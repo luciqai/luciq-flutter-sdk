@@ -1,0 +1,13 @@
+include: package:lint/analysis_options_package.yaml
+
+analyzer:
+  exclude:
+    - "packages/**/*.g.dart"
+    - "packages/**/example/**"
+
+
+linter:
+  rules:
+    # Not necessary for our current APIs
+    avoid_positional_boolean_parameters: false
+    omit_local_variable_types: true

@@ -12,11 +12,11 @@ your issue will help us a lot.
 
 ### Actual Behavior
 
-### Instabug integration code
+### Luciq integration code
 <!--Make sure to remove your app token.-->
 
 ### SDK Version
-<!--Which version of Instabug Flutter are you on?.-->
+<!--Which version of Luciq Flutter are you on?.-->
 
 ### Flutter, iOS and Android Versions
 

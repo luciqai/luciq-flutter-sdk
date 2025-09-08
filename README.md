@@ -1,39 +1,116 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Luciq for Flutter
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+[![pub package](https://img.shields.io/pub/v/luciq_flutter.svg)](https://pub.dev/packages/luciq_flutter)
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+The official Flutter plugin for Luciq, the Agentic Observability Platform for Mobile.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## Available Features
 
-## Features
+|      Feature                                              | Status  |
+|:---------------------------------------------------------:|:-------:|
+| [Bug Reporting](https://docs.luciq.ai/docs/flutter-bug-reporting)               |    ✅   |
+| [Crash Reporting](https://docs.luciq.ai/docs/flutter-crash-reporting)           |    ✅   |
+| [App Performance Monitoring](https://docs.luciq.ai/docs/flutter-apm)            |    ✅   |
+| [In-App Replies](https://docs.luciq.ai/docs/flutter-in-app-replies)             |    ✅   |
+| [In-App Surveys](https://docs.luciq.ai/docs/flutter-in-app-surveys)             |    ✅   |
+| [Feature Requests](https://docs.luciq.ai/docs/flutter-in-app-feature-requests)  |    ✅   |
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+* ✅ Stable
+* ⚙️ Under active development
 
-## Getting started
+## Integration
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+### Installation
 
-## Usage
+1. Add Luciq to your `pubspec.yaml` file.
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+      luciq_flutter:
 ```
 
-## Additional information
+2. Install the package by running the following command.
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```bash
+flutter packages get
+```
+
+### Initializing Luciq
+
+Initialize the SDK in your `main` function. This starts the SDK with the default behavior and sets it to be shown when the device is shaken.
+
+```dart
+import 'package:luciq_flutter/luciq_flutter.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  Luciq.init(
+    token: 'APP_TOKEN',
+    invocationEvents: [InvocationEvent.shake],
+  );
+
+  runApp(MyApp());
+}
+```
+
+> :warning:  If you're updating the SDK from versions prior to v11, please check our [migration guide](https://docs.luciq.ai/docs/flutter-migration-guide).
+
+## Crash reporting
+
+Luciq automatically captures every crash of your app and sends relevant details to the crashes page of your dashboard.
+
+⚠️ **Crashes will only be reported in release mode and not in debug mode.**
+
+```dart
+void main() {
+  runZonedGuarded(
+    () {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      Luciq.init(
+        token: 'APP_TOKEN',
+        invocationEvents: [InvocationEvent.shake],
+      );
+
+      FlutterError.onError = (FlutterErrorDetails details) {
+        Zone.current.handleUncaughtError(details.exception, details.stack!);
+      };
+
+      runApp(MyApp());
+    },
+    CrashReporting.reportCrash,
+  );
+}
+```
+
+## Repro Steps
+Repro Steps list all of the actions an app user took before reporting a bug or crash, grouped by the screens they visited in your app.
+
+To enable this feature, you need to add `LuciqNavigatorObserver` to the `navigatorObservers` :
+ ```
+  runApp(MaterialApp(
+    navigatorObservers: [LuciqNavigatorObserver()],
+  ));
+  ```
+
+## Network Logging
+You can choose to attach all your network requests to the reports being sent to the dashboard. To enable the feature when using the `dart:io` package `HttpClient`, please refer to the [Luciq Dart IO Http Client](https://github.com/Luciq/luciq-dart-io-http-client) repository.
+
+We also support the packages `http` and `dio`. For details on how to enable network logging for these external packages, refer to the [Luciq Dart Http Adapter](https://github.com/Luciq/Luciq-Dart-http-Adapter) and the [Luciq Dio Interceptor](https://github.com/Luciq/Luciq-Dio-Interceptor) repositories.
+
+## Microphone and Photo Library Usage Description (iOS Only)
+
+Luciq needs access to the microphone and photo library to be able to let users add audio and video attachments. Starting from iOS 10, apps that don’t provide a usage description for those 2 permissions would be rejected when submitted to the App Store.
+
+For your app not to be rejected, you’ll need to add the following 2 keys to your app’s info.plist file with text explaining to the user why those permissions are needed:
+
+* `NSMicrophoneUsageDescription`
+* `NSPhotoLibraryUsageDescription`
+
+If your app doesn’t already access the microphone or photo library, we recommend using a usage description like:
+
+* "`<app name>` needs access to the microphone to be able to attach voice notes."
+* "`<app name>` needs access to your photo library for you to be able to attach images."
+
+**The permission alert for accessing the microphone/photo library will NOT appear unless users attempt to attach a voice note/photo while using Luciq.**

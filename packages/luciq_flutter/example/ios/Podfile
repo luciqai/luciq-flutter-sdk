@@ -30,7 +30,6 @@ target 'Runner' do
 
   use_frameworks!
   use_modular_headers!
-    pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/ci-test-update-unleash-with-new-identity/16.0.3/Luciq.podspec'
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 

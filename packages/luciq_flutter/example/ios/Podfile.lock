@@ -34,10 +34,10 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Luciq (16.0.3)
+  - Luciq (18.0.0)
   - luciq_flutter (18.0.0):
     - Flutter
-    - Luciq (= 16.0.3)
+    - Luciq (= 18.0.0)
   - OCMock (3.6)
   - SDWebImage (5.21.2):
     - SDWebImage/Core (= 5.21.2)
@@ -50,7 +50,6 @@ PODS:
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
-  - Luciq (from `https://ios-releases.luciq.ai/custom/ci-test-update-unleash-with-new-identity/16.0.3/Luciq.podspec`)
   - luciq_flutter (from `.symlinks/plugins/luciq_flutter/ios`)
   - OCMock (= 3.6)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
@@ -59,6 +58,7 @@ SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
+    - Luciq
     - OCMock
     - SDWebImage
     - SwiftyGif
@@ -68,8 +68,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
-  Luciq:
-    :podspec: https://ios-releases.luciq.ai/custom/ci-test-update-unleash-with-new-identity/16.0.3/Luciq.podspec
   luciq_flutter:
     :path: ".symlinks/plugins/luciq_flutter/ios"
   video_player_avfoundation:
@@ -80,13 +78,13 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Luciq: 4dc415fc9ed5613ffda68b793700a35a4e86c49b
-  luciq_flutter: 1bdb2c61ff019661418c08c35c69222fa7615e42
+  Luciq: f364d44f0d57a236fcebac5220a99310a1b7d698
+  luciq_flutter: ada7268c84dd25ba80f1112c0d221f3e89408655
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
   SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
 
-PODFILE CHECKSUM: 2f7040ffca466133e7a09aad0544ac57e75b6718
+PODFILE CHECKSUM: dba4d98e97414c911d21f53b9edf9568310665e7
 
 COCOAPODS: 1.16.2

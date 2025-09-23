@@ -444,7 +444,7 @@ jobs:
       - run:
           name: Publish Package
           working_directory: packages/luciq_flutter
-          command: Escape flutter publish
+          command: Escape flutter publish-monorepo-luciq
 
 workflows:
   version: 2

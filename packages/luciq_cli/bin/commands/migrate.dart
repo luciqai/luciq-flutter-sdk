@@ -53,7 +53,6 @@ class MigrateCommand {
       }
       await _verifyFlutterProject(options.projectPath);
       await _executeMigration(options);
-      await _runFlutterPubGet(options.projectPath, options.dryRun);
       stdout.writeln('✅ Migration completed successfully!');
     } catch (e) {
       stderr.writeln('❌ Migration failed: $e');
@@ -161,8 +160,6 @@ class MigrateCommand {
     String projectPath,
     bool dryRun,
   ) async {
-    stdout.writeln('\n📦 Updating package dependencies...');
-
     final pubspecFile = File(path.join(projectPath, 'pubspec.yaml'));
     final content = await pubspecFile.readAsString();
 
@@ -189,11 +186,11 @@ class MigrateCommand {
 
         if (dryRun) {
           stdout.writeln(
-            '📝 [Package Update] Would update: $oldPackage → $newPackage',
+            '📝 Update: $oldPackage → $newPackage',
           );
         } else {
           stdout.writeln(
-            '📝 [Package Update] Updated: $oldPackage → $newPackage',
+            '📝 Update: $oldPackage → $newPackage',
           );
         }
       }
@@ -204,35 +201,6 @@ class MigrateCommand {
       stdout.writeln('✅ Package dependencies updated successfully');
     } else if (!hasChanges) {
       stdout.writeln('ℹ️ No Instabug packages found to update');
-    }
-  }
-
-  static Future<void> _runFlutterPubGet(
-    String? projectPath,
-    bool dryRun,
-  ) async {
-    if (dryRun) {
-      stdout.writeln('🔍 [DRY RUN] Would run: flutter pub get');
-      return;
-    }
-
-    stdout.writeln('\n🔄 Running flutter pub get...');
-    try {
-      final result = await Process.run(
-        'flutter',
-        ['pub', 'get'],
-        workingDirectory: projectPath,
-      );
-
-      if (result.exitCode == 0) {
-        stdout.writeln('✅ flutter pub get completed successfully');
-      } else {
-        stdout.writeln(
-          '⚠️ flutter pub get completed with warnings: ${result.stderr}',
-        );
-      }
-    } catch (e) {
-      stdout.writeln('⚠️ Failed to run flutter pub get: $e');
     }
   }
 
@@ -302,12 +270,12 @@ class MigrateCommand {
 
       if (newContent != content) {
         if (dryRun) {
-          stdout.writeln('📝 [Version Update] Would update: ${file.path}');
+          stdout.writeln('📝Update: ${file.path}');
           return;
         }
 
         await file.writeAsString(newContent);
-        stdout.writeln('📝 [Version Update] Updated: ${file.path}');
+        stdout.writeln('📝 Updated: ${file.path}');
       }
     } catch (e) {
       stdout.writeln('❌ Error updating file ${file.path}: $e');
@@ -319,24 +287,12 @@ class MigrateCommand {
     Directory projectDir,
     bool dryRun,
   ) async {
-    stdout.writeln('\n🚀 Starting method: ${method.name}');
-    stdout.writeln('   Description: ${method.description}');
-    stdout.writeln('   Search/Replace pairs: ${method.searchReplace.length}');
-    stdout
-        .writeln('   Target extensions: ${method.targetExtensions.join(', ')}');
-
     final startTime = DateTime.now();
 
-    // Process all files (content only, no renaming)
-    stdout.writeln('\n📝 Processing files for method: ${method.name}');
     await _walkAndProcessFiles(projectDir, method, dryRun);
 
     final endTime = DateTime.now();
     final duration = endTime.difference(startTime);
-
-    stdout.writeln(
-      '✅ Method "${method.name}" completed in ${duration.inMilliseconds}ms',
-    );
   }
 
   static Future<void> _walkAndProcessFiles(
@@ -383,13 +339,13 @@ class MigrateCommand {
       if (newContent != content) {
         if (dryRun) {
           stdout.writeln(
-            '📝 [${method.name}] Would update content: ${file.path}',
+            '📝 update content: ${file.path}',
           );
           return;
         }
 
         await file.writeAsString(newContent);
-        stdout.writeln('📝 [${method.name}] Updated content: ${file.path}');
+        stdout.writeln('📝 Updated content: ${file.path}');
       }
     } catch (error) {
       stdout.writeln('❌ Error processing file ${file.path}: $error');

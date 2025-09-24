@@ -54,8 +54,6 @@ void main() {
 }
 ```
 
-> :warning:  If you're updating the SDK from versions prior to v11, please check our [migration guide](https://docs.luciq.ai/docs/flutter-migration-guide).
-
 ## Crash reporting
 
 Luciq automatically captures every crash of your app and sends relevant details to the crashes page of your dashboard. 

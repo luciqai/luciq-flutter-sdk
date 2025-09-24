@@ -21,9 +21,9 @@ async function hasDescription() {
     );
   }
 
-  if (!danger.git.modified_files.includes('packages/instabug-Flutter/CHANGELOG.md') && !declaredTrivial) {
+  if (!danger.git.modified_files.includes('packages/luciq-Flutter/CHANGELOG.md') && !declaredTrivial) {
     warn(
-      'You have not included a CHANGELOG entry! \nYou can find it at [CHANGELOG.md](https://github.com/Instabug/Instabug-Flutter/blob/master/CHANGELOG.md).'
+      'You have not included a CHANGELOG entry! \nYou can find it at [CHANGELOG.md](https://github.com/luciqai/luciq-flutter-sdk/blob/master/CHANGELOG.md).'
     );
   }
 }

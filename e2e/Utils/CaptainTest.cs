@@ -9,12 +9,12 @@ public class CaptainTest : IDisposable
 {
   private static readonly CaptainConfig _config = new()
   {
-    AndroidApp = Path.GetFullPath("../../../../packages/instabug_flutter/example/build/app/outputs/flutter-apk/app-debug.apk"),
-    AndroidAppId = "com.instabug.flutter.example",
+    AndroidApp = Path.GetFullPath("../../../../packages/luciq_flutter/example/build/app/outputs/flutter-apk/app-release.apk"),
+    AndroidAppId = "ai.luciq.flutter.example",
     AndroidVersion = "13",
 
-    IosApp = Path.GetFullPath("../../../../packages/instabug_flutter/example/build/ios/iphonesimulator/Runner.app"),
-    IosAppId = "com.instabug.InstabugSample",
+    IosApp = Path.GetFullPath("../../../../packages/luciq_flutter/example/build/ios/iphonesimulator/Runner.app"),
+    IosAppId = "ai.luciq.LuciqSample",
     IosVersion = "17.2",
     IosDevice = "iPhone 15 Pro Max"
   };
@@ -23,7 +23,7 @@ public class CaptainTest : IDisposable
   public CaptainTest()
   {
     // Wait till the app is ready
-    captain.FindByText("Hello Instabug");
+    captain.FindByText("Hello Luciq");
   }
 
   public void Dispose()

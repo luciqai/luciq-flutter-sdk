@@ -1,4 +1,4 @@
-name: instabug_flutter_mono
+name: luciq_flutter_mono
 
 packages:
   - packages/*
@@ -60,10 +60,8 @@ scripts:
       concurrency: 1
       orderDependents: true
     packageFilters:
-      flutter: true
       dependsOn: pana
       private: false
-      scope: instabug_flutter
   pods:
     run: cd ios && pod install --repo-update
     description: running pod install
@@ -80,5 +78,6 @@ scripts:
     packageFilters:
       dependsOn: pana
       private: false
-      scope: instabug_flutter
+      ignore: "luciq_flutter_modular"
+
 

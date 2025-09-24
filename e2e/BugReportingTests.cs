@@ -151,11 +151,14 @@ captain.FindByTextScroll("Enter screen name").Tap();
     captain.FindByTextScroll("Report Screen Change")?.Tap();
     Thread.Sleep(500);
     captain.FindByTextScroll("Send Bug Report")?.Tap();
+    Thread.Sleep(500);
 
     captain.FindById(
         android: "instabug_text_view_repro_steps_disclaimer",
         ios: "IBGBugVCReproStepsDisclaimerAccessibilityIdentifier"
     ).Tap();
+
+    Thread.Sleep(1000);
 
     var reproSteps = captain.FindManyById(
         android: "ib_bug_repro_step_screenshot",

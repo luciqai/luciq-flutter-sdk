@@ -1,0 +1,89 @@
+{
+  "refactorMethods": [
+    {
+      "name": "Instabug to Luciq",
+      "description": "Replace all instances of Instabug with Luciq",
+      "searchReplace": [
+        {
+          "search": "Instabug",
+          "replacement": "Luciq"
+        },
+        {
+          "search": "instabug",
+          "replacement": "luciq"
+        },
+        {
+          "search": "INSTABUG",
+          "replacement": "LUCIQ"
+        },
+        {
+          "search": "IBG",
+          "replacement": "LCQ"
+        },
+        {
+          "search": "ibg",
+          "replacement": "lcq"
+        },
+        {
+          "search": "instabug_flutter",
+          "replacement": "luciq_flutter"
+        }
+      ],
+      "targetExtensions": [
+        ".dart",
+        ".yaml",
+        ".h",
+        ".m",
+        ".java",
+        ".kt",
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx",
+        ".json"
+      ],
+      "ignoredDirs": [
+        "node_modules",
+        "build",
+        "Pods",
+        "vendor",
+        ".git",
+        "dist",
+        "coverage",
+        ".next",
+        ".nuxt",
+        "target",
+        ".dart_tool",
+        ".pub-cache",
+        ".pub",
+        ".flutter-plugins",
+        ".flutter-plugins-dependencies",
+        ".packages",
+        "doc/api"
+      ]
+    }
+  ],
+  "versionUpdates": [
+    {
+      "fromPattern": "instabug_flutter\\s*:\\s*[^\\s]+",
+      "toPattern": "luciq_flutter: ^18.0.0",
+      "targetExtensions": [".yaml"]
+    },
+    {
+      "fromPattern": "instabug_dio_interceptor\\s*:\\s*[^\\s]+",
+      "toPattern": "luciq_dio_interceptor: ^3.0.0",
+      "targetExtensions": [".yaml"]
+    },
+    {
+      "fromPattern": "instabug_http_client\\s*:\\s*[^\\s]+",
+      "toPattern": "luciq_http_client: ^3.0.0",
+      "targetExtensions": [".yaml"]
+    },
+    {
+      "fromPattern": "instabug_flutter_modular\\s*:\\s*[^\\s]+",
+      "toPattern": "luciq_flutter_modular: ^2.0.0",
+      "targetExtensions": [".yaml"]
+    }
+  ]
+}
+

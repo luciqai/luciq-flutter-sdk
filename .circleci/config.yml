@@ -44,7 +44,7 @@ commands:
           command: sudo gem install cocoapods
       - run:
           name: Install Pods
-          working_directory: packages/instabug_flutter/example/ios
+          working_directory: packages/luciq_flutter/example/ios
           command: pod install --repo-update
   setup_captain:
     parameters:
@@ -222,7 +222,7 @@ jobs:
       - advanced-checkout/shallow-checkout
       - setup_flutter
       - android/run-tests:
-          working-directory: packages/instabug_flutter/example/android
+          working-directory: packages/luciq_flutter/example/android
           test-command: ./gradlew test
 
   e2e_android_captain:
@@ -239,7 +239,7 @@ jobs:
           run-tests-working-directory: e2e
           additional-avd-args: --device 25
           system-image: system-images;android-33;default;x86_64
-          post-emulator-launch-assemble-command: cd packages/instabug_flutter/example && flutter build apk --debug
+          post-emulator-launch-assemble-command: cd packages/luciq_flutter/example && flutter build apk --release
           test-command: dotnet test
 
   test_ios:
@@ -247,13 +247,13 @@ jobs:
       xcode: 15.2.0
     resource_class: macos.m1.medium.gen1
     environment:
-      INSTABUG_SOURCEMAPS_UPLOAD_DISABLE: true
+      luciq_SOURCEMAPS_UPLOAD_DISABLE: true
     steps:
       - advanced-checkout/shallow-checkout
       - setup_ios
       - run:
           name: Build and run tests
-          working_directory: ~/project/packages/instabug_flutter/example/ios
+          working_directory: ~/project/packages/luciq_flutter/example/ios
           command: |
             xcodebuild -allowProvisioningUpdates \
                 -workspace Runner.xcworkspace \
@@ -274,7 +274,7 @@ jobs:
       - setup_ios
       - run:
           name: Build Example App
-          working_directory: packages/instabug_flutter/example
+          working_directory: packages/luciq_flutter/example
           command: flutter build ios --simulator
       - run:
           name: Run E2E Tests
@@ -334,7 +334,7 @@ jobs:
             cp -f .build/release/Escape /usr/local/bin/escape
       - run:
           name: Publish Package
-          working_directory: packages/instabug_dio_interceptor
+          working_directory: packages/luciq_dio_interceptor
           command: Escape flutter publish-dependancy
 
 
@@ -362,19 +362,64 @@ jobs:
             cp -f .build/release/Escape /usr/local/bin/escape
       - run:
           name: Publish Package
-          working_directory: packages/instabug_http_client
+          working_directory: packages/luciq_http_client
           command: Escape flutter publish-dependancy
 
   release_modular_plugin:
-    executor: flutter-executor
+    macos:
+      xcode: 15.2.0
+    resource_class: macos.m1.medium.gen1
+    working_directory: "~/project"
     steps:
-      - advanced-checkout/shallow-checkout
+      - advanced-checkout/shallow-checkout:
+          path: ~/project
+      # Flutter doesn't support Apple Silicon yet, so we need to install Rosetta use Flutter on M1 machines.
+      - run:
+          name: Install Rosetta
+          command: softwareupdate --install-rosetta --agree-to-license
       - setup_flutter
-      - run: chmod +x packages/instabug_flutter_modular/release.sh
-      - run: ./packages/instabug_flutter_modular/release.sh
+      - run:
+          name: Clone Escape
+          command: git clone -b master2 git@github.com:instabug/Escape.git
+      - run:
+          name: Build Escape
+          working_directory: Escape
+          command: |
+            swift build -c release
+            cp -f .build/release/Escape /usr/local/bin/escape
+      - run:
+          name: Publish Package
+          working_directory: packages/luciq_flutter_modular
+          command: Escape flutter publish-dependancy
 
+  release_cli_plugin:
+    macos:
+      xcode: 15.2.0
+    resource_class: macos.m1.medium.gen1
+    working_directory: "~/project"
+    steps:
+      - advanced-checkout/shallow-checkout:
+          path: ~/project
+      # Flutter doesn't support Apple Silicon yet, so we need to install Rosetta use Flutter on M1 machines.
+      - run:
+          name: Install Rosetta
+          command: softwareupdate --install-rosetta --agree-to-license
+      - setup_flutter
+      - run:
+          name: Clone Escape
+          command: git clone -b master2 git@github.com:instabug/Escape.git
+      - run:
+          name: Build Escape
+          working_directory: Escape
+          command: |
+            swift build -c release
+            cp -f .build/release/Escape /usr/local/bin/escape
+      - run:
+          name: Publish Package
+          working_directory: packages/luciq_cli
+          command: Escape flutter publish-dependancy
 
-  release_instabug_flutter:
+  release_luciq_flutter:
     macos:
       xcode: 15.2.0
     resource_class: macos.m1.medium.gen1
@@ -398,8 +443,8 @@ jobs:
             cp -f .build/release/Escape /usr/local/bin/escape
       - run:
           name: Publish Package
-          working_directory: packages/instabug_flutter
-          command: Escape flutter publish
+          working_directory: packages/luciq_flutter
+          command: Escape flutter publish-monorepo-luciq
 
 workflows:
   version: 2
@@ -414,7 +459,7 @@ workflows:
       - test_flutter_without_melos:
           name: test_flutter-2.10.5
           version: 2.10.5
-          app-dir: "~/project/packages/instabug_flutter/"
+          app-dir: "~/project/packages/luciq_flutter/"
       - e2e_android_captain
       - test_ios
       - e2e_ios_captain
@@ -425,20 +470,8 @@ workflows:
       - verify_pub:
           requires:
             - lint_flutter
-      - hold_release_instabug_flutter:
+      - hold_release_luciq_flutter:
           type: approval
-          requires:
-            - danger
-            - test_flutter-stable
-            - test_flutter-2.10.5
-            - test_android
-            # TODO: Fix the flaky tests and add the following jobs to the dependencies for the release
-            # The following jobs have been removed while releasing v13.2.0 to avoid delaying the release
-            # as they were just flaky and the tests pass locally without issues.
-            # - e2e_android_captain
-            # - test_ios
-            # - e2e_ios_captain
-            - verify_pub
           filters:
             branches:
               only: master
@@ -470,6 +503,17 @@ workflows:
           filters:
             branches:
               only: master
+      - hold_release_cli_plugin:
+          type: approval
+          filters:
+            branches:
+              only: master
+      - release_cli_plugin:
+          requires:
+            - hold_release_cli_plugin
+          filters:
+            branches:
+              only: master
       - hold_release_modular_plugin:
           type: approval
           requires:
@@ -484,9 +528,9 @@ workflows:
           filters:
             branches:
               only: master
-      - release_instabug_flutter:
+      - release_luciq_flutter:
           requires:
-            - hold_release_instabug_flutter
+            - hold_release_luciq_flutter
           filters:
             branches:
               only: master

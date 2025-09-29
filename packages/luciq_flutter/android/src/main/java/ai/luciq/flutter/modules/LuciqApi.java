@@ -29,12 +29,12 @@ import ai.luciq.library.LuciqCustomTextPlaceHolder;
 import ai.luciq.library.IssueType;
 import ai.luciq.library.Platform;
 import ai.luciq.library.ReproConfigurations;
-import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
+import ai.luciq.library.featuresflags.model.LCQFeatureFlag;
 import ai.luciq.library.internal.crossplatform.InternalCore;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
-import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
+import ai.luciq.library.screenshot.luccapture.ScreenshotRequest;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
 
 import io.flutter.FlutterInjector;
@@ -302,9 +302,9 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     @Override
     public void addFeatureFlags(@NonNull Map<String, String> featureFlags) {
         try {
-            List<LuciqFeatureFlag> features = new ArrayList<>();
+            List<LCQFeatureFlag> features = new ArrayList<>();
             for (Map.Entry<String, String> entry : featureFlags.entrySet()) {
-                features.add(new LuciqFeatureFlag(entry.getKey(), entry.getValue().isEmpty() ? null : entry.getValue()));
+                features.add(new LCQFeatureFlag(entry.getKey(), entry.getValue().isEmpty() ? null : entry.getValue()));
             }
             Luciq.addFeatureFlags(features);
         } catch (Exception e) {
@@ -561,6 +561,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         Luciq.willRedirectToStore();
     }
 
+
     public static void setScreenshotCaptor(ScreenshotCaptor screenshotCaptor, InternalCore internalCore) {
         internalCore._setScreenshotCaptor(new ai.luciq.library.screenshot.ScreenshotCaptor() {
             @Override
@@ -594,7 +595,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         try {
             Log.d(TAG, "setTheme called with config: " + themeConfig.toString());
 
-            ai.luciq.library.model.LuciqTheme.Builder builder = new ai.luciq.library.model.LuciqTheme.Builder();
+            ai.luciq.library.model.LCQTheme.Builder builder = new ai.luciq.library.model.LCQTheme.Builder();
 
             if (themeConfig.containsKey("primaryColor")) {
                 builder.setPrimaryColor(getColor(themeConfig, "primaryColor"));
@@ -626,7 +627,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
             setFontIfPresent(themeConfig, builder, "secondaryFontPath", "secondaryFontAsset", "secondary");
             setFontIfPresent(themeConfig, builder, "ctaFontPath", "ctaFontAsset", "CTA");
 
-            ai.luciq.library.model.LuciqTheme theme = builder.build();
+            ai.luciq.library.model.LCQTheme theme = builder.build();
             Luciq.setTheme(theme);
             Log.d(TAG, "Theme applied successfully");
 
@@ -695,7 +696,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
      * @param assetKey The key for font asset path
      * @param fontType The type of font (for logging purposes)
      */
-    private void setFontIfPresent(Map<String, Object> themeConfig, ai.luciq.library.model.LuciqTheme.Builder builder,
+    private void setFontIfPresent(Map<String, Object> themeConfig, ai.luciq.library.model.LCQTheme.Builder builder,
                                  String fileKey, String assetKey, String fontType) {
         if (themeConfig.containsKey(fileKey) || themeConfig.containsKey(assetKey)) {
             Typeface typeface = getTypeface(themeConfig, fileKey, assetKey);
@@ -755,17 +756,18 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     @Override
     public void getNetworkBodyMaxSize(@NonNull LuciqPigeon.Result<Double> result) {
         ThreadManager.runOnMainThread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        double networkCharLimit = InternalCore.INSTANCE.get_networkLogCharLimit();
-                        result.success(networkCharLimit);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            double networkCharLimit = InternalCore.INSTANCE.get_networkLogCharLimit();
+                            result.success(networkCharLimit);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
         );
     }
+
 }

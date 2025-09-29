@@ -208,4 +208,23 @@ public class BugReportingApiTest {
 
                mBugReporting.verify(()->BugReporting.addUserConsent(key, description, mandatory, checked,"drop_auto_captured_media"));
     }
+    @Test
+    public void testSetProactiveReportingConfigurations() {
+        // given
+        boolean enabled = true;
+        long gapBetweenDialogs = 20;
+        long modeDelay = 30;
+
+        // when
+        api.setProactiveReportingConfigurations(enabled, gapBetweenDialogs, modeDelay);
+
+        // then
+        mBugReporting.verify(() -> BugReporting.setProactiveReportingConfigurations(argThat(config ->
+                config.getModalsGap() == gapBetweenDialogs &&
+                        config.getDetectionGap() == modeDelay &&
+                        config.isEnabled() == enabled
+        )));
+
+
+    }
 }

@@ -180,5 +180,12 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
                                 actionType:mappedActionType];
 }
 
+- (void)setProactiveReportingConfigurationsEnabled:(nonnull NSNumber *)enabled gapBetweenModals:(nonnull NSNumber *)gapBetweenModals modalDelayAfterDetection:(nonnull NSNumber *)modalDelayAfterDetection error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    IBGProactiveReportingConfigurations *configurations = [[IBGProactiveReportingConfigurations alloc] init];
+    configurations.enabled = [enabled boolValue]; //Enable/disable
+    configurations.gapBetweenModals = gapBetweenModals; // Time in seconds
+    configurations.modalDelayAfterDetection = modalDelayAfterDetection; // Time in seconds
+    [IBGBugReporting setProactiveReportingConfigurations:configurations];
+}
 
 @end

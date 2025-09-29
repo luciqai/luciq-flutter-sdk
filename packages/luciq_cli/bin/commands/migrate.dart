@@ -193,14 +193,14 @@ class MigrateCommand {
     // Embedded configuration as fallback
     return LuciqConfig(
       refactorMethods: [
-        RefactorMethod(
+        const RefactorMethod(
           name: "Instabug to Luciq",
           description: "Replace all instances of Instabug with Luciq",
           searchReplace: [
             SearchReplace(search: "Instabug", replacement: "Luciq"),
             SearchReplace(search: "instabug", replacement: "luciq"),
             SearchReplace(search: "INSTABUG", replacement: "LUCIQ"),
-            SearchReplace(search: "IBG", replacement: "LCQ"),
+            const SearchReplace(search: "IBG", replacement: "LCQ"),
             SearchReplace(search: "ibg", replacement: "lcq"),
             SearchReplace(
                 search: "instabug_flutter", replacement: "luciq_flutter"),
@@ -251,22 +251,22 @@ class MigrateCommand {
         ),
       ],
       versionUpdates: [
-        VersionUpdate(
+        const VersionUpdate(
           fromPattern: "instabug_flutter\\s*:\\s*[^\\s]+",
           toPattern: "luciq_flutter: ^18.0.0",
           targetExtensions: [".yaml"],
         ),
-        VersionUpdate(
+        const VersionUpdate(
           fromPattern: "instabug_dio_interceptor\\s*:\\s*[^\\s]+",
           toPattern: "luciq_dio_interceptor: ^3.0.0",
           targetExtensions: [".yaml"],
         ),
-        VersionUpdate(
+        const VersionUpdate(
           fromPattern: "instabug_http_client\\s*:\\s*[^\\s]+",
           toPattern: "luciq_http_client: ^3.0.0",
           targetExtensions: [".yaml"],
         ),
-        VersionUpdate(
+        const VersionUpdate(
           fromPattern: "instabug_flutter_modular\\s*:\\s*[^\\s]+",
           toPattern: "luciq_flutter_modular: ^2.0.0",
           targetExtensions: [".yaml"],

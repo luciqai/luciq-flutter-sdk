@@ -666,4 +666,12 @@
     [self waitForExpectations:@[expectation] timeout:5.0];
 }
 
+- (void)testSetNetworkAutoMaskingEnabled {
+    NSNumber *isEnabled = @1;
+    FlutterError *error;
+    [self.api setAutoMaskingEnabledIsEnabled:isEnabled error:&error];
+
+    OCMVerify([self.mNetworkLogger setAutoMaskingEnabled:YES]);
+}
+
 @end

@@ -7,6 +7,7 @@ import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
+import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -15,13 +16,14 @@ import 'luciq_navigator_observer_test.mocks.dart';
 @GenerateMocks([
   LuciqHostApi,
   ScreenLoadingManager,
+  LuciqScreenRenderManager,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  WidgetsFlutterBinding.ensureInitialized();
 
   final mHost = MockLuciqHostApi();
   final mScreenLoadingManager = MockScreenLoadingManager();
+  final mScreenRenderManager = MockLuciqScreenRenderManager();
 
   late LuciqNavigatorObserver observer;
   const screen = '/screen';
@@ -40,10 +42,11 @@ void main() {
     previousRoute = createRoute(previousScreen);
 
     ScreenNameMasker.I.setMaskingCallback(null);
+    when(mScreenRenderManager.screenRenderEnabled).thenReturn(false);
   });
 
   test('should report screen change when a route is pushed', () {
-    fakeAsync((async) {
+    fakeAsync((async) async {
       observer.didPush(route, previousRoute);
       WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
       WidgetsBinding.instance?.handleDrawFrame();
@@ -63,6 +66,9 @@ void main() {
       'should report screen change when a route is popped and previous is known',
       () {
     fakeAsync((async) {
+      when(mScreenLoadingManager.startUiTrace(previousScreen, previousScreen))
+          .thenAnswer((realInvocation) async => null);
+
       observer.didPop(route, previousRoute);
       WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
       WidgetsBinding.instance?.handleDrawFrame();
@@ -102,6 +108,9 @@ void main() {
       final route = createRoute('');
       const fallback = 'N/A';
 
+      when(mScreenLoadingManager.startUiTrace(fallback, fallback))
+          .thenAnswer((realInvocation) async => null);
+
       observer.didPush(route, previousRoute);
       WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
       WidgetsBinding.instance?.handleDrawFrame();
@@ -120,6 +129,9 @@ void main() {
   test('should mask screen name when masking callback is set', () {
     const maskedScreen = 'maskedScreen';
 
+    when(mScreenLoadingManager.startUiTrace(maskedScreen, screen))
+        .thenAnswer((realInvocation) async => null);
+
     ScreenNameMasker.I.setMaskingCallback((_) => maskedScreen);
 
     fakeAsync((async) {
@@ -135,6 +147,62 @@ void main() {
       verify(
         mHost.reportScreenChange(maskedScreen),
       ).called(1);
+    });
+  });
+
+  test('should start new screen render collector when a route is pushed', () {
+    fakeAsync((async) async {
+      const traceID = 123;
+
+      when(mScreenLoadingManager.startUiTrace(screen, screen))
+          .thenAnswer((_) async => traceID);
+      when(mScreenRenderManager.screenRenderEnabled).thenReturn(true);
+
+      observer.didPush(route, previousRoute);
+
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verify(
+        mScreenRenderManager.startScreenRenderCollectorForTraceId(traceID),
+      ).called(1);
+    });
+  });
+
+  test(
+      'should not start new screen render collector when a route is pushed and [traceID] is null',
+      () {
+    fakeAsync((async) async {
+      when(mScreenLoadingManager.startUiTrace(screen, screen))
+          .thenAnswer((_) async => null);
+
+      when(mScreenRenderManager.screenRenderEnabled).thenReturn(true);
+
+      observer.didPush(route, previousRoute);
+
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verifyNever(
+        mScreenRenderManager.startScreenRenderCollectorForTraceId(any),
+      );
+    });
+  });
+
+  test(
+      'should not start new screen render collector when a route is pushed and [mScreenRenderManager.screenRenderEnabled] is false',
+      () {
+    fakeAsync((async) async {
+      when(mScreenLoadingManager.startUiTrace(screen, screen))
+          .thenAnswer((_) async => 123);
+
+      when(mScreenRenderManager.screenRenderEnabled).thenReturn(false);
+
+      observer.didPush(route, previousRoute);
+
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verifyNever(
+        mScreenRenderManager.startScreenRenderCollectorForTraceId(any),
+      );
     });
   });
 }

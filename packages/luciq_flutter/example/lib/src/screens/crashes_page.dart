@@ -7,17 +7,22 @@ class CrashesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Page(
-      title: 'Crashes',
-      children: [
-        SectionTitle('Non-Fatal Crashes'),
-        NonFatalCrashesContent(),
-        SectionTitle('Fatal Crashes'),
-        Text('Fatal Crashes can only be tested in release mode'),
-        Text('Most of these buttons will crash the application'),
+    return Page(title: 'Crashes', children: [
+      const SectionTitle('Non-Fatal Crashes'),
+      const NonFatalCrashesContent(),
+      const SectionTitle('Fatal Crashes'),
+      const Text('Fatal Crashes can only be tested in release mode'),
+      const Text('Most of these buttons will crash the application'),
+      if (Platform.isAndroid) ...[
         FatalCrashesContent(),
-        SectionTitle('Crash section'),
-      ], // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        SectionTitle('NDK Crashes'),
+        Text(
+            'NDK crashes are native C/C++ crashes that occur in Android applications.'),
+        Text(
+            'These crashes can only be tested on Android devices with NDK support.',
+            style: TextStyle(color: Colors.orange)),
+        NdkCrashesContent(),
+      ],
+    ]);
   }
 }

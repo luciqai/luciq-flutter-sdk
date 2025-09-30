@@ -203,7 +203,7 @@
     NSNumber *enabledNum = [NSNumber numberWithBool:enabled];
     FlutterError *error;
 
-    IBGProactiveReportingConfigurations *configurations = [[IBGProactiveReportingConfigurations alloc] init];
+    LCQProactiveReportingConfigurations *configurations = [[LCQProactiveReportingConfigurations alloc] init];
     configurations.enabled = enabled; //Enable/disable
     configurations.gapBetweenModals = gap; // Time in seconds
     configurations.modalDelayAfterDetection = delay; // Time in seconds
@@ -214,7 +214,7 @@
 
     // Verify that the method is called with the correct properties (using OCMArg to match properties)
     OCMVerify([self.mBugReporting setProactiveReportingConfigurations:[OCMArg checkWithBlock:^BOOL(id obj) {
-        IBGProactiveReportingConfigurations *config = (IBGProactiveReportingConfigurations *)obj;
+        LCQProactiveReportingConfigurations *config = (LCQProactiveReportingConfigurations *)obj;
         return config.enabled == enabled &&
                 [config.gapBetweenModals isEqualToNumber:gap] &&
                 [config.modalDelayAfterDetection isEqualToNumber:delay];

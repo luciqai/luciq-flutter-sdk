@@ -669,7 +669,7 @@
 - (void)testSetNetworkAutoMaskingEnabled {
     NSNumber *isEnabled = @1;
     FlutterError *error;
-    [self.api setAutoMaskingEnabledIsEnabled:isEnabled error:&error];
+    [self.api setNetworkAutoMaskingEnabledIsEnabled:isEnabled error:&error];
 
     OCMVerify([self.mNetworkLogger setAutoMaskingEnabled:YES]);
 }

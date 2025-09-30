@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import ai.luciq.bug.BugReporting;
+import ai.luciq.bug.ProactiveReportingConfigs;
 import ai.luciq.flutter.generated.BugReportingPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.ThreadManager;
@@ -208,4 +209,20 @@ public void addUserConsents(String key, String description, Boolean mandatory, B
         }
     });
 }
+    @Override
+    public void setProactiveReportingConfigurations(@NonNull Boolean enabled, @NonNull Long gapBetweenModals, @NonNull Long modalDelayAfterDetection) {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                ProactiveReportingConfigs configs = new ProactiveReportingConfigs.Builder()
+                        .setGapBetweenModals(gapBetweenModals) // Time in seconds
+                        .setModalDelayAfterDetection(modalDelayAfterDetection) // Time in seconds
+                        .isEnabled(enabled) //Enable/disable
+                        .build();
+                BugReporting.setProactiveReportingConfigurations(configs);
+
+
+            }
+        });
+    }
 }

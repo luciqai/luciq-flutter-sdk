@@ -48,6 +48,9 @@ void main() {
           debugLogsLevel: LogLevel.verbose,
           appVariant: 'variant 1');
 
+      BugReporting.setProactiveReportingConfigurations(
+          const ProactiveReportingConfigs());
+
       Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
       FlutterError.onError = (FlutterErrorDetails details) {
         Zone.current.handleUncaughtError(details.exception, details.stack!);

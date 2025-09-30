@@ -69,5 +69,4 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
             e.printStackTrace();
         }
     }
-
 }

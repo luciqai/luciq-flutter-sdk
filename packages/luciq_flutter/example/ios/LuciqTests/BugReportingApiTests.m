@@ -196,4 +196,29 @@
                                             checked:[checked boolValue]
                                          actionType:mappedActionType]);
 }
+- (void) testSetProactiveReportingConfigurations {
+    BOOL enabled = true;
+    NSNumber* gap = @2;
+    NSNumber* delay = @4;
+    NSNumber *enabledNum = [NSNumber numberWithBool:enabled];
+    FlutterError *error;
+
+    LCQProactiveReportingConfigurations *configurations = [[LCQProactiveReportingConfigurations alloc] init];
+    configurations.enabled = enabled; //Enable/disable
+    configurations.gapBetweenModals = gap; // Time in seconds
+    configurations.modalDelayAfterDetection = delay; // Time in seconds
+
+    OCMStub([self.mBugReporting setProactiveReportingConfigurations:OCMOCK_ANY]);
+
+    [self.api setProactiveReportingConfigurationsEnabled:enabledNum gapBetweenModals:gap modalDelayAfterDetection:delay error:&error];
+
+    // Verify that the method is called with the correct properties (using OCMArg to match properties)
+    OCMVerify([self.mBugReporting setProactiveReportingConfigurations:[OCMArg checkWithBlock:^BOOL(id obj) {
+        LCQProactiveReportingConfigurations *config = (LCQProactiveReportingConfigurations *)obj;
+        return config.enabled == enabled &&
+                [config.gapBetweenModals isEqualToNumber:gap] &&
+                [config.modalDelayAfterDetection isEqualToNumber:delay];
+    }]]);
+}
+
 @end

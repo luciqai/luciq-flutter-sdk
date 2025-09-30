@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.argThat;
 
 import ai.luciq.bug.BugReporting;
 import ai.luciq.bug.invocation.Option;
@@ -207,5 +208,24 @@ public class BugReportingApiTest {
                api.addUserConsents(key, description, mandatory, checked, actionType);
 
                mBugReporting.verify(()->BugReporting.addUserConsent(key, description, mandatory, checked,"drop_auto_captured_media"));
+    }
+    @Test
+    public void testSetProactiveReportingConfigurations() {
+        // given
+        boolean enabled = true;
+        long gapBetweenDialogs = 20;
+        long modeDelay = 30;
+
+        // when
+        api.setProactiveReportingConfigurations(enabled, gapBetweenDialogs, modeDelay);
+
+        // then
+        mBugReporting.verify(() -> BugReporting.setProactiveReportingConfigurations(argThat(config ->
+                config.getModalsGap() == gapBetweenDialogs &&
+                        config.getDetectionGap() == modeDelay &&
+                        config.isEnabled() == enabled
+        )));
+
+
     }
 }

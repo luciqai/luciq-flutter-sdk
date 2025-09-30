@@ -409,4 +409,14 @@ void main() {
       verifyNever(mApmHost.networkLogAndroid(any));
     });
   });
+
+  test('[setNetworkAutoMaskingEnabled] should call host method', () async {
+    const enabled = true;
+
+    await NetworkLogger.setNetworkAutoMaskingEnabled(enabled);
+
+    verify(
+      mLuciqHost.setNetworkAutoMaskingEnabled(enabled),
+    ).called(1);
+  });
 }

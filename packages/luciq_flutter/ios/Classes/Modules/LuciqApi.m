@@ -613,5 +613,8 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     completion(@(LCQNetworkLogger.getNetworkBodyMaxSize), nil);
 }
 
+- (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
+}
 
 @end

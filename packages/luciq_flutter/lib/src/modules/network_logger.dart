@@ -164,4 +164,10 @@ class NetworkLogger {
   static Future<void> setNetworkLogBodyEnabled(bool isEnabled) async {
     return _host.setNetworkLogBodyEnabled(isEnabled);
   }
+
+  /// Enables or disables network logs sensitive information auto masking.
+  /// [boolean] isEnabled
+  static Future<void> setNetworkAutoMaskingEnabled(bool isEnabled) async {
+    return _host.setNetworkAutoMaskingEnabled(isEnabled);
+  }
 }

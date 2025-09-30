@@ -790,4 +790,18 @@ public class LuciqApiTest {
 
         api.getNetworkBodyMaxSize(result);
     }
+    @Test
+    public void testSetNetworkAutoMaskingEnabledGivenFalse() {
+        boolean isEnabled = false;
+
+        api.setNetworkAutoMaskingEnabled(isEnabled);
+        mLuciq.verify(() -> Luciq.setNetworkAutoMaskingState(Feature.State.DISABLED));
+    }
+    @Test
+    public void testSetNetworkAutoMaskingEnabledGivenTrue() {
+        boolean isEnabled = true;
+
+        api.setNetworkAutoMaskingEnabled(isEnabled);
+        mLuciq.verify(() -> Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED));
+    }
 }

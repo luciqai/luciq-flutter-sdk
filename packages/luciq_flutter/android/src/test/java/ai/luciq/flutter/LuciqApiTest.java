@@ -161,7 +161,6 @@ public class LuciqApiTest {
             String actualToken = (String) context.arguments().get(1);
             // Initializes Luciq with the correct token
             assertEquals(token, actualToken);
-            when(mock.setInvocationEvents(any())).thenReturn(mock);
             when(mock.setSdkDebugLogsLevel(anyInt())).thenReturn(mock);
         });
 

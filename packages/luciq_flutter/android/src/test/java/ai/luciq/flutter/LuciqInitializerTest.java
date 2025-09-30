@@ -1,4 +1,4 @@
-package ai;
+package ai.luciq.flutter;
 
 import static ai.luciq.flutter.util.GlobalMocks.reflected;
 import static org.mockito.Mockito.mock;

@@ -174,7 +174,6 @@ public class LuciqApiTest {
                 1,
                 mLuciqBuilder.constructed().size()
         );
-        verify(builder).setInvocationEvents(LuciqInvocationEvent.FLOATING_BUTTON);
         verify(builder).setSdkDebugLogsLevel(LogLevel.ERROR);
         verify(builder).setAppVariant(appVariant);
 

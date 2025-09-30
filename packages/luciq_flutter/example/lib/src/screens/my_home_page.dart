@@ -47,7 +47,9 @@ class _MyHomePageState extends State<MyHomePage> {
             title: const Text('On Dismiss'),
             content: Text(
               'onDismiss callback called with $dismissType and $reportType',
-            ),
+                key: const ValueKey('dismiss_callback_dialog_test'),
+
+          ),
           );
         },
       );
@@ -212,6 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
           controller: primaryColorController,
           label: 'Enter primary color',
           symanticLabel: 'primary_color_input',
+          textFieldKey: const ValueKey('enter_primary_color_input'),
         ),
         LuciqButton(
           text: 'Change Primary Color',
@@ -271,6 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
           controller: screenNameController,
           label: 'Enter screen name',
           symanticLabel: 'screen_name_input',
+          textFieldKey: const ValueKey('screen_name_input'),
         ),
         LuciqButton(
           text: 'Report Screen Change',

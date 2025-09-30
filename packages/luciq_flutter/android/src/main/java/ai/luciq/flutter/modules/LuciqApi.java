@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import ai.luciq.bug.BugReporting;
 import ai.luciq.flutter.generated.LuciqPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.Reflection;
@@ -128,24 +129,30 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
         final Application application = (Application) context;
         final int parsedLogLevel = ArgsRegistry.sdkLogLevels.get(debugLogsLevel);
-        Luciq.Builder builder = new Luciq.Builder(application, token)
-                .setInvocationEvents(invocationEventsArray)
-                .setSdkDebugLogsLevel(parsedLogLevel);
-        if (appVariant != null) {
-            builder.setAppVariant(appVariant);
-        }
 
-        builder.build();
 
-        Luciq.setScreenshotProvider(screenshotProvider);
-        try {
-            Class<?> myClass = Class.forName("ai.luciq.library.Luciq");
-            // Enable/Disable native user steps capturing
-            Method method = myClass.getDeclaredMethod("shouldDisableNativeUserStepsCapturing", boolean.class);
-            method.setAccessible(true);
-            method.invoke(null, true);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (Luciq.isBuilt()) {
+            Luciq.setSdkDebugLogsLevel(parsedLogLevel);
+            BugReporting.setInvocationEvents(invocationEventsArray);
+        } else {
+            LuciqInitializer.Builder builder = new LuciqInitializer.Builder(application, token, parsedLogLevel, invocationEventsArray);
+
+            if (appVariant != null) {
+                builder.setAppVariant(appVariant);
+            }
+
+            builder.build();
+
+            Luciq.setScreenshotProvider(screenshotProvider);
+            try {
+                Class<?> myClass = Class.forName("ai.luciq.library.Luciq");
+                // Enable/Disable native user steps capturing
+                Method method = myClass.getDeclaredMethod("shouldDisableNativeUserStepsCapturing", boolean.class);
+                method.setAccessible(true);
+                method.invoke(null, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

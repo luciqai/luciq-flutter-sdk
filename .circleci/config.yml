@@ -31,7 +31,6 @@ commands:
     steps:
       - flutter/install_sdk:
           version: <<parameters.version>>
-          app-dir: <<parameters.working_dir>>
       - install_flutter_and_dart_packages:
           generate_pigeons: true
           use_melos: <<parameters.use_melos>>
@@ -133,7 +132,8 @@ commands:
             - run:
                 name: remove Patrol
                 command: cd example && dart pub remove patrol
-      - flutter/install_pub
+      - flutter/install_pub:
+          app-dir: <<parameters.working_dir>>
       - when:
           condition:
             equal:

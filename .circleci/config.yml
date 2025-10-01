@@ -294,6 +294,7 @@ jobs:
                 -resultBundlePath coverage/result.xcresult \
                 -sdk iphonesimulator \
                 -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.0' \
+                -skip-testing:RunnerUITests \
                 test | xcpretty
 
   e2e_ios_patrol:

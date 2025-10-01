@@ -51,7 +51,7 @@ patrol:
   android:
     package_name: ai.luciq.flutter.example
   ios:
-    bundle_id: ai.luciq.InstabugSample
+    bundle_id: ai.luciq.LuciqSample
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

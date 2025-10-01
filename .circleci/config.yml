@@ -127,18 +127,19 @@ commands:
       - when:
           condition:
             equal:
+              - <<parameters.remove_patrol>>
+              - true
+          steps:
+            - run:
+                name: remove Patrol
+                command: cd example && dart pub remove patrol
+      - flutter/install_pub:
+      - when:
+          condition:
+            equal:
               - <<parameters.use_melos>>
               - true
           steps:
-            - when:
-                condition:
-                  equal:
-                    - <<parameters.remove_patrol>>
-                    - true
-                steps:
-                  - run:
-                      name: remove Patrol
-                      command: cd example && dart pub remove patrol
             - run:
                 name: Install melos
                 command: dart pub global activate melos &&  echo 'export PATH="$PATH:$HOME/.pub-cache/bin"' >> $BASH_ENV

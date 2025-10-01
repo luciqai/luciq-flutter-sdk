@@ -1,4 +1,4 @@
-package ai.luciq.flutter.example
+package com.example.LuciqSample
 
 import com.example.LuciqSample.LuciqExampleMethodCallHandler
 import com.example.LuciqSample.LuciqExampleMethodCallHandler.Companion.METHOD_CHANNEL_NAME

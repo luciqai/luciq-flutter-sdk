@@ -133,7 +133,7 @@ commands:
             - run:
                 name: remove Patrol
                 command: cd example && dart pub remove patrol
-      - flutter/install_pub:
+      - flutter/install_pub
       - when:
           condition:
             equal:

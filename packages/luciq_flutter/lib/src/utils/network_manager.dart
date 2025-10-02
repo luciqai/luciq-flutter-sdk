@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
+import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_constants.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
@@ -115,7 +116,7 @@ class NetworkManager {
 
   /// Gets the network body max size from native SDK, with caching
   Future<int?> _getNetworkBodyMaxSize() async {
-    if (_cachedNetworkBodyMaxSize != null) {
+    if (_cachedNetworkBodyMaxSize != null && LCQBuildInfo.I.isAndroid) {
       return _cachedNetworkBodyMaxSize;
     }
 

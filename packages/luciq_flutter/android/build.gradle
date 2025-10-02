@@ -47,7 +47,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:18.0.0'
+    api 'ai.luciq.library-bdrthermea:luciq:18.0.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

@@ -129,15 +129,19 @@ public final class ArgsRegistry {
     public static final ArgsMap<LuciqLocale> locales = new ArgsMap<LuciqLocale>() {{
         put("LCQLocale.arabic", LuciqLocale.ARABIC);
         put("LCQLocale.azerbaijani", LuciqLocale.AZERBAIJANI);
+        put("LCQLocale.bulgarian", LuciqLocale.BULGARIAN);
         put("LCQLocale.chineseSimplified", LuciqLocale.SIMPLIFIED_CHINESE);
         put("LCQLocale.chineseTraditional", LuciqLocale.TRADITIONAL_CHINESE);
+        put("LCQLocale.croatian", LuciqLocale.CROATIAN);
         put("LCQLocale.czech", LuciqLocale.CZECH);
         put("LCQLocale.danish", LuciqLocale.DANISH);
         put("LCQLocale.dutch", LuciqLocale.NETHERLANDS);
         put("LCQLocale.english", LuciqLocale.ENGLISH);
+        put("LCQLocale.estonian", LuciqLocale.ESTONIAN);
         put("LCQLocale.finnish", LuciqLocale.FINNISH);
         put("LCQLocale.french", LuciqLocale.FRENCH);
         put("LCQLocale.german", LuciqLocale.GERMAN);
+        put("LCQLocale.greek", LuciqLocale.GREEK);
         put("LCQLocale.hungarian", LuciqLocale.HUNGARIAN);
         put("LCQLocale.indonesian", LuciqLocale.INDONESIAN);
         put("LCQLocale.italian", LuciqLocale.ITALIAN);
@@ -149,10 +153,13 @@ public final class ArgsRegistry {
         put("LCQLocale.portuguesePortugal", LuciqLocale.PORTUGUESE_PORTUGAL);
         put("LCQLocale.romanian", LuciqLocale.ROMANIAN);
         put("LCQLocale.russian", LuciqLocale.RUSSIAN);
+        put("LCQLocale.serbian", LuciqLocale.SERBIAN);
         put("LCQLocale.slovak", LuciqLocale.SLOVAK);
+        put("LCQLocale.slovenian", LuciqLocale.SLOVENIAN);
         put("LCQLocale.spanish", LuciqLocale.SPANISH);
         put("LCQLocale.swedish", LuciqLocale.SWEDISH);
         put("LCQLocale.turkish", LuciqLocale.TURKISH);
+        put("LCQLocale.ukrainian", LuciqLocale.UKRAINIAN);
     }};
 
     public static final ArgsMap<Key> placeholders = new ArgsMap<Key>() {{

@@ -17,6 +17,6 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig   = { 'OTHER_LDFLAGS' => '-framework "Flutter" -framework "LuciqSDK"'}
 
   s.dependency 'Flutter'
-  s.dependency 'Luciq', '18.0.0'
+  s.dependency 'Luciq', '18.0.40'
 end
 

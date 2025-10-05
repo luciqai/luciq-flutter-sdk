@@ -34,11 +34,10 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Instabug (15.1.32)
-  - Luciq (18.0.0)
+  - Luciq (18.0.40)
   - luciq_flutter (18.0.0):
     - Flutter
-    - Luciq (= 18.0.0)
+    - Luciq (= 18.0.40)
   - OCMock (3.6)
   - SDWebImage (5.21.2):
     - SDWebImage/Core (= 5.21.2)
@@ -51,7 +50,7 @@ PODS:
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
-  - Instabug (from `https://ios-releases.instabug.com/custom/faeture-screen_rendering-release/15.1.32/Instabug.podspec`)
+  - Luciq (from `https://ios-releases.luciq.ai/custom/faeture-screen_rendering-release/18.0.40/Luciq.podspec`)
   - luciq_flutter (from `.symlinks/plugins/luciq_flutter/ios`)
   - OCMock (= 3.6)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
@@ -60,7 +59,6 @@ SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
-    - Luciq
     - OCMock
     - SDWebImage
     - SwiftyGif
@@ -70,8 +68,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
-  Instabug:
-    :podspec: https://ios-releases.instabug.com/custom/faeture-screen_rendering-release/15.1.32/Instabug.podspec
+  Luciq:
+    :podspec: https://ios-releases.luciq.ai/custom/faeture-screen_rendering-release/18.0.40/Luciq.podspec
   luciq_flutter:
     :path: ".symlinks/plugins/luciq_flutter/ios"
   video_player_avfoundation:
@@ -82,14 +80,13 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Instabug: ee379b2694fa1dd3951526e5a34782bac886102e
-  Luciq: f364d44f0d57a236fcebac5220a99310a1b7d698
-  luciq_flutter: ada7268c84dd25ba80f1112c0d221f3e89408655
+  Luciq: f68989674cd5555440a38fb8c3d0aaf5fde522b2
+  luciq_flutter: f155e64e501e69ee89a3363feb594d056d0a51f0
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
   SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
 
-PODFILE CHECKSUM: 6a40ad05d5631988fbd28b826184e484cce876ce
+PODFILE CHECKSUM: 4595eca4c9e856a8355a9b2a356a7d95fdf861d4
 
 COCOAPODS: 1.16.2

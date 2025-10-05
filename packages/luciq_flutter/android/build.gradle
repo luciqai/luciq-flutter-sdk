@@ -23,7 +23,8 @@ rootProject.allprojects {
             url "https://mvn.luciq.ai/nexus/repository/luciq-internal/"
             credentials {
                 username "luciq"
-                password "YrCYo6GitsFtG3Ca4g6b9WqreEr*W8"            }
+                password System.getenv("LUCIQ_REPOSITORY_PASSWORD")
+            }
         }
     }
 }

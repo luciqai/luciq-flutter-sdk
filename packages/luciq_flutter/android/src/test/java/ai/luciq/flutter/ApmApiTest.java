@@ -1,25 +1,18 @@
 package ai.luciq.flutter;
 
-import static ai.luciq.flutter.util.GlobalMocks.reflected;
-import static ai.luciq.flutter.util.MockResult.makeResult;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-
-import ai.luciq.apm.APM;
-import ai.luciq.apm.InternalAPM;
-import ai.luciq.apm.configuration.cp.APMFeature;
-import ai.luciq.apm.configuration.cp.FeatureAvailabilityCallback;
-import ai.luciq.apm.networking.APMNetworkLogger;
-import ai.luciq.flutter.generated.ApmPigeon;
-import ai.luciq.flutter.modules.ApmApi;
-import ai.luciq.flutter.util.GlobalMocks;
-import ai.luciq.flutter.util.MockReflected;
+import static org.mockito.Mockito.when;
+import static ai.luciq.flutter.util.GlobalMocks.reflected;
+import static ai.luciq.flutter.util.MockResult.makeResult;
 
 import org.json.JSONObject;
 import org.junit.After;
@@ -28,18 +21,22 @@ import org.junit.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static ai.luciq.flutter.util.GlobalMocks.reflected;
-import static ai.luciq.flutter.util.MockResult.makeResult;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import ai.luciq.apm.APM;
+import ai.luciq.apm.InternalAPM;
+import ai.luciq.apm.configuration.cp.APMFeature;
+import ai.luciq.apm.configuration.cp.FeatureAvailabilityCallback;
+import ai.luciq.apm.configuration.cp.ToleranceValueCallback;
+import ai.luciq.apm.networking.APMNetworkLogger;
+import ai.luciq.flutter.generated.ApmPigeon;
+import ai.luciq.flutter.modules.ApmApi;
+import ai.luciq.flutter.util.GlobalMocks;
+import ai.luciq.flutter.util.MockReflected;
 import io.flutter.plugin.common.BinaryMessenger;
 
 
@@ -104,7 +101,6 @@ public class ApmApiTest {
 
         mAPM.verify(() -> APM.setAutoUITraceEnabled(isEnabled));
     }
-
 
 
     @Test
@@ -387,7 +383,8 @@ public class ApmApiTest {
 
     @Test
     public void testDeviceRefreshRateWithException() throws Exception {
-        ApmPigeon.Result<List<Double>> result = spy(makeResult((actual) -> {}));
+        ApmPigeon.Result<List<Double>> result = spy(makeResult((actual) -> {
+        }));
 
         // Mock the refresh rate provider to throw an exception
         Callable<Float> mockRefreshRateProvider = () -> {

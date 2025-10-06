@@ -8,7 +8,6 @@ import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/flags_config.dart';
-import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:mockito/annotations.dart';

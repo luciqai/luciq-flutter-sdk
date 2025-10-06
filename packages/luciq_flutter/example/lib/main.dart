@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter_example/src/app_routes.dart';
-import 'package:luciq_flutter_example/src/components/apm_switch.dart';
 import 'package:luciq_flutter_example/src/native/luciq_flutter_example_method_channel.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_handler_provider.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';
+import 'package:luciq_flutter_example/src/utils/show_messages.dart';
 import 'package:luciq_flutter_example/src/utils/widget_ext.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_button.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_clipboard_input.dart';
@@ -27,7 +27,15 @@ part 'src/components/flows_content.dart';
 part 'src/components/network_content.dart';
 part 'src/components/non_fatal_crashes_content.dart';
 part 'src/components/page.dart';
+part 'src/components/apm_switch.dart';
+part 'src/components/animated_box.dart';
+part 'src/components/screen_render_switch.dart';
+part 'src/components/ui_traces_content.dart';
+part 'src/components/screen_render.dart';
+
 part 'src/screens/apm_page.dart';
+part 'src/screens/screen_render_page.dart';
+
 part 'src/screens/bug_reporting.dart';
 part 'src/screens/complex_page.dart';
 part 'src/screens/core_page.dart';
@@ -47,6 +55,7 @@ void main() {
           invocationEvents: [InvocationEvent.floatingButton],
           debugLogsLevel: LogLevel.verbose,
           appVariant: 'variant 1');
+      APM.setScreenRenderingEnabled(true);
 
       Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
       FlutterError.onError = (FlutterErrorDetails details) {

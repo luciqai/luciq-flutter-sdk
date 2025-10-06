@@ -17,6 +17,7 @@ import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.Reflection;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.ReproMode;
+import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.CoreFeature;
 import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
 import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
@@ -561,6 +562,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         Luciq.willRedirectToStore();
     }
 
+
     public static void setScreenshotCaptor(ScreenshotCaptor screenshotCaptor, InternalCore internalCore) {
         internalCore._setScreenshotCaptor(new ai.luciq.library.screenshot.ScreenshotCaptor() {
             @Override
@@ -755,17 +757,18 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     @Override
     public void getNetworkBodyMaxSize(@NonNull LuciqPigeon.Result<Double> result) {
         ThreadManager.runOnMainThread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        double networkCharLimit = InternalCore.INSTANCE.get_networkLogCharLimit();
-                        result.success(networkCharLimit);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            double networkCharLimit = InternalCore.INSTANCE.get_networkLogCharLimit();
+                            result.success(networkCharLimit);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
         );
     }
+
 }

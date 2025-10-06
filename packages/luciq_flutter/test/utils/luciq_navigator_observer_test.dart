@@ -42,10 +42,12 @@ void main() {
 
     ScreenNameMasker.I.setMaskingCallback(null);
     when(mScreenRenderManager.screenRenderEnabled).thenReturn(false);
+    when(mScreenLoadingManager.startUiTrace(any, any))
+        .thenAnswer((_) async => null);
   });
 
   test('should report screen change when a route is pushed', () {
-    fakeAsync((async) async {
+    fakeAsync((async) {
       observer.didPush(route, previousRoute);
       WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
       WidgetsBinding.instance?.handleDrawFrame();

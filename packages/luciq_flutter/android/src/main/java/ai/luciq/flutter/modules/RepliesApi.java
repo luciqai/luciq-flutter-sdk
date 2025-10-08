@@ -46,60 +46,102 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
         Replies.setInAppNotificationSound(isEnabled);
     }
 
+    // @Override
+    // public void getUnreadRepliesCount(RepliesPigeon.Result<Long> result) {
+    //     ThreadManager.runOnBackground(
+    //             new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     final long count = Replies.getUnreadRepliesCount();
+
+    //                     ThreadManager.runOnMainThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             result.success(count);
+    //                         }
+    //                     });
+    //                 }
+    //             }
+    //     );
+    // }
+
+
     @Override
     public void getUnreadRepliesCount(RepliesPigeon.Result<Long> result) {
-        ThreadManager.runOnBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        final long count = Replies.getUnreadRepliesCount();
-
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                result.success(count);
-                            }
-                        });
-                    }
-                }
-        );
+        ThreadManager.runOnBackground(() {
+            final long count = Replies.getUnreadRepliesCount();
+            ThreadManager.runOnMainThread(() -> result.success(count);)
+        } );
     }
 
-    @Override
-    public void hasChats(RepliesPigeon.Result<Boolean> result) {
-        ThreadManager.runOnBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        final boolean hasChats = Replies.hasChats();
 
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                result.success(hasChats);
-                            }
-                        });
-                    }
-                }
-        );
+
+
+    // @Override
+    // public void hasChats(RepliesPigeon.Result<Boolean> result) {
+    //     ThreadManager.runOnBackground(
+    //             new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     final boolean hasChats = Replies.hasChats();
+
+    //                     ThreadManager.runOnMainThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             result.success(hasChats);
+    //                         }
+    //                     });
+    //                 }
+    //             }
+    //     );
+    // }
+
+ 
+//is this correct? 
+//    @Override
+//     public void hasChats(RepliesPigeon.Result<Boolean> result){
+//         ThreadManager.runOnBackground(() -> ThreadManager.runOnMainThread(() -> result.success(Replies.hasChats()) ) );
+//     }
+
+   @Override
+    public void hasChats(RepliesPigeon.Result<Boolean> result){
+        ThreadManager.runOnBackground(() ->{
+            final boolean hasChats = Replies.hasChats();
+            ThreadManager.runOnMainThread(() -> result.success(Replies.hasChats()) ) 
+        });
+         
     }
+
+    // @Override
+    // public void bindOnNewReplyCallback() {
+    //     Replies.setOnNewReplyReceivedCallback(new Runnable() {
+    //         @Override
+    //         public void run() {
+    //             ThreadManager.runOnMainThread(new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     flutterApi.onNewReply(new RepliesPigeon.RepliesFlutterApi.Reply<Void>() {
+    //                         @Override
+    //                         public void reply(Void reply) {
+    //                         }
+    //                     });
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
 
     @Override
     public void bindOnNewReplyCallback() {
-        Replies.setOnNewReplyReceivedCallback(new Runnable() {
+        Replies.setOnNewReplyReceivedCallback(() -> {
+        ThreadManager.runOnMainThread(() ->
+         flutterApi.onNewReply(new RepliesPigeon.RepliesFlutterApi.Reply<Void>(){
             @Override
-            public void run() {
-                ThreadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterApi.onNewReply(new RepliesPigeon.RepliesFlutterApi.Reply<Void>() {
-                            @Override
-                            public void reply(Void reply) {
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }
+            public void reply(Void reply) {}
+        })
+      );
+}
+    );
+}
 }

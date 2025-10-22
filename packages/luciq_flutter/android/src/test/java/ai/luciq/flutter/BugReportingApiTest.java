@@ -5,8 +5,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import ai.luciq.bug.BugReporting;
 import ai.luciq.bug.invocation.Option;
+import ai.luciq.bug.userConsent.ActionType;
 import ai.luciq.flutter.generated.BugReportingPigeon;
 import ai.luciq.flutter.modules.BugReportingApi;
 import ai.luciq.flutter.util.GlobalMocks;
@@ -194,18 +198,38 @@ public class BugReportingApiTest {
         mBugReporting.verify(() -> BugReporting.setCommentMinimumCharacterCountForBugReportType(limit.intValue(), BugReporting.ReportType.BUG, BugReporting.ReportType.QUESTION));
     }
 
+
+
+
+    
+//    public void addHabibaUserConsents(@NonNull String key, @NonNull String description, @NonNull Boolean mandatory, @NonNull Boolean checked, @Nullable String actionType){
+//        BugReporting.addUserConsent(key, description, mandatory, checked, actionType);
+//    }
+
     @Test
-    public void TestAddUserConsents() {
+    public void testUserConsentActionTypeNull(){
 
-               final String key = "testKey";
-               final String description = "Consent description";
-               final boolean mandatory = true;
-               final boolean checked = true;
-               final String actionType = "UserConsentActionType.dropAutoCapturedMedia";
+        String key = "Key";
+        String desc = "habiba's desc";
+        Boolean mand = true;
+        Boolean checked = false;
 
-
-               api.addUserConsents(key, description, mandatory, checked, actionType);
-
-               mBugReporting.verify(()->BugReporting.addUserConsent(key, description, mandatory, checked,"drop_auto_captured_media"));
+        api.addHabibaUserConsents(key , desc , mand ,checked, null);
+        mBugReporting.verify(() -> BugReporting.addUserConsent(key , desc ,mand , checked , null));
     }
+
+    @Test
+    public void testUserConsentActionTypeNoLogs(){
+
+        String key = "Key";
+        String desc = "habiba's desc";
+        Boolean mand = true;
+        Boolean checked = false;
+        String type = ActionType.DROP_LOGS;
+
+        api.addHabibaUserConsents(key , desc , mand ,checked, type);
+        mBugReporting.verify(() -> BugReporting.addUserConsent(key , desc ,mand , checked , type));
+    }
+
+
 }

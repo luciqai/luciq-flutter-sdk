@@ -174,26 +174,53 @@
 
     OCMVerify([self.mBugReporting setCommentMinimumCharacterCount:limit.intValue forBugReportType:LCQBugReportingReportTypeBug | LCQBugReportingReportTypeFeedback | LCQBugReportingReportTypeQuestion]);
 }
-- (void)testAddUserConsentWithKey {
-  NSString *key = @"testKey";
-  NSString *description = @"Consent description";
-  NSNumber *mandatory = @1;
-  NSNumber *checked = @0;
-  NSString *actionType= @"UserConsentActionType.dropAutoCapturedMedia";
-  FlutterError *error;
-    LCQConsentAction mappedActionType =  LCQConsentActionDropAutoCapturedMedia;
 
-  [self.api addUserConsentsKey:key
-                                  description:description
-                                    mandatory:mandatory
-                                      checked:checked
-                                   actionType:actionType
-                         error: &error
-                                   ];
-  OCMVerify([self.mBugReporting addUserConsentWithKey:key
-                                        description:description
-                                          mandatory:[mandatory boolValue]
-                                            checked:[checked boolValue]
-                                         actionType:mappedActionType]);
+//two tests , one with action type null and another one with a type
+- (void)testAddUserConsentWithActionTypeNull {
+    NSString *key = @"testKey";
+    NSString *description = @"Test consent description";
+    NSNumber *mandatory = @NO;
+    NSNumber *checked = @YES;
+    NSString *actionType = nil;
+    FlutterError *error;
+    
+    [self.api addHabibaUserConsentsKey:key 
+                           description:description 
+                             mandatory:mandatory 
+                               checked:checked 
+                            actionType:actionType 
+                                  error:&error];
+    
+
+    OCMVerify([self.mBugReporting addUserConsentWithKey:key
+                                            description:description
+                                              mandatory:NO
+                                                checked:YES
+                                             actionType:nil]);
 }
+
+
+- (void)testAddUserConsentWithDropAutoCapturedMedia {
+    NSString *key = @"testKey";
+    NSString *description = @"Test consent description";
+    NSNumber *mandatory = @YES;
+    NSNumber *checked = @NO;
+    NSString *actionType = @"UserConsentActionType.dropAutoCapturedMedia";
+    FlutterError *error;
+    
+    [self.api addHabibaUserConsentsKey:key 
+                           description:description 
+                             mandatory:mandatory 
+                               checked:checked 
+                            actionType:actionType 
+                                  error:&error];
+    
+    OCMVerify([self.mBugReporting addUserConsentWithKey:key
+                                            description:description
+                                              mandatory:YES
+                                                checked:NO
+                                             actionType:actionType]);
+}
+
+
 @end

@@ -164,21 +164,12 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     [LCQBugReporting setCommentMinimumCharacterCount:[limit integerValue] forBugReportType:resolvedTypes];
 }
 
-- (void)addUserConsentsKey:(NSString *)key
-                 description:(NSString *)description
-                   mandatory:(NSNumber *)mandatory
-                     checked:(NSNumber *)checked
-                  actionType:(nullable NSString *)actionType
-                       error:(FlutterError *_Nullable *_Nonnull)error {
-   
-    LCQConsentAction mappedActionType =  (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
-
+- (void)addHabibaUserConsentsKey:(NSString *)key description:(NSString *)description mandatory:(NSNumber *)mandatory checked:(NSNumber *)checked actionType:(nullable NSString *)actionType error:(FlutterError *_Nullable *_Nonnull)error{
     [LCQBugReporting addUserConsentWithKey:key
                                description:description
                                  mandatory:[mandatory boolValue]
                                    checked:[checked boolValue]
-                                actionType:mappedActionType];
+                                actionType:actionType];
 }
-
 
 @end

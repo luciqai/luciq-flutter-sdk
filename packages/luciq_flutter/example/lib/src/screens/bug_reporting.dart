@@ -58,12 +58,12 @@ class _BugReportingPageState extends State<BugReportingPage> {
     bool checked,
     UserConsentActionType? actionType,
   ) {
-    BugReporting.addUserConsents(
-      key: key,
-      description: description,
-      mandatory: mandatory,
-      checked: true,
-      actionType: actionType,
+    BugReporting.addHabibaUserConsents(
+      key,
+      description,
+      mandatory,
+      true,
+      actionType,
     );
   }
 
@@ -122,9 +122,7 @@ class _BugReportingPageState extends State<BugReportingPage> {
       if (dismissType == DismissType.submit) {
         showDialog(
           context: context,
-          builder: (_) => const AlertDialog(
-            title: Text('Bug Reporting sent'),
-          ),
+          builder: (_) => const AlertDialog(title: Text('Bug Reporting sent')),
         );
       }
     });
@@ -213,14 +211,14 @@ class _BugReportingPageState extends State<BugReportingPage> {
           children: <Widget>[
             ElevatedButton(
               key: const Key('invocation_event_floating'),
-              onPressed: () =>
-                  setInvocationEvent(InvocationEvent.floatingButton),
+              onPressed:
+                  () => setInvocationEvent(InvocationEvent.floatingButton),
               child: const Text('Floating Button'),
             ).withSemanticsLabel('invocation_event_floating'),
             ElevatedButton(
               key: const Key('invocation_event_two_fingers'),
-              onPressed: () =>
-                  setInvocationEvent(InvocationEvent.twoFingersSwipeLeft),
+              onPressed:
+                  () => setInvocationEvent(InvocationEvent.twoFingersSwipeLeft),
               child: const Text('Two Fingers Swipe Left'),
             ).withSemanticsLabel('invocation_event_two_fingers'),
           ],
@@ -233,24 +231,26 @@ class _BugReportingPageState extends State<BugReportingPage> {
           children: <Widget>[
             ElevatedButton(
               key: const Key('user_consent_media_manadatory'),
-              onPressed: () => setUserConsent(
-                'media_mandatory',
-                "Mandatory for Media",
-                true,
-                true,
-                UserConsentActionType.dropAutoCapturedMedia,
-              ),
+              onPressed:
+                  () => setUserConsent(
+                    'media_mandatory',
+                    "Mandatory for Media",
+                    true,
+                    true,
+                    UserConsentActionType.dropAutoCapturedMedia,
+                  ),
               child: const Text('Drop Media Mandatory'),
             ).withSemanticsLabel('user_consent_media_manadatory'),
             ElevatedButton(
               key: const Key('user_consent_no_chat_manadatory'),
-              onPressed: () => setUserConsent(
-                'noChat_mandatory',
-                "Mandatory for No Chat",
-                true,
-                true,
-                UserConsentActionType.noChat,
-              ),
+              onPressed:
+                  () => setUserConsent(
+                    'noChat_mandatory',
+                    "Mandatory for No Chat",
+                    true,
+                    true,
+                    UserConsentActionType.noChat,
+                  ),
               child: const Text('No Chat Mandatory'),
             ).withSemanticsLabel('user_consent_no_chat_manadatory'),
           ],
@@ -262,24 +262,26 @@ class _BugReportingPageState extends State<BugReportingPage> {
           children: <Widget>[
             ElevatedButton(
               key: const Key('user_consent_drop_logs_manadatory'),
-              onPressed: () => setUserConsent(
-                'dropLogs_mandatory',
-                "Mandatory for Drop logs",
-                true,
-                true,
-                UserConsentActionType.dropLogs,
-              ),
+              onPressed:
+                  () => setUserConsent(
+                    'dropLogs_mandatory',
+                    "Mandatory for Drop logs",
+                    true,
+                    true,
+                    UserConsentActionType.dropLogs,
+                  ),
               child: const Text('Drop logs Mandatory'),
             ).withSemanticsLabel('user_consent_drop_logs_manadatory'),
             ElevatedButton(
               key: const Key('user_consent_no_chat_optional'),
-              onPressed: () => setUserConsent(
-                'noChat_mandatory',
-                "Optional for No Chat",
-                false,
-                true,
-                UserConsentActionType.noChat,
-              ),
+              onPressed:
+                  () => setUserConsent(
+                    'noChat_mandatory',
+                    "Optional for No Chat",
+                    false,
+                    true,
+                    UserConsentActionType.noChat,
+                  ),
               child: const Text('No Chat optional'),
             ).withSemanticsLabel('user_consent_no_chat_optional'),
           ],
@@ -291,17 +293,18 @@ class _BugReportingPageState extends State<BugReportingPage> {
           children: <Widget>[
             ElevatedButton(
               key: const Key('invocation_option_disable_post_sending_dialog'),
-              onPressed: () => addInvocationOption(
-                InvocationOption.disablePostSendingDialog,
-              ),
+              onPressed:
+                  () => addInvocationOption(
+                    InvocationOption.disablePostSendingDialog,
+                  ),
               child: const Text('disablePostSendingDialog'),
             ).withSemanticsLabel(
               'invocation_option_disable_post_sending_dialog',
             ),
             ElevatedButton(
               key: const Key('invocation_option_email_hidden'),
-              onPressed: () =>
-                  addInvocationOption(InvocationOption.emailFieldHidden),
+              onPressed:
+                  () => addInvocationOption(InvocationOption.emailFieldHidden),
               child: const Text('emailFieldHidden'),
             ).withSemanticsLabel('invocation_option_email_hidden'),
           ],
@@ -312,13 +315,16 @@ class _BugReportingPageState extends State<BugReportingPage> {
           children: <Widget>[
             ElevatedButton(
               key: const Key('invocation_option_comment_required'),
-              onPressed: () =>
-                  addInvocationOption(InvocationOption.commentFieldRequired),
+              onPressed:
+                  () => addInvocationOption(
+                    InvocationOption.commentFieldRequired,
+                  ),
               child: const Text('commentFieldRequired'),
             ).withSemanticsLabel('invocation_option_comment_required'),
             ElevatedButton(
-              onPressed: () =>
-                  addInvocationOption(InvocationOption.emailFieldOptional),
+              onPressed:
+                  () =>
+                      addInvocationOption(InvocationOption.emailFieldOptional),
               child: const Text('emailFieldOptional'),
             ).withSemanticsLabel('invocation_option_email_required'),
           ],
@@ -390,9 +396,10 @@ class _BugReportingPageState extends State<BugReportingPage> {
             ElevatedButton(
               key: const Key('bug_report_type_bug'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: reportTypes.contains(ReportType.bug)
-                    ? Colors.grey.shade400
-                    : null,
+                backgroundColor:
+                    reportTypes.contains(ReportType.bug)
+                        ? Colors.grey.shade400
+                        : null,
               ),
               onPressed: () => toggleReportType(ReportType.bug),
               child: const Text('Bug'),
@@ -401,9 +408,10 @@ class _BugReportingPageState extends State<BugReportingPage> {
               key: const Key('bug_report_type_feedback'),
               onPressed: () => toggleReportType(ReportType.feedback),
               style: ElevatedButton.styleFrom(
-                backgroundColor: reportTypes.contains(ReportType.feedback)
-                    ? Colors.grey.shade400
-                    : null,
+                backgroundColor:
+                    reportTypes.contains(ReportType.feedback)
+                        ? Colors.grey.shade400
+                        : null,
               ),
               child: const Text('Feedback'),
             ).withSemanticsLabel('bug_report_type_feedback'),
@@ -411,9 +419,10 @@ class _BugReportingPageState extends State<BugReportingPage> {
               key: const Key('bug_report_type_question'),
               onPressed: () => toggleReportType(ReportType.question),
               style: ElevatedButton.styleFrom(
-                backgroundColor: reportTypes.contains(ReportType.question)
-                    ? Colors.grey.shade400
-                    : null,
+                backgroundColor:
+                    reportTypes.contains(ReportType.question)
+                        ? Colors.grey.shade400
+                        : null,
               ),
               child: const Text('Question'),
             ).withSemanticsLabel('bug_report_type_question'),
@@ -451,12 +460,12 @@ class _BugReportingPageState extends State<BugReportingPage> {
         ).withSemanticsLabel('bug_report_type_question'),
         LuciqButton(
           symanticLabel: 'id_send_bug',
-          onPressed: () => {
-            BugReporting.show(
-              ReportType.bug,
-              [InvocationOption.emailFieldOptional],
-            ),
-          },
+          onPressed:
+              () => {
+                BugReporting.show(ReportType.bug, [
+                  InvocationOption.emailFieldOptional,
+                ]),
+              },
           text: 'Send Bug Report',
         ),
         const SectionTitle('Disclaimer Text'),
@@ -478,17 +487,20 @@ class _BugReportingPageState extends State<BugReportingPage> {
           children: <Widget>[
             ElevatedButton(
               key: const Key('extended_bug_report_mode_disabled'),
-              onPressed: () => BugReporting.setExtendedBugReportMode(
-                ExtendedBugReportMode.disabled,
-              ),
+              onPressed:
+                  () => BugReporting.setExtendedBugReportMode(
+                    ExtendedBugReportMode.disabled,
+                  ),
               child: const Text('disabled'),
             ).withSemanticsLabel('extended_bug_report_mode_disabled'),
             ElevatedButton(
-              key:
-                  const Key('extended_bug_report_mode_required_fields_enabled'),
-              onPressed: () => BugReporting.setExtendedBugReportMode(
-                ExtendedBugReportMode.enabledWithRequiredFields,
+              key: const Key(
+                'extended_bug_report_mode_required_fields_enabled',
               ),
+              onPressed:
+                  () => BugReporting.setExtendedBugReportMode(
+                    ExtendedBugReportMode.enabledWithRequiredFields,
+                  ),
               child: const Text('enabledWithRequiredFields'),
             ).withSemanticsLabel(
               'extended_bug_report_mode_required_fields_enabled',
@@ -500,11 +512,13 @@ class _BugReportingPageState extends State<BugReportingPage> {
           alignment: MainAxisAlignment.start,
           children: <Widget>[
             ElevatedButton(
-              key:
-                  const Key('extended_bug_report_mode_optional_fields_enabled'),
-              onPressed: () => BugReporting.setExtendedBugReportMode(
-                ExtendedBugReportMode.enabledWithOptionalFields,
+              key: const Key(
+                'extended_bug_report_mode_optional_fields_enabled',
               ),
+              onPressed:
+                  () => BugReporting.setExtendedBugReportMode(
+                    ExtendedBugReportMode.enabledWithOptionalFields,
+                  ),
               child: const Text('enabledWithOptionalFields'),
             ).withSemanticsLabel(
               'extended_bug_report_mode_optional_fields_enabled',
@@ -525,10 +539,7 @@ class _BugReportingPageState extends State<BugReportingPage> {
                       key: 'Date',
                       value: DateTime.now().toIso8601String(),
                     ),
-                    KeyValuePair(
-                      key: 'status value',
-                      value: 'triggered',
-                    ),
+                    KeyValuePair(key: 'status value', value: 'triggered'),
                     KeyValuePair(
                       key: 'issue type',
                       value: dismissType.toString(),
@@ -585,10 +596,7 @@ class _BugReportingPageState extends State<BugReportingPage> {
                       key: 'Date',
                       value: DateTime.now().toIso8601String(),
                     ),
-                    KeyValuePair(
-                      key: 'status value',
-                      value: 'triggered',
-                    ),
+                    KeyValuePair(key: 'status value', value: 'triggered'),
                   ],
                 ),
               );

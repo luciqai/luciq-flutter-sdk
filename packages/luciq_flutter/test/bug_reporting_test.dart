@@ -199,4 +199,119 @@ void main() {
       mHost.setCommentMinimumCharacterCount(count, reportTypes.mapToString()),
     ).called(1);
   });
+
+  group("user consent tests", () {
+    test(
+        "validate that user consent is working as expected with actiontype null",
+        () async {
+      const key = "habiba's key";
+      const desc = "test test";
+      const mand = false;
+      const checked = true;
+      const UserConsentActionType? actionType = null;
+
+      await BugReporting.addHabibaUserConsents(
+        key,
+        desc,
+        mand,
+        checked,
+        actionType,
+      );
+
+      verify(
+        mHost.addHabibaUserConsents(
+          key,
+          desc,
+          mand,
+          checked,
+          actionType?.toString(),
+        ),
+      ).called(1);
+    });
+
+    test(
+        "validate that user consent is working as expected with actiontype {no chats}",
+        () async {
+      const key = "habiba's key";
+      const desc = "test test";
+      const mand = false;
+      const checked = true;
+      const UserConsentActionType? actionType = UserConsentActionType.noChat;
+
+      await BugReporting.addHabibaUserConsents(
+        key,
+        desc,
+        mand,
+        checked,
+        actionType,
+      );
+
+      verify(
+        mHost.addHabibaUserConsents(
+          key,
+          desc,
+          mand,
+          checked,
+          actionType.toString(),
+        ),
+      ).called(1);
+    });
+
+    test(
+        "validate that user consent is working as expected with actiontype {drop Logs}",
+        () async {
+      const key = "habiba's key";
+      const desc = "test test";
+      const mand = false;
+      const checked = true;
+      const UserConsentActionType? actionType = UserConsentActionType.dropLogs;
+
+      await BugReporting.addHabibaUserConsents(
+        key,
+        desc,
+        mand,
+        checked,
+        actionType,
+      );
+
+      verify(
+        mHost.addHabibaUserConsents(
+          key,
+          desc,
+          mand,
+          checked,
+          actionType.toString(),
+        ),
+      ).called(1);
+    });
+
+    test(
+        "validate that user consent is working as expected with actiontype {drop media}",
+        () async {
+      const key = "habiba's key";
+      const desc = "test test";
+      const mand = false;
+      const checked = true;
+      const UserConsentActionType? actionType =
+          UserConsentActionType.dropAutoCapturedMedia;
+
+      await BugReporting.addHabibaUserConsents(
+        key,
+        desc,
+        mand,
+        checked,
+        actionType,
+      );
+
+      verify(
+        mHost.addHabibaUserConsents(
+          key,
+          desc,
+          mand,
+          checked,
+          actionType.toString(),
+        ),
+      ).called(1);
+    });
+  });
 }

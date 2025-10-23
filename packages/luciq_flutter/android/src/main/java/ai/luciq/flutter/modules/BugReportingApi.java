@@ -189,6 +189,17 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
    public void addHabibaUserConsents(@NonNull String key, @NonNull String description, @NonNull Boolean mandatory, @NonNull Boolean checked, @Nullable String actionType){
-        BugReporting.addUserConsent(key, description, mandatory, checked, actionType);
+        String type;
+        if(actionType!= null){
+            type = ArgsRegistry.userConsentActionType.get(actionType);
+        }else{
+            type = null;
+        }
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                BugReporting.addUserConsent(key, description, mandatory, checked, type);
+            }
+        });
     }
 }

@@ -267,13 +267,13 @@ class BugReporting implements BugReportingFlutterApi {
     );
   }
 
-  static Future<void> addHabibaUserConsents(
-    String withKey,
-    String description,
-    bool mandatory,
-    bool checked,
+  static Future<void> addHabibaUserConsents({
+    required String withKey,
+    required String description,
+    required bool mandatory,
+    required bool checked,
     UserConsentActionType? actionType,
-  ) async {
+  }) async {
     return _host.addHabibaUserConsents(
       withKey,
       description,

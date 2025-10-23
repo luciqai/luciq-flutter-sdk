@@ -59,11 +59,11 @@ class _BugReportingPageState extends State<BugReportingPage> {
     UserConsentActionType? actionType,
   ) {
     BugReporting.addHabibaUserConsents(
-      key,
-      description,
-      mandatory,
-      true,
-      actionType,
+      withKey: key,
+      description: description,
+      mandatory: mandatory,
+      checked: true,
+      actionType: actionType,
     );
   }
 

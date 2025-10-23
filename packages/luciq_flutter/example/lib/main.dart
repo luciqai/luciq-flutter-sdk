@@ -47,8 +47,8 @@ void main() {
       debugLogsLevel: LogLevel.verbose,
       appVariant: 'variant 1',
     );
-
-    BugReporting.addHabibaUserConsents("testKey", "habiba", true, false, null);
+    BugReporting.addHabibaUserConsents(
+        withKey: "key", description: "desc", mandatory: false, checked: false);
     BugReporting.setCommentMinimumCharacterCount(10);
 
     Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);

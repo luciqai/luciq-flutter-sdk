@@ -208,14 +208,12 @@ void main() {
       const desc = "test test";
       const mand = false;
       const checked = true;
-      const UserConsentActionType? actionType = null;
 
       await BugReporting.addHabibaUserConsents(
-        key,
-        desc,
-        mand,
-        checked,
-        actionType,
+        withKey: key,
+        description: desc,
+        mandatory: mand,
+        checked: checked,
       );
 
       verify(
@@ -224,7 +222,7 @@ void main() {
           desc,
           mand,
           checked,
-          actionType?.toString(),
+          null,
         ),
       ).called(1);
     });
@@ -236,14 +234,14 @@ void main() {
       const desc = "test test";
       const mand = false;
       const checked = true;
-      const UserConsentActionType? actionType = UserConsentActionType.noChat;
+      const actionType = UserConsentActionType.noChat;
 
       await BugReporting.addHabibaUserConsents(
-        key,
-        desc,
-        mand,
-        checked,
-        actionType,
+        withKey: key,
+        description: desc,
+        mandatory: mand,
+        checked: checked,
+        actionType: actionType,
       );
 
       verify(
@@ -264,14 +262,14 @@ void main() {
       const desc = "test test";
       const mand = false;
       const checked = true;
-      const UserConsentActionType? actionType = UserConsentActionType.dropLogs;
+      const actionType = UserConsentActionType.dropLogs;
 
       await BugReporting.addHabibaUserConsents(
-        key,
-        desc,
-        mand,
-        checked,
-        actionType,
+        withKey: key,
+        description: desc,
+        mandatory: mand,
+        checked: checked,
+        actionType: actionType,
       );
 
       verify(
@@ -296,11 +294,11 @@ void main() {
           UserConsentActionType.dropAutoCapturedMedia;
 
       await BugReporting.addHabibaUserConsents(
-        key,
-        desc,
-        mand,
-        checked,
-        actionType,
+        withKey: key,
+        description: desc,
+        mandatory: mand,
+        checked: checked,
+        actionType: actionType,
       );
 
       verify(

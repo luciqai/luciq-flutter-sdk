@@ -8,6 +8,9 @@ import static org.mockito.Mockito.mockStatic;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import ai.luciq.flutter.util.ArgsRegistry;
+import io.flutter.plugin.common.BinaryMessenger;
+
 import ai.luciq.bug.BugReporting;
 import ai.luciq.bug.invocation.Option;
 import ai.luciq.bug.userConsent.ActionType;
@@ -29,8 +32,6 @@ import org.mockito.MockedStatic;
 
 import java.util.Arrays;
 import java.util.List;
-
-import io.flutter.plugin.common.BinaryMessenger;
 
 public class BugReportingApiTest {
     private final BinaryMessenger mMessenger = mock(BinaryMessenger.class);
@@ -199,8 +200,6 @@ public class BugReportingApiTest {
     }
 
 
-
-
     
 //    public void addHabibaUserConsents(@NonNull String key, @NonNull String description, @NonNull Boolean mandatory, @NonNull Boolean checked, @Nullable String actionType){
 //        BugReporting.addUserConsent(key, description, mandatory, checked, actionType);
@@ -208,27 +207,26 @@ public class BugReportingApiTest {
 
     @Test
     public void testUserConsentActionTypeNull(){
-
         String key = "Key";
         String desc = "habiba's desc";
-        Boolean mand = true;
-        Boolean checked = false;
+        boolean mandatory = true;
+        boolean checked = false;
 
-        api.addHabibaUserConsents(key , desc , mand ,checked, null);
-        mBugReporting.verify(() -> BugReporting.addUserConsent(key , desc ,mand , checked , null));
+        api.addHabibaUserConsents(key , desc , mandatory ,checked , null);
+        mBugReporting.verify(() -> BugReporting.addUserConsent(key , desc ,mandatory , checked , null));
     }
 
     @Test
     public void testUserConsentActionTypeNoLogs(){
-
         String key = "Key";
         String desc = "habiba's desc";
-        Boolean mand = true;
-        Boolean checked = false;
-        String type = ActionType.DROP_LOGS;
+        boolean mandatory = true;
+        boolean checked = false;
+        String actionType = "UserConsentActionType.dropLogs";
+        String type = ArgsRegistry.userConsentActionType.get(actionType);
 
-        api.addHabibaUserConsents(key , desc , mand ,checked, type);
-        mBugReporting.verify(() -> BugReporting.addUserConsent(key , desc ,mand , checked , type));
+        api.addHabibaUserConsents(key , desc , mandatory ,checked, actionType);
+        mBugReporting.verify(() -> BugReporting.addUserConsent(key , desc ,mandatory , checked , type));
     }
 
 

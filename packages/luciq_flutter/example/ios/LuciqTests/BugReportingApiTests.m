@@ -2,6 +2,7 @@
 #import "OCMock/OCMock.h"
 #import "BugReportingApi.h"
 #import "LuciqSDK/LCQBugReporting.h"
+#import "ArgsRegistry.h"
 
 @interface BugReportingApiTests : XCTestCase
 
@@ -175,6 +176,22 @@
     OCMVerify([self.mBugReporting setCommentMinimumCharacterCount:limit.intValue forBugReportType:LCQBugReportingReportTypeBug | LCQBugReportingReportTypeFeedback | LCQBugReportingReportTypeQuestion]);
 }
 
+
+//- (void)addHabibaUserConsentsKey:(NSString *)key description:(NSString *)description mandatory:(NSNumber *)mandatory checked:(NSNumber *)checked actionType:(nullable NSString *)actionType error:(FlutterError *_Nullable *_Nonnull)error{
+
+//     LCQConsentAction type = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
+//
+//    [LCQBugReporting addUserConsentWithKey:key
+//                               description:description
+//                                 mandatory:[mandatory boolValue]
+//                                   checked:[checked boolValue]
+//                                actionType:type];
+//
+//}
+
+
+
+
 //two tests , one with action type null and another one with a type
 - (void)testAddUserConsentWithActionTypeNull {
     NSString *key = @"testKey";
@@ -183,6 +200,9 @@
     NSNumber *checked = @YES;
     NSString *actionType = nil;
     FlutterError *error;
+    
+    LCQConsentAction type = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
+
     
     [self.api addHabibaUserConsentsKey:key 
                            description:description 
@@ -194,9 +214,9 @@
 
     OCMVerify([self.mBugReporting addUserConsentWithKey:key
                                             description:description
-                                              mandatory:NO
-                                                checked:YES
-                                             actionType:nil]);
+                                              mandatory: [mandatory boolValue]
+                                                checked: [checked boolValue]
+                                             actionType:type]);
 }
 
 
@@ -208,6 +228,8 @@
     NSString *actionType = @"UserConsentActionType.dropAutoCapturedMedia";
     FlutterError *error;
     
+    LCQConsentAction type = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
+
     [self.api addHabibaUserConsentsKey:key 
                            description:description 
                              mandatory:mandatory 
@@ -217,9 +239,35 @@
     
     OCMVerify([self.mBugReporting addUserConsentWithKey:key
                                             description:description
-                                              mandatory:YES
-                                                checked:NO
-                                             actionType:actionType]);
+                                              mandatory:[mandatory boolValue]
+                                                checked:[checked boolValue]
+                                             actionType:type]);
+}
+
+
+
+- (void)testAddUserConsentWithDropChats {
+    NSString *key = @"testKey";
+    NSString *description = @"Test consent description";
+    NSNumber *mandatory = @YES;
+    NSNumber *checked = @NO;
+    NSString *actionType = @"UserConsentAction.noChats";
+    FlutterError *error;
+    
+    LCQConsentAction type = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
+
+    [self.api addHabibaUserConsentsKey:key
+                           description:description
+                             mandatory:mandatory
+                               checked:checked
+                            actionType:actionType
+                                  error:&error];
+    
+    OCMVerify([self.mBugReporting addUserConsentWithKey:key
+                                            description:description
+                                              mandatory:[mandatory boolValue]
+                                                checked:[checked boolValue]
+                                             actionType:type]);
 }
 
 

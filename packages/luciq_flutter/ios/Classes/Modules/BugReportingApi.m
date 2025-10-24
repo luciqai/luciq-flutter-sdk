@@ -118,6 +118,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)bindOnDismissCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
+    
     LCQBugReporting.didDismissHandler = ^(LCQDismissType dismissType, LCQReportCategory reportType) {
       // Parse dismiss type enum
       NSString *dismissTypeString;
@@ -165,7 +166,14 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)addHabibaUserConsentsKey:(NSString *)key description:(NSString *)description mandatory:(NSNumber *)mandatory checked:(NSNumber *)checked actionType:(nullable NSString *)actionType error:(FlutterError *_Nullable *_Nonnull)error{
-     LCQConsentAction type = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
+    
+    LCQConsentAction type;
+    if (actionType != nil) {
+        type = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
+    } else {
+        type = nil;
+    }
+    
 
     [LCQBugReporting addUserConsentWithKey:key
                                description:description

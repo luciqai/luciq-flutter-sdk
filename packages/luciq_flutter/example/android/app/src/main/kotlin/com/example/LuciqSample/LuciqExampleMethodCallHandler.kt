@@ -1,4 +1,5 @@
 package com.example.LuciqSample
+
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -37,10 +38,39 @@ class LuciqExampleMethodCallHandler : MethodChannel.MethodCallHandler {
                 sendOOM()
                 result.success(null)
             }
-            SET_FULLSCREEN -> {
-                val isEnabled = call.arguments as? Map<*, *>
-                val enabled = isEnabled?.get("isEnabled") as? Boolean ?: false
-                setFullscreen(enabled)
+            CAUSE_NDK_CRASH -> {
+                Log.d(TAG, "Causing NDK crash")
+                causeNdkCrash()
+                result.success(null)
+            }
+            CAUSE_SIGSEGV_CRASH -> {
+                Log.d(TAG, "Causing SIGSEGV crash")
+                causeSIGSEGVCrash()
+                result.success(null)
+            }
+            CAUSE_SIGABRT_CRASH -> {
+                Log.d(TAG, "Causing SIGABRT crash")
+                causeSIGABRTCrash()
+                result.success(null)
+            }
+            CAUSE_SIGFPE_CRASH -> {
+                Log.d(TAG, "Causing SIGFPE crash")
+                causeSIGFPECrash()
+                result.success(null)
+            }
+            CAUSE_SIGILL_CRASH -> {
+                Log.d(TAG, "Causing SIGILL crash")
+                causeSIGILLCrash()
+                result.success(null)
+            }
+            CAUSE_SIGBUS_CRASH -> {
+                Log.d(TAG, "Causing SIGBUS crash")
+                causeSIGBUSCrash()
+                result.success(null)
+            }
+            CAUSE_SIGTRAP_CRASH -> {
+                Log.d(TAG, "Causing SIGTRAP crash")
+                causeSIGTRAPCrash()
                 result.success(null)
             }
             else -> {
@@ -51,7 +81,7 @@ class LuciqExampleMethodCallHandler : MethodChannel.MethodCallHandler {
     }
 
     companion object {
-        const val TAG = "LCQEMethodCallHandler";
+        const val TAG = "LUCIQMethodCallHandler";
 
         const val METHOD_CHANNEL_NAME = "luciq_flutter_example"
 
@@ -61,18 +91,26 @@ class LuciqExampleMethodCallHandler : MethodChannel.MethodCallHandler {
         const val SEND_NATIVE_FATAL_HANG = "sendNativeFatalHang"
         const val SEND_ANR = "sendAnr"
         const val SEND_OOM = "sendOom"
-        const val SET_FULLSCREEN = "setFullscreen"
+
+        // NDK Crash Method Names
+        const val CAUSE_NDK_CRASH = "causeNdkCrash"
+        const val CAUSE_SIGSEGV_CRASH = "causeSIGSEGVCrash"
+        const val CAUSE_SIGABRT_CRASH = "causeSIGABRTCrash"
+        const val CAUSE_SIGFPE_CRASH = "causeSIGFPECrash"
+        const val CAUSE_SIGILL_CRASH = "causeSIGILLCrash"
+        const val CAUSE_SIGBUS_CRASH = "causeSIGBUSCrash"
+        const val CAUSE_SIGTRAP_CRASH = "causeSIGTRAPCrash"
     }
 
     private fun sendNativeNonFatal(exceptionObject: String?) {
-        val exception: LuciqNonFatalException = LuciqNonFatalException.Builder(IllegalStateException("Test exception"))
-                .build()
+        val exception:LuciqNonFatalException = LuciqNonFatalException.Builder(IllegalStateException("Test exception"))
+            .build()
         CrashReporting.report(exception)
     }
 
     private fun sendNativeFatalCrash() {
         Handler(Looper.getMainLooper()).post {
-            throw IllegalStateException("Unhandled IllegalStateException from Luciq Test App")
+            throw IllegalStateException("Unhandled IllegalStateException from Instabug Test App")
 
         }
     }
@@ -132,25 +170,33 @@ class LuciqExampleMethodCallHandler : MethodChannel.MethodCallHandler {
         return randomString.toString()
     }
 
-    private fun setFullscreen(enabled: Boolean) {
-        try {
-            
-            try {
-                val luciqClass = Class.forName("ai.luciq.library.Luciq")
-                val setFullscreenMethod = luciqClass.getMethod("setFullscreen", Boolean::class.java)
-                setFullscreenMethod.invoke(null, enabled)
-            } catch (e: ClassNotFoundException) {
-                throw e
-            } catch (e: NoSuchMethodException) {
-                throw e
-            } catch (e: Exception) {
-                throw e
-            }
-            
-        } catch (e: Exception) {
-            e.printStackTrace()
-            
-        }
+    // NDK Crash Methods
+    private fun causeNdkCrash() {
+        CppNativeLib.crashNDK()
+    }
+
+    private fun causeSIGSEGVCrash() {
+        CppNativeLib.causeSIGSEGVCrash()
+    }
+
+    private fun causeSIGABRTCrash() {
+        CppNativeLib.causeSIGABRTCrash()
+    }
+
+    private fun causeSIGFPECrash() {
+        CppNativeLib.causeSIGFPECrash()
+    }
+
+    private fun causeSIGILLCrash() {
+        CppNativeLib.causeSIGILLCrash()
+    }
+
+    private fun causeSIGBUSCrash() {
+        CppNativeLib.causeSIGBUSCrash()
+    }
+
+    private fun causeSIGTRAPCrash() {
+        CppNativeLib.causeSIGTRAPCrash()
     }
 
 }

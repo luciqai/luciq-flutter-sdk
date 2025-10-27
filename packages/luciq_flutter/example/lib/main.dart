@@ -45,13 +45,19 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
-          token: 'ed6f659591566da19b67857e1b9d40ab',
-          invocationEvents: [InvocationEvent.floatingButton],
-          debugLogsLevel: LogLevel.verbose,
-          appVariant: 'variant 1');
+        token: 'ed6f659591566da19b67857e1b9d40ab',
+        invocationEvents: [InvocationEvent.floatingButton],
+        debugLogsLevel: LogLevel.verbose,
+        appVariant: 'variant 1',
+      );
 
       BugReporting.setProactiveReportingConfigurations(
-          const ProactiveReportingConfigs());
+        const ProactiveReportingConfigs(
+          enabled: true,
+          gapBetweenModals: 2, //time in seconds
+          modalDelayAfterDetection: 2, //time in seconds
+        ),
+      );
 
       CrashReporting.setNDKEnabled(true);
 

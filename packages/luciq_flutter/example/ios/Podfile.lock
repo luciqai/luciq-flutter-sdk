@@ -34,14 +34,14 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Luciq (18.0.0)
-  - luciq_flutter (18.0.0):
+  - Luciq (18.0.1)
+  - luciq_flutter (18.0.1):
     - Flutter
-    - Luciq (= 18.0.0)
+    - Luciq (= 18.0.1)
   - OCMock (3.6)
-  - SDWebImage (5.21.2):
-    - SDWebImage/Core (= 5.21.2)
-  - SDWebImage/Core (5.21.2)
+  - SDWebImage (5.21.3):
+    - SDWebImage/Core (= 5.21.3)
+  - SDWebImage/Core (5.21.3)
   - SwiftyGif (5.4.5)
   - video_player_avfoundation (0.0.1):
     - Flutter
@@ -78,10 +78,10 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Luciq: f364d44f0d57a236fcebac5220a99310a1b7d698
-  luciq_flutter: ada7268c84dd25ba80f1112c0d221f3e89408655
+  Luciq: 6b1bb762f0a8991a40f1892e9acfe96f8a61ba31
+  luciq_flutter: 875f28ba129c7dda4035a11b5bb866ed4039e394
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
-  SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
+  SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
 

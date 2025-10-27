@@ -192,7 +192,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "18.0.0"
+    version: "18.0.1"
+  luciq_flutter_ndk:
+    dependency: "direct main"
+    description:
+      path: "../../luciq_flutter_ndk"
+      relative: true
+    source: path
+    version: "1.0.0"
   luciq_http_client:
     dependency: "direct main"
     description:
@@ -200,13 +207,6 @@ packages:
       relative: true
     source: path
     version: "3.0.0"
-  luciq_flutter_ndk:
-    dependency: "direct main"
-    description:
-      path: "../../luciq_flutter_ndk"
-      relative: true
-    source: path
-    version: "0.0.1"
   matcher:
     dependency: transitive
     description:

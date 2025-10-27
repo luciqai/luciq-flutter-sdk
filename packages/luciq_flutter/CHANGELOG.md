@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.0...dev)
+## [18.0.1](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.0...dev)
 
 ### Added
 

@@ -2,7 +2,7 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">api.instabug.com</domain>
+        <domain includeSubdomains="true">api.luciq.ai</domain>
     </domain-config>
     <base-config>
         <trust-anchors>

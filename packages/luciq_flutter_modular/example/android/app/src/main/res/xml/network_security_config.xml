@@ -2,7 +2,6 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">api.instabug.com</domain>
     </domain-config>
     <base-config>
         <trust-anchors>

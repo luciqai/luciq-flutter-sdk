@@ -418,32 +418,6 @@ jobs:
           name: Publish Package
           working_directory: packages/luciq_cli
           command: Escape flutter publish-dependancy
-  release_flutter_ndk_plugin:
-    macos:
-      xcode: 15.2.0
-    resource_class: macos.m1.medium.gen1
-    working_directory: "~/project"
-    steps:
-      - advanced-checkout/shallow-checkout:
-          path: ~/project
-      # Flutter doesn't support Apple Silicon yet, so we need to install Rosetta use Flutter on M1 machines.
-      - run:
-          name: Install Rosetta
-          command: softwareupdate --install-rosetta --agree-to-license
-      - setup_flutter
-      - run:
-          name: Clone Escape
-          command: git clone -b master2 git@github.com:instabug/Escape.git
-      - run:
-          name: Build Escape
-          working_directory: Escape
-          command: |
-            swift build -c release
-            cp -f .build/release/Escape /usr/local/bin/escape
-      - run:
-          name: Publish Package
-          working_directory: packages/luciq_flutter_ndk
-          command: Escape flutter publish-dependancy
 
   release_luciq_flutter:
     macos:
@@ -546,20 +520,9 @@ workflows:
           filters:
             branches:
               only: master
-      - hold_release_flutter_ndk_plugin:
-          type: approval
-          filters:
-            branches:
-              only: master
       - release_cli_plugin:
           requires:
             - hold_release_cli_plugin
-          filters:
-            branches:
-              only: master
-      - release_flutter_ndk_plugin:
-          requires:
-            - hold_release_flutter_ndk_plugin
           filters:
             branches:
               only: master

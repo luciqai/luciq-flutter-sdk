@@ -4,11 +4,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 part 'commands/migrate.dart';
-part 'commands/upload_so_files.dart';
 
 // ignore: avoid_classes_with_only_static_members
 /// Command registry for easy management
@@ -17,10 +15,6 @@ class CommandRegistry {
     'migrate': CommandHandler(
       parser: MigrateCommand.createParser(),
       execute: MigrateCommand.execute,
-    ),
-    'upload-so-files': CommandHandler(
-      parser: UploadSoFilesCommand.createParser(),
-      execute: UploadSoFilesCommand.execute,
     ),
   };
 

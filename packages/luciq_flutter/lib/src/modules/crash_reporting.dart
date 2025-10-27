@@ -116,14 +116,4 @@ class CrashReporting {
     );
     return crashData;
   }
-
-  /// Enables and disables NDK crash reporting.
-  /// [boolean] isEnabled
-  ///
-  /// Requires the [Luciq NDK package](https://pub.dev/packages/luciq_flutter_ndk to be added to the project for this to work.
-  ///
-  /// This method is Android-only and has no effect on iOS.
-  static Future<void> setNDKEnabled(bool isEnabled) async {
-    return _host.setNDKEnabled(isEnabled);
-  }
 }

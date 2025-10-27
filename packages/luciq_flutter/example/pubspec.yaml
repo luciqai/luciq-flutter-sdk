@@ -29,8 +29,6 @@ dependencies:
   luciq_http_client:
     path: ../../luciq_http_client
   file_picker: <10.0.0
-  luciq_flutter_ndk:
-    path: ../../luciq_flutter_ndk
   provider:
   video_player:
 dev_dependencies:

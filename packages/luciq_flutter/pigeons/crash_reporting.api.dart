@@ -12,5 +12,4 @@ abstract class CrashReportingHostApi {
     String? fingerprint,
     String nonFatalExceptionLevel,
   );
-  void setNDKEnabled(bool isEnabled);
 }

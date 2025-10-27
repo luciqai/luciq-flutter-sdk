@@ -46,8 +46,4 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
                                              userAttributes:userAttributes];
 
 }
-
-- (void)setNDKEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-//    This is auto-generated with pigeon, there is no NDK crashes for iOS.
-}
 @end

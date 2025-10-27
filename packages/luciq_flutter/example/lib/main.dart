@@ -26,6 +26,8 @@ part 'src/components/fatal_crashes_content.dart';
 part 'src/components/flows_content.dart';
 part 'src/components/network_content.dart';
 part 'src/components/non_fatal_crashes_content.dart';
+part 'src/components/ndk_crashes_content.dart';
+
 part 'src/components/page.dart';
 part 'src/screens/apm_page.dart';
 part 'src/screens/bug_reporting.dart';
@@ -50,6 +52,8 @@ void main() {
 
       BugReporting.setProactiveReportingConfigurations(
           const ProactiveReportingConfigs());
+
+      CrashReporting.setNDKEnabled(true);
 
       Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
       FlutterError.onError = (FlutterErrorDetails details) {

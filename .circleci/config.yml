@@ -2,8 +2,9 @@ version: 2.1
 
 orbs:
   android: circleci/android@2.5.0
-  flutter: circleci/flutter@2.0.4
+  flutter: circleci/flutter@2.1.0
   node: circleci/node@5.2.0
+  ios: circleci/macos@2.5.4
   advanced-checkout: vsco/advanced-checkout@1.1.0
 
 executors:
@@ -21,23 +22,24 @@ commands:
       use_melos:
         type: boolean
         default: true
+      remove_patrol:
+        type: boolean
+        default: false
       working_dir:
         type: string
         default: "~/project"
     steps:
-      - flutter/install_sdk_and_pub:
+      - flutter/install_sdk:
           version: <<parameters.version>>
-          app-dir: <<parameters.working_dir>>
       - install_flutter_and_dart_packages:
           generate_pigeons: true
           use_melos: <<parameters.use_melos>>
+          remove_patrol: <<parameters.remove_patrol>>
           working_dir: <<parameters.working_dir>>
   setup_ios:
     steps:
       # Flutter doesn't support Apple Silicon yet, so we need to install Rosetta use Flutter on M1 machines.
-      - run:
-          name: Install Rosetta
-          command: softwareupdate --install-rosetta --agree-to-license
+      - ios/install-rosetta
       - setup_flutter
       - run:
           name: Install CocoaPods
@@ -46,6 +48,17 @@ commands:
           name: Install Pods
           working_directory: packages/luciq_flutter/example/ios
           command: pod install --repo-update
+  setup_patrol:
+    steps:
+      - run:
+          name: Add pub-cache bin to PATH
+          command: |
+            echo 'export PATH="$PATH:$HOME/.pub-cache/bin"' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Install patrol
+          command: dart pub global activate patrol_cli 3.5.0
+
   setup_captain:
     parameters:
       platform:
@@ -101,12 +114,26 @@ commands:
     parameters:
       generate_pigeons:
         type: boolean
+      remove_patrol:
+        type: boolean
+        default: false
       use_melos:
         type: boolean
         default: true
       working_dir:
         type: string
     steps:
+      - when:
+          condition:
+            equal:
+              - <<parameters.remove_patrol>>
+              - true
+          steps:
+            - run:
+                name: remove Patrol
+                command: cd example && dart pub remove patrol
+      - flutter/install_pub:
+          app-dir: <<parameters.working_dir>>
       - when:
           condition:
             equal:
@@ -210,6 +237,7 @@ jobs:
       - setup_flutter:
           version: <<parameters.version>>
           use_melos: false
+          remove_patrol: true
           working_dir: <<parameters.app-dir>>
       - run: flutter test
 
@@ -225,26 +253,31 @@ jobs:
           working-directory: packages/luciq_flutter/example/android
           test-command: ./gradlew test
 
-  e2e_android_captain:
+  e2e_android_patrol:
     executor:
       name: android/android-machine
       resource-class: xlarge
       tag: 2024.01.1
     steps:
       - advanced-checkout/shallow-checkout
-      - setup_captain:
-          platform: android
       - setup_flutter
-      - android/start-emulator-and-run-tests:
-          run-tests-working-directory: e2e
-          additional-avd-args: --device 25
+      - setup_patrol
+      - android/create-avd:
+          avd-name: 'test'
+          install: true
           system-image: system-images;android-33;default;x86_64
-          post-emulator-launch-assemble-command: cd packages/luciq_flutter/example && flutter build apk --release
-          test-command: dotnet test
+      - android/start-emulator:
+          avd-name: 'test'
+          post-emulator-launch-assemble-command: ""
+      - run:
+          name: Run E2E Tests
+          no_output_timeout: 30m
+          working_directory: packages/luciq_flutter/example
+          command: patrol test -t integration_test/
 
   test_ios:
     macos:
-      xcode: 15.2.0
+      xcode: 16.0.0
     resource_class: macos.m1.medium.gen1
     environment:
       luciq_SOURCEMAPS_UPLOAD_DISABLE: true
@@ -260,28 +293,34 @@ jobs:
                 -scheme Runner \
                 -resultBundlePath coverage/result.xcresult \
                 -sdk iphonesimulator \
-                -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.2' \
+                -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.0' \
+                -skip-testing:RunnerUITests \
                 test | xcpretty
 
-  e2e_ios_captain:
+  e2e_ios_patrol:
     macos:
-      xcode: 15.2.0
+      xcode: 16.0.0
     resource_class: macos.m1.medium.gen1
     steps:
       - advanced-checkout/shallow-checkout
-      - setup_captain:
-          platform: ios
       - setup_ios
+      - setup_patrol
+      - ios/preboot-simulator:
+          version: "18.0"
+          device: "iPhone 16 Pro"
+      - ios/wait-until-simulator-booted
+      - ios/wait-until-simulator-booted
       - run:
-          name: Build Example App
-          working_directory: packages/luciq_flutter/example
-          command: flutter build ios --simulator
+          name: sleep 10 seconds
+          command: sleep 10
+      - run:
+          name: sleep 10 seconds
+          command: sleep 10
       - run:
           name: Run E2E Tests
-          no_output_timeout: 20m
-          working_directory: e2e
-          command: dotnet test
-
+          no_output_timeout: 30m
+          working_directory: packages/luciq_flutter/example
+          command: patrol test -t integration_test/ --verbose --device "iPhone 16 Pro"
   format_flutter:
     executor: flutter-executor
     steps:
@@ -418,6 +457,32 @@ jobs:
           name: Publish Package
           working_directory: packages/luciq_cli
           command: Escape flutter publish-dependancy
+  release_flutter_ndk_plugin:
+    macos:
+      xcode: 15.2.0
+    resource_class: macos.m1.medium.gen1
+    working_directory: "~/project"
+    steps:
+      - advanced-checkout/shallow-checkout:
+          path: ~/project
+      # Flutter doesn't support Apple Silicon yet, so we need to install Rosetta use Flutter on M1 machines.
+      - run:
+          name: Install Rosetta
+          command: softwareupdate --install-rosetta --agree-to-license
+      - setup_flutter
+      - run:
+          name: Clone Escape
+          command: git clone -b master2 git@github.com:instabug/Escape.git
+      - run:
+          name: Build Escape
+          working_directory: Escape
+          command: |
+            swift build -c release
+            cp -f .build/release/Escape /usr/local/bin/escape
+      - run:
+          name: Publish Package
+          working_directory: packages/luciq_flutter_ndk
+          command: Escape flutter publish-dependancy
 
   release_luciq_flutter:
     macos:
@@ -460,9 +525,9 @@ workflows:
           name: test_flutter-2.10.5
           version: 2.10.5
           app-dir: "~/project/packages/luciq_flutter/"
-      - e2e_android_captain
+      - e2e_android_patrol
       - test_ios
-      - e2e_ios_captain
+      - e2e_ios_patrol
       - format_flutter
       - lint_flutter:
           requires:
@@ -520,9 +585,20 @@ workflows:
           filters:
             branches:
               only: master
+      - hold_release_flutter_ndk_plugin:
+          type: approval
+          filters:
+            branches:
+              only: master
       - release_cli_plugin:
           requires:
             - hold_release_cli_plugin
+          filters:
+            branches:
+              only: master
+      - release_flutter_ndk_plugin:
+          requires:
+            - hold_release_flutter_ndk_plugin
           filters:
             branches:
               only: master

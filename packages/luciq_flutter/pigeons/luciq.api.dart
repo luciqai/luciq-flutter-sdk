@@ -116,4 +116,5 @@ abstract class LuciqHostApi {
 
   void setTheme(Map<String, Object> themeConfig);
   void setFullscreen(bool isEnabled);
+  void setNetworkAutoMaskingEnabled(bool isEnabled);
 }

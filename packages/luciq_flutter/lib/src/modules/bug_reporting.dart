@@ -2,8 +2,8 @@
 
 import 'dart:async';
 
+import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/bug_reporting.api.g.dart';
-import 'package:luciq_flutter/src/modules/luciq.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:meta/meta.dart';
@@ -286,6 +286,18 @@ class BugReporting implements BugReportingFlutterApi {
       mandatory,
       checked,
       actionType?.toString(),
+    );
+  }
+
+  /// prompts end users to submit their feedback after our SDK automatically detects a frustrating experience.
+  /// [config] configuration of proActive  bug report.
+  static Future<void> setProactiveReportingConfigurations(
+    ProactiveReportingConfigs config,
+  ) async {
+    _host.setProactiveReportingConfigurations(
+      config.enabled,
+      config.gapBetweenModals,
+      config.modalDelayAfterDetection,
     );
   }
 }

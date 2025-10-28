@@ -61,6 +61,8 @@ void main() {
 
       CrashReporting.setNDKEnabled(true);
 
+      CrashReporting.setNDKEnabled(true);
+
       Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
       FlutterError.onError = (FlutterErrorDetails details) {
         Zone.current.handleUncaughtError(details.exception, details.stack!);

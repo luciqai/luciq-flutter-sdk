@@ -278,23 +278,32 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         Luciq.resetTags();
     }
 
+    // @Override
+    // public void getTags(LuciqPigeon.Result<List<String>> result) {
+    //     ThreadManager.runOnBackground(
+    //             new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     final List<String> tags = Luciq.getTags();
+
+    //                     ThreadManager.runOnMainThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             result.success(tags);
+    //                         }
+    //                     });
+    //                 }
+    //             }
+    //     );
+    // }
+
+
     @Override
     public void getTags(LuciqPigeon.Result<List<String>> result) {
-        ThreadManager.runOnBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        final List<String> tags = Luciq.getTags();
-
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                result.success(tags);
-                            }
-                        });
-                    }
-                }
-        );
+        ThreadManager.runOnBackground (() -> {
+            final List<String> tags = Luciq.getTags();
+            ThreadManager.runOnMainThread (() -> result.success(tags));
+        });
     }
 
 
@@ -304,7 +313,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         try {
             List<LuciqFeatureFlag> features = new ArrayList<>();
             for (Map.Entry<String, String> entry : featureFlags.entrySet()) {
-                features.add(new LuciqFeatureFlag(entry.getKey(), entry.getValue().isEmpty() ? null : entry.getValue()));
+                features.add(new Lu ciqFeatureFlag(entry.getKey(), entry.getValue().isEmpty() ? null : entry.getValue()));
             }
             Luciq.addFeatureFlags(features);
         } catch (Exception e) {
@@ -341,43 +350,64 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     }
 
 
+    // @Override
+    // public void getUserAttributeForKey(@NonNull String key, LuciqPigeon.Result<String> result) {
+    //     ThreadManager.runOnBackground(
+    //             new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                    
+
+    //                     ThreadManager.runOnMainThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             result.success(attribute);
+    //                         }
+    //                     });
+    //                 }
+    //             }
+    //     );
+    // }
+    
     @Override
     public void getUserAttributeForKey(@NonNull String key, LuciqPigeon.Result<String> result) {
-        ThreadManager.runOnBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        final String attribute = Luciq.getUserAttribute(key);
-
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                result.success(attribute);
-                            }
-                        });
-                    }
-                }
-        );
+        ThreadManager.runOnBackground(() -> {
+            final String attribute = Luciq.getUserAttribute(key);
+            ThreadManager.runOnMainThread(() -> result.success(attribute));
+        })
     }
+
+
+
+    // @Override
+    // public void getUserAttributes(LuciqPigeon.Result<Map<String, String>> result) {
+    //     ThreadManager.runOnBackground(
+    //             new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     final Map<String, String> attributes = Luciq.getAllUserAttributes();
+
+    //                     ThreadManager.runOnMainThread(new Runnable() {
+    //                         @Override
+    //                         public void run() {
+    //                             result.success(attributes);
+    //                         }
+    //                     });
+    //                 }
+    //             }
+    //     );
+    // }
 
     @Override
     public void getUserAttributes(LuciqPigeon.Result<Map<String, String>> result) {
-        ThreadManager.runOnBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        final Map<String, String> attributes = Luciq.getAllUserAttributes();
-
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                result.success(attributes);
-                            }
-                        });
-                    }
-                }
-        );
+        ThreadManager.runOnBackground(() -> {
+            final Map<String, String> attributes = Luciq.getAllUserAttributes();
+            ThreadManager.runOnMainThread(() ->  result.success(attributes));
+        } )
     }
+
+
+
 
     @Override
     public void setReproStepsConfig(@Nullable String bugMode, @Nullable String crashMode, @Nullable String sessionReplayMode) {
@@ -509,40 +539,69 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         }
     }
 
+    // @Override
+    // public void registerFeatureFlagChangeListener() {
+
+    //     try {
+//         InternalCore.INSTANCE._setFeaturesStateListener(new FeaturesStateListener() {
+//             @Override
+//             public void invoke(@NonNull CoreFeaturesState featuresState) {
+//                 ThreadManager.runOnMainThread(new Runnable() {
+//                     @Override
+//                     public void run() {
+//                         featureFlagsFlutterApi.onW3CFeatureFlagChange(featuresState.isW3CExternalTraceIdEnabled(),
+//                                 featuresState.isAttachingGeneratedHeaderEnabled(),
+//                                 featuresState.isAttachingCapturedHeaderEnabled(),
+//                                 new LuciqPigeon.FeatureFlagsFlutterApi.Reply<Void>() {
+//                                     @Override
+//                                     public void reply(Void reply) {
+
+//                                     }
+//                                 });
+
+//                         featureFlagsFlutterApi.onNetworkLogBodyMaxSizeChange(
+//                                 (long) featuresState.getNetworkLogCharLimit(),
+//                                 reply -> {}
+//                         );
+//                     }
+//                 });
+//             }
+
+//         });
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+
+    // }
+
+
     @Override
     public void registerFeatureFlagChangeListener() {
-
-        try {
+        try{
             InternalCore.INSTANCE._setFeaturesStateListener(new FeaturesStateListener() {
                 @Override
-                public void invoke(@NonNull CoreFeaturesState featuresState) {
-                    ThreadManager.runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            featureFlagsFlutterApi.onW3CFeatureFlagChange(featuresState.isW3CExternalTraceIdEnabled(),
+                public void invoke(@NonNull CoreFeaturesState featuresState){
+                    ThreadManager.runOnMainThread(() -> {
+                        featureFlagsFlutterApi.onW3CFeatureFlagChange(featuresState.isW3CExternalTraceIdEnabled(),
                                     featuresState.isAttachingGeneratedHeaderEnabled(),
-                                    featuresState.isAttachingCapturedHeaderEnabled(),
-                                    new LuciqPigeon.FeatureFlagsFlutterApi.Reply<Void>() {
-                                        @Override
-                                        public void reply(Void reply) {
-
-                                        }
-                                    });
-
-                            featureFlagsFlutterApi.onNetworkLogBodyMaxSizeChange(
-                                    (long) featuresState.getNetworkLogCharLimit(),
+                                    featuresState.isAttachingCapturedHeaderEnabled(),              
                                     reply -> {}
-                            );
-                        }
+                                );
+                        featureFlagsFlutterApi.onNetworkLogBodyMaxSizeChange(
+                        (long) featuresState.getNetworkLogCharLimit(),
+                         reply -> {}
+                        );
                     });
+
                 }
-
+            
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
+        }catch (Exception e){e.printStackTrace();}
     }
+
+
+
 
     @NonNull
     @Override
@@ -560,6 +619,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     public void willRedirectToStore() {
         Luciq.willRedirectToStore();
     }
+
+
 
     public static void setScreenshotCaptor(ScreenshotCaptor screenshotCaptor, InternalCore internalCore) {
         internalCore._setScreenshotCaptor(new ai.luciq.library.screenshot.ScreenshotCaptor() {
@@ -579,6 +640,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
             }
         });
     }
+
+
 
     @Override
     public void setNetworkLogBodyEnabled(@NonNull Boolean isEnabled) {
@@ -752,21 +815,32 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         }
     }
 
+    // @Override
+    // public void getNetworkBodyMaxSize(@NonNull LuciqPigeon.Result<Double> result) {
+    //     ThreadManager.runOnMainThread(
+    //         new Runnable() {
+    //             @Override
+    //             public void run() {
+    //                 try {
+    //                     double networkCharLimit = InternalCore.INSTANCE.get_networkLogCharLimit();
+    //                     result.success(networkCharLimit);
+    //                 } catch (Exception e) {
+    //                     e.printStackTrace();
+    //                 }
+    //             }
+    //         }
+    //     );
+    // }
+
+
     @Override
-    public void getNetworkBodyMaxSize(@NonNull LuciqPigeon.Result<Double> result) {
-        ThreadManager.runOnMainThread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        double networkCharLimit = InternalCore.INSTANCE.get_networkLogCharLimit();
-                        result.success(networkCharLimit);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        );
+    public void getNetworkBodyMaxSize(@NonNull LuciqPigeon.Result<Double> result){
+        ThreadManager.runOnMainThread(() -> {
+            try{
+                double networkCharLimit = InternalCore.INSTANCE.get_networkLogCharLimit();
+                result.success(networkCharLimit);
+            } catch (Exception e){e.printStackTrace();}
+        });
     }
     @Override
     public void setNetworkAutoMaskingEnabled(@NonNull Boolean isEnabled) {

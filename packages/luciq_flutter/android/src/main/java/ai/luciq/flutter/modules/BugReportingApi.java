@@ -129,46 +129,83 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
         BugReporting.setAttachmentTypesEnabled(screenshot, extraScreenshot, galleryImage, screenRecording);
     }
 
+    // @Override
+    // public void bindOnInvokeCallback() {
+    //     BugReporting.setOnInvokeCallback(new OnInvokeCallback() {
+    //         @Override
+    //         public void onInvoke() {
+    //             // The on invoke callback for Flutter needs to be run on the
+    //             // main thread, otherwise, it won't work and will break the
+    //             // Luciq.show API
+    //             ThreadManager.runOnMainThread(new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     flutterApi.onSdkInvoke(new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
+    //                         @Override
+    //                         public void reply(Void reply) {
+    //                         }
+    //                     });
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
     @Override
     public void bindOnInvokeCallback() {
-        BugReporting.setOnInvokeCallback(new OnInvokeCallback() {
-            @Override
+        BugReporting.setOnInvokeCallback(new OnInvokeCallback(){
             public void onInvoke() {
-                // The on invoke callback for Flutter needs to be run on the
-                // main thread, otherwise, it won't work and will break the
-                // Luciq.show API
-                ThreadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterApi.onSdkInvoke(new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
-                            @Override
+                 ThreadManager.runOnMainThread(()-> {
+                     flutterApi.onSdkInvoke(new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>(){
+                        @Override
                             public void reply(Void reply) {
                             }
-                        });
-                    }
-                });
+                     });
+                 });
             }
         });
     }
+
+
+    
+
+    // @Override
+    // public void bindOnDismissCallback() {
+    //     BugReporting.setOnDismissCallback(new OnSdkDismissCallback() {
+    //         @Override
+    //         public void call(DismissType dismissType, ReportType reportType) {
+    //             ThreadManager.runOnMainThread(new Runnable() {
+    //                 @Override
+    //                 public void run() {
+    //                     flutterApi.onSdkDismiss(dismissType.toString(), reportType.toString(), 
+    //                     new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
+    //                         @Override
+    //                         public void reply(Void reply) {
+    //                         }
+    //                     });
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
 
     @Override
     public void bindOnDismissCallback() {
         BugReporting.setOnDismissCallback(new OnSdkDismissCallback() {
             @Override
             public void call(DismissType dismissType, ReportType reportType) {
-                ThreadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterApi.onSdkDismiss(dismissType.toString(), reportType.toString(), new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
+                ThreadManager.runOnMainThread(() -> {
+                    flutterApi.onSdkDismiss(dismissType.toString(), reportType.toString(), 
+                    new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
                             @Override
                             public void reply(Void reply) {
-                            }
-                        });
-                    }
+                            }}
+                    );
                 });
             }
         });
     }
+
 
     @Override
     public void setDisclaimerText(@NonNull String text) {

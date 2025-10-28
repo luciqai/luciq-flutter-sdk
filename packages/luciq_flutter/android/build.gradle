@@ -1,5 +1,5 @@
 group 'ai.luciq.flutter'
-version '18.0.0'
+version '18.0.1'
 
 buildscript {
     repositories {
@@ -47,7 +47,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:18.0.0'
+    api 'ai.luciq.library:luciq:18.0.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

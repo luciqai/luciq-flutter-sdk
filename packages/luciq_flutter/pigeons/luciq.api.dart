@@ -50,8 +50,6 @@ abstract class LuciqHostApi {
     String? viewName,
   );
 
-  void setLocale(String locale);
-
   void setColorTheme(String theme);
 
   void setWelcomeMessageMode(String mode);
@@ -117,4 +115,6 @@ abstract class LuciqHostApi {
   void setTheme(Map<String, Object> themeConfig);
   void setFullscreen(bool isEnabled);
   void setNetworkAutoMaskingEnabled(bool isEnabled);
+
+  void setLocale(String locale);
 }

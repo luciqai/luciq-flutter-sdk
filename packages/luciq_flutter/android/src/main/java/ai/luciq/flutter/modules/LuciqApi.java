@@ -230,12 +230,6 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     }
 
     @Override
-    public void setLocale(@NonNull String locale) {
-        final LuciqLocale resolvedLocale = ArgsRegistry.locales.get(locale);
-        Luciq.setLocale(new Locale(resolvedLocale.getCode(), resolvedLocale.getCountry()));
-    }
-
-    @Override
     public void setColorTheme(@NonNull String theme) {
         LuciqColorTheme resolvedTheme = ArgsRegistry.colorThemes.get(theme);
         Luciq.setColorTheme(resolvedTheme);
@@ -777,6 +771,18 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 Luciq.setNetworkAutoMaskingState(Feature.State.DISABLED);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setLocale(@NonNull String locale) {
+        LuciqLocale resolvedLocale = ArgsRegistry.locales.get(locale);
+        String langCode = resolvedLocale.getCode();
+        String countryCode = resolvedLocale.getCountry();
+        if(countryCode.equals("")){
+            Luciq.setLocale(new Locale(langCode));
+        }else{
+            Luciq.setLocale(new Locale(langCode , countryCode));
         }
     }
 }

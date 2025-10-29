@@ -22,13 +22,13 @@ import static org.mockito.Mockito.when;
 import static io.mockk.MockKKt.every;
 import static io.mockk.MockKKt.mockkObject;
 
+import ai.luciq.library.internal.module.LuciqLocale;
 import io.mockk.*;
 
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
-import ai.luciq.apm.InternalAPM;
 import ai.luciq.bug.BugReporting;
 import ai.luciq.flutter.generated.LuciqPigeon;
 import ai.luciq.flutter.modules.LuciqApi;
@@ -47,20 +47,11 @@ import ai.luciq.library.ReproConfigurations;
 import ai.luciq.library.ReproMode;
 import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.CoreFeature;
-import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
-import ai.luciq.library.internal.crossplatform.InternalCore;
-import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
-import ai.luciq.library.internal.crossplatform.CoreFeature;
-import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
-import ai.luciq.library.internal.crossplatform.InternalCore;
-import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.InternalCore;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
 import ai.luciq.library.screenshot.ScreenshotCaptor;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
-import ai.luciq.survey.Surveys;
-import ai.luciq.survey.callbacks.OnShowCallback;
 
 import org.json.JSONObject;
 import org.junit.After;
@@ -83,20 +74,6 @@ import java.util.concurrent.Callable;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import kotlin.jvm.functions.Function1;
-
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.mockito.verification.VerificationMode;
-
-import kotlin.jvm.functions.Function1;
-
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.mockito.verification.VerificationMode;
-
-import android.graphics.Typeface;
 
 import android.graphics.Typeface;
 
@@ -269,15 +246,6 @@ public class LuciqApiTest {
         api.logOut();
 
         mLuciq.verify(Luciq::logoutUser);
-    }
-
-    @Test
-    public void testSetLocale() {
-        String locale = "LCQLocale.japanese";
-
-        api.setLocale(locale);
-
-        mLuciq.verify(() -> Luciq.setLocale(any(Locale.class)));
     }
 
     @Test
@@ -803,5 +771,23 @@ public class LuciqApiTest {
 
         api.setNetworkAutoMaskingEnabled(isEnabled);
         mLuciq.verify(() -> Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED));
+    }
+
+
+    @Test
+    public void testSetLocaleWithCountryCode(){
+        String locale = "LCQLocale.portuguesePortugal";
+        api.setLocale(locale);
+        LuciqLocale resolvedLocale = ArgsRegistry.locales.get(locale);
+        mLuciq.verify(() -> Luciq.setLocale(new Locale(resolvedLocale.getCode() , resolvedLocale.getCountry())));
+    }
+
+    @Test
+    public void testSetLocaleWithoutCountryCode(){
+        String locale = "LCQLocale.arabic";
+        api.setLocale(locale);
+        LuciqLocale resolvedLocale = ArgsRegistry.locales.get(locale);
+        mLuciq.verify(() -> Luciq.setLocale(new Locale(resolvedLocale.getCode())));
+        assertEquals("" , resolvedLocale.getCountry());
     }
 }

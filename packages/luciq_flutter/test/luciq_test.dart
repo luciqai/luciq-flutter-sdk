@@ -170,16 +170,6 @@ void main() {
     ).called(1);
   });
 
-  test('[setLocale] should call host method', () async {
-    const locale = LCQLocale.arabic;
-
-    await Luciq.setLocale(locale);
-
-    verify(
-      mHost.setLocale(locale.toString()),
-    ).called(1);
-  });
-
   test('[setColorTheme] should call host method', () async {
     const theme = ColorTheme.dark;
 
@@ -465,5 +455,16 @@ void main() {
     verify(
       mHost.setTheme(themeConfig.toMap()),
     ).called(1);
+  });
+
+  // static Future<void> setLocaleHabiba(LCQLocale locale) async {
+  //   return _host.setLocale(locale.toString());
+  // }
+  test('setLocale test', () async {
+    await Luciq.setLocaleHabiba(LCQLocale.arabic);
+    verify(mHost.setLocale(LCQLocale.arabic.toString())).called(1);
+
+    await Luciq.setLocaleHabiba(LCQLocale.portugueseBrazil);
+    verify(mHost.setLocale(LCQLocale.portugueseBrazil.toString())).called(1);
   });
 }

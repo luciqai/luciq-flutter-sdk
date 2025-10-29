@@ -234,13 +234,6 @@ class Luciq {
     return _host.logOut();
   }
 
-  /// Sets the SDK's [locale].
-  /// Use to change the SDK's UI to different language.
-  /// Defaults to the device's current locale.
-  static Future<void> setLocale(LCQLocale locale) async {
-    return _host.setLocale(locale.toString());
-  }
-
   /// Sets the color theme of the SDK's whole UI to the [colorTheme] given.
   /// It should be of type [ColorTheme].
   static Future<void> setColorTheme(ColorTheme colorTheme) async {
@@ -529,5 +522,9 @@ class Luciq {
     String? viewName,
   ) async {
     return _host.logUserSteps(gestureType.toString(), message, viewName);
+  }
+
+  static Future<void> setLocaleHabiba(LCQLocale locale) async {
+    return _host.setLocale(locale.toString());
   }
 }

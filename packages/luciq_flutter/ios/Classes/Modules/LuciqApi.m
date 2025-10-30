@@ -92,10 +92,6 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [Luciq logOut];
 }
 
-- (void)setLocaleLocale:(NSString *)locale error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQLocale resolvedLocale = (ArgsRegistry.locales[locale]).integerValue;
-    [Luciq setLocale:resolvedLocale];
-}
 
 - (void)setColorThemeTheme:(NSString *)theme error:(FlutterError *_Nullable *_Nonnull)error {
     LCQColorTheme resolvedTheme = (ArgsRegistry.colorThemes[theme]).integerValue;
@@ -616,5 +612,13 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 - (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
 }
+
+- (void)setLocaleLocale:(NSString *)locale error:(FlutterError *_Nullable *_Nonnull)error{
+   
+   LCQLocale resolvedLocale = (ArgsRegistry.locales[locale]).integerValue;
+   
+    [Luciq setLocale:resolvedLocale];
+}
+
 
 @end

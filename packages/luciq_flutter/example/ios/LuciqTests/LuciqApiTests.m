@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import <objc/runtime.h>
 #import "OCMock/OCMock.h"
 #import "LuciqApi.h"
 #import "LuciqSDK/LuciqSDK.h"
@@ -8,6 +9,8 @@
 #import "Flutter/Flutter.h"
 #import "luciq_flutter/LCQAPM+PrivateAPIs.h"
 #import "luciq_flutter/LCQNetworkLogger+CP.h"
+#import "ArgsRegistry.h"
+#import "HLuciq.h"
 
 @interface LuciqTests : XCTestCase
 
@@ -108,15 +111,6 @@
     [self.api logOutWithError:&error];
 
     OCMVerify([self.mLuciq logOut]);
-}
-
-- (void)testSetLocale {
-    NSString *locale = @"LCQLocale.japanese";
-    FlutterError *error;
-
-    [self.api setLocaleLocale:locale error:&error];
-
-    OCMVerify([(Class) self.mLuciq setLocale:LCQLocaleJapanese]);
 }
 
 - (void)testSetColorTheme {
@@ -672,6 +666,44 @@
     [self.api setNetworkAutoMaskingEnabledIsEnabled:isEnabled error:&error];
 
     OCMVerify([self.mNetworkLogger setAutoMaskingEnabled:YES]);
+}
+
+
+//-(void)testSetLocale{
+//    
+//    NSString *locale = @"LCQLocale.danish";
+//    FlutterError *error;
+//    
+//    [HLuciq resetTracking];
+//    [HLuciq enableSwizzling];
+//    
+//    LCQLocale expectedLocale = (ArgsRegistry.locales[locale]).integerValue;
+//    
+//    [self.api setLocaleLocale:locale error:&error];
+//    
+//    // Verify using HLuciq's tracking
+//    XCTAssertTrue(HLuciq.setLocaleCalled, @"setLocale should have been called");
+//    XCTAssertEqual(HLuciq.lastLocaleCalled, expectedLocale, @"setLocale should have been called with correct locale");
+//    
+//    // Disable swizzling to restore original behavior
+//    [HLuciq disableSwizzling];
+//    
+//    XCTAssertNil(error, @"Error should be nil");
+//}
+
+
+- (void)testSetLocale {
+    NSString *locale = @"LCQLocale.danish";
+    FlutterError *error;
+    
+    [self.api setLocaleLocale:locale error:&error];
+   
+    LCQLocale expectedLocale = (ArgsRegistry.locales[locale]).integerValue;
+
+    
+    OCMVerify([(Class)self.mLuciq setLocale:expectedLocale]);
+    
+
 }
 
 @end

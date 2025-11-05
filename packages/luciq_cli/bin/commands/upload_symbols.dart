@@ -29,18 +29,18 @@ class UploadSymbolsCommand {
   static const String uploadUrl =
       'https://api.instabug.com/api/web/public/flutter-symbol-files';
   static const List<String> validPlatforms = ['android', 'ios'];
-  
+
   // Helper methods for conditional logging
   static void _logVerbose(bool verbose, String message) {
     if (verbose) {
       stdout.writeln(message);
     }
   }
-  
+
   static void _logError(String message) {
     stderr.writeln(message);
   }
-  
+
   static void _logInfo(String message) {
     stdout.writeln(message);
   }
@@ -52,27 +52,31 @@ class UploadSymbolsCommand {
         'symbols-path',
         abbr: 's',
         help:
-        'Path to the symbols directory (optional - searches current directory recursively if not provided)',
-      )..addOption(
+            'Path to the symbols directory (optional - searches current directory recursively if not provided)',
+      )
+      ..addOption(
         'platform',
         abbr: 'p',
         help:
-        'Platform: android or ios (optional - auto-detected from filenames if not provided)',
+            'Platform: android or ios (optional - auto-detected from filenames if not provided)',
         allowed: validPlatforms,
-      )..addOption(
+      )
+      ..addOption(
         'api_key',
-        help: 'Your API key (or set LUCIQ_API_KEY/INSTABUG_API_KEY env variable)',
-      )..addOption(
+        help:
+            'Your API key (or set LUCIQ_API_KEY/INSTABUG_API_KEY env variable)',
+      )
+      ..addOption(
         'token',
         abbr: 't',
         help:
-        'Your App Token (or set LUCIQ_APP_TOKEN/INSTABUG_APP_TOKEN env variable)',
+            'Your App Token (or set LUCIQ_APP_TOKEN/INSTABUG_APP_TOKEN env variable)',
       )
       ..addFlag(
         'enable-native-sourcemaps',
         defaultsTo: false,
         help:
-        'Enable native sourcemaps upload (Android mapping.txt and iOS DWARF files)',
+            'Enable native sourcemaps upload (Android mapping.txt and iOS DWARF files)',
       )
       ..addFlag(
         'verbose-logs',
@@ -81,11 +85,13 @@ class UploadSymbolsCommand {
       )
       ..addOption(
         'version-name',
-        help: 'App version name (e.g., "1.0.0"). If not provided, reads from pubspec.yaml',
+        help:
+            'App version name (e.g., "1.0.0"). If not provided, reads from pubspec.yaml',
       )
       ..addOption(
         'version-number',
-        help: 'App version number/code (e.g., "1"). If not provided, reads from pubspec.yaml',
+        help:
+            'App version number/code (e.g., "1"). If not provided, reads from pubspec.yaml',
       );
 
     return parser;
@@ -112,7 +118,6 @@ class UploadSymbolsCommand {
       final projectPath = Directory.current.path;
       await _verifyFlutterProject(projectPath);
 
-
       // Get upload configs with fallback support
       final applicationToken = await _getApplicationToken(
         projectPath,
@@ -129,13 +134,15 @@ class UploadSymbolsCommand {
       // Get version - use provided values or read from pubspec.yaml
       final String versionName;
       final String versionNumber;
-      
+
       if (options.versionName != null && options.versionName!.isNotEmpty) {
         versionName = options.versionName!;
         versionNumber = options.versionNumber ?? '';
-        _logVerbose(options.verboseLogs, 'Using provided version name: $versionName');
+        _logVerbose(
+            options.verboseLogs, 'Using provided version name: $versionName');
         if (versionNumber.isNotEmpty) {
-          _logVerbose(options.verboseLogs, 'Using provided version number: $versionNumber');
+          _logVerbose(options.verboseLogs,
+              'Using provided version number: $versionNumber');
         }
       } else {
         // Read version from pubspec.yaml
@@ -146,10 +153,12 @@ class UploadSymbolsCommand {
         } else {
           versionNumber = options.versionNumber ?? '';
         }
-        _logVerbose(options.verboseLogs, 'App version name (from pubspec.yaml): $versionName');
-        _logVerbose(options.verboseLogs, 'App version number (from pubspec.yaml): $versionNumber');
+        _logVerbose(options.verboseLogs,
+            'App version name (from pubspec.yaml): $versionName');
+        _logVerbose(options.verboseLogs,
+            'App version number (from pubspec.yaml): $versionNumber');
       }
-      
+
       _logVerbose(options.verboseLogs, '🦋 Luciq: Uploading symbol files');
 
       // Group symbol files by platform based on filename
@@ -162,12 +171,15 @@ class UploadSymbolsCommand {
             ? options.symbolsPath!
             : path.join(projectPath, options.symbolsPath!);
         _logVerbose(options.verboseLogs, 'Symbols path: $basePath');
-        platformGroups = await _groupFilesByPlatform(basePath, options.verboseLogs);
+        platformGroups =
+            await _groupFilesByPlatform(basePath, options.verboseLogs);
       } else {
         // Search current directory recursively for symbol files
         basePath = projectPath;
-        _logVerbose(options.verboseLogs, 'Searching for symbol files in current directory...');
-        platformGroups = await _findSymbolFilesRecursively(projectPath, options.verboseLogs);
+        _logVerbose(options.verboseLogs,
+            'Searching for symbol files in current directory...');
+        platformGroups =
+            await _findSymbolFilesRecursively(projectPath, options.verboseLogs);
       }
 
       if (platformGroups.isEmpty) {
@@ -197,9 +209,8 @@ class UploadSymbolsCommand {
 
           try {
             // Upload symbols
-            await _uploadSymbols(
-                zipFile, applicationToken, apiKey, platform, versionName,
-                versionNumber, options.verboseLogs);
+            await _uploadSymbols(zipFile, applicationToken, apiKey, platform,
+                versionName, versionNumber, options.verboseLogs);
             uploadedPlatforms.add(platform);
             _logInfo('✅ $platform symbols uploaded successfully');
           } finally {
@@ -214,17 +225,19 @@ class UploadSymbolsCommand {
       }
 
       if (uploadedPlatforms.isNotEmpty) {
-        _logInfo('✅ Successfully uploaded symbol files for platform(s): ${uploadedPlatforms.join(', ')}');
+        _logInfo(
+            '✅ Successfully uploaded symbol files for platform(s): ${uploadedPlatforms.join(', ')}');
       }
 
       if (failedPlatforms.isNotEmpty) {
-        _logError('⚠️  Failed to upload symbol files for platform(s): ${failedPlatforms.join(', ')}');
+        _logError(
+            '⚠️  Failed to upload symbol files for platform(s): ${failedPlatforms.join(', ')}');
       }
 
       // Handle native sourcemaps if enabled (continue on failures)
       if (options.enableNativeSourcemaps) {
-        await _uploadNativeSourcemaps(
-            projectPath, applicationToken, versionName, versionNumber, options.verboseLogs);
+        await _uploadNativeSourcemaps(projectPath, applicationToken,
+            versionName, versionNumber, options.verboseLogs);
       }
 
       // Exit with error only if all tasks failed
@@ -259,10 +272,8 @@ class UploadSymbolsCommand {
     }
   }
 
-
-  static String _getVariableWithFallback(String primaryName,
-      String fallbackName,
-      String? optionValue,
+  static String _getVariableWithFallback(
+      String primaryName, String fallbackName, String? optionValue,
       {bool verbose = false}) {
     // Use option value if provided
     if (optionValue != null && optionValue.isNotEmpty) {
@@ -285,25 +296,25 @@ class UploadSymbolsCommand {
 
     // Try local.properties file
     final projectPath = Directory.current.path;
-    final localPropertiesFile = File(
-        path.join(projectPath, 'local.properties'));
+    final localPropertiesFile =
+        File(path.join(projectPath, 'local.properties'));
     if (localPropertiesFile.existsSync()) {
       final properties = localPropertiesFile.readAsStringSync();
       final lines = properties.split('\n');
       for (final line in lines) {
-        if (line
-            .trim()
-            .isEmpty || line.trim().startsWith('#')) continue;
+        if (line.trim().isEmpty || line.trim().startsWith('#')) continue;
         final parts = line.split('=');
         if (parts.length == 2) {
           final key = parts[0].trim();
           final value = parts[1].trim();
           if (key == primaryName) {
-            _logVerbose(verbose, 'Luciq: Using $primaryName from local.properties');
+            _logVerbose(
+                verbose, 'Luciq: Using $primaryName from local.properties');
             return value;
           }
           if (key == fallbackName) {
-            _logVerbose(verbose, 'Luciq: Using $fallbackName from local.properties');
+            _logVerbose(
+                verbose, 'Luciq: Using $fallbackName from local.properties');
             return value;
           }
         }
@@ -316,8 +327,8 @@ class UploadSymbolsCommand {
   }
 
   /// Finds application token using the same logic as find-token.sh
-  static Future<String> _getApplicationToken(String projectPath,
-      String? providedToken, bool verbose) async {
+  static Future<String> _getApplicationToken(
+      String projectPath, String? providedToken, bool verbose) async {
     // If token is provided as option, use it
     if (providedToken != null && providedToken.isNotEmpty) {
       _logVerbose(verbose, 'Luciq: Using token from command line option');
@@ -374,7 +385,7 @@ class UploadSymbolsCommand {
 
     throw Exception(
       'Could not find Luciq app token. Please provide it via --token option, '
-          'LUCIQ_APP_TOKEN/INSTABUG_APP_TOKEN environment variable, or in source files.',
+      'LUCIQ_APP_TOKEN/INSTABUG_APP_TOKEN environment variable, or in source files.',
     );
   }
 
@@ -517,7 +528,6 @@ class UploadSymbolsCommand {
     throw Exception('Version not found in pubspec.yaml');
   }
 
-
   /// Groups symbol files by platform based on filename containing ".android" or ".ios"
   static Future<Map<String, List<File>>> _groupFilesByPlatform(
       String symbolsPath, bool verbose) async {
@@ -593,15 +603,11 @@ class UploadSymbolsCommand {
     return platformGroups;
   }
 
-
   /// Creates a zip file for a specific platform's symbol files
-  static Future<File> _createZipFileForPlatform(String basePath,
-      List<File> files,
-      String platform, bool verbose) async {
+  static Future<File> _createZipFileForPlatform(
+      String basePath, List<File> files, String platform, bool verbose) async {
     final zipEncoder = ZipEncoder();
-    final timestamp = DateTime
-        .now()
-        .millisecondsSinceEpoch;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
     final zipFileName = 'symbols_${platform}_$timestamp.zip';
     final zipFile = File(path.join(Directory.systemTemp.path, zipFileName));
 
@@ -627,9 +633,9 @@ class UploadSymbolsCommand {
     return zipFile;
   }
 
-
   /// Uploads native sourcemaps (Android mapping.txt and iOS DWARF files)
-  static Future<void> _uploadNativeSourcemaps(String projectPath,
+  static Future<void> _uploadNativeSourcemaps(
+      String projectPath,
       String applicationToken,
       String versionName,
       String versionNumber,
@@ -654,9 +660,9 @@ class UploadSymbolsCommand {
     }
   }
 
-
   /// Finds and uploads Android mapping.txt file
-  static Future<void> _uploadAndroidMappingFile(String projectPath,
+  static Future<void> _uploadAndroidMappingFile(
+      String projectPath,
       String applicationToken,
       String versionName,
       String versionNumber,
@@ -664,7 +670,8 @@ class UploadSymbolsCommand {
     // Look for build/*/outputs/mapping/release/mapping.txt
     final buildDir = Directory(path.join(projectPath, 'build'));
     if (!await buildDir.exists()) {
-      _logVerbose(verbose, '⚠️  Android build directory not found, skipping mapping.txt upload');
+      _logVerbose(verbose,
+          '⚠️  Android build directory not found, skipping mapping.txt upload');
       return;
     }
 
@@ -683,26 +690,21 @@ class UploadSymbolsCommand {
     }
 
     if (mappingFile == null) {
-      _logVerbose(verbose, '⚠️  Android mapping.txt not found, skipping upload');
+      _logVerbose(
+          verbose, '⚠️  Android mapping.txt not found, skipping upload');
       return;
     }
 
     _logVerbose(verbose, '📦 Found Android mapping.txt: ${mappingFile.path}');
 
     // Upload to native sourcemaps endpoint
-    await _uploadNativeSourcemapFile(
-        mappingFile,
-        applicationToken,
-        'android',
-        versionName,
-        versionNumber,
-        verbose
-    );
+    await _uploadNativeSourcemapFile(mappingFile, applicationToken, 'android',
+        versionName, versionNumber, verbose);
   }
 
   /// Finds and uploads iOS DWARF files
-  static Future<void> _uploadIosDwarfFiles(String projectPath,
-      String applicationToken, bool verbose) async {
+  static Future<void> _uploadIosDwarfFiles(
+      String projectPath, String applicationToken, bool verbose) async {
     // Look for build/ios/archive/*/dSYMs/*.framework.dSYM/Contents/Resources/DWARF/
     // or ios/build/archive/*/dSYMs/*.framework.dSYM/Contents/Resources/DWARF/
     final possibleBasePaths = [
@@ -722,8 +724,8 @@ class UploadSymbolsCommand {
       await for (final entity in archiveDir.list(recursive: true)) {
         if (entity is Directory && entity.path.endsWith('DWARF')) {
           // Check if path matches pattern: */dSYMs/*.framework.dSYM/Contents/Resources/DWARF/
-          final relativePath = path.relative(
-              entity.path, from: archiveDir.path);
+          final relativePath =
+              path.relative(entity.path, from: archiveDir.path);
           if (relativePath.contains('dSYMs') &&
               relativePath.contains('.framework.dSYM') &&
               relativePath.endsWith('DWARF')) {
@@ -739,7 +741,8 @@ class UploadSymbolsCommand {
     }
 
     if (dwarfDir == null) {
-      _logVerbose(verbose, '⚠️  iOS DWARF directory not found, skipping upload');
+      _logVerbose(
+          verbose, '⚠️  iOS DWARF directory not found, skipping upload');
       return;
     }
 
@@ -754,18 +757,21 @@ class UploadSymbolsCommand {
     }
 
     if (dwarfFiles.isEmpty) {
-      _logVerbose(verbose, '⚠️  No files found in DWARF directory, skipping upload');
+      _logVerbose(
+          verbose, '⚠️  No files found in DWARF directory, skipping upload');
       return;
     }
 
     _logVerbose(verbose, '📦 Found ${dwarfFiles.length} DWARF file(s)');
 
     // Create zip file with all DWARF files
-    final zipFile = await _createDwarfZipFile(dwarfDir.path, dwarfFiles, verbose);
+    final zipFile =
+        await _createDwarfZipFile(dwarfDir.path, dwarfFiles, verbose);
 
     try {
       // Upload to native sourcemaps endpoint
-      await _uploadNativeSourcemapZipFile(zipFile, applicationToken, 'iOS', verbose);
+      await _uploadNativeSourcemapZipFile(
+          zipFile, applicationToken, 'iOS', verbose);
       _logInfo('✅ iOS DWARF files uploaded successfully');
     } finally {
       // Clean up zip file
@@ -774,12 +780,10 @@ class UploadSymbolsCommand {
   }
 
   /// Creates a zip file from DWARF directory files
-  static Future<File> _createDwarfZipFile(String dwarfDirPath,
-      List<File> dwarfFiles, bool verbose) async {
+  static Future<File> _createDwarfZipFile(
+      String dwarfDirPath, List<File> dwarfFiles, bool verbose) async {
     final zipEncoder = ZipEncoder();
-    final timestamp = DateTime
-        .now()
-        .millisecondsSinceEpoch;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
     final zipFileName = 'dwarf_ios_$timestamp.zip';
     final zipFile = File(path.join(Directory.systemTemp.path, zipFileName));
 
@@ -806,7 +810,8 @@ class UploadSymbolsCommand {
   }
 
   /// Uploads a single file (mapping.txt) to native sourcemaps endpoint
-  static Future<void> _uploadNativeSourcemapFile(File file,
+  static Future<void> _uploadNativeSourcemapFile(
+      File file,
       String applicationToken,
       String os,
       String versionName,
@@ -814,7 +819,8 @@ class UploadSymbolsCommand {
       bool verbose) async {
     const uploadUrl = 'https://api.instabug.com/api/sdk/v3/symbols_files';
 
-    _logVerbose(verbose, 'Luciq: Uploading $os mapping file to native sourcemaps endpoint');
+    _logVerbose(verbose,
+        'Luciq: Uploading $os mapping file to native sourcemaps endpoint');
 
     // Create multipart request
     final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
@@ -823,16 +829,16 @@ class UploadSymbolsCommand {
     request.fields['os'] = os;
     request.fields['application_token'] = applicationToken;
     request.fields['app_version'] =
-    '{"code":"$versionNumber","name":"$versionNumber"}';
+        '{"code":"$versionNumber","name":"$versionNumber"}';
 
     // Add the file
     final fileStream = http.ByteStream(file.openRead());
     final fileLength = await file.length();
     final multipartFile = http.MultipartFile(
-    'symbols_file',
-    fileStream,
-    fileLength,
-    filename: file.path.split('/').last,
+      'symbols_file',
+      fileStream,
+      fileLength,
+      filename: file.path.split('/').last,
     );
     request.files.add(multipartFile);
 
@@ -843,24 +849,23 @@ class UploadSymbolsCommand {
     _logVerbose(verbose, 'Luciq: Response Message: ${response.reasonPhrase}');
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-     _logError('[Luciq-CLI] Error: Failed to upload native sourcemap file');
-     _logVerbose(verbose, 'Response: $responseBody');
-     throw Exception('Upload failed with status ${response.statusCode}');
+      _logError('[Luciq-CLI] Error: Failed to upload native sourcemap file');
+      _logVerbose(verbose, 'Response: $responseBody');
+      throw Exception('Upload failed with status ${response.statusCode}');
     }
 
     if (response.statusCode == 200) {
-     _logInfo('✅ Successfully uploaded $os native sourcemap file');
+      _logInfo('✅ Successfully uploaded $os native sourcemap file');
     }
   }
 
   /// Uploads a zip file (DWARF files) to native sourcemaps endpoint
-  static Future<void> _uploadNativeSourcemapZipFile(File zipFile,
-      String applicationToken,
-      String os,
-      bool verbose) async {
+  static Future<void> _uploadNativeSourcemapZipFile(
+      File zipFile, String applicationToken, String os, bool verbose) async {
     const uploadUrl = 'https://api.instabug.com/api/sdk/v3/symbols_files';
 
-    _logVerbose(verbose, 'Luciq: Uploading $os DWARF zip file to native sourcemaps endpoint');
+    _logVerbose(verbose,
+        'Luciq: Uploading $os DWARF zip file to native sourcemaps endpoint');
 
     // Create multipart request
     final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
@@ -876,9 +881,7 @@ class UploadSymbolsCommand {
       'symbols_file',
       fileStream,
       fileLength,
-      filename: zipFile.path
-          .split('/')
-          .last,
+      filename: zipFile.path.split('/').last,
     );
     request.files.add(multipartFile);
 
@@ -889,7 +892,8 @@ class UploadSymbolsCommand {
     _logVerbose(verbose, 'Luciq: Response Message: ${response.reasonPhrase}');
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      _logError('[Luciq-CLI] Error: Failed to upload native sourcemap zip file');
+      _logError(
+          '[Luciq-CLI] Error: Failed to upload native sourcemap zip file');
       _logVerbose(verbose, 'Response: $responseBody');
       throw Exception('Upload failed with status ${response.statusCode}');
     }
@@ -899,7 +903,8 @@ class UploadSymbolsCommand {
     }
   }
 
-  static Future<void> _uploadSymbols(File zipFile,
+  static Future<void> _uploadSymbols(
+      File zipFile,
       String applicationToken,
       String apiKey,
       String platform,
@@ -921,7 +926,6 @@ class UploadSymbolsCommand {
     request.fields['app_version_name'] = versionName;
     request.fields['app_version_code'] = versionNumber;
 
-
     // Add the zip file
     final fileStream = http.ByteStream(zipFile.openRead());
     final fileLength = await zipFile.length();
@@ -929,9 +933,7 @@ class UploadSymbolsCommand {
       'file',
       fileStream,
       fileLength,
-      filename: zipFile.path
-          .split('/')
-          .last,
+      filename: zipFile.path.split('/').last,
     );
     request.files.add(multipartFile);
 
@@ -952,4 +954,3 @@ class UploadSymbolsCommand {
     }
   }
 }
-

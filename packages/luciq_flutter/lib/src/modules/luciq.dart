@@ -22,6 +22,7 @@ import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
+import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart' show LuciqScreenRenderManager;
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_widget_binding_observer.dart';
 import 'package:luciq_flutter/src/utils/user_steps/user_step_details.dart';
 import 'package:meta/meta.dart';
@@ -148,9 +149,11 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
 
   @override
   void dispose() {
-    // Call the LuciqWidgetsBindingObserver dispose method when Android onPause is triggered
-    // to overcome calling onActivityDestroy() from android side before sending the data to it.
-    LuciqWidgetsBindingObserver.dispose();
+    // // Call the LuciqWidgetsBindingObserver dispose method when Android onPause is triggered
+    // // to overcome calling onActivityDestroy() from android side before sending the data to it.
+    // LuciqWidgetsBindingObserver.dispose();
+    //Save the screen rendering data for the active traces Auto|Custom.
+    LuciqScreenRenderManager.I.syncCollectedScreenRenderingData();
   }
 }
 

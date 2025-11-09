@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' show log;
 import 'dart:ui' show TimingsCallback, FrameTiming, FramePhase;
 
 import 'package:flutter/widgets.dart';
@@ -6,6 +7,7 @@ import 'package:luciq_flutter/luciq_flutter.dart' show CrashReporting;
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
+import 'package:luciq_flutter/src/utils/lcq_build_info.dart' show LCQBuildInfo;
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_widget_binding_observer.dart';
 import 'package:meta/meta.dart';
@@ -160,7 +162,7 @@ class LuciqScreenRenderManager {
 
   /// Stop screen render collector and sync the captured data.
   @internal
-  void stopScreenRenderCollector() {
+  void syncCollectedScreenRenderingData() {
     // Return if frameTimingListener not attached
     if (_frameCollectorIsNotActive) return;
 
@@ -315,8 +317,13 @@ class LuciqScreenRenderManager {
     _delayedFrames.clear();
   }
 
+  //todo: remove logs
   /// Save Slow/Frozen Frames data
   void _onDelayedFrameDetected(int startTime, int durationInMicroseconds) {
+    log(
+      "${durationInMicroseconds >= 700000 ? "🚨Frozen" : "⚠️Slow"} Frame Detected (startTime: $startTime, duration: $durationInMicroseconds  µs)",
+      name: tag,
+    );
     _delayedFrames.add(
       LuciqFrameData(
         startTime,
@@ -334,6 +341,10 @@ class LuciqScreenRenderManager {
     try {
       screenRenderData.saveEndTime();
       await APM.endScreenRenderForCustomUiTrace(screenRenderData);
+      log(
+        "reportScreenRenderForCustomUiTrace $screenRenderData",
+        name: tag,
+      );
       return true;
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);
@@ -351,7 +362,10 @@ class LuciqScreenRenderManager {
       // Save the end time for the running ui trace, it's only needed in Android SDK.
       screenRenderData.saveEndTime();
       await APM.endScreenRenderForAutoUiTrace(screenRenderData);
-
+      log(
+        "reportScreenRenderForAutoUiTrace $screenRenderData",
+        name: tag,
+      );
       return true;
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);

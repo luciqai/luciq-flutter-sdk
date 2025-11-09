@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'dart:developer' show log;
 
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/models/luciq_route.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/repro_steps_constants.dart';
-import 'package:luciq_flutter/src/utils/screen_loading/flags_config.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
+import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 
 class LuciqNavigatorObserver extends NavigatorObserver {
   final List<LuciqRoute> _steps = [];
@@ -75,10 +76,11 @@ class LuciqNavigatorObserver extends NavigatorObserver {
     screenChanged(route);
   }
 
+  //todo: remove logs
   FutureOr<void> _startScreenRenderCollector(int? uiTraceId) async {
     if (uiTraceId == null) return;
     final isScreenRenderEnabled = await FlagsConfig.screenRendering.isEnabled();
-
+    log("isScreenRenderEnabled: $isScreenRenderEnabled");
     await LuciqScreenRenderManager.I
         .checkForScreenRenderInitialization(isScreenRenderEnabled);
     if (isScreenRenderEnabled) {

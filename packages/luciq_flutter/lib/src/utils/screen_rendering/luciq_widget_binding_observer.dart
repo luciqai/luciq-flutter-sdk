@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:flutter/widgets.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
@@ -20,15 +22,6 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
 
   /// Logging tag for debugging purposes.
   static const tag = "LuciqWidgetsBindingObserver";
-
-  /// Disposes all screen render resources.
-  static void dispose() {
-    //Save the screen rendering data for the active traces Auto|Custom.
-    LuciqScreenRenderManager.I.stopScreenRenderCollector();
-
-    // The dispose method is safe to call multiple times due to state tracking
-    LuciqScreenRenderManager.I.dispose();
-  }
 
   void _handleResumedState() {
     final lastUiTrace = ScreenLoadingManager.I.currentUiTrace;
@@ -64,7 +57,8 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
     // To overcome the onActivityDestroy() before sending the data to the android side.
     if (LuciqScreenRenderManager.I.screenRenderEnabled &&
         LCQBuildInfo.I.isIOS) {
-      LuciqScreenRenderManager.I.stopScreenRenderCollector();
+      //Save the screen rendering data for the active traces Auto|Custom.
+      LuciqScreenRenderManager.I.syncCollectedScreenRenderingData();
     }
   }
 
@@ -73,8 +67,10 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
     // To overcome the onActivityDestroy() before sending the data to the android side.
     if (LuciqScreenRenderManager.I.screenRenderEnabled &&
         LCQBuildInfo.I.isIOS) {
-      dispose();
+      //Save the screen rendering data for the active traces Auto|Custom.
+      LuciqScreenRenderManager.I.syncCollectedScreenRenderingData();
     }
+    LuciqScreenRenderManager.I.dispose();
   }
 
   void _handleDefaultState() {
@@ -83,6 +79,7 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    log("Andrew: appStateChange: ${state.name}");
     switch (state) {
       case AppLifecycleState.resumed:
         _handleResumedState();

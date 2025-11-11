@@ -39,6 +39,13 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
   int _pointerCount = 0;
   double? _previousOffset;
 
+  // NEW: Pre-classification rage tap tracking
+  final Map<Element, _TapCluster> _tapClusters = {};
+  static const int _rageTapMinCount = 3;
+  static const double _rageTapTimeWindowMs = 1000;
+  static const double _rageTapDistanceThreshold = 20;
+  static const double _rageTapCooldownMs = 5000;
+
   void _onPointerDown(PointerDownEvent event) {
     _resetGestureTracking();
     _pointerDownLocation = event.localPosition;
@@ -51,6 +58,34 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
   void _onPointerUp(PointerUpEvent event, BuildContext context) {
     _longPressTimer?.cancel();
 
+    // NEW: Check for rage tap BEFORE gesture classification
+    final delta = event.localPosition - (_pointerDownLocation ?? Offset.zero);
+    if (_isTap(delta)) {  // Only process tap-like gestures
+      final tappedWidget = _getWidgetDetails(event.localPosition, context, GestureType.tap);
+
+      if (tappedWidget != null && tappedWidget.element != null && !tappedWidget.isPrivate) {
+        // Process potential rage tap
+        final rageTapResult = _processRageTapDetection(
+          tappedWidget.element!,
+          event.localPosition,
+          tappedWidget,
+        );
+
+        // If rage tap was detected and logged, skip normal gesture processing
+        if (rageTapResult == _RageTapResult.detected) {
+          _pointerCount = 0;
+          return;  // Early return - rage tap handled
+        }
+
+        // If suppressed (waiting for more taps), also skip normal processing
+        if (rageTapResult == _RageTapResult.suppressed) {
+          _pointerCount = 0;
+          return;  // Early return - might become rage tap
+        }
+      }
+    }
+
+    // Continue with normal gesture detection only if not a rage tap
     final gestureType = _detectGestureType(event.localPosition);
     if (_gestureType != GestureType.longPress) {
       _gestureType = gestureType;
@@ -228,6 +263,70 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
     );
   }
 
+  // NEW: Process rage tap detection
+  _RageTapResult _processRageTapDetection(
+    Element element,
+    Offset localPosition,
+    UserStepDetails tappedWidget,
+  ) {
+    // Get or create tap cluster for this element
+    final cluster = _tapClusters.putIfAbsent(
+      element,
+      () => _TapCluster(element),
+    );
+
+    // Skip if in cooldown
+    if (cluster.isInCooldown()) {
+      return _RageTapResult.notDetected;
+    }
+
+    // Check if tap is within distance threshold
+    if (!cluster.isWithinDistanceThreshold(localPosition)) {
+      cluster.reset();
+    }
+
+    // Add current tap
+    cluster.addTap(localPosition);
+
+    // Check if we have a rage tap (3+ taps)
+    if (cluster.isRageTap()) {
+      // Emit single consolidated rage tap event with tap count
+      final userStepDetails = tappedWidget.copyWith(
+        gestureType: GestureType.rageTap,
+        tapCount: cluster.taps.length,
+      );
+
+      // For now, we'll use the existing 3-parameter logUserSteps
+      // Phase 3 will update the platform channel to include tapCount
+      Luciq.logUserSteps(
+        userStepDetails.gestureType!,
+        userStepDetails.message!,
+        userStepDetails.widgetName,
+      );
+
+      // Start cooldown and reset
+      cluster.startCooldown();
+      cluster.reset();
+
+      return _RageTapResult.detected;
+    }
+
+    // If we have 1-2 taps in the tracking window, suppress the individual tap
+    // We're tracking taps but haven't reached rage tap threshold yet
+    if (cluster.taps.isNotEmpty && cluster.taps.length < _rageTapMinCount) {
+      return _RageTapResult.suppressed;  // Suppress individual tap emission
+    }
+
+    return _RageTapResult.notDetected;
+  }
+
+  @override
+  void dispose() {
+    _longPressTimer?.cancel();
+    _tapClusters.clear(); // NEW: Clear tap clusters
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Listener(
@@ -258,4 +357,67 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
       ),
     );
   }
+}
+
+// NEW: Rage tap detection result enum
+enum _RageTapResult {
+  notDetected,  // Not a rage tap, proceed with normal tap
+  suppressed,   // Part of rage tap tracking, suppress individual tap
+  detected,     // Rage tap detected and logged
+}
+
+// Helper class for tracking tap clusters
+class _TapCluster {
+  final List<_TapEvent> taps = [];
+  DateTime? cooldownEndTime;
+  final Element element;
+
+  _TapCluster(this.element);
+
+  void addTap(Offset localPosition) {
+    final now = DateTime.now();
+    // Remove old taps outside time window
+    taps.removeWhere(
+      (tap) =>
+          now.difference(tap.timestamp).inMilliseconds >
+          LuciqUserStepsState._rageTapTimeWindowMs,
+    );
+
+    // Add new tap
+    taps.add(_TapEvent(localPosition, now));
+  }
+
+  bool isRageTap() => taps.length >= LuciqUserStepsState._rageTapMinCount;
+
+  bool isInCooldown() {
+    if (cooldownEndTime == null) return false;
+    return DateTime.now().isBefore(cooldownEndTime!);
+  }
+
+  void startCooldown() {
+    cooldownEndTime = DateTime.now().add(
+      Duration(milliseconds: LuciqUserStepsState._rageTapCooldownMs.toInt()),
+    );
+  }
+
+  bool isWithinDistanceThreshold(Offset newPosition) {
+    if (taps.isEmpty) return true;
+    for (final tap in taps) {
+      if ((tap.position - newPosition).distance >
+          LuciqUserStepsState._rageTapDistanceThreshold) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void reset() {
+    taps.clear();
+  }
+}
+
+class _TapEvent {
+  final Offset position;
+  final DateTime timestamp;
+  _TapEvent(this.position, this.timestamp);
 }

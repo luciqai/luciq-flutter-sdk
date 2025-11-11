@@ -528,6 +528,7 @@ class Luciq {
     String message,
     String? viewName,
   ) async {
+    print('logUserSteps: gestureType: $gestureType, message: $message, viewName: $viewName');
     return _host.logUserSteps(gestureType.toString(), message, viewName);
   }
 }

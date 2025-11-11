@@ -75,9 +75,13 @@ class UserStepDetails {
         gestureType == GestureType.swipe) {
       baseMessage +=
           gestureMetaData?.isNotEmpty == true ? '$gestureMetaData ' : '';
+      baseMessage += "${gestureType!.text} ";
+    } else {
+      // For all other gesture types (tap, doubleTap, longPress)
+      baseMessage = "${gestureType!.text} ";
     }
 
-    if (widgetName != null) baseMessage += " $widgetName ";
+    if (widgetName != null) baseMessage += "$widgetName ";
 
     if (!isPrivate && widget != null) {
       final additionalInfo = _getWidgetSpecificDetails();

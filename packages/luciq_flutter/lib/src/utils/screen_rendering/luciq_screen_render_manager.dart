@@ -7,7 +7,6 @@ import 'package:luciq_flutter/luciq_flutter.dart' show CrashReporting;
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
-import 'package:luciq_flutter/src/utils/lcq_build_info.dart' show LCQBuildInfo;
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_widget_binding_observer.dart';
 import 'package:meta/meta.dart';
@@ -340,11 +339,11 @@ class LuciqScreenRenderManager {
   ) async {
     try {
       screenRenderData.saveEndTime();
-      await APM.endScreenRenderForCustomUiTrace(screenRenderData);
       log(
         "reportScreenRenderForCustomUiTrace $screenRenderData",
         name: tag,
       );
+      await APM.endScreenRenderForCustomUiTrace(screenRenderData);
       return true;
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);
@@ -361,11 +360,11 @@ class LuciqScreenRenderManager {
     try {
       // Save the end time for the running ui trace, it's only needed in Android SDK.
       screenRenderData.saveEndTime();
-      await APM.endScreenRenderForAutoUiTrace(screenRenderData);
       log(
         "reportScreenRenderForAutoUiTrace $screenRenderData",
         name: tag,
       );
+      await APM.endScreenRenderForAutoUiTrace(screenRenderData);
       return true;
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);

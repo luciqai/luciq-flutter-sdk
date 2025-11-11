@@ -157,7 +157,7 @@ class ScreenLoadingManager {
 
       if (!isAutoUiTraceEnabled) {
         LuciqLogger.I.e(
-          'APM is disabled, skipping starting the UI trace for screen: $screenName.\n'
+          'Auto UI trace is disabled, skipping starting the UI trace for screen: $screenName.\n'
           'Please refer to the documentation for how to enable APM on your app: '
           'https://docs.luciq.ai/docs/react-native-apm-disabling-enabling',
           tag: APM.tag,

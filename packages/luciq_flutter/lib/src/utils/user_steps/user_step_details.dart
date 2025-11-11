@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
 
-enum GestureType { swipe, scroll, tap, pinch, longPress, doubleTap }
+enum GestureType { swipe, scroll, tap, pinch, longPress, doubleTap, rageTap }
 
 extension GestureTypeText on GestureType {
   String get text {
@@ -18,6 +18,8 @@ extension GestureTypeText on GestureType {
         return "Long Pressed";
       case GestureType.doubleTap:
         return "Double Tapped";
+      case GestureType.rageTap:
+        return "Rage tap";
     }
   }
 }
@@ -28,12 +30,14 @@ class UserStepDetails {
   final GestureType? gestureType;
   final String? gestureMetaData;
   final Widget? widget;
+  final int? tapCount;
 
   UserStepDetails({
     required this.element,
     required this.isPrivate,
     this.gestureType,
     this.gestureMetaData,
+    this.tapCount,
   }) : widget = element?.widget;
 
   String? get key => widget == null ? null : keyToStringValue(widget!.key);
@@ -64,7 +68,11 @@ class UserStepDetails {
     }
     var baseMessage = "";
 
-    if (gestureType == GestureType.scroll || gestureType == GestureType.swipe) {
+    // Handle rage tap with tap count
+    if (gestureType == GestureType.rageTap && tapCount != null) {
+      baseMessage = "Rage tap ($tapCount taps) on ";
+    } else if (gestureType == GestureType.scroll ||
+        gestureType == GestureType.swipe) {
       baseMessage +=
           gestureMetaData?.isNotEmpty == true ? '$gestureMetaData ' : '';
     }
@@ -111,12 +119,14 @@ class UserStepDetails {
     bool? isPrivate,
     GestureType? gestureType,
     String? gestureMetaData,
+    int? tapCount,
   }) {
     return UserStepDetails(
       element: element ?? this.element,
       isPrivate: isPrivate ?? this.isPrivate,
       gestureType: gestureType ?? this.gestureType,
       gestureMetaData: gestureMetaData ?? this.gestureMetaData,
+      tapCount: tapCount ?? this.tapCount,
     );
   }
 }

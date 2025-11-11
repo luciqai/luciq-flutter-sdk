@@ -189,6 +189,7 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
       case GestureType.tap:
       case GestureType.longPress:
       case GestureType.doubleTap:
+      case GestureType.rageTap:
         return isTappedWidget(widget);
       case GestureType.pinch:
         return isPinchWidget(widget);

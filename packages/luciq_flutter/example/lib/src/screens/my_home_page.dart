@@ -47,9 +47,8 @@ class _MyHomePageState extends State<MyHomePage> {
             title: const Text('On Dismiss'),
             content: Text(
               'onDismiss callback called with $dismissType and $reportType',
-                key: const ValueKey('dismiss_callback_dialog_test'),
-
-          ),
+              key: const ValueKey('dismiss_callback_dialog_test'),
+            ),
           );
         },
       );

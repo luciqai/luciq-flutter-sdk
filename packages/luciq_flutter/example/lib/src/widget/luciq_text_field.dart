@@ -9,14 +9,12 @@ class LuciqTextField extends StatelessWidget {
       this.margin,
       this.keyboardType,
       this.validator,
-        this.textFieldKey,
-
-        this.symanticLabel})
+      this.textFieldKey,
+      this.symanticLabel})
       : super(key: key);
 
   final String label;
   final Key? textFieldKey;
-
 
   final TextEditingController controller;
   final EdgeInsetsGeometry? margin;
@@ -36,7 +34,6 @@ class LuciqTextField extends StatelessWidget {
         label: label,
         child: TextFormField(
           key: textFieldKey,
-
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,

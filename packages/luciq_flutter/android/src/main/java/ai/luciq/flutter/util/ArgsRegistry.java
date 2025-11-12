@@ -230,5 +230,6 @@ public final class ArgsRegistry {
         put("GestureType.pinch", StepType.PINCH);
         put("GestureType.longPress", StepType.LONG_PRESS);
         put("GestureType.doubleTap", StepType.DOUBLE_TAP);
+        put("GestureType.rageTap", StepType.RAGE_TAP);
     }};
 }

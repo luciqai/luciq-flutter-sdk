@@ -211,6 +211,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     public void logUserSteps(@NonNull String gestureType, @NonNull String message, @Nullable String viewName) {
         try {
+            Log.d(TAG, "logUserSteps: gestureType: " + gestureType + ", message: " + message + ", viewName: " + viewName);
             final String stepType = ArgsRegistry.gestureStepType.get(gestureType);
             final long timeStamp = System.currentTimeMillis();
             String view = "";
@@ -221,6 +222,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 if (viewName != null) {
                     view = viewName;
                 }
+
+                Log.d(TAG, "logUserSteps: timeStamp: " + timeStamp + ", stepType: " + stepType + ", message: " + message + ", view: " + view);
 
                 method.invoke(null, timeStamp, stepType, message, null, view);
             }

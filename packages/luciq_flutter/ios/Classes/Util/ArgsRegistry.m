@@ -227,7 +227,8 @@
     return @{
         @"UserConsentActionType.dropAutoCapturedMedia": @(LCQConsentActionDropAutoCapturedMedia),
         @"UserConsentActionType.dropLogs": @(LCQConsentActionDropLogs),
-        @"UserConsentActionType.noChat": @(LCQConsentActionNoChat)
+        @"UserConsentActionType.noChat": @(LCQConsentActionNoChat),
+        @"UserConsentActionType.noGrouping": @(LCQConsentActionNoGrouping),
     };
 }
 

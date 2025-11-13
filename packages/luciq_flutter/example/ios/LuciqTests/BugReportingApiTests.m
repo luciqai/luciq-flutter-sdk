@@ -2,6 +2,7 @@
 #import "OCMock/OCMock.h"
 #import "BugReportingApi.h"
 #import "LuciqSDK/LCQBugReporting.h"
+#import "ArgsRegistry.h"
 
 @interface BugReportingApiTests : XCTestCase
 
@@ -195,6 +196,31 @@
                                           mandatory:[mandatory boolValue]
                                             checked:[checked boolValue]
                                          actionType:mappedActionType]);
+}
+
+- (void)testAddUserConsentWithNoGroupingActionType {
+  NSString *key = @"testKeyNoGrouping";
+  NSString *description = @"No grouping consent";
+
+
+  NSNumber *mandatory = @0;
+  NSNumber *checked = @1;
+  NSString *actionType = @"UserConsentActionType.noGrouping";
+  FlutterError *error;
+  LCQConsentAction mappedActionType = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;;
+
+  [self.api addUserConsentsKey:key
+                   description:description
+                     mandatory:mandatory
+                       checked:checked
+                    actionType:actionType
+                         error:&error];
+  
+  OCMVerify([self.mBugReporting addUserConsentWithKey:key
+                                          description:description
+                                            mandatory:[mandatory boolValue]
+                                              checked:[checked boolValue]
+                                           actionType:mappedActionType]);
 }
 - (void) testSetProactiveReportingConfigurations {
     BOOL enabled = true;

@@ -210,4 +210,31 @@ void main() {
 
     verify(mHost.setProactiveReportingConfigurations(true, 1, 1)).called(1);
   });
+
+  test('[addUserConsents] should call host method with noGrouping action type',
+      () async {
+    const key = 'consent_key_no_grouping';
+    const description = 'No grouping consent';
+    const mandatory = false;
+    const checked = true;
+    const actionType = UserConsentActionType.noGrouping;
+
+    await BugReporting.addUserConsents(
+      key: key,
+      description: description,
+      mandatory: mandatory,
+      checked: checked,
+      actionType: actionType,
+    );
+
+    verify(
+      mHost.addUserConsents(
+        key,
+        description,
+        mandatory,
+        checked,
+        'UserConsentActionType.noGrouping',
+      ),
+    ).called(1);
+  });
 }

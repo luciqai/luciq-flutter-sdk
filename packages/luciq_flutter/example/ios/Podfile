@@ -31,7 +31,7 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/habiba-user-consent/19.1.0/Luciq.podspec'
+  pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/habiba-user-consent/19.0.0/Luciq.podspec'
 
 
 target 'RunnerUITests' do

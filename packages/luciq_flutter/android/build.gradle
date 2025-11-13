@@ -1,5 +1,5 @@
 group 'ai.luciq.flutter'
-version '18.0.1'
+version '18.0.1.7408582-SNAPSHOT'
 
 buildscript {
     repositories {
@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:8.1.0'
     }
 }
 
@@ -16,9 +16,14 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
-        }
+        jcenter()
+maven {
+    credentials {
+        username "luciq"
+        password "YrCYo6GitsFtG3Ca4g6b9WqreEr*W8"
+    }
+    url "https://mvn.luciq.ai/nexus/repository/luciq-internal/"
+}
     }
 }
 
@@ -47,7 +52,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:18.0.1'
+    api 'ai.luciq.library:luciq:18.0.1.7408582-SNAPSHOT'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

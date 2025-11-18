@@ -1,5 +1,13 @@
 # Changelog
 
+
+## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.1...dev)
+
+### Added
+
+- Make `LuciqNavigatorObserver` screen report delay configurable. ([#17](https://github.com/luciqai/luciq-flutter-sdk/pull/17))
+
+
 ## [18.0.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.1...18.0.0) (October 27, 2025)
 
 ### Added

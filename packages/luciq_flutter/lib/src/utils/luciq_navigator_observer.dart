@@ -11,6 +11,11 @@ import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_man
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 
 class LuciqNavigatorObserver extends NavigatorObserver {
+  LuciqNavigatorObserver({Duration? screenReportDelay})
+      : _screenReportDelay =
+            screenReportDelay ?? const Duration(milliseconds: 100);
+
+  final Duration _screenReportDelay;
   final List<LuciqRoute> _steps = [];
 
   void screenChanged(Route newRoute) {
@@ -59,7 +64,7 @@ class LuciqNavigatorObserver extends NavigatorObserver {
 
   Future<void> reportScreenChange(String name) async {
     // Wait for the animation to complete
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(_screenReportDelay);
 
     Luciq.reportScreenChange(name);
   }

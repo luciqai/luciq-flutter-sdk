@@ -29,8 +29,6 @@ dependencies:
   luciq_http_client:
     path: ../../luciq_http_client
   file_picker: <10.0.0
-  luciq_flutter_ndk:
-    path: ../../luciq_flutter_ndk
   provider:
   video_player:
 
@@ -43,11 +41,13 @@ dev_dependencies:
   patrol: 3.15.2
 
 
+luciq:
+  ndk: true
+
 dependency_overrides:
   http: ^1.1.0
   luciq_flutter:
     path: ../
-    
 patrol:
   app_name: Luciq example
   android:

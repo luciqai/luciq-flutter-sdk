@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' show log;
 
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
@@ -81,11 +80,10 @@ class LuciqNavigatorObserver extends NavigatorObserver {
     screenChanged(route);
   }
 
-  //todo: remove logs
+
   FutureOr<void> _startScreenRenderCollector(int? uiTraceId) async {
     if (uiTraceId == null) return;
     final isScreenRenderEnabled = await FlagsConfig.screenRendering.isEnabled();
-    log("isScreenRenderEnabled: $isScreenRenderEnabled");
     await LuciqScreenRenderManager.I
         .checkForScreenRenderInitialization(isScreenRenderEnabled);
     if (isScreenRenderEnabled) {

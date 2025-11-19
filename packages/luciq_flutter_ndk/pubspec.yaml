@@ -1,6 +1,6 @@
 name: luciq_flutter_ndk
 description: An add-on for the Luciq Flutter SDK that provides support NDK Crash.
-version: 1.0.0
+version: 18.2.0
 homepage: https://www.luciq.ai
 repository: https://github.com/luciqai/luciq-flutter-sdk/tree/master/packages/luciq_flutter_ndk
 

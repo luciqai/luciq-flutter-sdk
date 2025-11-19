@@ -198,14 +198,14 @@
                                          actionType:mappedActionType]);
 }
 
-- (void)testAddUserConsentWithNoGroupingActionType {
-  NSString *key = @"testKeyNoGrouping";
-  NSString *description = @"No grouping consent";
+- (void)testAddUserConsentWithNoAutomaticBugGroupingActionType {
+  NSString *key = @"testKeyNoAutomaticBugGrouping";
+  NSString *description = @"No automatic bug grouping consent";
 
 
   NSNumber *mandatory = @0;
   NSNumber *checked = @1;
-  NSString *actionType = @"UserConsentActionType.noGrouping";
+  NSString *actionType = @"UserConsentActionType.noAutomaticBugGrouping";
   FlutterError *error;
   LCQConsentAction mappedActionType = (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;;
 

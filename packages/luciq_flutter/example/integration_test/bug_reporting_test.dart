@@ -23,12 +23,9 @@ void main() {
       ($) async {
         await init($);
 
-        await $.native2.tap(NativeSelector(
-            ios: IOSSelector(
-                identifier: 'IBGFloatingButtonAccessibilityIdentifier'),
-            android: AndroidSelector(
-                resourceName:
-                    'ai.luciq.flutter.example:id/instabug_floating_button')));
+        final floatingButton = await getFAB($, waitUntilVisible: true);
+
+        await $.native2.tap(floatingButton);
 
         await $.native2.tap(NativeSelector(
             ios: IOSSelector(labelContains: 'Report a bug'),
@@ -69,12 +66,10 @@ void main() {
       ($) async {
         await init($);
 
-        await $.native2.tap(NativeSelector(
-            ios: IOSSelector(
-                identifier: 'IBGFloatingButtonAccessibilityIdentifier'),
-            android: AndroidSelector(
-                resourceName:
-                    'ai.luciq.flutter.example:id/instabug_floating_button')));
+        final floatingButton = await getFAB($, waitUntilVisible: true);
+
+        await $.native2.tap(floatingButton);
+
 
         assertOptionsPromptIsDisplayed($);
       },
@@ -213,7 +208,7 @@ void main() {
             ios: IOSSelector(label: 'Cancel'),
           ));
 
-      await wait(second: 4);
+      await wait(second: 2);
 
       final callbackWidget = await $(#dismiss_callback_dialog_test)
           .waitUntilVisible(timeout: const Duration(seconds: 5));

@@ -347,6 +347,10 @@ class Luciq {
     await setTheme(ThemeConfig(primaryColor: color.toString()));
   }
 
+  static Future<void> setTheme(ThemeConfig themeConfig) {
+    return _host.setTheme(themeConfig.toMap());
+  }
+
   /// Adds specific user data that you need to be added to the reports
   /// [userData] data to be added
   static Future<void> setUserData(String userData) async {
@@ -485,34 +489,6 @@ class Luciq {
   /// [appVariant] used to set current App variant name
   static Future<void> setAppVariant(String appVariant) async {
     return _host.setAppVariant(appVariant);
-  }
-
-  /// Sets a custom theme for Luciq UI elements.
-  ///
-  /// @param theme - Configuration object containing theme properties
-  ///
-  /// Example:
-  /// ```dart
-  ///
-  /// Luciq.setTheme(ThemeConfig(
-  ///   primaryColor: '#FF6B6B',
-  ///   secondaryTextColor: '#666666',
-  ///   primaryTextColor: '#333333',
-  ///   titleTextColor: '#000000',
-  ///   backgroundColor: '#FFFFFF',
-  ///   primaryTextStyle: 'bold',
-  ///   secondaryTextStyle: 'normal',
-  ///   titleTextStyle: 'bold',
-  ///   ctaTextStyle: 'bold',
-  ///   primaryFontPath: '/data/user/0/com.yourapp/files/fonts/YourFont.ttf',
-  ///   secondaryFontPath: '/data/user/0/com.yourapp/files/fonts/YourFont.ttf',
-  ///   ctaFontPath: '/data/user/0/com.yourapp/files/fonts/YourFont.ttf',
-  ///   primaryFontAsset: 'fonts/YourFont.ttf',
-  ///   secondaryFontAsset: 'fonts/YourFont.ttf'
-  /// ));
-  /// ```
-  static Future<void> setTheme(ThemeConfig themeConfig) async {
-    return _host.setTheme(themeConfig.toMap());
   }
 
   /// Enables and disables user interaction steps.

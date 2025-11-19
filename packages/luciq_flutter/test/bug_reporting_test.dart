@@ -211,13 +211,13 @@ void main() {
     verify(mHost.setProactiveReportingConfigurations(true, 1, 1)).called(1);
   });
 
-  test('[addUserConsents] should call host method with noGrouping action type',
+  test('[addUserConsents] should call host method with noAutomaticBugGrouping action type',
       () async {
-    const key = 'consent_key_no_grouping';
-    const description = 'No grouping consent';
+    const key = 'consent_key_no_automatic_bug_grouping';
+    const description = 'No automatic bug grouping consent';
     const mandatory = false;
     const checked = true;
-    const actionType = UserConsentActionType.noGrouping;
+    const actionType = UserConsentActionType.noAutomaticBugGrouping;
 
     await BugReporting.addUserConsents(
       key: key,
@@ -233,7 +233,7 @@ void main() {
         description,
         mandatory,
         checked,
-        'UserConsentActionType.noGrouping',
+        'UserConsentActionType.noAutomaticBugGrouping',
       ),
     ).called(1);
   });

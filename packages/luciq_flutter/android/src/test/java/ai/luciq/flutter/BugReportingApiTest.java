@@ -212,12 +212,12 @@ public class BugReportingApiTest {
     }
 
     @Test
-    public void TestAddUserConsentsWithNoGrouping() {
-               final String key = "testKeyNoGrouping";
-               final String description = "No grouping consent";
+    public void TestAddUserConsentsWithNoAutomaticBugGrouping() {
+               final String key = "testKeyNoAutomaticBugGrouping";
+               final String description = "No automatic bug grouping consent";
                final boolean mandatory = false;
                final boolean checked = true;
-               final String actionType = "UserConsentActionType.noGrouping";
+               final String actionType = "UserConsentActionType.noAutomaticBugGrouping";
                String type = ArgsRegistry.userConsentActionType.get(actionType);
 
                api.addUserConsents(key, description, mandatory, checked, actionType);

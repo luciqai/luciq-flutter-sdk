@@ -228,7 +228,7 @@
         @"UserConsentActionType.dropAutoCapturedMedia": @(LCQConsentActionDropAutoCapturedMedia),
         @"UserConsentActionType.dropLogs": @(LCQConsentActionDropLogs),
         @"UserConsentActionType.noChat": @(LCQConsentActionNoChat),
-        @"UserConsentActionType.noAutomaticBugGrouping": @(LCQConsentActionNoGrouping),
+        @"UserConsentActionType.noAutomaticBugGrouping": @(LCQConsentActionNoAutomaticBugGrouping),
     };
 }
 

@@ -23,7 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.0
+  http: ^1.1.0
   luciq_flutter:
     path: ../
   luciq_http_client:
@@ -31,17 +31,29 @@ dependencies:
   file_picker: <10.0.0
   provider:
   video_player:
+
 dev_dependencies:
   flutter_driver:
     sdk: flutter
   flutter_test:
     sdk: flutter
   flutter_lints: 1.0.4
+  patrol: 3.15.2
+
+
+luciq:
+  ndk: true
 
 dependency_overrides:
+  http: ^1.1.0
   luciq_flutter:
     path: ../
-
+patrol:
+  app_name: Luciq example
+  android:
+    package_name: ai.luciq.flutter.example
+  ios:
+    bundle_id: ai.luciq.LuciqSample
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

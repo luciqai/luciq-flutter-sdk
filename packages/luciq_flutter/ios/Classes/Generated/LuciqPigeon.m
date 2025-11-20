@@ -898,4 +898,23 @@ void LuciqHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Luci
       [channel setMessageHandler:nil];
     }
   }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setNetworkAutoMaskingEnabled"
+        binaryMessenger:binaryMessenger
+        codec:LuciqHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setNetworkAutoMaskingEnabledIsEnabled:error:)], @"LuciqHostApi api (%@) doesn't respond to @selector(setNetworkAutoMaskingEnabledIsEnabled:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_isEnabled = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setNetworkAutoMaskingEnabledIsEnabled:arg_isEnabled error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
 }

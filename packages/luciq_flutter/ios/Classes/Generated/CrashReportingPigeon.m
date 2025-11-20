@@ -94,4 +94,23 @@ void CrashReportingHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSOb
       [channel setMessageHandler:nil];
     }
   }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.CrashReportingHostApi.setNDKEnabled"
+        binaryMessenger:binaryMessenger
+        codec:CrashReportingHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setNDKEnabledIsEnabled:error:)], @"CrashReportingHostApi api (%@) doesn't respond to @selector(setNDKEnabledIsEnabled:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_isEnabled = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setNDKEnabledIsEnabled:arg_isEnabled error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
 }

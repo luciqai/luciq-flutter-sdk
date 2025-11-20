@@ -127,6 +127,8 @@ public class BugReportingPigeon {
 
     void addUserConsents(@NonNull String key, @NonNull String description, @NonNull Boolean mandatory, @NonNull Boolean checked, @Nullable String actionType);
 
+    void setProactiveReportingConfigurations(@NonNull Boolean enabled, @NonNull Long gapBetweenModals, @NonNull Long modalDelayAfterDetection);
+
     /** The codec used by BugReportingHostApi. */
     static @NonNull MessageCodec<Object> getCodec() {
       return new StandardMessageCodec();
@@ -535,6 +537,32 @@ public class BugReportingPigeon {
                 String actionTypeArg = (String) args.get(4);
                 try {
                   api.addUserConsents(keyArg, descriptionArg, mandatoryArg, checkedArg, actionTypeArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.BugReportingHostApi.setProactiveReportingConfigurations", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Boolean enabledArg = (Boolean) args.get(0);
+                Number gapBetweenModalsArg = (Number) args.get(1);
+                Number modalDelayAfterDetectionArg = (Number) args.get(2);
+                try {
+                  api.setProactiveReportingConfigurations(enabledArg, (gapBetweenModalsArg == null) ? null : gapBetweenModalsArg.longValue(), (modalDelayAfterDetectionArg == null) ? null : modalDelayAfterDetectionArg.longValue());
                   wrapped.add(0, null);
                 }
  catch (Throwable exception) {

@@ -41,6 +41,7 @@ NSObject<FlutterMessageCodec> *BugReportingHostApiGetCodec(void);
 - (void)setDisclaimerTextText:(NSString *)text error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setCommentMinimumCharacterCountLimit:(NSNumber *)limit reportTypes:(nullable NSArray<NSString *> *)reportTypes error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)addUserConsentsKey:(NSString *)key description:(NSString *)description mandatory:(NSNumber *)mandatory checked:(NSNumber *)checked actionType:(nullable NSString *)actionType error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setProactiveReportingConfigurationsEnabled:(NSNumber *)enabled gapBetweenModals:(NSNumber *)gapBetweenModals modalDelayAfterDetection:(NSNumber *)modalDelayAfterDetection error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void BugReportingHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<BugReportingHostApi> *_Nullable api);

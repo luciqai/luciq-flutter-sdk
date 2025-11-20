@@ -403,4 +403,25 @@ void BugReportingHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObje
       [channel setMessageHandler:nil];
     }
   }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.BugReportingHostApi.setProactiveReportingConfigurations"
+        binaryMessenger:binaryMessenger
+        codec:BugReportingHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setProactiveReportingConfigurationsEnabled:gapBetweenModals:modalDelayAfterDetection:error:)], @"BugReportingHostApi api (%@) doesn't respond to @selector(setProactiveReportingConfigurationsEnabled:gapBetweenModals:modalDelayAfterDetection:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_enabled = GetNullableObjectAtIndex(args, 0);
+        NSNumber *arg_gapBetweenModals = GetNullableObjectAtIndex(args, 1);
+        NSNumber *arg_modalDelayAfterDetection = GetNullableObjectAtIndex(args, 2);
+        FlutterError *error;
+        [api setProactiveReportingConfigurationsEnabled:arg_enabled gapBetweenModals:arg_gapBetweenModals modalDelayAfterDetection:arg_modalDelayAfterDetection error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
 }

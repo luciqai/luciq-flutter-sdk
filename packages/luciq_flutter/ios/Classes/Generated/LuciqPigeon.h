@@ -71,6 +71,7 @@ NSObject<FlutterMessageCodec> *LuciqHostApiGetCodec(void);
 - (void)getNetworkBodyMaxSizeWithCompletion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
 - (void)setThemeThemeConfig:(NSDictionary<NSString *, id> *)themeConfig error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setFullscreenIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void LuciqHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<LuciqHostApi> *_Nullable api);

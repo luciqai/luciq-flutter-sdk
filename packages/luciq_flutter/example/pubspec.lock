@@ -220,9 +220,10 @@ packages:
   luciq_http_client:
     dependency: "direct main"
     description:
-      path: "../../luciq_http_client"
-      relative: true
-    source: path
+      name: luciq_http_client
+      sha256: a5087fa8f19d235dc4b0bdcd8268ce4bc9d277dcbe815ab88309b714759df1ae
+      url: "https://pub.dev"
+    source: hosted
     version: "3.0.0"
   matcher:
     dependency: transitive

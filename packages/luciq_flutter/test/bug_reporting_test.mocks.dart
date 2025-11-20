@@ -255,6 +255,25 @@ class MockBugReportingHostApi extends _i1.Mock
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setProactiveReportingConfigurations(
+    bool? arg_enabled,
+    int? arg_gapBetweenModals,
+    int? arg_modalDelayAfterDetection,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setProactiveReportingConfigurations,
+          [
+            arg_enabled,
+            arg_gapBetweenModals,
+            arg_modalDelayAfterDetection,
+          ],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }
 
 /// A class which mocks [LCQBuildInfo].

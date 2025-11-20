@@ -1,6 +1,7 @@
-# melos_managed_dependency_overrides: luciq_flutter
+# melos_managed_dependency_overrides: luciq_flutter,http
 dependency_overrides:
 #  http: ^1.1.0
 
   luciq_flutter:
     path: ../
+  http: ^1.1.0

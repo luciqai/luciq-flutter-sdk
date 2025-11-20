@@ -79,6 +79,16 @@ class MockCrashReportingHostApi extends _i1.Mock
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setNDKEnabled(bool? arg_isEnabled) => (super.noSuchMethod(
+        Invocation.method(
+          #setNDKEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }
 
 /// A class which mocks [LCQBuildInfo].

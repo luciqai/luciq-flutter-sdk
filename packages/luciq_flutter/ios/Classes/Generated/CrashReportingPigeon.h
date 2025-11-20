@@ -18,6 +18,7 @@ NSObject<FlutterMessageCodec> *CrashReportingHostApiGetCodec(void);
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)sendJsonCrash:(NSString *)jsonCrash isHandled:(NSNumber *)isHandled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)sendNonFatalErrorJsonCrash:(NSString *)jsonCrash userAttributes:(nullable NSDictionary<NSString *, NSString *> *)userAttributes fingerprint:(nullable NSString *)fingerprint nonFatalExceptionLevel:(NSString *)nonFatalExceptionLevel error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setNDKEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void CrashReportingHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CrashReportingHostApi> *_Nullable api);

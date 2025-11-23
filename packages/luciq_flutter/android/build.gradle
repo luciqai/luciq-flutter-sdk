@@ -33,7 +33,7 @@ android {
     if (project.android.hasProperty("namespace")) {
         namespace "ai.luciq.flutter"
     }
-    compileSdkVersion 33
+    compileSdkVersion 35
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -57,12 +57,4 @@ dependencies {
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"
     testImplementation "org.robolectric:robolectric:4.12.2"
-}
-
-// add upload_symbols task
-apply from: './upload_symbols.gradle'
-tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleRelease') {
-        task.finalizedBy upload_symbols_task
-    }
 }

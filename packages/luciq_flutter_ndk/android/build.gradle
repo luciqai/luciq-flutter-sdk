@@ -48,7 +48,7 @@ android {
     }
 
     dependencies {
-        implementation("ai.luciq.library:luciq-ndk-crash:18.0.1")
+        implementation("ai.luciq.library:luciq-ndk-crash:18.2.0")
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }

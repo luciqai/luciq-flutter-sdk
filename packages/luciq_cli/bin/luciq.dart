@@ -3,12 +3,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:args/args.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 part 'commands/migrate.dart';
 part 'commands/upload_so_files.dart';
+part 'commands/upload_symbols.dart';
 
 // ignore: avoid_classes_with_only_static_members
 /// Command registry for easy management
@@ -21,6 +23,10 @@ class CommandRegistry {
     'upload-so-files': CommandHandler(
       parser: UploadSoFilesCommand.createParser(),
       execute: UploadSoFilesCommand.execute,
+    ),
+    'upload-symbols': CommandHandler(
+      parser: UploadSymbolsCommand.createParser(),
+      execute: UploadSymbolsCommand.execute,
     ),
   };
 

@@ -1,6 +1,21 @@
 import java.util.zip.ZipOutputStream
 import java.util.zip.ZipEntry
 
+
+project.afterEvaluate {
+    // Works for both `bundleReleaseJsAndAssets` and `createBundleReleaseJsAndAssets` and product flavors
+    def bundleTasks = project(':app').tasks.findAll {
+        task -> task.name
+    }
+
+    bundleTasks.forEach { task ->
+
+        if (task.name == 'assembleRelease' || task.name == 'bundleRelease') {
+            task.finalizedBy upload_symbols_task
+        }
+    }
+}
+
 // Custom Exception for undefined variable
 public class VariableNotFoundException extends Exception {
     public VariableNotFoundException(String errorMessage) {

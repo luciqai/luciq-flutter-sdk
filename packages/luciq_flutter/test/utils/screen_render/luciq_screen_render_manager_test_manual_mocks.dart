@@ -30,6 +30,12 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: prefer_const_constructors
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
+// ignore_for_file: unused_import
+// ignore_for_file: unused_element
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use_from_same_package
+// ignore_for_file: unnecessary_overrides
+// ignore_for_file: unnecessary_null_comparison
 
 class _FakeLuciqScreenRenderData_0 extends _i1.Fake
     implements _i2.LuciqScreenRenderData {}
@@ -70,8 +76,6 @@ class _FakePointerSignalResolver_12 extends _i1.Fake
 
 class _FakeMouseTracker_13 extends _i1.Fake implements _i7.MouseTracker {}
 
-class _FakePipelineOwner_14 extends _i1.Fake implements _i7.PipelineOwner {}
-
 class _FakeRenderView_15 extends _i1.Fake implements _i7.RenderView {
   @override
   String toString({_i3.DiagnosticLevel? minLevel = _i3.DiagnosticLevel.info}) =>
@@ -80,9 +84,6 @@ class _FakeRenderView_15 extends _i1.Fake implements _i7.RenderView {
 
 class _FakeAccessibilityFeatures_16 extends _i1.Fake
     implements _i4.AccessibilityFeatures {}
-
-class _FakeViewConfiguration_17 extends _i1.Fake
-    implements _i7.ViewConfiguration {}
 
 class _FakeSemanticsUpdateBuilder_18 extends _i1.Fake
     implements _i4.SemanticsUpdateBuilder {}
@@ -300,15 +301,11 @@ class MockWidgetsBinding extends _i1.Mock implements _i3.WidgetsBinding {
   @override
   _i7.PipelineOwner get pipelineOwner =>
       (super.noSuchMethod(Invocation.getter(#pipelineOwner),
-          returnValue: _FakePipelineOwner_14()) as _i7.PipelineOwner);
+          returnValue: _i7.PipelineOwner()) as _i7.PipelineOwner);
   @override
   _i7.RenderView get renderView =>
       (super.noSuchMethod(Invocation.getter(#renderView),
           returnValue: _FakeRenderView_15()) as _i7.RenderView);
-  @override
-  set renderView(_i7.RenderView? value) =>
-      super.noSuchMethod(Invocation.setter(#renderView, value),
-          returnValueForMissingStub: null);
   @override
   bool get sendFramesToEngine =>
       (super.noSuchMethod(Invocation.getter(#sendFramesToEngine),
@@ -367,15 +364,17 @@ class MockWidgetsBinding extends _i1.Mock implements _i3.WidgetsBinding {
       Invocation.method(#dispatchAccessibilityFeaturesChanged, []),
       returnValueForMissingStub: null);
   @override
-  _i9.Future<void> handlePopRoute() =>
+  _i9.Future<bool> handlePopRoute() =>
       (super.noSuchMethod(Invocation.method(#handlePopRoute, []),
-          returnValue: Future<void>.value(),
-          returnValueForMissingStub: Future<void>.value()) as _i9.Future<void>);
+              returnValue: Future<bool>.value(false),
+              returnValueForMissingStub: Future<bool>.value(false))
+          as _i9.Future<bool>);
   @override
-  _i9.Future<void> handlePushRoute(String? route) =>
+  _i9.Future<bool> handlePushRoute(String route) =>
       (super.noSuchMethod(Invocation.method(#handlePushRoute, [route]),
-          returnValue: Future<void>.value(),
-          returnValueForMissingStub: Future<void>.value()) as _i9.Future<void>);
+              returnValue: Future<bool>.value(false),
+              returnValueForMissingStub: Future<bool>.value(false))
+          as _i9.Future<bool>);
   @override
   void handleAppLifecycleStateChanged(_i4.AppLifecycleState? state) => super
       .noSuchMethod(Invocation.method(#handleAppLifecycleStateChanged, [state]),
@@ -513,11 +512,15 @@ class MockWidgetsBinding extends _i1.Mock implements _i3.WidgetsBinding {
       (super.noSuchMethod(Invocation.method(#handleEventLoopCallback, []),
           returnValue: false) as bool);
   @override
-  int scheduleFrameCallback(_i10.FrameCallback? callback,
-          {bool? rescheduling = false}) =>
+  int scheduleFrameCallback(_i10.FrameCallback callback,
+          {bool rescheduling = false, bool scheduleNewFrame = true}) =>
       (super.noSuchMethod(
-          Invocation.method(#scheduleFrameCallback, [callback],
-              {#rescheduling: rescheduling}),
+          Invocation.method(#scheduleFrameCallback, [
+            callback
+          ], {
+            #rescheduling: rescheduling,
+            #scheduleNewFrame: scheduleNewFrame
+          }),
           returnValue: 0) as int);
   @override
   void cancelFrameCallbackWithId(int? id) =>
@@ -532,8 +535,11 @@ class MockWidgetsBinding extends _i1.Mock implements _i3.WidgetsBinding {
       .noSuchMethod(Invocation.method(#addPersistentFrameCallback, [callback]),
           returnValueForMissingStub: null);
   @override
-  void addPostFrameCallback(_i10.FrameCallback? callback) =>
-      super.noSuchMethod(Invocation.method(#addPostFrameCallback, [callback]),
+  void addPostFrameCallback(_i10.FrameCallback callback,
+          {String debugLabel = r''}) =>
+      super.noSuchMethod(
+          Invocation.method(
+              #addPostFrameCallback, [callback], {#debugLabel: debugLabel}),
           returnValueForMissingStub: null);
   @override
   void ensureFrameCallbacksRegistered() =>
@@ -593,20 +599,8 @@ class MockWidgetsBinding extends _i1.Mock implements _i3.WidgetsBinding {
       super.noSuchMethod(Invocation.method(#resetGestureBinding, []),
           returnValueForMissingStub: null);
   @override
-  void initRenderView() =>
-      super.noSuchMethod(Invocation.method(#initRenderView, []),
-          returnValueForMissingStub: null);
-  @override
-  _i7.ViewConfiguration createViewConfiguration() =>
-      (super.noSuchMethod(Invocation.method(#createViewConfiguration, []),
-          returnValue: _FakeViewConfiguration_17()) as _i7.ViewConfiguration);
-  @override
   void initMouseTracker([_i7.MouseTracker? tracker]) =>
       super.noSuchMethod(Invocation.method(#initMouseTracker, [tracker]),
-          returnValueForMissingStub: null);
-  @override
-  void setSemanticsEnabled(bool? enabled) =>
-      super.noSuchMethod(Invocation.method(#setSemanticsEnabled, [enabled]),
           returnValueForMissingStub: null);
   @override
   void deferFirstFrame() =>

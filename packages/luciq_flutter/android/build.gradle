@@ -1,5 +1,6 @@
 group 'ai.luciq.flutter'
 version '18.0.1.7408772-SNAPSHOT'
+apply from: './upload_symbols.gradle'
 
 buildscript {
     repositories {

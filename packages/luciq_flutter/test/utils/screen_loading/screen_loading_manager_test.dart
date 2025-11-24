@@ -186,7 +186,7 @@ void main() {
       verifyNever(mApmHost.startCpUiTrace(any, any, any));
     });
 
-    test('[startUiTrace] with APM disabled on iOS Platform should Log error',
+    test('[startUiTrace] with APM disabled should Log error',
         () async {
       mScreenLoadingManager.currentUiTrace = uiTrace;
       when(FlagsConfig.uiTrace.isEnabled()).thenAnswer((_) async => false);
@@ -198,7 +198,7 @@ void main() {
 
       verify(
         mLuciqLogger.e(
-          'APM is disabled, skipping starting the UI trace for screen: $screenName.\n'
+          'Auto UI trace is disabled, skipping starting the UI trace for screen: $screenName.\n'
           'Please refer to the documentation for how to enable APM on your app: https://docs.luciq.ai/docs/react-native-apm-disabling-enabling',
           tag: APM.tag,
         ),

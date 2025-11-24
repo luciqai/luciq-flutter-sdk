@@ -1,28 +1,14 @@
-import 'dart:ui' show FrameTiming;
-
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
-import 'package:luciq_flutter/src/generated/apm.api.g.dart';
-import 'package:luciq_flutter/src/generated/crash_reporting.api.g.dart';
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'luciq_screen_render_manager_test.mocks.dart';
+import 'luciq_screen_render_manager_test_manual_mocks.dart';
 
 
-@GenerateMocks([
-  LuciqScreenRenderManager,
-  WidgetsBinding,
-  FrameTiming,
-  CrashReportingHostApi,
-  ApmHostApi,
-  LuciqLogger,
-])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

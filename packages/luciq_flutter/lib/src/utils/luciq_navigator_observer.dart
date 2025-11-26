@@ -29,22 +29,28 @@ class LuciqNavigatorObserver extends NavigatorObserver {
       );
       //ignore: invalid_null_aware_operator
       WidgetsBinding.instance?.addPostFrameCallback((_) async {
-        // Starts a the new UI trace which is exclusive to screen loading
-        ScreenLoadingManager.I.startUiTrace(maskedScreenName, screenName);
-        // If there is a step that hasn't been pushed yet
-        if (_steps.isNotEmpty) {
-          await reportScreenChange(_steps.last.name);
-          // Report the last step and remove it from the list
-          _steps.removeLast();
-        }
+        try {
+          // Starts a the new UI trace which is exclusive to screen loading
+          ScreenLoadingManager.I.startUiTrace(maskedScreenName, screenName);
+          // If there is a step that hasn't been pushed yet
+          final pendingStep = _steps.isNotEmpty ? _steps.last : null;
+          if (pendingStep != null) {
+            await reportScreenChange(pendingStep.name);
+            // Remove the specific pending step regardless of current ordering
+            _steps.remove(pendingStep);
+          }
 
-        // Add the new step to the list
-        _steps.add(route);
+          // Add the new step to the list
+          _steps.add(route);
 
-        // If this route is in the array, report it and remove it from the list
-        if (_steps.contains(route)) {
-          await reportScreenChange(route.name);
-          _steps.remove(route);
+          // If this route is in the array, report it and remove it from the list
+          if (_steps.contains(route)) {
+            await reportScreenChange(route.name);
+            _steps.remove(route);
+          }
+        } catch (e) {
+          LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
+          LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
         }
       });
     } catch (e) {

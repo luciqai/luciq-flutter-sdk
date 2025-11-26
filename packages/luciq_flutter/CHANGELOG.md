@@ -2,7 +2,7 @@
 
 ## [18.2.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v18.2.1...18.2.0) (November 26, 2025)
 
-### Added
+### Fixed
 
 - Guard LuciqNavigatorObserver pending-step removal to eliminate the race that could crash apps or produce incorrect screenshots during rapid route transitions. ([#23](https://github.com/luciqai/luciq-flutter-sdk/pull/23))
 

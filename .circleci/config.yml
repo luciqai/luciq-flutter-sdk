@@ -18,7 +18,7 @@ commands:
     parameters:
       version:
         type: string
-        default: 3.32.0
+        default: 3.24.3
       use_melos:
         type: boolean
         default: true
@@ -57,7 +57,7 @@ commands:
             source $BASH_ENV
       - run:
           name: Install patrol
-          command: dart pub global activate patrol_cli 3.8.0
+          command: dart pub global activate patrol_cli 3.5.0
 
   # This runs `flutter pub get` and `dart pub get` if we pass parameter `generate_pigeons` to the job it also runs the following:
   #   - `melos pigeon`
@@ -159,7 +159,7 @@ jobs:
     parameters:
       version:
         type: string
-        default: "3.32.0"
+        default: "3.24.3"
     executor: flutter-executor
     steps:
       - advanced-checkout/shallow-checkout
@@ -200,12 +200,6 @@ jobs:
       tag: 2024.01.1
     steps:
       - advanced-checkout/shallow-checkout
-      - run:
-          name: Increase Gradle Heap Memory
-          command: |
-            echo "org.gradle.daemon=true" >> packages/luciq_flutter/example/android/gradle.properties
-            echo "org.gradle.jvmargs=-Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dkotlin.daemon.jvm.options=-Xmx2g" >> packages/luciq_flutter/example/android/gradle.properties
-            echo "android.jetifier.maxHeapSize=4g" >> packages/luciq_flutter/example/android/gradle.properties
       - setup_flutter
       - android/run-tests:
           working-directory: packages/luciq_flutter/example/android
@@ -218,12 +212,6 @@ jobs:
       tag: 2024.01.1
     steps:
       - advanced-checkout/shallow-checkout
-      - run:
-          name: Increase Gradle Heap Memory
-          command: |
-            echo "org.gradle.daemon=true" >> packages/luciq_flutter/example/android/gradle.properties
-            echo "org.gradle.jvmargs=-Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dkotlin.daemon.jvm.options=-Xmx2g" >> packages/luciq_flutter/example/android/gradle.properties
-            echo "android.jetifier.maxHeapSize=4g" >> packages/luciq_flutter/example/android/gradle.properties
       - setup_flutter
       - setup_patrol
       - android/create-avd:

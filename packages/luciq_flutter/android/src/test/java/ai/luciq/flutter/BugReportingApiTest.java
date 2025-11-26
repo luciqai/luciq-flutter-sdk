@@ -10,6 +10,7 @@ import ai.luciq.bug.BugReporting;
 import ai.luciq.bug.invocation.Option;
 import ai.luciq.flutter.generated.BugReportingPigeon;
 import ai.luciq.flutter.modules.BugReportingApi;
+import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.GlobalMocks;
 import ai.luciq.library.Feature;
 import ai.luciq.library.OnSdkDismissCallback;
@@ -208,6 +209,20 @@ public class BugReportingApiTest {
                api.addUserConsents(key, description, mandatory, checked, actionType);
 
                mBugReporting.verify(()->BugReporting.addUserConsent(key, description, mandatory, checked,"drop_auto_captured_media"));
+    }
+
+    @Test
+    public void TestAddUserConsentsWithNoAutomaticBugGrouping() {
+               final String key = "testKeyNoAutomaticBugGrouping";
+               final String description = "No automatic bug grouping consent";
+               final boolean mandatory = false;
+               final boolean checked = true;
+               final String actionType = "UserConsentActionType.noAutomaticBugGrouping";
+               String type = ArgsRegistry.userConsentActionType.get(actionType);
+
+               api.addUserConsents(key, description, mandatory, checked, actionType);
+
+               mBugReporting.verify(()->BugReporting.addUserConsent(key, description, mandatory, checked, type));
     }
     @Test
     public void testSetProactiveReportingConfigurations() {

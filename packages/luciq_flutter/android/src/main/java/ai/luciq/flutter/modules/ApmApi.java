@@ -437,6 +437,21 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     }
 
     @Override
+    public void isCustomSpanEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        // TODO: Replace with actual custom span feature check when available in native SDK
+        try {
+            InternalAPM._isFeatureEnabledCP(APMFeature.SCREEN_RENDERING, "LuciqCustomSpan", new FeatureAvailabilityCallback() {
+                @Override
+                public void invoke(boolean isEnabled) {
+                    result.success(isEnabled);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void getDeviceRefreshRateAndTolerance(@NonNull ApmPigeon.Result<List<Double>> result) {
         try {
             final double refreshRate = refreshRateCallback.call().doubleValue();
@@ -505,6 +520,21 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void syncCustomSpan(@NonNull String name, @NonNull Long startTimestamp, @NonNull Long endTimestamp) {
+        // The native Android SDK will handle the custom span
+        // This is a placeholder - actual implementation depends on Android SDK
+
+        // For now, forward to native SDK's internal method
+        // The Android team will implement the actual span recording
+
+        // Example (actual implementation TBD):
+        // APM.recordCustomSpan(name, startTimestamp, endTimestamp);
+
+        Log.d(TAG, "Custom span recorded: " + name +
+              " duration: " + (endTimestamp - startTimestamp) + " microseconds");
     }
 
 }

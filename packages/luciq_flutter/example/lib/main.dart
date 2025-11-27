@@ -29,6 +29,7 @@ part 'src/components/non_fatal_crashes_content.dart';
 part 'src/components/ndk_crashes_content.dart';
 part 'src/components/apm_switch.dart';
 part 'src/components/ui_traces_content.dart';
+part 'src/components/custom_spans_content.dart';
 part 'src/components/screen_render_switch.dart';
 part 'src/components/screen_render.dart';
 part 'src/components/animated_box.dart';
@@ -51,7 +52,7 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
-        token: 'ed6f659591566da19b67857e1b9d40ab',
+        token: '77f408c7b24432861ab63e6c56e61f32',
         invocationEvents: [InvocationEvent.floatingButton],
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',

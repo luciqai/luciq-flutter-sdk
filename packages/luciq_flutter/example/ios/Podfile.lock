@@ -36,7 +36,7 @@ PODS:
     - Flutter
   - Flutter (1.0.0)
   - Luciq (19.1.0)
-  - luciq_flutter (18.0.1):
+  - luciq_flutter (18.2.1):
     - Flutter
     - Luciq
   - OCMock (3.6)

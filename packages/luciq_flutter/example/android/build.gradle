@@ -16,6 +16,24 @@ subprojects {
     }
 }
 
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
+
+        maven {
+            url "https://mvn.luciq.ai/nexus/repository/luciq-internal/"
+            credentials {
+                username "luciq"
+                password System.getenv("LUCIQ_REPOSITORY_PASSWORD")
+            }
+        }
+    }
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

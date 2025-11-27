@@ -89,6 +89,7 @@ public final class ArgsRegistry {
         put("UserConsentActionType.dropAutoCapturedMedia",  ai.luciq.bug.userConsent.ActionType.DROP_AUTO_CAPTURED_MEDIA);
         put("UserConsentActionType.dropLogs",  ai.luciq.bug.userConsent.ActionType.DROP_LOGS);
         put("UserConsentActionType.noChat",  ai.luciq.bug.userConsent.ActionType.NO_CHAT);
+        put("UserConsentActionType.noAutomaticBugGrouping",  ai.luciq.bug.userConsent.ActionType.NO_AUTOMATIC_BUG_GROUPING);
     }};
 
     public static ArgsMap<WelcomeMessage.State> welcomeMessageStates = new ArgsMap<WelcomeMessage.State>() {{

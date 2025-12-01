@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:luciq_flutter/src/modules/apm.dart';
+import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 
@@ -22,6 +22,7 @@ class CustomSpan {
   final int _startMonotonicTimeInMicroseconds;
 
   /// Unix epoch timestamp when the span ended (microseconds).
+  //ignore: use_late_for_private_fields_and_variables
   int? _endTimeInMicroseconds;
 
   /// Duration of the span in microseconds.
@@ -57,7 +58,7 @@ class CustomSpan {
 
     try {
       // Unregister from active spans
-      APM.$unregisterSpan(this);
+      CustomSpanManager.I.unregisterSpan(this);
 
       // Calculate duration using monotonic clock
       final endMonotonicTime = LuciqMonotonicClock.I.now;
@@ -67,7 +68,7 @@ class CustomSpan {
       _endTimeInMicroseconds = _startTimeInMicroseconds + _duration!;
 
       // Send to native SDK
-      await APM.$syncCustomSpan(
+      await CustomSpanManager.I.syncCustomSpan(
         name,
         _startTimeInMicroseconds,
         _endTimeInMicroseconds!,

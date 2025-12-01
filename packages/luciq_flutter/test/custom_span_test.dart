@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/models/custom_span.dart';
-import 'package:luciq_flutter/src/modules/apm.dart';
+import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:mockito/annotations.dart';
@@ -24,12 +24,14 @@ void main() {
     mockDateTime = MockLCQDateTime();
     mockClock = MockLuciqMonotonicClock();
 
-    APM.$setHostApi(mockHost);
+    // Reset CustomSpanManager and set host
+    CustomSpanManager.resetInstance();
+    CustomSpanManager.I.$setHostApi(mockHost);
     LCQDateTime.setInstance(mockDateTime);
     LuciqMonotonicClock.setInstance(mockClock);
 
     // Clear active spans before each test
-    APM.$clearActiveSpans();
+    CustomSpanManager.I.$clearActiveSpans();
   });
 
   tearDown(() {
@@ -92,7 +94,7 @@ void main() {
           'Test Span',
           startTime,
           1500000, // startTime + 500000 duration
-        )).called(1);
+        ),).called(1);
 
         expect(span.toString(), contains('hasEnded: true'));
         expect(span.toString(), contains('duration: 500000'));
@@ -136,7 +138,7 @@ void main() {
         await span.end();
 
         // Duration is 0, which means endTime = startTime
-        // $syncCustomSpan validates end > start, so this should NOT sync
+        // syncCustomSpan validates end > start, so this should NOT sync
         verifyNever(mockHost.syncCustomSpan(any, any, any));
 
         expect(span.toString(), contains('duration: 0'));
@@ -165,10 +167,10 @@ void main() {
           'Long Span',
           startTime,
           startTime + 3600000000,
-        )).called(1);
+        ),).called(1);
       });
 
-      test('unregisters span from APM active spans', () async {
+      test('unregisters span from CustomSpanManager active spans', () async {
         const startTime = 1000000;
 
         when(mockDateTime.now()).thenReturn(
@@ -183,13 +185,13 @@ void main() {
 
         // Manually register the span (simulating startCustomSpan behavior)
         final span = CustomSpan('Test Span');
-        APM.$registerSpan(span);
+        CustomSpanManager.I.registerSpan(span);
 
-        expect(APM.activeSpanCount, 1);
+        expect(CustomSpanManager.I.activeSpanCount, 1);
 
         await span.end();
 
-        expect(APM.activeSpanCount, 0);
+        expect(CustomSpanManager.I.activeSpanCount, 0);
       });
     });
 

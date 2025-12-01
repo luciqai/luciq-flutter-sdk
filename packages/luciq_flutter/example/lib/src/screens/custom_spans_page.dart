@@ -1,13 +1,15 @@
 part of '../../main.dart';
 
-class CustomSpansContent extends StatefulWidget {
-  const CustomSpansContent({Key? key}) : super(key: key);
+class CustomSpansPage extends StatefulWidget {
+  static const screenName = 'customSpans';
+
+  const CustomSpansPage({Key? key}) : super(key: key);
 
   @override
-  State<CustomSpansContent> createState() => _CustomSpansContentState();
+  State<CustomSpansPage> createState() => _CustomSpansPageState();
 }
 
-class _CustomSpansContentState extends State<CustomSpansContent> {
+class _CustomSpansPageState extends State<CustomSpansPage> {
   final _spanNameController = TextEditingController(text: '');
   final _activeSpans = <String, CustomSpan>{};
 
@@ -88,13 +90,13 @@ class _CustomSpansContentState extends State<CustomSpansContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Span name input
-          TextField(
+    return Page(
+      title: 'Custom Spans',
+      children: [
+        // Span name input
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: TextField(
             controller: _spanNameController,
             decoration: const InputDecoration(
               labelText: 'Span Name',
@@ -102,10 +104,13 @@ class _CustomSpansContentState extends State<CustomSpansContent> {
               border: OutlineInputBorder(),
             ),
           ),
-          const SizedBox(height: 16),
+        ),
+        const SizedBox(height: 16),
 
-          // Control buttons
-          Wrap(
+        // Control buttons
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
@@ -123,28 +128,41 @@ class _CustomSpansContentState extends State<CustomSpansContent> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+        ),
+        const SizedBox(height: 24),
 
-          // Active spans list
-          const Text(
+        // Active spans section
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
             'Active Spans:',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
+        ),
+        const SizedBox(height: 8),
 
-          if (_activeSpans.isEmpty)
-            const Text('No active spans')
-          else
-            ...(_activeSpans.entries.map((entry) => Card(
-              child: ListTile(
-                title: Text(entry.key),
-                subtitle: const Text('Click to end span'),
-                trailing: const Icon(Icons.stop_circle_outlined),
-                onTap: () => _endSpan(entry.key),
-              ),
-            ))),
-        ],
-      ),
+        if (_activeSpans.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text('No active spans'),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              children: _activeSpans.entries.map((entry) => Card(
+                child: ListTile(
+                  title: Text(entry.key),
+                  subtitle: const Text('Click to end span'),
+                  trailing: const Icon(Icons.stop_circle_outlined),
+                  onTap: () => _endSpan(entry.key),
+                ),
+              )).toList(),
+            ),
+          ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }
+

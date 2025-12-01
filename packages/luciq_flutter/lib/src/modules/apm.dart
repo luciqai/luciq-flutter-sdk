@@ -3,12 +3,11 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart' show WidgetBuilder;
-import 'package:luciq_flutter/src/constants/strings.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/models/custom_span.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/models/network_data.dart';
-import 'package:luciq_flutter/src/modules/luciq.dart' show Luciq;
+import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
@@ -20,49 +19,63 @@ class APM {
   static var _host = ApmHostApi();
   static String tag = 'Luciq - APM';
 
-  /// Maximum number of concurrent custom spans allowed.
-  static const int maxConcurrentSpans = 100;
-
-  /// Set of active custom spans for tracking.
-  static final Set<CustomSpan> _activeSpans = {};
-
   /// @nodoc
   @visibleForTesting
   // ignore: use_setters_to_change_properties
   static void $setHostApi(ApmHostApi host) {
     _host = host;
+    // Also set the host for CustomSpanManager
+    CustomSpanManager.I.$setHostApi(host);
   }
 
-  /// Returns the current number of active spans.
-  /// @nodoc
-  @visibleForTesting
-  static int get activeSpanCount => _activeSpans.length;
+  // ============================================================
+  // Custom Spans - Public API (delegates to CustomSpanManager)
+  // ============================================================
 
-  /// Clears all active spans (for testing purposes only).
-  /// @nodoc
-  @visibleForTesting
-  static void $clearActiveSpans() {
-    _activeSpans.clear();
+  /// Starts a custom span with the given [name] for performance tracking.
+  ///
+  /// The [name] must not be empty and will be trimmed to 150 characters if longer.
+  /// Multiple spans can be active concurrently with the same or different names.
+  ///
+  /// Returns a [CustomSpan] object that must be ended by calling its `end()` method,
+  /// or null if the feature is disabled or the name is invalid.
+  ///
+  /// Example:
+  /// ```dart
+  /// final span = await APM.startCustomSpan('Database Query');
+  /// // ... perform operation ...
+  /// await span?.end();
+  /// ```
+  static Future<CustomSpan?> startCustomSpan(String name) {
+    return CustomSpanManager.I.startCustomSpan(name);
   }
 
-  /// Registers a span as active.
-  /// Returns true if successful, false if limit reached.
-  /// @nodoc
-  @internal
-  static bool $registerSpan(CustomSpan span) {
-    if (_activeSpans.length >= maxConcurrentSpans) {
-      return false;
-    }
-    _activeSpans.add(span);
-    return true;
+  /// Records a custom span that has already completed with specific start and end times.
+  ///
+  /// Use this API when you need to record a span retrospectively or when tracking
+  /// operations that occurred before SDK initialization.
+  ///
+  /// The [name] must not be empty and will be trimmed to 150 characters if longer.
+  /// The [startDate] must be before [endDate].
+  ///
+  /// Example:
+  /// ```dart
+  /// final start = DateTime.now();
+  /// // ... perform operation ...
+  /// final end = DateTime.now();
+  /// await APM.addCompletedCustomSpan('Cache Lookup', start, end);
+  /// ```
+  static Future<void> addCompletedCustomSpan(
+    String name,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    return CustomSpanManager.I.addCompletedCustomSpan(name, startDate, endDate);
   }
 
-  /// Unregisters a span when it ends.
-  /// @nodoc
-  @internal
-  static void $unregisterSpan(CustomSpan span) {
-    _activeSpans.remove(span);
-  }
+  // ============================================================
+  // APM Core Methods
+  // ============================================================
 
   /// Enables or disables APM feature.
   /// [boolean] isEnabled
@@ -113,6 +126,10 @@ class APM {
     return _host.setColdAppLaunchEnabled(isEnabled);
   }
 
+  // ============================================================
+  // App Flows
+  // ============================================================
+
   /// Starts an AppFlow with the given [name].
   ///
   /// The [name] must not be an empty string. It should be unique and not exceed 150 characters,
@@ -156,198 +173,9 @@ class APM {
     return _host.endFlow(name);
   }
 
-  /// Starts a custom span with the given [name] for performance tracking.
-  ///
-  /// The [name] must not be empty and will be trimmed to 150 characters if longer.
-  /// Multiple spans can be active concurrently with the same or different names.
-  ///
-  /// Returns a [CustomSpan] object that must be ended by calling its `end()` method,
-  /// or null if the feature is disabled or the name is invalid.
-  ///
-  /// Example:
-  /// ```dart
-  /// final span = await APM.startCustomSpan('Database Query');
-  /// // ... perform operation ...
-  /// await span?.end();
-  /// ```
-  static Future<CustomSpan?> startCustomSpan(String name) async {
-    // Validate name
-    if (name.trim().isEmpty) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanNameEmpty,
-        tag: tag,
-      );
-      return null;
-    }
-
-    // Check feature flag
-    final isSDKInitialized = await Luciq.isBuilt();
-    if (!isSDKInitialized) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanSDKNotInitializedMessage,
-        tag: tag,
-      );
-      return null;
-    }
-
-    final isAPMEnabled = await FlagsConfig.apm.isEnabled();
-    if (!isAPMEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanAPMDisabledMessage,
-        tag: tag,
-      );
-      return null;
-    }
-
-    final isCustomSpanEnabled = await FlagsConfig.customSpan.isEnabled();
-    if (!isCustomSpanEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanDisabled,
-        tag: tag,
-      );
-      return null;
-    }
-
-    // Check span limit
-    if (_activeSpans.length >= maxConcurrentSpans) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanLimitReached,
-        tag: tag,
-      );
-      return null;
-    }
-
-    // Trim name to limit
-    var spanName = name.trim();
-    if (spanName.length > 150) {
-      spanName = spanName.substring(0, 150);
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanNameTruncated,
-        tag: tag,
-      );
-    }
-
-    // Create span object and register it
-    final span = CustomSpan(spanName);
-    _activeSpans.add(span);
-    return span;
-  }
-
-  /// Records a custom span that has already completed with specific start and end times.
-  ///
-  /// Use this API when you need to record a span retrospectively or when tracking
-  /// operations that occurred before SDK initialization.
-  ///
-  /// The [name] must not be empty and will be trimmed to 150 characters if longer.
-  /// The [startDate] must be before [endDate].
-  ///
-  /// Example:
-  /// ```dart
-  /// final start = DateTime.now();
-  /// // ... perform operation ...
-  /// final end = DateTime.now();
-  /// await APM.addCompletedCustomSpan('Cache Lookup', start, end);
-  /// ```
-  static Future<void> addCompletedCustomSpan(
-    String name,
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    // Validate inputs
-    if (name.trim().isEmpty) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanNameEmpty,
-        tag: tag,
-      );
-      return;
-    }
-
-    if (endDate.isBefore(startDate) || endDate.isAtSameMomentAs(startDate)) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanEndTimeBeforeStartTime,
-        tag: tag,
-      );
-      return;
-    }
-
-    // Check feature flag
-    final isSDKInitialized = await Luciq.isBuilt();
-    if (!isSDKInitialized) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanSDKNotInitializedMessage,
-        tag: tag,
-      );
-      return;
-    }
-
-    final isAPMEnabled = await FlagsConfig.apm.isEnabled();
-    if (!isAPMEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanAPMDisabledMessage,
-        tag: tag,
-      );
-      return;
-    }
-
-    final isCustomSpanEnabled = await FlagsConfig.customSpan.isEnabled();
-    if (!isCustomSpanEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanDisabled,
-        tag: tag,
-      );
-      return;
-    }
-
-    // Convert to microseconds
-    final startTimestamp = startDate.microsecondsSinceEpoch;
-    final endTimestamp = endDate.microsecondsSinceEpoch;
-
-    // Send to native
-    return $syncCustomSpan(name, startTimestamp, endTimestamp);
-  }
-
-  /// Internal method to sync custom span data to native SDK.
-  /// Used by CustomSpan.end() and addCompletedCustomSpan().
-  @internal
-  static Future<void> $syncCustomSpan(
-    String name,
-    int startTimestamp,
-    int endTimestamp,
-  ) async {
-    // Validate inputs
-    if (name.isEmpty) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanNameEmpty,
-        tag: tag,
-      );
-      return;
-    }
-
-    if (endTimestamp <= startTimestamp) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanEndTimeBeforeStartTime,
-        tag: tag,
-      );
-      return;
-    }
-
-    // Trim name to 150 characters if needed
-    var spanName = name.trim();
-    if (spanName.length > 150) {
-      spanName = spanName.substring(0, 150);
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanNameTruncated,
-        tag: tag,
-      );
-    }
-
-    // Send to native
-    return _host.syncCustomSpan(
-      spanName,
-      startTimestamp,
-      endTimestamp,
-    );
-  }
+  // ============================================================
+  // UI Traces
+  // ============================================================
 
   /// Sets whether auto UI trace is enabled or not.
   ///
@@ -411,6 +239,10 @@ class APM {
     return _host.endUITrace();
   }
 
+  // ============================================================
+  // App Launch
+  // ============================================================
+
   /// Defines when an app launch is complete,
   /// such as when it's intractable, use the end app launch API.
   /// You can then view this data with the automatic cold and hot app launches.
@@ -420,6 +252,10 @@ class APM {
   static Future<void> endAppLaunch() async {
     return _host.endAppLaunch();
   }
+
+  // ============================================================
+  // Network Logging
+  // ============================================================
 
   /// Logs network data for Luciq Android SDK if the app is running on an
   /// Android platform.
@@ -435,6 +271,10 @@ class APM {
       return _host.networkLogAndroid(data.toJson());
     }
   }
+
+  // ============================================================
+  // Internal CP (Cross-Platform) UI Trace Methods
+  // ============================================================
 
   /// Logs a message and then starts a UI trace with the provided screen
   /// name, start time, and trace ID.
@@ -464,6 +304,10 @@ class APM {
     );
     return _host.startCpUiTrace(screenName, startTimeInMicroseconds, traceId);
   }
+
+  // ============================================================
+  // Screen Loading Methods
+  // ============================================================
 
   /// Reports screen loading trace with specific details.
   ///
@@ -567,6 +411,10 @@ class APM {
   static Future<bool> isAutoUiTraceEnabled() async {
     return _host.isAutoUiTraceEnabled();
   }
+
+  // ============================================================
+  // Screen Rendering Methods
+  // ============================================================
 
   /// Returns a Future<bool> indicating whether the screen
   /// render is enabled.

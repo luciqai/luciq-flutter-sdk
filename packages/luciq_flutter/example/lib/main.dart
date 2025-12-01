@@ -29,7 +29,6 @@ part 'src/components/non_fatal_crashes_content.dart';
 part 'src/components/ndk_crashes_content.dart';
 part 'src/components/apm_switch.dart';
 part 'src/components/ui_traces_content.dart';
-part 'src/components/custom_spans_content.dart';
 part 'src/components/screen_render_switch.dart';
 part 'src/components/screen_render.dart';
 part 'src/components/animated_box.dart';
@@ -45,6 +44,7 @@ part 'src/screens/screen_capture_premature_extension_page.dart';
 part 'src/screens/screen_loading_page.dart';
 part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
+part 'src/screens/custom_spans_page.dart';
 
 void main() {
   runZonedGuarded(

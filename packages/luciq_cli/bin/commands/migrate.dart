@@ -253,7 +253,7 @@ class MigrateCommand {
       versionUpdates: [
         const VersionUpdate(
           fromPattern: "instabug_flutter\\s*:\\s*[^\\s]+",
-          toPattern: "luciq_flutter: ^18.2.0",
+          toPattern: "luciq_flutter: ^18.2.1",
           targetExtensions: [".yaml"],
         ),
         const VersionUpdate(
@@ -312,7 +312,7 @@ class MigrateCommand {
 
     // Define package mappings for regular dependencies
     final packageMappings = {
-      'instabug_flutter': 'luciq_flutter: ^18.2.0',
+      'instabug_flutter': 'luciq_flutter: ^18.2.1',
       'instabug_dio_interceptor': 'luciq_dio_interceptor: ^3.0.0',
       'instabug_http_client': 'luciq_http_client: ^3.0.0',
       'instabug_flutter_modular': 'luciq_flutter_modular: ^2.0.0',
@@ -320,7 +320,7 @@ class MigrateCommand {
 
     // Define Git dependency mappings
     final gitDependencyMappings = {
-      'instabug_flutter': 'luciq_flutter: ^18.2.0\n',
+      'instabug_flutter': 'luciq_flutter: ^18.2.1\n',
       'instabug_dio_interceptor': 'luciq_dio_interceptor: ^3.0.0\n',
       'instabug_http_client': 'luciq_http_client: ^3.0.0\n',
       'instabug_flutter_modular': 'luciq_flutter_modular: ^2.0.0\n',

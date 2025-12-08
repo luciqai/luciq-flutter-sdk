@@ -158,7 +158,12 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
 
   bool isElementInCurrentRoute(Element element) {
     final modalRoute = ModalRoute.of(element);
-    return modalRoute?.isCurrent ?? false;
+
+    if (modalRoute == null) {
+      return true;
+    }
+
+    return modalRoute.isCurrent;
   }
 
   @override

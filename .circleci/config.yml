@@ -612,3 +612,15 @@ workflows:
           requires:
             - release_luciq_flutter
           context: slack-app
+
+  send-release-notes:
+    jobs:
+      - hold_slack_notification:
+          type: approval
+          filters:
+            branches:
+              only: ci/automate-release-notes-for-slack
+      - release_slack_notification:
+          requires:
+            - hold_slack_notification
+          context: slack-app

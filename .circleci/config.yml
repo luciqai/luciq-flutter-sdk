@@ -6,6 +6,7 @@ orbs:
   node: circleci/node@5.2.0
   ios: circleci/macos@2.5.4
   advanced-checkout: vsco/advanced-checkout@1.1.0
+  slack: circleci/slack@5.1.1
 
 executors:
   flutter-executor:
@@ -139,6 +140,38 @@ commands:
                   - run:
                       name: Build Pigeons
                       command: dart run build_runner build --delete-conflicting-outputs
+
+  notify_slack_with_release:
+    steps:
+      - slack/notify:
+          channel: C08F3Q30U7Q
+          event: pass
+          custom: |
+            {
+            	"blocks": [
+            		{
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": ":flutter: Flutter `v$(./scripts/releases/get_sdk_version.sh)` is released by <@$(./scripts/releases/get_job_approver.sh)> 🚀"
+                        }
+                    },
+            		{
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "$(./scripts/releases/get_release_notes.sh)"
+                        }
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "cc: <@U5697F4EL> @support_team <@ULDFCC09J>"
+                        }
+                    }
+                ]
+            }
 
 jobs:
   danger:
@@ -456,6 +489,14 @@ jobs:
           working_directory: packages/luciq_flutter
           command: Escape flutter publish-monorepo-luciq
 
+  release_slack_notification:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - advanced-checkout/shallow-checkout
+      - notify_slack_with_release
+
+
 workflows:
   version: 2
   build-test-and-approval-deploy:
@@ -567,3 +608,7 @@ workflows:
           filters:
             branches:
               only: master
+      - release_slack_notification:
+          requires:
+            - release_luciq_flutter
+          context: slack-app

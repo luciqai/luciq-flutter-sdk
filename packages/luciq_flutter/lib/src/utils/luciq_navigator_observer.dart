@@ -34,11 +34,11 @@ class LuciqNavigatorObserver extends NavigatorObserver {
       WidgetsBinding.instance?.addPostFrameCallback((_) async {
         try {
           //Ends the last screen rendering collector
-        LuciqScreenRenderManager.I.endScreenRenderCollector();
-        // Starts a the new UI trace which is exclusive to screen loading
+          LuciqScreenRenderManager.I.endScreenRenderCollector();
+          // Starts a the new UI trace which is exclusive to screen loading
           ScreenLoadingManager.I
-            .startUiTrace(maskedScreenName, screenName)
-            .then(_startScreenRenderCollector);
+              .startUiTrace(maskedScreenName, screenName)
+              .then(_startScreenRenderCollector);
 
           // If there is a step that hasn't been pushed yet
           final pendingStep = _steps.isNotEmpty ? _steps.last : null;

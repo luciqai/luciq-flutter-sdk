@@ -63,6 +63,33 @@ void main() {
     });
   });
 
+  test('should respect configured screen report delay', () {
+    fakeAsync((async) {
+      observer = LuciqNavigatorObserver(
+        screenReportDelay: const Duration(milliseconds: 500),
+      );
+
+      observer.didPush(route, previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 400));
+
+      verifyNever(
+        mHost.reportScreenChange(screen),
+      );
+
+      async.elapse(const Duration(milliseconds: 100));
+
+      verify(
+        mScreenLoadingManager.startUiTrace(screen, screen),
+      ).called(1);
+
+      verify(
+        mHost.reportScreenChange(screen),
+      ).called(1);
+    });
+  });
+
   test(
       'should report screen change when a route is popped and previous is known',
       () {

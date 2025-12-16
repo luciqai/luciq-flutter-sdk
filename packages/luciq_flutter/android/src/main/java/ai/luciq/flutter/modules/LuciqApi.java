@@ -770,5 +770,17 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 }
         );
     }
+    @Override
+    public void setNetworkAutoMaskingEnabled(@NonNull Boolean isEnabled) {
+        try {
+            if (isEnabled)
+                Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED);
+            else
+                Luciq.setNetworkAutoMaskingState(Feature.State.DISABLED);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
 
 }

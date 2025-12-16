@@ -26,6 +26,8 @@ part 'src/components/fatal_crashes_content.dart';
 part 'src/components/flows_content.dart';
 part 'src/components/network_content.dart';
 part 'src/components/non_fatal_crashes_content.dart';
+part 'src/components/ndk_crashes_content.dart';
+
 part 'src/components/page.dart';
 part 'src/components/apm_switch.dart';
 part 'src/components/animated_box.dart';
@@ -51,11 +53,24 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
-          token: 'ed6f659591566da19b67857e1b9d40ab',
-          invocationEvents: [InvocationEvent.floatingButton],
-          debugLogsLevel: LogLevel.verbose,
-          appVariant: 'variant 1');
+        token: 'ed6f659591566da19b67857e1b9d40ab',
+        invocationEvents: [InvocationEvent.floatingButton],
+        debugLogsLevel: LogLevel.verbose,
+        appVariant: 'variant 1',
+      );
       APM.setScreenRenderingEnabled(true);
+
+      BugReporting.setProactiveReportingConfigurations(
+        const ProactiveReportingConfigs(
+          enabled: true,
+          gapBetweenModals: 2, //time in seconds
+          modalDelayAfterDetection: 2, //time in seconds
+        ),
+      );
+
+      CrashReporting.setNDKEnabled(true);
+
+      CrashReporting.setNDKEnabled(true);
 
       Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
       FlutterError.onError = (FlutterErrorDetails details) {

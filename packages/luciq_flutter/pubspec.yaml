@@ -1,5 +1,5 @@
 name: luciq_flutter
-version: 18.0.0
+version: 18.2.1
 description: >-
   The official SDK for Luciq, the Agentic Observability Platform for Mobile. 
   Use AI agents to resolve issues faster and empower your team to focus on building what matters.
@@ -24,6 +24,9 @@ dev_dependencies:
   pana: ^0.21.0
   # pigeon v3.0.0 is needed for running Flutter 2 tests on CI
   pigeon: ">=3.0.0 <=10.1.5"
+
+
+
 
 
 flutter:

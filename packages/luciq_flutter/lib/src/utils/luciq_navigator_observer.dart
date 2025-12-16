@@ -10,6 +10,11 @@ import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 
 class LuciqNavigatorObserver extends NavigatorObserver {
+  LuciqNavigatorObserver({Duration? screenReportDelay})
+      : _screenReportDelay =
+            screenReportDelay ?? const Duration(milliseconds: 100);
+
+  final Duration _screenReportDelay;
   final List<LuciqRoute> _steps = [];
 
   void screenChanged(Route newRoute) {
@@ -27,27 +32,33 @@ class LuciqNavigatorObserver extends NavigatorObserver {
 
       //ignore: invalid_null_aware_operator
       WidgetsBinding.instance?.addPostFrameCallback((_) async {
-        //Ends the last screen rendering collector
+        try {
+          //Ends the last screen rendering collector
         LuciqScreenRenderManager.I.endScreenRenderCollector();
         // Starts a the new UI trace which is exclusive to screen loading
-        ScreenLoadingManager.I
+          ScreenLoadingManager.I
             .startUiTrace(maskedScreenName, screenName)
             .then(_startScreenRenderCollector);
 
-        // If there is a step that hasn't been pushed yet
-        if (_steps.isNotEmpty) {
-          await reportScreenChange(_steps.last.name);
-          // Report the last step and remove it from the list
-          _steps.removeLast();
-        }
+          // If there is a step that hasn't been pushed yet
+          final pendingStep = _steps.isNotEmpty ? _steps.last : null;
+          if (pendingStep != null) {
+            await reportScreenChange(pendingStep.name);
+            // Remove the specific pending step regardless of current ordering
+            _steps.remove(pendingStep);
+          }
 
-        // Add the new step to the list
-        _steps.add(route);
+          // Add the new step to the list
+          _steps.add(route);
 
-        // If this route is in the array, report it and remove it from the list
-        if (_steps.contains(route)) {
-          await reportScreenChange(route.name);
-          _steps.remove(route);
+          // If this route is in the array, report it and remove it from the list
+          if (_steps.contains(route)) {
+            await reportScreenChange(route.name);
+            _steps.remove(route);
+          }
+        } catch (e) {
+          LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
+          LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
         }
       });
     } catch (e) {
@@ -58,7 +69,7 @@ class LuciqNavigatorObserver extends NavigatorObserver {
 
   Future<void> reportScreenChange(String name) async {
     // Wait for the animation to complete
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(_screenReportDelay);
 
     Luciq.reportScreenChange(name);
   }

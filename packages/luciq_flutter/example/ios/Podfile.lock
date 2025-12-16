@@ -1,4 +1,5 @@
 PODS:
+  - CocoaAsyncSocket (7.6.5)
   - DKImagePickerController/Core (4.3.9):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
@@ -34,14 +35,18 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Luciq (18.0.40)
-  - luciq_flutter (18.0.0):
+  - Luciq (19.1.0)
+  - luciq_flutter (18.2.1):
     - Flutter
-    - Luciq (= 18.0.40)
+    - Luciq (= 19.1.0)
   - OCMock (3.6)
-  - SDWebImage (5.21.2):
-    - SDWebImage/Core (= 5.21.2)
-  - SDWebImage/Core (5.21.2)
+  - patrol (0.0.1):
+    - CocoaAsyncSocket (~> 7.6)
+    - Flutter
+    - FlutterMacOS
+  - SDWebImage (5.21.3):
+    - SDWebImage/Core (= 5.21.3)
+  - SDWebImage/Core (5.21.3)
   - SwiftyGif (5.4.5)
   - video_player_avfoundation (0.0.1):
     - Flutter
@@ -50,15 +55,17 @@ PODS:
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
-  - Luciq (from `https://ios-releases.luciq.ai/custom/faeture-screen_rendering-release/18.0.40/Luciq.podspec`)
   - luciq_flutter (from `.symlinks/plugins/luciq_flutter/ios`)
   - OCMock (= 3.6)
+  - patrol (from `.symlinks/plugins/patrol/darwin`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
 
 SPEC REPOS:
   trunk:
+    - CocoaAsyncSocket
     - DKImagePickerController
     - DKPhotoGallery
+    - Luciq
     - OCMock
     - SDWebImage
     - SwiftyGif
@@ -68,25 +75,27 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
-  Luciq:
-    :podspec: https://ios-releases.luciq.ai/custom/faeture-screen_rendering-release/18.0.40/Luciq.podspec
   luciq_flutter:
     :path: ".symlinks/plugins/luciq_flutter/ios"
+  patrol:
+    :path: ".symlinks/plugins/patrol/darwin"
   video_player_avfoundation:
     :path: ".symlinks/plugins/video_player_avfoundation/darwin"
 
 SPEC CHECKSUMS:
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Luciq: f68989674cd5555440a38fb8c3d0aaf5fde522b2
-  luciq_flutter: f155e64e501e69ee89a3363feb594d056d0a51f0
+  Luciq: 361dd60882645e0c431a005a7512ea137181d21b
+  luciq_flutter: da3a3643105ea9899e952bfb9321ba8defa1c090
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
-  SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
+  patrol: 51b76cc7c11a2933ee3e72482d930c75b9d4ec73
+  SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
 
-PODFILE CHECKSUM: 4595eca4c9e856a8355a9b2a356a7d95fdf861d4
+PODFILE CHECKSUM: ae57b29f0c9d0c90e20041b0a24a20bca81d6332
 
 COCOAPODS: 1.16.2

@@ -10,7 +10,7 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
   LuciqWidgetsBindingObserver._();
 
   static final LuciqWidgetsBindingObserver _instance =
-  LuciqWidgetsBindingObserver._();
+      LuciqWidgetsBindingObserver._();
 
   /// Returns the singleton instance of [LuciqWidgetsBindingObserver].
   static LuciqWidgetsBindingObserver get instance => _instance;
@@ -34,7 +34,7 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
       if (uiTraceId == null) return;
 
       final isScreenRenderEnabled =
-      await FlagsConfig.screenRendering.isEnabled();
+          await FlagsConfig.screenRendering.isEnabled();
 
       if (!isScreenRenderEnabled) return;
 

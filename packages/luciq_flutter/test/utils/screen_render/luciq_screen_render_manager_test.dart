@@ -8,7 +8,6 @@ import 'package:mockito/mockito.dart';
 
 import 'luciq_screen_render_manager_test_manual_mocks.dart';
 
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -59,7 +58,8 @@ void main() {
     });
 
     test('should attach timing listener if it is not attached', () async {
-      manager.syncCollectedScreenRenderingData(); // this should detach listener safely
+      manager
+          .syncCollectedScreenRenderingData(); // this should detach listener safely
 
       manager.startScreenRenderCollectorForTraceId(1);
 

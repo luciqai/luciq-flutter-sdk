@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '15.0'
+platform :ios, '15.4'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -30,7 +30,6 @@ target 'Runner' do
 
   use_frameworks!
   use_modular_headers!
-  pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/faeture-screen_rendering-release/19.1.49/Luciq.podspec'
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
 target 'RunnerUITests' do

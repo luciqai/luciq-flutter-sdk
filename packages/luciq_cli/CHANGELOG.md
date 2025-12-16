@@ -9,7 +9,7 @@
 
 ### Fixed
 - migrate to version 18.2.1
-
+ 
 ## [1.0.8](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.0...dev) (October 28, 2025)
 
 ### Fixed

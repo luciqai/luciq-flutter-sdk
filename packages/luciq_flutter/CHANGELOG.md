@@ -27,7 +27,7 @@
 
 ### Changed
 
-- Bump Luciq iOS SDK to v19.2.0 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.1.0).
+- Bump Luciq iOS SDK to v19.1.0 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.1.0).
 
 - Bump Luciq Android SDK to v18.2.0 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v18.2.0).
 

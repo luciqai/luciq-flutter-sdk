@@ -22,6 +22,8 @@ import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
+import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart'
+    show LuciqScreenRenderManager;
 import 'package:luciq_flutter/src/utils/user_steps/user_step_details.dart';
 import 'package:meta/meta.dart';
 
@@ -137,6 +139,24 @@ enum CustomTextPlaceHolderKey {
 
 enum ReproStepsMode { enabled, disabled, enabledWithNoScreenshots }
 
+/// Disposal manager for handling Android lifecycle events
+class _LuciqDisposalManager implements LuciqFlutterApi {
+  _LuciqDisposalManager._();
+
+  static final _LuciqDisposalManager _instance = _LuciqDisposalManager._();
+
+  static _LuciqDisposalManager get instance => _instance;
+
+  @override
+  void dispose() {
+    // Call the LuciqScreenRenderManager [syncCollectedScreenRenderingData] method when Android onPause is triggered
+    // to overcome calling onActivityDestroy() from android side before sending the data to it.
+
+    //Save the screen rendering data for the active traces Auto|Custom.
+    LuciqScreenRenderManager.I.syncCollectedScreenRenderingData();
+  }
+}
+
 class Luciq {
   static var _host = LuciqHostApi();
 
@@ -155,6 +175,8 @@ class Luciq {
     BugReporting.$setup();
     Replies.$setup();
     Surveys.$setup();
+    // Set up LuciqFlutterApi for Android onDestroy disposal
+    LuciqFlutterApi.setup(_LuciqDisposalManager.instance);
   }
 
   /// @nodoc

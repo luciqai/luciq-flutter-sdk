@@ -17,6 +17,6 @@ while IFS= read -r line; do
     line=$(./scripts/releases/changelog_to_slack_formatter.sh <<< "$line")
     latest_release+="$line\n"
   fi
-done < CHANGELOG.md
+done < packages/luciq_flutter/CHANGELOG.md
 
 echo "$latest_release"

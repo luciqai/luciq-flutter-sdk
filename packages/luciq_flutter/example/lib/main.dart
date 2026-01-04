@@ -44,6 +44,7 @@ part 'src/screens/screen_capture_premature_extension_page.dart';
 part 'src/screens/screen_loading_page.dart';
 part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
+part 'src/screens/custom_spans_page.dart';
 
 void main() {
   runZonedGuarded(
@@ -51,7 +52,7 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
-        token: 'ed6f659591566da19b67857e1b9d40ab',
+        token: '77f408c7b24432861ab63e6c56e61f32',
         invocationEvents: [InvocationEvent.floatingButton],
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',

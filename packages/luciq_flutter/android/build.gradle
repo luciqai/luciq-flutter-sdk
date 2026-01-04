@@ -20,6 +20,13 @@ rootProject.allprojects {
         maven {
             url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
+        maven {
+            url "https://mvn.luciq.ai/nexus/repository/luciq-internal/"
+            credentials {
+                username "luciq"
+                password System.getenv("LUCIQ_REPOSITORY_PASSWORD")
+            }
+        }
     }
 }
 

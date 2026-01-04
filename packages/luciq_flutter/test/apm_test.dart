@@ -2,33 +2,49 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
+import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
+import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'apm_test.mocks.dart';
 
+// Note: Detailed custom span tests are in custom_span_manager_test.dart
+// APM tests here only verify the public API delegation
+
 @GenerateMocks([
   ApmHostApi,
+  LuciqHostApi,
   LCQDateTime,
   LCQBuildInfo,
   LuciqScreenRenderManager,
+  LuciqLogger,
+  LuciqMonotonicClock,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
 
   final mHost = MockApmHostApi();
+  final mLuciqHost = MockLuciqHostApi();
   final mDateTime = MockLCQDateTime();
   final mBuildInfo = MockLCQBuildInfo();
   final mScreenRenderManager = MockLuciqScreenRenderManager();
+  final mLuciqLogger = MockLuciqLogger();
+  final mMonotonicClock = MockLuciqMonotonicClock();
 
   setUpAll(() {
     APM.$setHostApi(mHost);
+    Luciq.$setHostApi(mLuciqHost);
     LCQDateTime.setInstance(mDateTime);
     LCQBuildInfo.setInstance(mBuildInfo);
+    LuciqLogger.setInstance(mLuciqLogger);
+    LuciqMonotonicClock.setInstance(mMonotonicClock);
   });
 
   test('[setEnabled] should call host method', () async {
@@ -336,6 +352,50 @@ void main() {
       verifyNever(
         mScreenRenderManager.endScreenRenderCollector(),
       );
+    });
+  });
+
+  group('Custom Spans - APM Public API', () {
+    late DateTime time;
+
+    setUp(() {
+      time = DateTime.now();
+      when(mDateTime.now()).thenReturn(time);
+      when(mMonotonicClock.now).thenReturn(1000000);
+      // Reset mocks for Custom Spans tests
+      reset(mLuciqHost);
+      reset(mHost);
+      reset(mLuciqLogger);
+      // Clear active spans before each test
+      CustomSpanManager.I.$clearActiveSpans();
+    });
+
+    test('startCustomSpan delegates to CustomSpanManager', () async {
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
+      when(mHost.isEnabled()).thenAnswer((_) async => true);
+      when(mHost.isCustomSpanEnabled()).thenAnswer((_) async => true);
+
+      final span = await APM.startCustomSpan('Test Span');
+
+      expect(span, isNotNull);
+      expect(span!.name, 'Test Span');
+      expect(CustomSpanManager.I.activeSpanCount, 1);
+    });
+
+    test('addCompletedCustomSpan delegates to CustomSpanManager', () async {
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
+      when(mHost.isEnabled()).thenAnswer((_) async => true);
+      when(mHost.isCustomSpanEnabled()).thenAnswer((_) async => true);
+      final start = DateTime(2025, 1, 1, 10);
+      final end = DateTime(2025, 1, 1, 10, 0, 1);
+
+      await APM.addCompletedCustomSpan('Test Span', start, end);
+
+      verify(mHost.syncCustomSpan(
+        'Test Span',
+        start.microsecondsSinceEpoch,
+        end.microsecondsSinceEpoch,
+      ),).called(1);
     });
   });
 }

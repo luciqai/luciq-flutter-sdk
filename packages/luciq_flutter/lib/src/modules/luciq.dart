@@ -22,8 +22,7 @@ import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
-import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart'
-    show LuciqScreenRenderManager;
+import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart' show LuciqScreenRenderManager;
 import 'package:luciq_flutter/src/utils/user_steps/user_step_details.dart';
 import 'package:meta/meta.dart';
 

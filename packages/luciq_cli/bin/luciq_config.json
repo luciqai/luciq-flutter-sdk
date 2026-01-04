@@ -75,7 +75,7 @@
   "versionUpdates": [
     {
       "fromPattern": "instabug_flutter:\\s*\\n\\s*git:[\\s\\S]*?(?=\\n[a-zA-Z_]|\\n\\n|$)",
-      "toPattern": "luciq_flutter: ^18.2.0\n",
+      "toPattern": "luciq_flutter: ^19.0.0\n",
       "targetExtensions": [".yaml"]
     },
     {
@@ -95,7 +95,7 @@
     },
     {
       "fromPattern": "instabug_flutter\\s*:\\s*[^\\s]+",
-      "toPattern": "luciq_flutter: ^18.2.0\n",
+      "toPattern": "luciq_flutter: ^19.0.0\n",
       "targetExtensions": [".yaml"]
     },
     {

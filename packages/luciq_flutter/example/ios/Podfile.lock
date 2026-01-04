@@ -35,18 +35,18 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Luciq (19.1.48)
-  - luciq_flutter (18.0.1):
+  - Luciq (19.2.0)
+  - luciq_flutter (19.0.0):
     - Flutter
-    - Luciq (= 19.1.48)
+    - Luciq (= 19.2.0)
   - OCMock (3.6)
   - patrol (0.0.1):
     - CocoaAsyncSocket (~> 7.6)
     - Flutter
     - FlutterMacOS
-  - SDWebImage (5.21.3):
-    - SDWebImage/Core (= 5.21.3)
-  - SDWebImage/Core (5.21.3)
+  - SDWebImage (5.21.5):
+    - SDWebImage/Core (= 5.21.5)
+  - SDWebImage/Core (5.21.5)
   - SwiftyGif (5.4.5)
   - video_player_avfoundation (0.0.1):
     - Flutter
@@ -55,7 +55,6 @@ PODS:
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
-  - Luciq (from `https://ios-releases.luciq.ai/custom/faeture-screen_rendering-release/19.1.48/Luciq.podspec`)
   - luciq_flutter (from `.symlinks/plugins/luciq_flutter/ios`)
   - OCMock (= 3.6)
   - patrol (from `.symlinks/plugins/patrol/darwin`)
@@ -66,6 +65,7 @@ SPEC REPOS:
     - CocoaAsyncSocket
     - DKImagePickerController
     - DKPhotoGallery
+    - Luciq
     - OCMock
     - SDWebImage
     - SwiftyGif
@@ -75,8 +75,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
-  Luciq:
-    :podspec: https://ios-releases.luciq.ai/custom/faeture-screen_rendering-release/19.1.48/Luciq.podspec
   luciq_flutter:
     :path: ".symlinks/plugins/luciq_flutter/ios"
   patrol:
@@ -89,15 +87,15 @@ SPEC CHECKSUMS:
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Luciq: 185c0fa07f0b509c12fa0aab2073403a8d697b9b
-  luciq_flutter: f3cdd582447bdd069a0bc80fb6f5a21614bbbd7d
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  Luciq: 7c99d17c0cdfb7a90fd1df26733cd82042462e6b
+  luciq_flutter: 79fabe04e0439096b9052dabb78c092441feb06c
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
   patrol: 51b76cc7c11a2933ee3e72482d930c75b9d4ec73
-  SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
+  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
 
-PODFILE CHECKSUM: 603dd9a7c9a4b6255e13e5ddc29d6e149ebef65f
+PODFILE CHECKSUM: 2fac70ef5212a738d3e6dd688a655571d8ec3c6e
 
 COCOAPODS: 1.16.2

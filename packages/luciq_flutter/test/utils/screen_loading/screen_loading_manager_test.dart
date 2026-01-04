@@ -186,8 +186,7 @@ void main() {
       verifyNever(mApmHost.startCpUiTrace(any, any, any));
     });
 
-    test('[startUiTrace] with APM disabled should Log error',
-        () async {
+    test('[startUiTrace] with APM disabled should Log error', () async {
       mScreenLoadingManager.currentUiTrace = uiTrace;
       when(FlagsConfig.uiTrace.isEnabled()).thenAnswer((_) async => false);
 

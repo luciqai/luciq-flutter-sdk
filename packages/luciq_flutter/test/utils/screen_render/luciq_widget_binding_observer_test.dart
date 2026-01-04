@@ -12,9 +12,6 @@ import 'package:mockito/mockito.dart';
 
 import 'luciq_widget_binding_observer_test.mocks.dart';
 
-
-
-
 @GenerateMocks([
   LuciqScreenRenderManager,
   ScreenLoadingManager,

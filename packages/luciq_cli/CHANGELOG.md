@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.11](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.0.0...dev) (January 5, 2026)
+
+### Fixed
+-migrate to version 19.1.0
+
 ## [1.0.10](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.0.0...dev) (December 17, 2025)
 
 ### Fixed

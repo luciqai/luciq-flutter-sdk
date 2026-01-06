@@ -38,7 +38,7 @@ PODS:
   - Luciq (19.2.0)
   - luciq_flutter (19.0.0):
     - Flutter
-    - Luciq (= 19.2.0)
+    - Luciq (= 19.3.0)
   - OCMock (3.6)
   - patrol (0.0.1):
     - CocoaAsyncSocket (~> 7.6)

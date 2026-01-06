@@ -1,5 +1,14 @@
 # Changelog
 
+## [19.1.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
+
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.3.0 ([#33](https://github.com/luciqai/luciq-flutter-sdk/pull/33)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.3.0).
+
+- Bump Luciq Android SDK to v19.1.0 ([#33](https://github.com/luciqai/luciq-flutter-sdk/pull/33)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.1.0).
+
 ## [19.0.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.0.0...18.2.1) (December 16, 2025)
 
 ### Added

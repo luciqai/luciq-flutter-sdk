@@ -6,6 +6,27 @@
 
 - Add new UserConsentActionType - noAutomaticBugGrouping.
 
+## [19.1.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.3.0 ([#33](https://github.com/luciqai/luciq-flutter-sdk/pull/33)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.3.0).
+
+- Bump Luciq Android SDK to v19.1.0 ([#33](https://github.com/luciqai/luciq-flutter-sdk/pull/33)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.1.0).
+
+## [19.0.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.0.0...18.2.1) (December 16, 2025)
+
+### Added
+
+- Add support for Screen Rendering ([#22](https://github.com/luciqai/luciq-flutter-sdk/pull/22))
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.2.0 ([#22](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.2.0).
+
+- Bump Luciq Android SDK to v19.0.0 ([#22](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.0.0).
+
+
 ## [18.2.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v18.2.1...18.2.0) (November 26, 2025)
 
 ### Fixed

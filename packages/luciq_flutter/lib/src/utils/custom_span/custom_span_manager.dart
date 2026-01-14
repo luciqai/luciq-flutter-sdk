@@ -48,7 +48,7 @@ class CustomSpanManager {
   static const int maxNameLength = 150;
 
   /// List of active custom spans for tracking.
-  final List<CustomSpan> _activeSpans = [];
+  final Set<CustomSpan> _activeSpans = {};
 
   /// Sets the host API for native communication.
   /// Called from APM.$setHostApi and tests.

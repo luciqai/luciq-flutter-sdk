@@ -247,13 +247,6 @@ NSMutableDictionary *traces;
         NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:startSeconds];
         NSDate *endDate   = [NSDate dateWithTimeIntervalSince1970:endSeconds];
 
-        // Log for verification
-        NSLog(@"[CustomSpan] Syncing span - name: %@, start: %.0f μs, end: %.0f μs, duration: %.0f μs",
-              name,
-              startTimestamp.doubleValue,
-              endTimestamp.doubleValue,
-              endTimestamp.doubleValue - startTimestamp.doubleValue);
-
         // Send span to native APM SDK
         [LCQAPM addCompletedCustomSpanWithName:name
                                      startDate:startDate

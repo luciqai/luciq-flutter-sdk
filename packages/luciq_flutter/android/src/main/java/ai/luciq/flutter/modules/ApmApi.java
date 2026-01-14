@@ -523,8 +523,6 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void syncCustomSpan(@NonNull String name, @NonNull Long startTimestamp, @NonNull Long endTimestamp) {
-        Log.d(TAG, "Custom span recorded: " + name + " duration: " + (endTimestamp - startTimestamp) + " microseconds");
-
         try {
             // Convert microseconds to milliseconds for Date objects
             Date startDate = new Date(startTimestamp / 1000);

@@ -55,7 +55,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:19.1.0.7568581-SNAPSHOT'
+    api 'ai.luciq.library:luciq:19.1.0.7568131-SNAPSHOT'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

@@ -165,6 +165,13 @@ NSMutableDictionary *traces;
     completion(isEnabledNumber, nil);
 }
 
+// TODO: Replace with actual custom span feature check when available in native SDK
+- (void)isCustomSpanEnabledWithCompletion:(void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion{
+    BOOL isCustomSpanEnabled = LCQAPM.isScreenRenderingOperational;
+    NSNumber *isEnabledNumber = @(isCustomSpanEnabled);
+    completion(isEnabledNumber, nil);
+}
+
 - (void)setScreenRenderEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LCQAPM setScreenRenderingEnabled:[isEnabled boolValue]];
 
@@ -222,6 +229,25 @@ NSMutableDictionary *traces;
     BOOL isAutoUiTraceIsEnabled = LCQAPM.autoUITraceEnabled && LCQAPM.enabled;
     NSNumber *isEnabledNumber = @(isAutoUiTraceIsEnabled);
     completion(isEnabledNumber, nil);
+}
+
+- (void)syncCustomSpanName:(NSString *)name
+           startTimestamp:(NSNumber *)startTimestamp
+             endTimestamp:(NSNumber *)endTimestamp
+                    error:(FlutterError *_Nullable *_Nonnull)error {
+    // The native iOS SDK will handle the custom span
+    // This is a placeholder - actual implementation depends on iOS SDK
+
+    // For now, forward to native SDK's internal method
+    // The iOS team will implement the actual span recording
+
+    // Example (actual implementation TBD):
+    // [LCQAPM recordCustomSpanWithName:name
+    //                   startTimestamp:startTimestamp.longLongValue
+    //                     endTimestamp:endTimestamp.longLongValue];
+
+    NSLog(@"Luciq-Flutter: Custom span recorded: %@ duration: %lld microseconds",
+          name, endTimestamp.longLongValue - startTimestamp.longLongValue);
 }
 
 

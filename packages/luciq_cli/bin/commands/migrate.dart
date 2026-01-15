@@ -200,24 +200,19 @@ class MigrateCommand {
             SearchReplace(search: "Instabug", replacement: "Luciq"),
             SearchReplace(search: "instabug", replacement: "luciq"),
             SearchReplace(search: "INSTABUG", replacement: "LUCIQ"),
-            SearchReplace(search: "IBG", replacement: "LCQ"),
+            const SearchReplace(search: "IBG", replacement: "LCQ"),
             SearchReplace(search: "ibg", replacement: "lcq"),
             SearchReplace(
-              search: "instabug_flutter",
-              replacement: "luciq_flutter",
-            ),
+                search: "instabug_flutter", replacement: "luciq_flutter"),
             SearchReplace(
-              search: "instabug_dio_interceptor",
-              replacement: "luciq_dio_interceptor",
-            ),
+                search: "instabug_dio_interceptor",
+                replacement: "luciq_dio_interceptor"),
             SearchReplace(
-              search: "instabug_http_client",
-              replacement: "luciq_http_client",
-            ),
+                search: "instabug_http_client",
+                replacement: "luciq_http_client"),
             SearchReplace(
-              search: "instabug_flutter_modular",
-              replacement: "luciq_flutter_modular",
-            ),
+                search: "instabug_flutter_modular",
+                replacement: "luciq_flutter_modular"),
           ],
           targetExtensions: [
             ".dart",
@@ -230,7 +225,7 @@ class MigrateCommand {
             ".tsx",
             ".js",
             ".jsx",
-            ".json",
+            ".json"
           ],
           ignoredDirs: [
             ".symlinks",
@@ -251,7 +246,7 @@ class MigrateCommand {
             ".flutter-plugins",
             ".flutter-plugins-dependencies",
             ".packages",
-            "doc/api",
+            "doc/api"
           ],
         ),
       ],
@@ -349,8 +344,15 @@ class MigrateCommand {
         // Use a more sophisticated replacement that maintains YAML structure
         updatedContent = updatedContent.replaceAllMapped(gitPattern, (match) {
           // Get the indentation level from the original match
+          final matchText = match.group(0)!;
+          final lines = matchText.split('\n');
+          final firstLine = lines.first;
+
+          // Extract indentation from the first line
+          final indentation = firstLine.replaceAll(RegExp(r'^(\s*).*'), r'$1');
+
           // Create properly indented replacement
-          return newPackage;
+          return '$newPackage';
         });
 
         hasChanges = true;
@@ -394,6 +396,11 @@ class MigrateCommand {
       await yamlFile.writeAsString(updatedContent);
       stdout.writeln('✅ Updated: ${yamlFile.path}');
     }
+  }
+
+  static Future<void> _checkForLuciqPackagesMessage() async {
+    // This method will be called once at the end to show the summary message
+    stdout.writeln('ℹ️ No Luciq packages found to update');
   }
 
   static Future<void> _executeVersionUpdates(
@@ -577,10 +584,21 @@ class MigrateCommand {
     return false;
   }
 
-  static String _contextAwareReplace(
-    String content,
-    SearchReplace searchReplace,
+  static String _casePreservingReplace(
+    String str,
+    List<SearchReplace> searchReplace,
   ) {
+    var result = str;
+
+    for (final sr in searchReplace) {
+      result = _contextAwareReplace(result, sr);
+    }
+
+    return result;
+  }
+
+  static String _contextAwareReplace(
+      String content, SearchReplace searchReplace) {
     // More sophisticated context-aware replacement
     var result = content;
     var offset = 0;
@@ -592,7 +610,7 @@ class MigrateCommand {
       final matchedText = match.group(0)!;
 
       // Check if this match should be protected
-      final shouldProtect = _shouldProtectMatch(content, matchStart, matchEnd);
+      bool shouldProtect = _shouldProtectMatch(content, matchStart, matchEnd);
 
       if (!shouldProtect) {
         // Apply case-preserving replacement
@@ -608,10 +626,7 @@ class MigrateCommand {
 
         // Replace the match
         result = result.replaceRange(
-          matchStart + offset,
-          matchEnd + offset,
-          replacement,
-        );
+            matchStart + offset, matchEnd + offset, replacement);
 
         // Update offset for subsequent replacements
         offset += replacement.length - (matchEnd - matchStart);
@@ -692,8 +707,12 @@ class MigrateCommand {
     }
 
     // If odd number of quotes, we're inside a string literal
-    // ignore: use_is_even_rather_than_modulo
     return (singleQuotes % 2 == 1) || (doubleQuotes % 2 == 1);
+  }
+
+  static bool _isInComment(String line) {
+    final trimmedLine = line.trim();
+    return trimmedLine.startsWith('//');
   }
 
   static bool _isInUrl(String line) {

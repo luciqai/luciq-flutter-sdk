@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - Luciq (19.2.0)
-  - luciq_flutter (19.0.0):
+  - Luciq (19.3.0)
+  - luciq_flutter (19.1.0):
     - Flutter
-    - Luciq (= 19.2.0)
+    - Luciq (= 19.3.0)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -21,8 +21,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  Luciq: 7c99d17c0cdfb7a90fd1df26733cd82042462e6b
-  luciq_flutter: 79fabe04e0439096b9052dabb78c092441feb06c
+  Luciq: 284cbf278a471929c2080547ee521dc06bf7f32c
+  luciq_flutter: 04ceb9d140efcaae3276c5f3405ededfc4c96ebb
 
 PODFILE CHECKSUM: 94f53e8d6b63b5d45710485b9afa0e55e8e7e4fb
 

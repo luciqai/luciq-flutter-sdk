@@ -165,9 +165,9 @@ NSMutableDictionary *traces;
     completion(isEnabledNumber, nil);
 }
 
-// TODO: Replace with actual custom span feature check when available in native SDK
+
 - (void)isCustomSpanEnabledWithCompletion:(void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion{
-    BOOL isCustomSpanEnabled = LCQAPM.isScreenRenderingOperational;
+    BOOL isCustomSpanEnabled = LCQAPM.customSpansEnabled;
     NSNumber *isEnabledNumber = @(isCustomSpanEnabled);
     completion(isEnabledNumber, nil);
 }
@@ -234,20 +234,27 @@ NSMutableDictionary *traces;
 - (void)syncCustomSpanName:(NSString *)name
            startTimestamp:(NSNumber *)startTimestamp
              endTimestamp:(NSNumber *)endTimestamp
-                    error:(FlutterError *_Nullable *_Nonnull)error {
-    // The native iOS SDK will handle the custom span
-    // This is a placeholder - actual implementation depends on iOS SDK
+                    error:(FlutterError *_Nullable *_Nonnull)error
+{
+    @try {
+      
 
-    // For now, forward to native SDK's internal method
-    // The iOS team will implement the actual span recording
+        // Convert NSNumber (μs) → NSTimeInterval (seconds)
+        NSTimeInterval startSeconds = startTimestamp.doubleValue / 1e6;
+        NSTimeInterval endSeconds   = endTimestamp.doubleValue / 1e6;
 
-    // Example (actual implementation TBD):
-    // [LCQAPM recordCustomSpanWithName:name
-    //                   startTimestamp:startTimestamp.longLongValue
-    //                     endTimestamp:endTimestamp.longLongValue];
 
-    NSLog(@"Luciq-Flutter: Custom span recorded: %@ duration: %lld microseconds",
-          name, endTimestamp.longLongValue - startTimestamp.longLongValue);
+        NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:startSeconds];
+        NSDate *endDate   = [NSDate dateWithTimeIntervalSince1970:endSeconds];
+
+        // Send span to native APM SDK
+        [LCQAPM addCompletedCustomSpanWithName:name
+                                     startDate:startDate
+                                       endDate:endDate];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"[CustomSpan] Error checking APM enabled: %@", exception);
+    }
 }
 
 

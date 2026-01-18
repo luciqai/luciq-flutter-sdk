@@ -19,18 +19,12 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
     super.dispose();
   }
 
-  Future<void> _startSpan() async {
-    final name = _spanNameController.text.trim();
+  Future<void> _startSpan([String? spanName]) async {
+    final name = spanName ?? _spanNameController.text.trim();
     if (name.isEmpty) {
       log('Please enter a span name');
       return;
     }
-
-    if (_activeSpans.containsKey(name)) {
-      log('Span "$name" is already active');
-      return;
-    }
-
     final span = await APM.startCustomSpan(name);
     if (span != null) {
       setState(() {
@@ -40,6 +34,21 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
     } else {
       log('Failed to start custom span (APM may be disabled)');
     }
+  }
+
+  Future<void> _startMultipleSpans({int numberOfSpans = 5 , bool haveSameName = true}) async {
+    final spansList = <CustomSpan>[];
+    for (var i = 1; i <= numberOfSpans; i++) {
+      final name = haveSameName ? 'span' : 'span $i';
+      final span = await APM.startCustomSpan(name);
+      if (span != null) spansList.add(span);
+    }
+    // wait till all spans started
+    Future.delayed(const Duration(seconds: 1), () async {
+      for (final span in spansList) {
+        span.end();
+      }
+    });
   }
 
   Future<void> _endSpan(String name) async {
@@ -61,17 +70,20 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
 
     // Simulate database query
     final dbSpan = await APM.startCustomSpan('Database Query');
-    await Future.delayed(Duration(milliseconds: 100 + math.Random().nextInt(200)));
+    await Future.delayed(
+        Duration(milliseconds: 100 + math.Random().nextInt(200)));
     await dbSpan?.end();
 
     // Simulate API call
     final apiSpan = await APM.startCustomSpan('API Request');
-    await Future.delayed(Duration(milliseconds: 200 + math.Random().nextInt(300)));
+    await Future.delayed(
+        Duration(milliseconds: 200 + math.Random().nextInt(300)));
     await apiSpan?.end();
 
     // Simulate data processing
     final processSpan = await APM.startCustomSpan('Data Processing');
-    await Future.delayed(Duration(milliseconds: 50 + math.Random().nextInt(100)));
+    await Future.delayed(
+        Duration(milliseconds: 50 + math.Random().nextInt(100)));
     await processSpan?.end();
 
     // End parent operation
@@ -119,6 +131,10 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
                 child: const Text('Start Span'),
               ),
               ElevatedButton(
+                onPressed: _startMultipleSpans,
+                child: const Text('Start Multiple Spans'),
+              ),
+              ElevatedButton(
                 onPressed: _simulateOperation,
                 child: const Text('Simulate Operation'),
               ),
@@ -150,14 +166,17 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
-              children: _activeSpans.entries.map((entry) => Card(
-                child: ListTile(
-                  title: Text(entry.key),
-                  subtitle: const Text('Click to end span'),
-                  trailing: const Icon(Icons.stop_circle_outlined),
-                  onTap: () => _endSpan(entry.key),
-                ),
-              )).toList(),
+              children: _activeSpans.entries
+                  .map((entry) =>
+                  Card(
+                    child: ListTile(
+                      title: Text(entry.key),
+                      subtitle: const Text('Click to end span'),
+                      trailing: const Icon(Icons.stop_circle_outlined),
+                      onTap: () => _endSpan(entry.key),
+                    ),
+                  ))
+                  .toList(),
             ),
           ),
         const SizedBox(height: 16),
@@ -165,4 +184,3 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
     );
   }
 }
-

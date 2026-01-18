@@ -20,13 +20,6 @@ rootProject.allprojects {
         maven {
             url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
-        maven {
-            url "https://mvn.luciq.ai/nexus/repository/luciq-internal/"
-            credentials {
-                username "luciq"
-                password System.getenv("LUCIQ_REPOSITORY_PASSWORD")
-            }
-        }
     }
 }
 
@@ -55,7 +48,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:19.0.0'
+    api 'ai.luciq.library:luciq:19.1.0.7568131-SNAPSHOT'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

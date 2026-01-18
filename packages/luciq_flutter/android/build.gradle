@@ -1,5 +1,5 @@
 group 'ai.luciq.flutter'
-version '19.0.0'
+version '19.1.0'
 apply from: './upload_symbols.gradle'
 
 buildscript {
@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:19.0.0'
+    api 'ai.luciq.library:luciq:19.1.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

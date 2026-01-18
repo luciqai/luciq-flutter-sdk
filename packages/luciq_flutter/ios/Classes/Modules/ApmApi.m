@@ -165,6 +165,13 @@ NSMutableDictionary *traces;
     completion(isEnabledNumber, nil);
 }
 
+
+- (void)isCustomSpanEnabledWithCompletion:(void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion{
+    BOOL isCustomSpanEnabled = LCQAPM.customSpansEnabled;
+    NSNumber *isEnabledNumber = @(isCustomSpanEnabled);
+    completion(isEnabledNumber, nil);
+}
+
 - (void)setScreenRenderEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LCQAPM setScreenRenderingEnabled:[isEnabled boolValue]];
 
@@ -222,6 +229,32 @@ NSMutableDictionary *traces;
     BOOL isAutoUiTraceIsEnabled = LCQAPM.autoUITraceEnabled && LCQAPM.enabled;
     NSNumber *isEnabledNumber = @(isAutoUiTraceIsEnabled);
     completion(isEnabledNumber, nil);
+}
+
+- (void)syncCustomSpanName:(NSString *)name
+           startTimestamp:(NSNumber *)startTimestamp
+             endTimestamp:(NSNumber *)endTimestamp
+                    error:(FlutterError *_Nullable *_Nonnull)error
+{
+    @try {
+      
+
+        // Convert NSNumber (μs) → NSTimeInterval (seconds)
+        NSTimeInterval startSeconds = startTimestamp.doubleValue / 1e6;
+        NSTimeInterval endSeconds   = endTimestamp.doubleValue / 1e6;
+
+
+        NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:startSeconds];
+        NSDate *endDate   = [NSDate dateWithTimeIntervalSince1970:endSeconds];
+
+        // Send span to native APM SDK
+        [LCQAPM addCompletedCustomSpanWithName:name
+                                     startDate:startDate
+                                       endDate:endDate];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"[CustomSpan] Error checking APM enabled: %@", exception);
+    }
 }
 
 

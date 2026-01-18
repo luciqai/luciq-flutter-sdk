@@ -39,6 +39,9 @@ abstract class ApmHostApi {
   bool isScreenRenderEnabled();
 
   @async
+  bool isCustomSpanEnabled();
+
+  @async
   List<double> getDeviceRefreshRateAndTolerance();
 
   void setScreenRenderEnabled(bool isEnabled);
@@ -46,4 +49,7 @@ abstract class ApmHostApi {
   void endScreenRenderForAutoUiTrace(Map<String, Object> data);
 
   void endScreenRenderForCustomUiTrace(Map<String, Object> data);
+
+  // Custom Spans APIs
+  void syncCustomSpan(String name, int startTimestamp, int endTimestamp);
 }

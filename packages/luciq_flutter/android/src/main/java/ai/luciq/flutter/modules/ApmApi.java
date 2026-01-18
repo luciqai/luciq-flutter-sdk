@@ -5,6 +5,16 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.json.JSONObject;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
 import ai.luciq.apm.APM;
 import ai.luciq.apm.InternalAPM;
 import ai.luciq.apm.configuration.cp.APMFeature;
@@ -16,17 +26,6 @@ import ai.luciq.apm.screenrendering.models.cp.LuciqFrameData;
 import ai.luciq.apm.screenrendering.models.cp.LuciqScreenRenderingData;
 import ai.luciq.flutter.generated.ApmPigeon;
 import ai.luciq.flutter.util.Reflection;
-import ai.luciq.flutter.util.ThreadManager;
-
-import org.json.JSONObject;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
 import io.flutter.plugin.common.BinaryMessenger;
 
 public class ApmApi implements ApmPigeon.ApmHostApi {
@@ -94,7 +93,6 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     }
 
 
-
     /**
      * Starts an AppFlow with the specified name.
      * <br/>
@@ -157,7 +155,6 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             e.printStackTrace();
         }
     }
-
 
 
     /**
@@ -280,12 +277,12 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
                 );
             }
 
-                Method method = Reflection.getMethod(Class.forName("ai.luciq.apm.networking.APMNetworkLogger"), "log", long.class, long.class, String.class, String.class, long.class, String.class, String.class, String.class, String.class, String.class, long.class, int.class, String.class, String.class, String.class, String.class, APMCPNetworkLog.W3CExternalTraceAttributes.class);
-                if (method != null) {
-                    method.invoke(apmNetworkLogger, requestStartTime, requestDuration, requestHeaders, requestBody, requestBodySize, requestMethod, requestUrl, requestContentType, responseHeaders, responseBody, responseBodySize, statusCode, responseContentType, errorMessage, gqlQueryName, serverErrorMessage, w3cExternalTraceAttributes);
-                } else {
-                    Log.e(TAG, "APMNetworkLogger.log was not found by reflection");
-                }
+            Method method = Reflection.getMethod(Class.forName("ai.luciq.apm.networking.APMNetworkLogger"), "log", long.class, long.class, String.class, String.class, long.class, String.class, String.class, String.class, String.class, String.class, long.class, int.class, String.class, String.class, String.class, String.class, APMCPNetworkLog.W3CExternalTraceAttributes.class);
+            if (method != null) {
+                method.invoke(apmNetworkLogger, requestStartTime, requestDuration, requestHeaders, requestBody, requestBodySize, requestMethod, requestUrl, requestContentType, responseHeaders, responseBody, responseBodySize, statusCode, responseContentType, errorMessage, gqlQueryName, serverErrorMessage, w3cExternalTraceAttributes);
+            } else {
+                Log.e(TAG, "APMNetworkLogger.log was not found by reflection");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -376,9 +373,12 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     @Override
     public void isEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
         try {
-            // TODO: replace true with an actual implementation of APM.isEnabled once implemented
-            // in the Android SDK.
-            result.success(true);
+            InternalAPM._isFeatureEnabledCP(APMFeature.APM, "APM", new FeatureAvailabilityCallback() {
+                @Override
+                public void invoke(boolean isEnabled) {
+                    result.success(isEnabled);
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -426,6 +426,20 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     public void isScreenRenderEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
         try {
             InternalAPM._isFeatureEnabledCP(APMFeature.SCREEN_RENDERING, "LuciqCaptureScreenRender", new FeatureAvailabilityCallback() {
+                @Override
+                public void invoke(boolean isEnabled) {
+                    result.success(isEnabled);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void isCustomSpanEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        try {
+            InternalAPM._isFeatureEnabledCP(APMFeature.CUSTOM_SPANS, "LuciqCustomSpan", new FeatureAvailabilityCallback() {
                 @Override
                 public void invoke(boolean isEnabled) {
                     result.success(isEnabled);
@@ -504,6 +518,20 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             InternalAPM._endCustomUiTraceWithScreenRenderingCP(screenRenderingData);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void syncCustomSpan(@NonNull String name, @NonNull Long startTimestamp, @NonNull Long endTimestamp) {
+        try {
+            // Convert microseconds to milliseconds for Date objects
+            Date startDate = new Date(startTimestamp / 1000);
+            Date endDate = new Date(endTimestamp / 1000);
+
+            APM.addCompletedCustomSpan(name, startDate, endDate);
+
+        } catch (Exception e) {
+            Log.e("IB-CP-Bridge", "Error syncing span", e);
         }
     }
 

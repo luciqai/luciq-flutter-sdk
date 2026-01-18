@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) 
+
+### Added
+
+- **Custom Spans**: New feature to manually instrument code paths for performance tracking
+    - `APM.startCustomSpan(name)` - Start a custom span and return a span object
+    - `CustomSpan.end()` - End the span and report to SDK
+    - `APM.addCompletedCustomSpan(name, startDate, endDate)` - Record a pre-completed span
+    - Support for up to 100 concurrent spans
+    - Comprehensive validation (name length, empty checks, timestamp validation)
+    - Feature flag support to enable/disable custom spans
+
 ## [19.1.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
 
 

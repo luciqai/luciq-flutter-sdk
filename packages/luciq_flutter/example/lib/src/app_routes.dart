@@ -6,7 +6,6 @@ final appRoutes = {
   /// ["/"] route name should only be used with [onGenerateRoute:] when no
   /// Home Widget specified in MaterialApp() other wise the the Flutter engine
   /// will throw a Runtime exception deo to Flutter restrictions
-
   "/": (BuildContext context) =>
       const MyHomePage(title: 'Flutter Demo Home Pag'),
   CrashesPage.screenName: (BuildContext context) => const CrashesPage(),
@@ -17,6 +16,9 @@ final appRoutes = {
   ComplexPage.screenName: (BuildContext context) => const ComplexPage(),
   SessionReplayPage.screenName: (BuildContext context) =>
       const SessionReplayPage(),
+  PrivateViewsStressPage.screenName: (BuildContext context) =>
+      const PrivateViewsStressPage(),
+  LongListPage.screenName: (BuildContext context) => const LongListPage(),
   TopTabBarScreen.route: (BuildContext context) => const TopTabBarScreen(),
 
   ApmPage.screenName: (BuildContext context) => const ApmPage(),

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
@@ -43,45 +44,52 @@ part 'src/screens/my_home_page.dart';
 part 'src/screens/screen_capture_premature_extension_page.dart';
 part 'src/screens/screen_loading_page.dart';
 part 'src/screens/session_replay_page.dart';
+part 'src/screens/private_views_stress_page.dart';
+part 'src/screens/long_list_page.dart';
 part 'src/screens/screen_render_page.dart';
 
+const _videoLikeMode = ScreenshotCapturingMode.interaction; // baseline default
+const _captureIntervalMs = 500; // Only used when mode is frequency
+const _qualityMode = ScreenshotQualityMode.greyScale;
+// ==================================================================
+
 void main() {
-  runZonedGuarded(
-    () {
-      WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-      Luciq.init(
-        token: 'ed6f659591566da19b67857e1b9d40ab',
-        invocationEvents: [InvocationEvent.floatingButton],
-        debugLogsLevel: LogLevel.verbose,
-        appVariant: 'variant 1',
-      );
+    await SessionReplay.setScreenshotCapturingMode(_videoLikeMode);
+    await SessionReplay.setScreenshotCaptureInterval(_captureIntervalMs);
+    await SessionReplay.setScreenshotQualityMode(_qualityMode);
 
-      BugReporting.setProactiveReportingConfigurations(
-        const ProactiveReportingConfigs(
-          enabled: true,
-          gapBetweenModals: 2, //time in seconds
-          modalDelayAfterDetection: 2, //time in seconds
-        ),
-      );
+    Luciq.init(
+      token: '0174a800719ebdebf7b248fa6ae2ef17',
+      invocationEvents: [InvocationEvent.floatingButton],
+      debugLogsLevel: LogLevel.verbose,
+      appVariant: 'variant 1',
+    );
+    BugReporting.setProactiveReportingConfigurations(
+      const ProactiveReportingConfigs(
+        enabled: true,
+        gapBetweenModals: 2, //time in seconds
+        modalDelayAfterDetection: 2, //time in seconds
+      ),
+    );
 
-      CrashReporting.setNDKEnabled(true);
-      // APM.setScreenRenderingEnabled(true);
-      // APM.setAutoUITraceEnabled(false);
-      Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
-      FlutterError.onError = (FlutterErrorDetails details) {
-        Zone.current.handleUncaughtError(details.exception, details.stack!);
-      };
+    CrashReporting.setNDKEnabled(true);
+    // APM.setScreenRenderingEnabled(true);
+    // APM.setAutoUITraceEnabled(false);
+    Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
+    FlutterError.onError = (FlutterErrorDetails details) {
+      Zone.current.handleUncaughtError(details.exception, details.stack!);
+    };
 
-      runApp(
-        ChangeNotifierProvider(
-          create: (_) => CallbackHandlersProvider(),
-          child: const MyApp(),
-        ),
-      );
-    },
-    CrashReporting.reportCrash,
-  );
+    runApp(
+      ChangeNotifierProvider(
+        create: (_) => CallbackHandlersProvider(),
+        child: const LuciqWidget(child: MyApp()),
+      ),
+    );
+  }, CrashReporting.reportCrash);
 }
 
 class MyApp extends StatelessWidget {
@@ -91,9 +99,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      navigatorObservers: [
-        LuciqNavigatorObserver(),
-      ],
+      navigatorObservers: [LuciqNavigatorObserver()],
       routes: APM.wrapRoutes(appRoutes, exclude: [CrashesPage.screenName]),
       theme: ThemeData(
         primarySwatch: Colors.blue,

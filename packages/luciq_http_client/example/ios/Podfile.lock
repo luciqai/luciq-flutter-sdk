@@ -1,7 +1,7 @@
 PODS:
   - Flutter (1.0.0)
   - Luciq (19.3.0)
-  - luciq_flutter (19.1.0):
+  - luciq_flutter (19.2.1):
     - Flutter
     - Luciq (= 19.3.0)
 

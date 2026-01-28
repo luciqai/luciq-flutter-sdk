@@ -19,6 +19,7 @@ enum UserConsentActionType {
   dropAutoCapturedMedia,
   dropLogs,
   noChat,
+  noAutomaticBugGrouping,
 }
 
 enum DismissType { cancel, submit, addAttachment }

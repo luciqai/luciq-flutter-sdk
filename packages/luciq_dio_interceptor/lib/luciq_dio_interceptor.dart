@@ -68,7 +68,7 @@ class LuciqDioInterceptor extends Interceptor {
     final endTime = DateTime.now();
 
     response.headers
-        .forEach((String name, dynamic value) => responseHeaders[name] = value);
+        .forEach((name, value) => responseHeaders[name] = value.join(', '));
 
     var responseContentType = '';
     if (responseHeaders.containsKey('content-type')) {

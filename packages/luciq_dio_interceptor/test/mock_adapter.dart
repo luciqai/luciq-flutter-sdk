@@ -29,6 +29,30 @@ class MockAdapter implements HttpClientAdapter {
             200,
           );
 
+        case '/test-single-header':
+          return ResponseBody.fromString(
+            jsonEncode(<String, dynamic>{
+              'errCode': 0,
+              'data': <String, dynamic>{'path': uri.path},
+            }),
+            200,
+            headers: <String, List<String>>{
+              'x-custom-header': <String>['single-value'],
+            },
+          );
+
+        case '/test-multi-header':
+          return ResponseBody.fromString(
+            jsonEncode(<String, dynamic>{
+              'errCode': 0,
+              'data': <String, dynamic>{'path': uri.path},
+            }),
+            200,
+            headers: <String, List<String>>{
+              'x-custom-header': <String>['value1', 'value2'],
+            },
+          );
+
         default:
           return ResponseBody.fromString('', 404);
       }

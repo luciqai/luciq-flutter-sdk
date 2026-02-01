@@ -64,16 +64,13 @@ class LuciqDioInterceptor extends Interceptor {
 
   NetworkData _map(Response<dynamic> response) {
     final data = _getRequestData(response.requestOptions.hashCode);
-    final responseHeaders = <String, dynamic>{};
+    final responseHeaders = <String, String>{};
     final endTime = DateTime.now();
 
     response.headers
         .forEach((name, value) => responseHeaders[name] = value.join(', '));
 
-    var responseContentType = '';
-    if (responseHeaders.containsKey('content-type')) {
-      responseContentType = responseHeaders['content-type'].toString();
-    }
+    var responseContentType = responseHeaders['content-type'] ?? '';
 
     var requestBodySize = 0;
     if (response.requestOptions.headers.containsKey('content-length')) {
@@ -87,7 +84,7 @@ class LuciqDioInterceptor extends Interceptor {
     var responseBodySize = 0;
     if (responseHeaders.containsKey('content-length')) {
       // ignore: avoid_dynamic_calls
-      responseBodySize = int.parse(responseHeaders['content-length'][0] ?? '0');
+      responseBodySize = int.parse(responseHeaders['content-length'] ?? '0');
     } else if (response.data != null) {
       // Calculate actual byte size for more accurate size estimation
       responseBodySize = _calculateBodySize(response.data);

@@ -30,17 +30,24 @@ class LuciqNavigatorObserver extends NavigatorObserver {
         name: maskedScreenName,
       );
 
+      //Ends the last screen rendering collector if exists.
+      LuciqScreenRenderManager.I.endScreenRenderCollector();
+
+      // Synchronously prepares the UI trace so the widget can find it immediately.
+      ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
+
+      // Start screen render collector after UI trace validation completes.
+      final uiTrace = ScreenLoadingManager.I.currentUiTrace;
+      uiTrace?.whenValidated.then((isValid) {
+        if (isValid) {
+          _startScreenRenderCollector(uiTrace.traceId);
+        }
+      });
+
+
       //ignore: invalid_null_aware_operator
       WidgetsBinding.instance?.addPostFrameCallback((_) async {
         try {
-          //Ends the last screen rendering collector if exists.
-          LuciqScreenRenderManager.I.endScreenRenderCollector();
-
-          // Starts a the new UI trace which is exclusive to APM UI traces.
-          ScreenLoadingManager.I
-              .startUiTrace(maskedScreenName, screenName)
-              .then(_startScreenRenderCollector);
-
           // If there is a step that hasn't been pushed yet
           final pendingStep = _steps.isNotEmpty ? _steps.last : null;
           if (pendingStep != null) {

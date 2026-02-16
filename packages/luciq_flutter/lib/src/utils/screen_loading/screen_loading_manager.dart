@@ -9,6 +9,9 @@ import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
 
+
+const int _traceValidationTimeout = 500;
+
 /// Manages screen loading traces and UI traces for performance monitoring.
 ///
 /// This class handles the tracking of screen loading times and UI transitions,
@@ -309,7 +312,7 @@ class ScreenLoadingManager {
 
       if (isSameScreen && !didStartLoading) {
         LuciqLogger.I.d(
-          'starting screen loading trace — screenName: ${trace.screenName}, startTimeInMicroseconds: ${trace.startTimeInMicroseconds}',
+          'Starting screen loading trace — screenName: ${trace.screenName}, startTimeInMicroseconds: ${trace.startTimeInMicroseconds}',
           tag: APM.tag,
         );
         currentUiTrace?.didStartScreenLoading = true;
@@ -363,7 +366,7 @@ class ScreenLoadingManager {
       if (isSameScreen && !isReported && isValidTrace) {
         // Wait for UI trace native-side activation before reporting
         final isUiTraceValid = await currentUiTrace?.whenValidated.timeout(
-          const Duration(milliseconds: 500),
+          const Duration(milliseconds: _traceValidationTimeout),
           onTimeout: () {
             LuciqLogger.I.e(
               'UI trace validation timed out — dropping screen loading trace',
@@ -510,7 +513,7 @@ class ScreenLoadingManager {
 
       // Wait for UI trace validation before calling native API
       final isUiTraceValid = await currentUiTrace?.whenValidated.timeout(
-        const Duration(milliseconds: 500),
+        const Duration(milliseconds: _traceValidationTimeout),
         onTimeout: () {
           LuciqLogger.I.e(
             'UI trace validation timed out — dropping endScreenLoading',

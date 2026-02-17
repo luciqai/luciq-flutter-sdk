@@ -48,6 +48,9 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
     final isPrivate = (widget.runtimeType == LuciqPrivateView) ||
         (widget.runtimeType == LuciqSliverPrivateView);
 
+    if(isPrivate){
+      print("DEBUG-LUCIQ-FLUTTER:${widget.runtimeType} is Private");
+    }
     return isPrivate;
   }
 

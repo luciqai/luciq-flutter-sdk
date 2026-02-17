@@ -10,7 +10,7 @@ class NetworkContent extends StatefulWidget {
 }
 
 class _NetworkContentState extends State<NetworkContent> {
-  final http = LuciqHttpClient();
+  // final http = LuciqHttpClient();
 
   final endpointUrlController = TextEditingController();
 
@@ -115,16 +115,16 @@ class _NetworkContentState extends State<NetworkContent> {
   Future<void> _sendRequestToUrl(String text,
       {Map<String, String>? headers}) async {
     try {
-      final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
-      final response = await http.get(Uri.parse(url), headers: headers);
-
-      // Handle the response here
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        log(jsonEncode(jsonData));
-      } else {
-        log('Request failed with status: ${response.statusCode}');
-      }
+      // final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
+      // final response = await http.get(Uri.parse(url), headers: headers);
+      //
+      // // Handle the response here
+      // if (response.statusCode == 200) {
+      //   final jsonData = json.decode(response.body);
+      //   log(jsonEncode(jsonData));
+      // } else {
+      //   log('Request failed with status: ${response.statusCode}');
+      // }
     } catch (e) {
       log('Error sending request: $e');
     }
@@ -133,16 +133,16 @@ class _NetworkContentState extends State<NetworkContent> {
   Future<void> _sendGetRequestToUrl(String text,
       {Map<String, String>? headers}) async {
     try {
-      final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
-      final response = await http.get(Uri.parse(url), headers: headers);
-
-      // Handle the response here
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        log(jsonEncode(jsonData));
-      } else {
-        log('Request failed with status: ${response.statusCode}');
-      }
+      // final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
+      // final response = await http.get(Uri.parse(url), headers: headers);
+      //
+      // // Handle the response here
+      // if (response.statusCode == 200) {
+      //   final jsonData = json.decode(response.body);
+      //   log(jsonEncode(jsonData));
+      // } else {
+      //   log('Request failed with status: ${response.statusCode}');
+      // }
     } catch (e) {
       log('Error sending request: $e');
     }
@@ -153,16 +153,16 @@ class _NetworkContentState extends State<NetworkContent> {
     Map<String, String>? headers,
   }) async {
     try {
-      final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
-      final response = await http.post(Uri.parse(url), headers: headers);
-
-      // Handle the response here
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        log(jsonEncode(jsonData));
-      } else {
-        log('Request failed with status: ${response.statusCode}');
-      }
+      // final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
+      // final response = await http.post(Uri.parse(url), headers: headers);
+      //
+      // // Handle the response here
+      // if (response.statusCode == 200) {
+      //   final jsonData = json.decode(response.body);
+      //   log(jsonEncode(jsonData));
+      // } else {
+      //   log('Request failed with status: ${response.statusCode}');
+      // }
     } catch (e) {
       log('Error sending request: $e');
     }
@@ -171,16 +171,16 @@ class _NetworkContentState extends State<NetworkContent> {
   Future<void> _sendPutRequestToUrl(String text,
       {Map<String, String>? headers}) async {
     try {
-      final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
-      final response = await http.put(Uri.parse(url), headers: headers);
-
-      // Handle the response here
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        log(jsonEncode(jsonData));
-      } else {
-        log('Request failed with status: ${response.statusCode}');
-      }
+      // final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
+      // final response = await http.put(Uri.parse(url), headers: headers);
+      //
+      // // Handle the response here
+      // if (response.statusCode == 200) {
+      //   final jsonData = json.decode(response.body);
+      //   log(jsonEncode(jsonData));
+      // } else {
+      //   log('Request failed with status: ${response.statusCode}');
+      // }
     } catch (e) {
       log('Error sending request: $e');
     }
@@ -191,16 +191,16 @@ class _NetworkContentState extends State<NetworkContent> {
     Map<String, String>? headers,
   }) async {
     try {
-      final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
-      final response = await http.delete(Uri.parse(url), headers: headers);
-
-      // Handle the response here
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        log(jsonEncode(jsonData));
-      } else {
-        log('Request failed with status: ${response.statusCode}');
-      }
+      // final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
+      // final response = await http.delete(Uri.parse(url), headers: headers);
+      //
+      // // Handle the response here
+      // if (response.statusCode == 200) {
+      //   final jsonData = json.decode(response.body);
+      //   log(jsonEncode(jsonData));
+      // } else {
+      //   log('Request failed with status: ${response.statusCode}');
+      // }
     } catch (e) {
       log('Error sending request: $e');
     }
@@ -211,16 +211,16 @@ class _NetworkContentState extends State<NetworkContent> {
     Map<String, String>? headers,
   }) async {
     try {
-      final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
-      final response = await http.patch(Uri.parse(url), headers: headers);
-
-      // Handle the response here
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        log(jsonEncode(jsonData));
-      } else {
-        log('Request failed with status: ${response.statusCode}');
-      }
+      // final url = text.trim().isEmpty ? widget.defaultRequestUrl : text;
+      // final response = await http.patch(Uri.parse(url), headers: headers);
+      //
+      // // Handle the response here
+      // if (response.statusCode == 200) {
+      //   final jsonData = json.decode(response.body);
+      //   log(jsonEncode(jsonData));
+      // } else {
+      //   log('Request failed with status: ${response.statusCode}');
+      // }
     } catch (e) {
       log('Error sending request: $e');
     }

@@ -2,6 +2,7 @@ package ai.luciq.flutter.modules;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
@@ -26,6 +27,8 @@ public class LuciqPrivateView implements LuciqPrivateViewPigeon.LuciqPrivateView
 
     @Override
     public void init() {
+        Log.v("DEBUG-LUCIQ-FLUTTER","Screen-shot  setScreenshotCaptor init called");
+
         LuciqApi.setScreenshotCaptor(new ScreenshotCaptor() {
             @Override
             public void capture(CapturingCallback listener) {

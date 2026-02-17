@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -58,12 +59,16 @@ public class PrivateViewManager {
 
                 @Override
                 public void onScreenshotResult(ScreenshotResult screenshotResult) {
+                    Log.v("DEBUG-LUCIQ-FLUTTER","Screen-shot  boundryScreenshotResult  onScreenshotResult");
+
                     processScreenshot(screenshotResult, privateViews, latch, capturingCallback);
 
                 }
 
                 @Override
                 public void onError() {
+                    Log.v("DEBUG-LUCIQ-FLUTTER","Screen-shot boundryScreenshotResult  onCapturingFailure");
+
                     capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
                 }
             };
@@ -84,21 +89,29 @@ public class PrivateViewManager {
                     pixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
                         @Override
                         public void onScreenshotResult(ScreenshotResult result) {
+                            Log.v("DEBUG-LUCIQ-FLUTTER","Screen-shot pixelCopyScreenshotCaptor  onScreenshotResult");
+
                             processScreenshot(result, privateViews, latch, capturingCallback);
 
                         }
 
                         @Override
                         public void onError() {
+                            Log.v("DEBUG-LUCIQ-FLUTTER","Screen-shot pixelCopyScreenshotCaptor  onCapturingFailure");
+
                             boundryScreenshotCaptor.capture(activity, boundryScreenshotResult);
 
                         }
                     });
                 } else {
+                    Log.v("DEBUG-LUCIQ-FLUTTER","Screen-shot boundryScreenshotCaptor  less than 8");
+
                     boundryScreenshotCaptor.capture(activity, boundryScreenshotResult);
                 }
 
             } catch (Exception e) {
+                Log.v("DEBUG-LUCIQ-FLUTTER","Screen-shot Error "+e.getMessage());
+
                 capturingCallback.onCapturingFailure(e);
             }
         } else {
@@ -126,6 +139,8 @@ public class PrivateViewManager {
     @VisibleForTesting
     public void maskPrivateViews(ScreenshotResult result, List<Double> privateViews) {
         try {
+            Log.v("DEBUG-LUCIQ-FLUTTER","maskPrivateViews  "+privateViews.size());
+
             if (privateViews == null || privateViews.isEmpty()) return;
 
             Bitmap bitmap = result.getScreenshot();

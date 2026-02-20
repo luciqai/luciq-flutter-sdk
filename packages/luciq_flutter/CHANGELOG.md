@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.1...dev)
+
+### Added
+
+- Allow identification with nullable email. ([#40](https://github.com/luciqai/luciq-flutter-sdk/pull/40)).
+
+
 ## [19.2.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.1...19.1.0) (January 28, 2026)
 
 ### Added

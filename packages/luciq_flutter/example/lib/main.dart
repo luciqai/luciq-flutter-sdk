@@ -18,7 +18,6 @@ import 'package:luciq_flutter_example/src/widget/luciq_clipboard_input.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_text_field.dart';
 import 'package:luciq_flutter_example/src/widget/nested_view.dart';
 import 'package:luciq_flutter_example/src/widget/section_title.dart';
-import 'package:luciq_http_client/luciq_http_client.dart';
 import 'package:provider/provider.dart';
 import 'package:luciq_flutter_example/src/utils/show_messages.dart';
 

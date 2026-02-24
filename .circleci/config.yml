@@ -258,7 +258,7 @@ jobs:
       - setup_ios
       - setup_patrol
       - ios/preboot-simulator:
-          version: "18.0"
+          version: "18.5"
           device: "iPhone 16 Pro Max"
       - ios/wait-until-simulator-booted
       - run:

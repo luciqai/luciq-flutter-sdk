@@ -445,7 +445,7 @@ void main() {
       );
       verify(
         mLuciqLogger.d(
-          argThat(contains('starting screen loading trace')),
+          argThat(contains('Starting screen loading trace')),
           tag: APM.tag,
         ),
       ).called(1);
@@ -549,6 +549,7 @@ void main() {
       time = DateTime.now();
       traceId = time.millisecondsSinceEpoch;
       uiTrace = UiTrace(screenName: screenName, traceId: traceId);
+      uiTrace.validationCompleter.complete(true);
       mScreenLoadingManager.currentUiTrace = uiTrace;
       when(mDateTime.now()).thenReturn(time);
       screenLoadingTrace = ScreenLoadingTrace(
@@ -847,6 +848,7 @@ void main() {
       time = DateTime.now();
       traceId = time.millisecondsSinceEpoch;
       uiTrace = UiTrace(screenName: screenName, traceId: traceId);
+      uiTrace.validationCompleter.complete(true);
       duration = 1000;
       extendedMonotonic = 500;
       endTime = time.add(Duration(microseconds: duration ?? 0));

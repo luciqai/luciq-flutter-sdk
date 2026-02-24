@@ -55,18 +55,21 @@ void main() {
       expect(shorthand, same(instance));
     });
 
-    test('handles AppLifecycleState.resumed and starts UiTrace', () async {
+    test(
+        'handles AppLifecycleState.resumed and starts screen render collector',
+        () async {
       when(mockLoadingManager.currentUiTrace).thenReturn(mockUiTrace);
-      when(mockUiTrace.screenName).thenReturn("HomeScreen");
-      when(mockNameMasker.mask("HomeScreen")).thenReturn("MaskedHome");
-      when(mockLoadingManager.startUiTrace("MaskedHome", "HomeScreen"))
-          .thenAnswer((_) async => 123);
-      when(mockRenderManager.screenRenderEnabled).thenReturn(true);
-
+      when(mockUiTrace.screenName).thenReturn('HomeScreen');
+      when(mockUiTrace.traceId).thenReturn(123);
+      when(mockUiTrace.whenValidated).thenAnswer((_) async => true);
+      when(mockNameMasker.mask('HomeScreen')).thenReturn('MaskedHome');
       when(mApmHost.isScreenRenderEnabled()).thenAnswer((_) async => true);
 
       LuciqWidgetsBindingObserver.I
           .didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+      verify(mockLoadingManager.prepareUiTrace('MaskedHome', 'HomeScreen'))
+          .called(1);
 
       // wait for async call to complete
       await untilCalled(

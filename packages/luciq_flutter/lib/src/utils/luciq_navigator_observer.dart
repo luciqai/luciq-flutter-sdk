@@ -36,18 +36,17 @@ class LuciqNavigatorObserver extends NavigatorObserver {
       // Synchronously prepares the UI trace so the widget can find it immediately.
       ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
 
-      // Start screen render collector after UI trace validation completes.
-      final uiTrace = ScreenLoadingManager.I.currentUiTrace;
-      uiTrace?.whenValidated.then((isValid) {
-        if (isValid) {
-          _startScreenRenderCollector(uiTrace.traceId);
-        }
-      });
-
-
       //ignore: invalid_null_aware_operator
       WidgetsBinding.instance?.addPostFrameCallback((_) async {
         try {
+          // Start screen render collector after UI trace validation completes and the new screen is mounted.
+          final uiTrace = ScreenLoadingManager.I.currentUiTrace;
+          uiTrace?.whenValidated.then((isValid) {
+            if (isValid) {
+              _startScreenRenderCollector(uiTrace.traceId);
+            }
+          });
+
           // If there is a step that hasn't been pushed yet
           final pendingStep = _steps.isNotEmpty ? _steps.last : null;
           if (pendingStep != null) {

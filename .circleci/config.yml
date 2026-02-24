@@ -229,7 +229,7 @@ jobs:
 
   test_ios:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     environment:
       luciq_SOURCEMAPS_UPLOAD_DISABLE: true
@@ -245,20 +245,20 @@ jobs:
                 -scheme Runner \
                 -resultBundlePath coverage/result.xcresult \
                 -sdk iphonesimulator \
-                -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.0' \
+                -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.5' \
                 -skip-testing:RunnerUITests \
                 test | xcpretty
 
   e2e_ios_patrol:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     steps:
       - advanced-checkout/shallow-checkout
       - setup_ios
       - setup_patrol
       - ios/preboot-simulator:
-          version: "18.0"
+          version: "18.5"
           device: "iPhone 16 Pro Max"
       - ios/wait-until-simulator-booted
       - run:
@@ -296,7 +296,7 @@ jobs:
 
   release_dio_plugin:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
@@ -324,7 +324,7 @@ jobs:
 
   release_http_adapter_plugin:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
@@ -351,7 +351,7 @@ jobs:
 
   release_modular_plugin:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
@@ -378,7 +378,7 @@ jobs:
 
   release_cli_plugin:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
@@ -404,7 +404,7 @@ jobs:
           command: Escape flutter publish-dependancy
   release_flutter_ndk_plugin:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
@@ -431,7 +431,7 @@ jobs:
 
   release_luciq_flutter:
     macos:
-      xcode: 16.3.0
+      xcode: 16.4.0
     resource_class: m4pro.medium
     working_directory: "~/project"
     steps:

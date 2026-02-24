@@ -315,7 +315,7 @@ jobs:
           name: Run E2E Tests
           no_output_timeout: 30m
           working_directory: packages/luciq_flutter/example
-          command: patrol test -t integration_test/ --verbose --device "iPhone 16 Pro Max"
+          command: patrol test -t integration_test/ --verbose --device "iPhone 17 Pro Max"
   format_flutter:
     executor: flutter-executor
     steps:

@@ -1,8 +1,10 @@
+// ignore_for_file: deprecated_member_use
 import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
@@ -17,6 +19,7 @@ import 'luciq_test.mocks.dart';
   LuciqHostApi,
   LCQBuildInfo,
   ScreenNameMasker,
+  ApmHostApi,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -25,12 +28,14 @@ void main() {
   final mHost = MockLuciqHostApi();
   final mBuildInfo = MockLCQBuildInfo();
   final mScreenNameMasker = MockScreenNameMasker();
+  final mApmHost = MockApmHostApi();
 
   setUpAll(() {
     Luciq.$setHostApi(mHost);
     FeatureFlagsManager().$setHostApi(mHost);
     LCQBuildInfo.setInstance(mBuildInfo);
     ScreenNameMasker.setInstance(mScreenNameMasker);
+    APM.$setHostApi(mApmHost);
   });
 
   test('[setEnabled] should call host method', () async {
@@ -81,6 +86,10 @@ void main() {
     when(mHost.getNetworkBodyMaxSize()).thenAnswer(
       (_) => Future.value(10240),
     );
+
+    //disable the feature flag for screen render feature in order to skip its checking.
+    when(mApmHost.isScreenRenderEnabled()).thenAnswer((_) async => false);
+
     await Luciq.init(
       token: token,
       invocationEvents: events,
@@ -465,5 +474,22 @@ void main() {
     verify(
       mHost.setTheme(themeConfig.toMap()),
     ).called(1);
+  });
+
+  group('Disposal Manager', () {
+    test('LuciqFlutterApi dispose should call widget binding observer dispose',
+        () {
+      // Test that the FlutterApi setup and dispose functionality works
+      // This verifies that when Android calls dispose(), it properly cleans up resources
+      expect(
+        () {
+          // Get the LuciqFlutterApi setup that was configured in Luciq.$setup()
+          // The actual dispose call will be tested in integration tests
+          // Here we just verify the setup doesn't crash
+          Luciq.$setup();
+        },
+        returnsNormally,
+      );
+    });
   });
 }

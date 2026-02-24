@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/models/luciq_route.dart';
-import 'package:luciq_flutter/src/modules/luciq.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/repro_steps_constants.dart';
-import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
+import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
+import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 
 class LuciqNavigatorObserver extends NavigatorObserver {
   LuciqNavigatorObserver({Duration? screenReportDelay})
@@ -27,11 +29,18 @@ class LuciqNavigatorObserver extends NavigatorObserver {
         route: newRoute,
         name: maskedScreenName,
       );
+
       //ignore: invalid_null_aware_operator
       WidgetsBinding.instance?.addPostFrameCallback((_) async {
         try {
-          // Starts a the new UI trace which is exclusive to screen loading
-          ScreenLoadingManager.I.startUiTrace(maskedScreenName, screenName);
+          //Ends the last screen rendering collector if exists.
+          LuciqScreenRenderManager.I.endScreenRenderCollector();
+
+          // Starts a the new UI trace which is exclusive to APM UI traces.
+          ScreenLoadingManager.I
+              .startUiTrace(maskedScreenName, screenName)
+              .then(_startScreenRenderCollector);
+
           // If there is a step that hasn't been pushed yet
           final pendingStep = _steps.isNotEmpty ? _steps.last : null;
           if (pendingStep != null) {
@@ -76,5 +85,16 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route route, Route? previousRoute) {
     screenChanged(route);
+  }
+
+  FutureOr<void> _startScreenRenderCollector(int? uiTraceId) async {
+    if (uiTraceId == null) return;
+    final isScreenRenderEnabled = await FlagsConfig.screenRendering.isEnabled();
+    await LuciqScreenRenderManager.I
+        .checkForScreenRenderInitialization(isScreenRenderEnabled);
+    if (isScreenRenderEnabled) {
+      LuciqScreenRenderManager.I
+          .startScreenRenderCollectorForTraceId(uiTraceId);
+    }
   }
 }

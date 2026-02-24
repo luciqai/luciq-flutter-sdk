@@ -78,6 +78,7 @@ scripts:
     packageFilters:
       dependsOn: pana
       private: false
-      ignore: "luciq_flutter_modular"
+      scope: luciq_flutter
+#sdkPath: .fvm/flutter_sdk
 
 

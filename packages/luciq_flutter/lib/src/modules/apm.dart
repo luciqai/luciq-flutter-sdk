@@ -4,10 +4,13 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
+import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/models/network_data.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
+import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
+import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
 
 class APM {
@@ -135,7 +138,24 @@ class APM {
   /// Returns:
   ///   The method is returning a `Future<void>`.
   static Future<void> startUITrace(String name) async {
-    return _host.startUITrace(name);
+    final isScreenRenderingEnabled =
+        await FlagsConfig.screenRendering.isEnabled();
+    await LuciqScreenRenderManager.I
+        .checkForScreenRenderInitialization(isScreenRenderingEnabled);
+
+    // Ends the active custom ui trace before starting new one.
+    if (isScreenRenderingEnabled) {
+      LuciqScreenRenderManager.I.endScreenRenderCollector(UiTraceType.custom);
+    }
+    return _host.startUITrace(name).then(
+      (_) {
+        // Start screen render collector for custom ui trace if enabled.
+        if (isScreenRenderingEnabled) {
+          LuciqScreenRenderManager.I
+              .startScreenRenderCollectorForTraceId(0, UiTraceType.custom);
+        }
+      },
+    );
   }
 
   /// The [endUITrace] function ends a UI trace.
@@ -143,6 +163,18 @@ class APM {
   /// Returns:
   ///   The method is returning a `Future<void>`.
   static Future<void> endUITrace() async {
+    // End screen render collector for custom ui trace if enabled.
+    if (LuciqScreenRenderManager.I.screenRenderEnabled) {
+      LuciqScreenRenderManager.I.endScreenRenderCollector(UiTraceType.custom);
+
+      final isAutoUiTraceEnabled = await FlagsConfig.uiTrace.isEnabled();
+
+      // dispose the LuciqScreenRenderManager if AutoUiTrace is disabled.
+      if (!isAutoUiTraceEnabled) LuciqScreenRenderManager.I.dispose();
+
+      return;
+    }
+
     return _host.endUITrace();
   }
 
@@ -291,5 +323,85 @@ class APM {
     List<String> exclude = const [],
   }) {
     return ScreenLoadingManager.wrapRoutes(routes, exclude: exclude);
+  }
+
+  /// Returns a Future<bool> indicating whether the auto
+  /// ui trace is enabled.
+  ///
+  /// Returns:
+  ///   A Future<bool> is being returned.
+  @internal
+  static Future<bool> isAutoUiTraceEnabled() async {
+    return _host.isAutoUiTraceEnabled();
+  }
+
+  /// Returns a Future<bool> indicating whether the screen
+  /// render is enabled.
+  ///
+  /// Returns:
+  ///   A Future<bool> is being returned.
+  @internal
+  static Future<bool> isScreenRenderEnabled() async {
+    return _host.isScreenRenderEnabled();
+  }
+
+  /// Retrieve the device refresh rate from native side .
+  ///
+  /// Returns:
+  ///   A Future<double> that represent the refresh rate.
+  /// Retrieve the device refresh rate and tolerance value from native side.
+  ///
+  /// Returns:
+  ///   A Future<List<double>> where the first element is the refresh rate and the second is the tolerance value.
+  @internal
+  static Future<List<double?>> getDeviceRefreshRateAndTolerance() {
+    return _host.getDeviceRefreshRateAndTolerance();
+  }
+
+  /// Sets the screen Render state based on the provided boolean value.
+  ///
+  /// Args:
+  ///   isEnabled (bool): The [isEnabled] parameter is a boolean value that determines whether screen
+  /// Render is enabled or disabled. If [isEnabled] is `true`, screen render will be enabled; if
+  /// [isEnabled] is `false`, screen render will be disabled.
+  ///
+  /// Returns:
+  ///   A Future<void> is being returned.
+  static Future<void> setScreenRenderingEnabled(bool isEnabled) async {
+    return _host.setScreenRenderEnabled(isEnabled);
+  }
+
+  /// Ends screen rendering for
+  /// automatic UI tracing using data provided in `LuciqScreenRenderData` object.
+  ///
+  /// Args:
+  ///   data (LuciqScreenRenderData): The `data` parameter in the `endScreenRenderForAutoUiTrace`
+  /// function is of type `LuciqScreenRenderData`. It contains information related to screen
+  /// rendering.
+  ///
+  /// Returns:
+  ///   A `Future<void>` is being returned.
+  @internal
+  static Future<void> endScreenRenderForAutoUiTrace(
+    LuciqScreenRenderData data,
+  ) {
+    return _host.endScreenRenderForAutoUiTrace(data.toMap());
+  }
+
+  /// Ends the screen render for a custom
+  /// UI trace using data provided in `LuciqScreenRenderData`.
+  ///
+  /// Args:
+  ///   data (LuciqScreenRenderData): The `data` parameter in the `endScreenRenderForCustomUiTrace`
+  /// function is of type `LuciqScreenRenderData`, which contains information related to the
+  /// rendering of a screen in the Luciq custom UI.
+  ///
+  /// Returns:
+  ///   A `Future<void>` is being returned.
+  @internal
+  static Future<void> endScreenRenderForCustomUiTrace(
+    LuciqScreenRenderData data,
+  ) {
+    return _host.endScreenRenderForCustomUiTrace(data.toMap());
   }
 }

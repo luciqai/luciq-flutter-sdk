@@ -4,12 +4,18 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
 
+import ai.luciq.flutter.generated.LuciqPigeon;
 import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.modules.ApmApi;
 import ai.luciq.flutter.modules.BugReportingApi;
@@ -30,15 +36,18 @@ import java.util.concurrent.Callable;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.embedding.engine.plugins.lifecycle.HiddenLifecycleReference;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.plugin.common.BinaryMessenger;
 
-public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware {
+public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, LifecycleEventObserver {
     private static final String TAG = LuciqFlutterPlugin.class.getName();
 
     @SuppressLint("StaticFieldLeak")
     private static Activity activity;
 
+    private LuciqPigeon.LuciqFlutterApi luciqFlutterApi;
+    private Lifecycle lifecycle;
 
     private static PrivateViewManager privateViewManager;
 
@@ -47,6 +56,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware {
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
         register(binding.getApplicationContext(), binding.getBinaryMessenger(), (FlutterRenderer) binding.getTextureRegistry());
+        luciqFlutterApi = new LuciqPigeon.LuciqFlutterApi(binding.getBinaryMessenger());
     }
 
     @Override
@@ -60,10 +70,19 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware {
         if (privateViewManager != null) {
             privateViewManager.setActivity(activity);
         }
+
+        // Register lifecycle observer if available
+        if (binding.getLifecycle() instanceof HiddenLifecycleReference) {
+            lifecycle = ((HiddenLifecycleReference) binding.getLifecycle()).getLifecycle();
+            lifecycle.addObserver(this);
+        }
     }
 
     @Override
     public void onDetachedFromActivityForConfigChanges() {
+        if (lifecycle != null) {
+            lifecycle.removeObserver(this);
+        }
         activity = null;
         privateViewManager.setActivity(null);
 
@@ -72,6 +91,12 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware {
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
         activity = binding.getActivity();
+
+        // Re-register lifecycle observer if available
+        if (binding.getLifecycle() instanceof HiddenLifecycleReference) {
+            lifecycle = ((HiddenLifecycleReference) binding.getLifecycle()).getLifecycle();
+            lifecycle.addObserver(this);
+        }
         if (privateViewManager != null) {
             privateViewManager.setActivity(activity);
         }
@@ -79,9 +104,31 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware {
 
     @Override
     public void onDetachedFromActivity() {
+        if (lifecycle != null) {
+            lifecycle.removeObserver(this);
+            lifecycle = null;
+        }
         activity = null;
         privateViewManager.setActivity(null);
 
+    }
+
+    @Override
+    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+        if (event == Lifecycle.Event.ON_PAUSE) {
+            handleOnPause();
+        }
+    }
+
+    private void handleOnPause() {
+        if (luciqFlutterApi != null) {
+            luciqFlutterApi.dispose(new LuciqPigeon.LuciqFlutterApi.Reply<Void>() {
+                @Override
+                public void reply(Void reply) {
+                    Log.d(TAG, "Screen render cleanup dispose called successfully");
+                }
+            });
+        }
     }
 
     private static void register(Context context, BinaryMessenger messenger, FlutterRenderer renderer) {
@@ -95,7 +142,14 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware {
         privateViewManager = new PrivateViewManager(new LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi(messenger), new PixelCopyCaptureManager(), new BoundryCaptureManager(renderer));
         LuciqPrivateView.init(messenger, privateViewManager);
 
-        ApmApi.init(messenger);
+        Callable<Float> refreshRateProvider = new Callable<Float>() {
+            @Override
+            public Float call() {
+                return getRefreshRate();
+            }
+        };
+
+        ApmApi.init(messenger, refreshRateProvider);
         BugReportingApi.init(messenger);
         CrashReportingApi.init(messenger);
         FeatureRequestsApi.init(messenger);
@@ -122,4 +176,20 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware {
             return null;
         }
     }
+
+    private static float getRefreshRate() {
+        float refreshRate = 60f;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            final Display display = activity.getDisplay();
+            if (display != null) {
+                refreshRate = display.getRefreshRate();
+            }
+        } else {
+            refreshRate = activity.getWindowManager().getDefaultDisplay().getRefreshRate();
+        }
+
+        return refreshRate;
+    }
+
 }

@@ -25,5 +25,8 @@ export 'src/utils/private_views/luciq_sliver_private_view.dart';
 export 'src/utils/private_views/private_views_manager.dart' show AutoMasking;
 export 'src/utils/screen_loading/luciq_capture_screen_loading.dart';
 export 'src/utils/screen_loading/route_matcher.dart';
+//ignore: invalid_export_of_internal_element
+export 'src/utils/screen_loading/screen_loading_manager.dart'
+    show ScreenLoadingManager;
 export 'src/utils/screen_name_masker.dart' show ScreenNameMaskingCallback;
 export 'src/utils/user_steps/luciq_user_steps.dart';

@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - Instabug (16.0.2)
-  - luciq_flutter (16.0.1):
+  - Luciq (19.4.1)
+  - luciq_flutter (19.2.2):
     - Flutter
-    - Instabug (= 16.0.2)
+    - Luciq (= 19.4.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -11,7 +11,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - Instabug
+    - Luciq
 
 EXTERNAL SOURCES:
   Flutter:
@@ -20,10 +20,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/luciq_flutter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Instabug: 125f729dea4e4a43e815ae06f9db0332e2a5fd60
-  luciq_flutter: 19eef3e1d3c3f79cc8f86f0346b107d9304326f1
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  Luciq: f29a09180b9b23f74f249b88176c73141643f271
+  luciq_flutter: 067dbdd0a83877738be84ba652e6f35ef17af4ff
 
-PODFILE CHECKSUM: c1fe4523a8171a94fbcc760d65f59a67f3a2c60b
+PODFILE CHECKSUM: 94f53e8d6b63b5d45710485b9afa0e55e8e7e4fb
 
 COCOAPODS: 1.16.2

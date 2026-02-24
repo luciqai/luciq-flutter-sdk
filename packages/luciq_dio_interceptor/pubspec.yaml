@@ -2,7 +2,7 @@ name: luciq_dio_interceptor
 description:
   This package is an add on to luciq_flutter. It intercepts any requests performed
   with Dio Package and sends them to the report that will be sent to the dashboard.
-version: 3.0.0
+version: 3.1.0
 homepage: https://github.com/luciqai/luciq-flutter-sdk#readme
 repository: https://github.com/luciqai/luciq-flutter-sdk/tree/master/packages/luciq_dio_interceptor
 
@@ -13,7 +13,7 @@ dependencies:
   dio: '>=4.0.0 <6.0.0'
   flutter:
     sdk: flutter
-  luciq_flutter: '>=18.0.0 <19.0.0'
+  luciq_flutter: '>=19.0.0 <20.0.0'
 
 
 dev_dependencies:

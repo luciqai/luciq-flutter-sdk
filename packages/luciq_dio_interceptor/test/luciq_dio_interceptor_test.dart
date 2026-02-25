@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -115,5 +117,39 @@ void main() {
       }
     }
     expect(luciqDioInterceptor.requestCount, 1000);
+  });
+
+  test('Response headers with single value are mapped correctly', () async {
+    final completer = Completer<Map<String, dynamic>>();
+    when(mHost.networkLog(any)).thenAnswer((invocation) {
+      final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+      completer.complete(data);
+      return Future<void>.value();
+    });
+
+    await dio.get('/test-single-header');
+    final capturedNetworkLog = await completer.future;
+
+    expect(luciqDioInterceptor.resposneCount, 1);
+    final responseHeaders =
+        capturedNetworkLog['responseHeaders'] as Map<String, dynamic>;
+    expect(responseHeaders['x-custom-header'], 'single-value');
+  });
+
+  test('Response headers with multiple values are joined with comma', () async {
+    final completer = Completer<Map<String, dynamic>>();
+    when(mHost.networkLog(any)).thenAnswer((invocation) {
+      final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+      completer.complete(data);
+      return Future<void>.value();
+    });
+
+    await dio.get('/test-multi-header');
+    final capturedNetworkLog = await completer.future;
+
+    expect(luciqDioInterceptor.resposneCount, 1);
+    final responseHeaders =
+        capturedNetworkLog['responseHeaders'] as Map<String, dynamic>;
+    expect(responseHeaders['x-custom-header'], 'value1, value2');
   });
 }

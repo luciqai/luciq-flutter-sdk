@@ -4,7 +4,7 @@ case $github_username in
     'mzelzoghbi')
         sid='U5697F4EL'
         ;;
-    'AndrewAminInstabug')
+    'andrewamindev')
         sid='U06JVRNMKE1'
         ;;
     'ahmedAlaaInstabug')
@@ -12,9 +12,6 @@ case $github_username in
         ;;
    'AyaMahmoud148')
         sid='U07GZSURC8K'
-        ;;
-    'MoKamall')
-        sid='U06JHDS3JJK'
         ;;
     *)
 esac

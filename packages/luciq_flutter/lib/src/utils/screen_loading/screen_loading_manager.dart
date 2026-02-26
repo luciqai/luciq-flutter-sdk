@@ -232,57 +232,6 @@ class ScreenLoadingManager {
     return sanitizedScreenName;
   }
 
-  /// Starts a new UI trace with [screenName] as the public screen name and
-  /// [matchingScreenName] as the screen name used for matching the UI trace
-  /// with a Screen Loading trace.
-  @internal
-  Future<int?> startUiTrace(
-    String screenName, [
-    String? matchingScreenName,
-  ]) async {
-    matchingScreenName ??= screenName;
-
-    try {
-      resetDidStartScreenLoading();
-
-      final isSDKBuilt =
-          await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
-
-      if (!isSDKBuilt) return null;
-
-      final isAutoUiTraceEnabled = await FlagsConfig.uiTrace.isEnabled();
-
-      if (!isAutoUiTraceEnabled) {
-        LuciqLogger.I.e(
-          'Auto UI trace is disabled, skipping starting the UI trace for screen: $screenName.\n'
-          'Please refer to the documentation for how to enable APM on your app: '
-          'https://docs.luciq.ai/docs/react-native-apm-disabling-enabling',
-          tag: APM.tag,
-        );
-        return null;
-      }
-
-      final sanitizedScreenName = sanitizeScreenName(screenName);
-      final sanitizedMatchingScreenName =
-          sanitizeScreenName(matchingScreenName);
-
-      final microTimeStamp = LCQDateTime.I.now().microsecondsSinceEpoch;
-      final uiTraceId = LCQDateTime.I.now().millisecondsSinceEpoch;
-
-      APM.startCpUiTrace(sanitizedScreenName, microTimeStamp, uiTraceId);
-
-      currentUiTrace = UiTrace(
-        screenName: sanitizedScreenName,
-        matchingScreenName: sanitizedMatchingScreenName,
-        traceId: uiTraceId,
-      );
-      return uiTraceId;
-    } catch (error, stackTrace) {
-      _logExceptionErrorAndStackTrace(error, stackTrace);
-      return null;
-    }
-  }
-
   /// Starts a screen loading trace.
   @internal
   Future<void> startScreenLoadingTrace(ScreenLoadingTrace trace) async {

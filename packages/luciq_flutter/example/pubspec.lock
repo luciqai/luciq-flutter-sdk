@@ -216,7 +216,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "19.2.1"
+    version: "19.2.2"
   luciq_http_client:
     dependency: "direct main"
     description:

@@ -7,5 +7,8 @@
 + (void)startUITraceCPWithName:(NSString *)name startTimestampMUS:(NSTimeInterval)startTimestampMUS;
 + (void)reportScreenLoadingCPWithStartTimestampMUS:(NSTimeInterval)startTimestampMUS
                                        durationMUS:(NSTimeInterval)durationMUS;
++ (void)reportManualScreenLoadingCPWithScreenName:(NSString *)screenName
+                                 startTimestampMUS:(NSTimeInterval)startTimestampMUS
+                                       durationMUS:(NSTimeInterval)durationMUS;
 + (void)endScreenLoadingCPWithEndTimestampMUS:(NSTimeInterval)endTimestampMUS;
 @end

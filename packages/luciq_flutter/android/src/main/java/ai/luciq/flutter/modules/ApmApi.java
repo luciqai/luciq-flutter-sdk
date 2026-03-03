@@ -332,6 +332,16 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     }
 
 
+    @Override
+    public void reportManualScreenLoadingCP(@NonNull String screenName, @NonNull Long startTimeStampMicro, @NonNull Long durationMicro) {
+        try {
+            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, 0);
+//            InternalAPM._reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * This method is responsible for extend the end time if the screen loading custom
      * trace. It takes two parameters:

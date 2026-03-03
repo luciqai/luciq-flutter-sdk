@@ -188,6 +188,20 @@
     OCMVerify([self.mAPM reportScreenLoadingCPWithStartTimestampMUS:startTimeStampMicroMUS durationMUS:durationMUS]);
 }
 
+- (void)testReportManualScreenLoading {
+    NSString *screenName = @"testScreen";
+    NSNumber *startTimeStampMicro = @(123456789);
+    NSNumber *durationMicro = @(987654321);
+    FlutterError *error;
+    
+    NSTimeInterval startTimeStampMicroMUS = [startTimeStampMicro doubleValue];
+    NSTimeInterval durationMUS = [durationMicro doubleValue];
+
+    [self.api reportManualScreenLoadingCPScreenName:screenName startTimeStampMicro:startTimeStampMicro durationMicro:durationMicro error:&error];
+
+    OCMVerify([self.mAPM reportManualScreenLoadingCPWithScreenName:screenName startTimestampMUS:startTimeStampMicroMUS durationMUS:durationMUS]);
+}
+
 - (void)testEndScreenLoading {
     NSNumber *timeStampMicro = @(123456789);
     NSNumber *uiTraceId = @(987654321);

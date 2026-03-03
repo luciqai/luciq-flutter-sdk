@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart' show WidgetBuilder, BuildContext;
 import 'package:luciq_flutter/luciq_flutter.dart';
-import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
@@ -8,7 +7,6 @@ import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart
 import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
-
 
 const int _traceValidationTimeout = 500;
 
@@ -238,20 +236,25 @@ class ScreenLoadingManager {
     try {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
-      if (!isSDKBuilt) return;
+      if (!isSDKBuilt) {
+        LuciqLogger.I.e(
+          'Luciq SDK is not built, skipping starting screen loading monitoring for screen: ${trace.screenName}.',
+          tag: APM.tag,
+        );
+        return;
+      }
 
       final isScreenLoadingEnabled =
           await FlagsConfig.screenLoading.isEnabled();
       if (!isScreenLoadingEnabled) {
-        if (LCQBuildInfo.I.isIOS) {
-          LuciqLogger.I.e(
-            'Screen loading monitoring is disabled, skipping starting screen loading monitoring for screen: ${trace.screenName}.\n'
-            'Please refer to the documentation for how to enable screen loading monitoring on your app: '
-            'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-            "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
-            tag: APM.tag,
-          );
-        }
+        LuciqLogger.I.e(
+          'Screen loading monitoring is disabled, skipping starting screen loading monitoring for screen: ${trace.screenName}.\n'
+          'Please refer to the documentation for how to enable screen loading monitoring on your app: '
+          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
+          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+          tag: APM.tag,
+        );
+
         return;
       }
 
@@ -287,21 +290,26 @@ class ScreenLoadingManager {
     try {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
-      if (!isSDKBuilt) return;
+      if (!isSDKBuilt) {
+        LuciqLogger.I.e(
+          'Luciq SDK is not built, skipping reporting screen loading time for screen: ${trace?.screenName}.',
+          tag: APM.tag,
+        );
+        return;
+      }
 
       int? duration;
       final isScreenLoadingEnabled =
           await FlagsConfig.screenLoading.isEnabled();
       if (!isScreenLoadingEnabled) {
-        if (LCQBuildInfo.I.isIOS) {
-          LuciqLogger.I.e(
-            'Screen loading monitoring is disabled, skipping reporting screen loading time for screen: ${trace?.screenName}.\n'
-            'Please refer to the documentation for how to enable screen loading monitoring on your app: '
-            'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-            "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
-            tag: APM.tag,
-          );
-        }
+        LuciqLogger.I.e(
+          'Screen loading monitoring is disabled, skipping reporting screen loading time for screen: ${trace?.screenName}.\n'
+          'Please refer to the documentation for how to enable screen loading monitoring on your app: '
+          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
+          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+          tag: APM.tag,
+        );
+
         return;
       }
 
@@ -363,6 +371,41 @@ class ScreenLoadingManager {
     }
   }
 
+  @internal
+  Future<void> reportManualScreenLoading(
+      String screenName, int startTimeInMicroseconds, int duration) async {
+    try {
+      final isSDKBuilt =
+          await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
+      if (!isSDKBuilt) {
+        LuciqLogger.I.e(
+          'Luciq SDK is not built, skipping reporting manual screen loading time for screen: $screenName.',
+          tag: APM.tag,
+        );
+        return;
+      }
+
+      final isScreenLoadingEnabled =
+          await FlagsConfig.screenLoading.isEnabled();
+      if (!isScreenLoadingEnabled) {
+        LuciqLogger.I.e(
+          'Screen loading monitoring is disabled, skipping reporting manual screen loading time for screen: $screenName.\n'
+          'Please refer to the documentation for how to enable screen loading monitoring on your app: '
+          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
+          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+          tag: APM.tag,
+        );
+        return;
+      }
+
+      APM.reportManualScreenLoadingCP(
+          screenName, startTimeInMicroseconds, duration);
+      return;
+    } catch (error, stackTrace) {
+      _logExceptionErrorAndStackTrace(error, stackTrace);
+    }
+  }
+
   void _reportScreenLoadingDroppedError(ScreenLoadingTrace? trace) {
     LuciqLogger.I.e(
       "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — $trace",
@@ -378,17 +421,14 @@ class ScreenLoadingManager {
 
       final isScreenLoadingEnabled =
           await FlagsConfig.screenLoading.isEnabled();
-
       if (!isScreenLoadingEnabled) {
-        if (LCQBuildInfo.I.isIOS) {
-          LuciqLogger.I.e(
-            'Screen loading monitoring is disabled, skipping ending screen loading monitoring with APM.endScreenLoading().\n'
-            'Please refer to the documentation for how to enable screen loading monitoring in your app: '
-            'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-            "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
-            tag: APM.tag,
-          );
-        }
+        LuciqLogger.I.e(
+          'Screen loading monitoring is disabled, skipping ending screen loading monitoring with APM.endScreenLoading().\n'
+          'Please refer to the documentation for how to enable screen loading monitoring in your app: '
+          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
+          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+          tag: APM.tag,
+        );
         return;
       }
 
@@ -396,15 +436,14 @@ class ScreenLoadingManager {
           await FlagsConfig.endScreenLoading.isEnabled();
 
       if (!isEndScreenLoadingEnabled) {
-        if (LCQBuildInfo.I.isIOS) {
-          LuciqLogger.I.e(
-            'End Screen loading API is disabled.\n'
-            'Please refer to the documentation for how to enable screen loading monitoring in your app: '
-            'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-            "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
-            tag: APM.tag,
-          );
-        }
+        LuciqLogger.I.e(
+          'End Screen loading API is disabled.\n'
+          'Please refer to the documentation for how to enable screen loading monitoring in your app: '
+          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
+          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+          tag: APM.tag,
+        );
+
         return;
       }
 
@@ -423,7 +462,7 @@ class ScreenLoadingManager {
           currentScreenLoadingTrace?.startTimeInMicroseconds != null;
       if (!didStartScreenLoading) {
         LuciqLogger.I.e(
-          "endScreenLoading wasn’t called as there is no active screen Loading trace.",
+          "endScreenLoading wasn’t called as there is no active screen loading trace.",
           tag: APM.tag,
         );
         return;
@@ -519,8 +558,9 @@ class ScreenLoadingManager {
     for (final entry in routes.entries) {
       if (!excludedRoutes.containsKey(entry.key)) {
         wrappedRoutes[entry.key] =
-            (BuildContext context) => LuciqCaptureScreenLoading(
+            (BuildContext context) => LuciqCaptureScreenLoading.withConfig(
                   screenName: entry.key,
+                  isManual: false,
                   child: entry.value(context),
                 );
       } else {

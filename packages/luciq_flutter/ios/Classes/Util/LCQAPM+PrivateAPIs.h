@@ -23,6 +23,10 @@
 + (void)reportScreenLoadingCPWithStartTimestampMUS:(LCQMicroSecondsTimeInterval)startTimestampMUS
                                        durationMUS:(LCQMicroSecondsTimeInterval)durationMUS;
 
++ (void)reportManualScreenLoadingCPWithScreenName:(NSString *)screenName
+                                 startTimestampMUS:(LCQMicroSecondsTimeInterval)startTimestampMUS
+                                       durationMUS:(LCQMicroSecondsTimeInterval)durationMUS;
+
 + (void)endScreenLoadingCPWithEndTimestampMUS:(LCQMicroSecondsTimeInterval)endTimestampMUS;
 
 + (BOOL)isScreenRenderingOperational;

@@ -149,10 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const LuciqCaptureScreenLoading(
-          screenName: ApmPage.screenName,
-          child: ApmPage(),
-        ),
+        builder: (context) => const ApmPage(),
         settings: const RouteSettings(name: ApmPage.screenName),
       ),
     );

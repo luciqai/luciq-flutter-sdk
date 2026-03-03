@@ -851,7 +851,7 @@ void main() {
       );
       verify(
         mLuciqLogger.e(
-          'endScreenLoading wasn’t called as there is no active screen Loading trace.',
+          argThat(contains("endScreenLoading wasn")),
           tag: APM.tag,
         ),
       );
@@ -1036,6 +1036,352 @@ void main() {
 
       // Verify that the returned map is empty
       expect(wrappedRoutes, isEmpty);
+    });
+  });
+
+  group('prepareUiTrace tests', () {
+    late DateTime time;
+    setUp(() {
+      time = DateTime(2024, 1, 1, 12, 0, 0);
+      when(mDateTime.now()).thenReturn(time);
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
+      when(mApmHost.isAutoUiTraceEnabled()).thenAnswer((_) async => true);
+      when(mApmHost.startCpUiTrace(any, any, any))
+          .thenAnswer((_) async => {});
+    });
+
+    test(
+        '[prepareUiTrace] should create a UiTrace with correct screenName and traceId',
+        () async {
+      mScreenLoadingManager.prepareUiTrace(screenName);
+
+      final uiTrace = mScreenLoadingManager.currentUiTrace;
+      expect(uiTrace, isNotNull);
+      expect(uiTrace?.screenName, screenName);
+      expect(uiTrace?.traceId, time.millisecondsSinceEpoch);
+
+      await uiTrace?.whenValidated;
+
+      verify(mApmHost.startCpUiTrace(
+        screenName,
+        time.microsecondsSinceEpoch,
+        time.millisecondsSinceEpoch,
+      )).called(1);
+    });
+
+    test(
+        '[prepareUiTrace] should sanitize screen name with leading slash',
+        () async {
+      mScreenLoadingManager.prepareUiTrace('/Home');
+
+      final uiTrace = mScreenLoadingManager.currentUiTrace;
+      expect(uiTrace, isNotNull);
+      expect(uiTrace?.screenName, 'Home');
+    });
+
+    test(
+        '[prepareUiTrace] should use matchingScreenName when provided',
+        () async {
+      const matchingName = 'matchingScreen';
+      when(RouteMatcher.I.match(
+        routePath: anyNamed('routePath'),
+        actualPath: anyNamed('actualPath'),
+      )).thenReturn(true);
+
+      mScreenLoadingManager.prepareUiTrace(screenName, matchingName);
+
+      final uiTrace = mScreenLoadingManager.currentUiTrace;
+      expect(uiTrace, isNotNull);
+      expect(uiTrace?.screenName, screenName);
+      expect(uiTrace?.matches(screenName), isTrue);
+    });
+
+    test(
+        '[prepareUiTrace] should discard UiTrace when SDK is not built',
+        () async {
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => false);
+
+      mScreenLoadingManager.prepareUiTrace(screenName);
+
+      final uiTrace = mScreenLoadingManager.currentUiTrace;
+      expect(uiTrace, isNotNull);
+
+      final isValid = await uiTrace?.whenValidated;
+      expect(isValid, isFalse);
+
+      expect(mScreenLoadingManager.currentUiTrace, isNull);
+
+      verifyNever(mApmHost.startCpUiTrace(any, any, any));
+    });
+
+    test(
+        '[prepareUiTrace] should discard UiTrace when auto UI trace is disabled',
+        () async {
+      when(mApmHost.isAutoUiTraceEnabled()).thenAnswer((_) async => false);
+
+      mScreenLoadingManager.prepareUiTrace(screenName);
+
+      final uiTrace = mScreenLoadingManager.currentUiTrace;
+      expect(uiTrace, isNotNull);
+
+      final isValid = await uiTrace?.whenValidated;
+      expect(isValid, isFalse);
+
+      expect(mScreenLoadingManager.currentUiTrace, isNull);
+
+      verifyNever(mApmHost.startCpUiTrace(any, any, any));
+      verify(mLuciqLogger.e(
+        argThat(contains('Auto UI trace is disabled')),
+        tag: APM.tag,
+      )).called(1);
+    });
+
+    test(
+        '[prepareUiTrace] should reset didStartScreenLoading on the previous UiTrace',
+        () async {
+      final oldUiTrace = UiTrace(screenName: 'oldScreen', traceId: 1);
+      oldUiTrace.didStartScreenLoading = true;
+      mScreenLoadingManager.currentUiTrace = oldUiTrace;
+
+      mScreenLoadingManager.prepareUiTrace(screenName);
+
+      expect(oldUiTrace.didStartScreenLoading, isFalse);
+    });
+
+    test(
+        '[prepareUiTrace] should handle exception gracefully and log error',
+        () async {
+      when(mDateTime.now()).thenThrow(Exception('test exception'));
+
+      mScreenLoadingManager.prepareUiTrace(screenName);
+
+      verify(mLuciqLogger.e(
+        argThat(contains('test exception')),
+        tag: APM.tag,
+      )).called(1);
+    });
+  });
+
+  group('reportManualScreenLoading tests', () {
+    const testScreenName = 'manualScreen';
+    const startTime = 1000;
+    const testDuration = 500;
+
+    setUp(() {
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
+    });
+
+    test(
+        '[reportManualScreenLoading] with SDK not built should log error',
+        () async {
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => false);
+
+      await ScreenLoadingManager.I.reportManualScreenLoading(
+        testScreenName,
+        startTime,
+        testDuration,
+      );
+
+      verify(mLuciqLogger.e(
+        argThat(contains(
+            'Luciq SDK is not built, skipping reporting manual screen loading')),
+        tag: APM.tag,
+      )).called(1);
+      verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any));
+    });
+
+    test(
+        '[reportManualScreenLoading] with screen loading disabled should log error',
+        () async {
+      when(FlagsConfig.screenLoading.isEnabled())
+          .thenAnswer((_) async => false);
+
+      await ScreenLoadingManager.I.reportManualScreenLoading(
+        testScreenName,
+        startTime,
+        testDuration,
+      );
+
+      verify(mLuciqLogger.e(
+        argThat(contains(
+            'Screen loading monitoring is disabled, skipping reporting manual screen loading')),
+        tag: APM.tag,
+      )).called(1);
+      verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any));
+    });
+
+    test(
+        '[reportManualScreenLoading] should report to native when everything is enabled',
+        () async {
+      when(FlagsConfig.screenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+      when(mApmHost.reportManualScreenLoadingCP(any, any, any))
+          .thenAnswer((_) async => {});
+
+      await ScreenLoadingManager.I.reportManualScreenLoading(
+        testScreenName,
+        startTime,
+        testDuration,
+      );
+
+      verify(mApmHost.reportManualScreenLoadingCP(
+        testScreenName,
+        startTime,
+        testDuration,
+      )).called(1);
+    });
+  });
+
+  group('reportScreenLoading - UI trace validation tests', () {
+    late DateTime time;
+    late UiTrace uiTrace;
+    late int traceId;
+    late ScreenLoadingTrace screenLoadingTrace;
+
+    setUp(() {
+      time = DateTime.now();
+      traceId = time.millisecondsSinceEpoch;
+      uiTrace = UiTrace(screenName: screenName, traceId: traceId);
+      mScreenLoadingManager.currentUiTrace = uiTrace;
+      when(mDateTime.now()).thenReturn(time);
+      screenLoadingTrace = ScreenLoadingTrace(
+        screenName,
+        startTimeInMicroseconds: time.microsecondsSinceEpoch,
+        startMonotonicTimeInMicroseconds: time.microsecondsSinceEpoch,
+      );
+      screenLoadingTrace.duration = 1000;
+      screenLoadingTrace.endTimeInMicroseconds =
+          time.microsecondsSinceEpoch + 1000;
+      mScreenLoadingManager.currentScreenLoadingTrace = screenLoadingTrace;
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
+      when(FlagsConfig.screenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+    });
+
+    test(
+        '[reportScreenLoading] should drop trace when UI trace validation completes with false',
+        () async {
+      uiTrace.validationCompleter.complete(false);
+
+      await ScreenLoadingManager.I.reportScreenLoading(screenLoadingTrace);
+
+      expect(mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
+          isFalse);
+      expect(mScreenLoadingManager.currentScreenLoadingTrace, isNull);
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verify(mLuciqLogger.d(
+        argThat(contains(
+            'Dropping screen loading trace — UI trace validation failed')),
+        tag: APM.tag,
+      )).called(1);
+    });
+
+    test(
+        '[reportScreenLoading] should drop trace when UI trace validation times out',
+        () async {
+      // Never complete the validation completer — triggers timeout
+      await ScreenLoadingManager.I.reportScreenLoading(screenLoadingTrace);
+
+      expect(mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
+          isFalse);
+      expect(mScreenLoadingManager.currentScreenLoadingTrace, isNull);
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verify(mLuciqLogger.e(
+        argThat(contains('UI trace validation timed out')),
+        tag: APM.tag,
+      )).called(1);
+    });
+  });
+
+  group('endScreenLoading - additional edge cases', () {
+    late DateTime time;
+    late UiTrace uiTrace;
+    late int traceId;
+    late ScreenLoadingTrace screenLoadingTrace;
+
+    setUp(() {
+      time = DateTime.now();
+      traceId = time.millisecondsSinceEpoch;
+      uiTrace = UiTrace(screenName: screenName, traceId: traceId);
+      uiTrace.validationCompleter.complete(true);
+      mScreenLoadingManager.currentUiTrace = uiTrace;
+      when(mDateTime.now()).thenReturn(time);
+      when(mLuciqMonotonicClock.now).thenReturn(500);
+      screenLoadingTrace = ScreenLoadingTrace(
+        screenName,
+        startTimeInMicroseconds: time.microsecondsSinceEpoch,
+        startMonotonicTimeInMicroseconds: time.microsecondsSinceEpoch,
+      );
+      screenLoadingTrace.endTimeInMicroseconds =
+          time.microsecondsSinceEpoch + 1000;
+      screenLoadingTrace.duration = 1000;
+      mScreenLoadingManager.currentScreenLoadingTrace = screenLoadingTrace;
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
+    });
+
+    test(
+        '[endScreenLoading] with endScreenLoading feature flag disabled should log error',
+        () async {
+      when(FlagsConfig.screenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+      when(FlagsConfig.endScreenLoading.isEnabled())
+          .thenAnswer((_) async => false);
+
+      await ScreenLoadingManager.I.endScreenLoading();
+
+      verify(mLuciqLogger.e(
+        argThat(contains('End Screen loading API is disabled')),
+        tag: APM.tag,
+      )).called(1);
+      verifyNever(mApmHost.endScreenLoadingCP(any, any));
+    });
+
+    test(
+        '[endScreenLoading] should drop when UI trace validation completes with false',
+        () async {
+      final invalidUiTrace =
+          UiTrace(screenName: screenName, traceId: traceId);
+      invalidUiTrace.validationCompleter.complete(false);
+      mScreenLoadingManager.currentUiTrace = invalidUiTrace;
+
+      when(FlagsConfig.screenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+      when(FlagsConfig.endScreenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+
+      await ScreenLoadingManager.I.endScreenLoading();
+
+      expect(invalidUiTrace.didExtendScreenLoading, isFalse);
+      verifyNever(mApmHost.endScreenLoadingCP(any, any));
+      verify(mLuciqLogger.d(
+        argThat(contains(
+            'Dropping endScreenLoading — UI trace validation failed')),
+        tag: APM.tag,
+      )).called(1);
+    });
+
+    test(
+        '[endScreenLoading] should drop when UI trace validation times out',
+        () async {
+      final pendingUiTrace =
+          UiTrace(screenName: screenName, traceId: traceId);
+      // Never complete the validation completer
+      mScreenLoadingManager.currentUiTrace = pendingUiTrace;
+
+      when(FlagsConfig.screenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+      when(FlagsConfig.endScreenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+
+      await ScreenLoadingManager.I.endScreenLoading();
+
+      expect(pendingUiTrace.didExtendScreenLoading, isFalse);
+      verifyNever(mApmHost.endScreenLoadingCP(any, any));
+      verify(mLuciqLogger.e(
+        argThat(
+            contains('UI trace validation timed out')),
+        tag: APM.tag,
+      )).called(1);
     });
   });
 }

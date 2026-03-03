@@ -3,6 +3,7 @@ import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
+import 'package:meta/meta.dart';
 
 /// A widget that tracks and reports screen loading times to Luciq.
 ///
@@ -29,6 +30,16 @@ class LuciqCaptureScreenLoading extends StatefulWidget {
     Key? key,
     required this.screenName,
     required this.child,
+  })  : isManual = true,
+        super(key: key);
+
+  /// Internal constructor that allows configuring [isManual].
+  @internal
+  const LuciqCaptureScreenLoading.withConfig({
+    Key? key,
+    required this.screenName,
+    required this.child,
+    this.isManual = true,
   }) : super(key: key);
 
   /// The UI component whose loading time is being measured.
@@ -36,6 +47,9 @@ class LuciqCaptureScreenLoading extends StatefulWidget {
 
   /// The name of the screen being monitored for loading performance.
   final String screenName;
+
+  /// Whether the screen loading is manual or automatic.
+  final bool isManual;
 
   @override
   State<LuciqCaptureScreenLoading> createState() =>
@@ -73,7 +87,22 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
       final duration = stopwatch.elapsedMicroseconds;
       trace?.duration = duration;
       trace?.endTimeInMicroseconds = startTimeInMicroseconds + duration;
-      ScreenLoadingManager.I.reportScreenLoading(trace);
+
+      // Only the widget whose trace won the start (i.e. the most-parent)
+      // should report. Nested children will have a different trace object.
+      final isActiveTrace =
+          ScreenLoadingManager.I.currentScreenLoadingTrace == trace;
+      if (!isActiveTrace) return;
+
+      if (widget.isManual) {
+        ScreenLoadingManager.I.reportManualScreenLoading(
+          widget.screenName,
+          startTimeInMicroseconds,
+          duration,
+        );
+      } else {
+        ScreenLoadingManager.I.reportScreenLoading(trace);
+      }
     });
   }
 

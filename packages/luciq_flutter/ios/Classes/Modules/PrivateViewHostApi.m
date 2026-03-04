@@ -18,12 +18,16 @@ extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger
 
 
 - (void)initWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    NSLog(@" LCQ_FLUTTER:Init With Private views");
     [LuciqApi setScreenshotMaskingHandler:^(UIImage * _Nonnull screenshot, void (^ _Nonnull completion)(UIImage * _Nullable)) {
         
-        
+        NSLog(@"LCQ_FLUTTER:Private views CALLback called");
 
+        
            [self.privateViewApi mask:screenshot completion:^(UIImage * _Nonnull maskedImage) {
              if (maskedImage != nil) {
+                 NSLog(@"LCQ_FLUTTER:Private views CALLback compeleted");
+
                  completion(maskedImage);
                 }
            }];

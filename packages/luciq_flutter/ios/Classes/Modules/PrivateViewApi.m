@@ -51,6 +51,9 @@ static long long currentTimeMillis;
     for (UIWindow *window in UIApplication.sharedApplication.windows) {
         [window drawViewHierarchyInRect:window.bounds afterScreenUpdates:YES];
     }
+    
+    NSLog(@"LCQ_FLUTTER:Private views captureScreenshot called");
+
 
     UIImage *screenshot = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -108,6 +111,8 @@ static long long currentTimeMillis;
     CGContextRef context = UIGraphicsGetCurrentContext();
 
     @try {
+        NSLog(@"LCQ_FLUTTER:Private views drawMaskedImage called");
+
         [screenshot drawAtPoint:CGPointZero];
         CGContextSetFillColorWithColor(context, UIColor.blackColor.CGColor);
 

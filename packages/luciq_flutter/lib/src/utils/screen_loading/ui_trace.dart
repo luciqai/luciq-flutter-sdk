@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:luciq_flutter/src/utils/screen_loading/route_matcher.dart';
 
 class UiTrace {
@@ -14,6 +16,13 @@ class UiTrace {
   bool didStartScreenLoading = false;
   bool didReportScreenLoading = false;
   bool didExtendScreenLoading = false;
+
+  /// Completes with `true` if the UI trace was validated and activated
+  /// on the native side, or `false` if it was discarded.
+  final Completer<bool> validationCompleter = Completer<bool>();
+
+  /// Awaitable future that resolves when validation finishes.
+  Future<bool> get whenValidated => validationCompleter.future;
 
   UiTrace({
     required this.screenName,

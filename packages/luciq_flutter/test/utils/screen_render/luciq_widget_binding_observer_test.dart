@@ -55,8 +55,7 @@ void main() {
       expect(shorthand, same(instance));
     });
 
-    test(
-        'handles AppLifecycleState.resumed and starts screen render collector',
+    test('handles AppLifecycleState.resumed and starts screen render collector',
         () async {
       when(mockLoadingManager.currentUiTrace).thenReturn(mockUiTrace);
       when(mockUiTrace.screenName).thenReturn('HomeScreen');

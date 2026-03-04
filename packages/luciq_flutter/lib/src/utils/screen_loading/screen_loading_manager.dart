@@ -9,7 +9,6 @@ import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
 
-
 const int _traceValidationTimeout = 500;
 
 /// Manages screen loading traces and UI traces for performance monitoring.

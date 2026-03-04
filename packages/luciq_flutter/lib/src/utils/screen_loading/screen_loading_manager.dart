@@ -373,7 +373,7 @@ class ScreenLoadingManager {
 
   @internal
   Future<void> reportManualScreenLoading(
-      String screenName, int startTimeInMicroseconds, int duration) async {
+      String screenName, int startTimeInMicroseconds, int duration,) async {
     try {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
@@ -399,7 +399,7 @@ class ScreenLoadingManager {
       }
 
       APM.reportManualScreenLoadingCP(
-          screenName, startTimeInMicroseconds, duration);
+          screenName, startTimeInMicroseconds, duration,);
       return;
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);

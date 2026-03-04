@@ -56,7 +56,7 @@ void main() {
       screenName,
       any,
       any,
-    )).called(1);
+    ),).called(1);
     verifyNever(mockScreenLoadingManager.reportScreenLoading(any));
   });
 
@@ -85,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
     verify(mockScreenLoadingManager.reportScreenLoading(any)).called(1);
     verifyNever(
-        mockScreenLoadingManager.reportManualScreenLoading(any, any, any));
+        mockScreenLoadingManager.reportManualScreenLoading(any, any, any),);
   });
 
   testWidgets(
@@ -113,12 +113,12 @@ void main() {
     final trace = mockScreenLoadingManager.currentScreenLoadingTrace;
     expect(trace, isNotNull);
     expect(trace!.endTimeInMicroseconds, isNotNull,
-        reason: 'endTimeInMicroseconds must be set for endScreenLoading');
+        reason: 'endTimeInMicroseconds must be set for endScreenLoading',);
     expect(trace.duration, isNotNull,
-        reason: 'duration must be set for endScreenLoading');
+        reason: 'duration must be set for endScreenLoading',);
     expect(trace.duration, greaterThanOrEqualTo(0));
     expect(trace.endTimeInMicroseconds,
-        equals(trace.startTimeInMicroseconds + trace.duration!));
+        equals(trace.startTimeInMicroseconds + trace.duration!),);
   });
 
   testWidgets(
@@ -147,12 +147,12 @@ void main() {
     final trace = mockScreenLoadingManager.currentScreenLoadingTrace;
     expect(trace, isNotNull);
     expect(trace!.endTimeInMicroseconds, isNotNull,
-        reason: 'endTimeInMicroseconds must be set for endScreenLoading');
+        reason: 'endTimeInMicroseconds must be set for endScreenLoading',);
     expect(trace.duration, isNotNull,
-        reason: 'duration must be set for endScreenLoading');
+        reason: 'duration must be set for endScreenLoading',);
     expect(trace.duration, greaterThanOrEqualTo(0));
     expect(trace.endTimeInMicroseconds,
-        equals(trace.startTimeInMicroseconds + trace.duration!));
+        equals(trace.startTimeInMicroseconds + trace.duration!),);
   });
 
   testWidgets(
@@ -189,7 +189,7 @@ void main() {
       screenName,
       any,
       any,
-    )).called(1);
+    ),).called(1);
     verifyNever(mockScreenLoadingManager.reportScreenLoading(any));
   });
 
@@ -228,6 +228,6 @@ void main() {
     // Only the parent (whose trace matches currentScreenLoadingTrace) reports
     verify(mockScreenLoadingManager.reportScreenLoading(any)).called(1);
     verifyNever(
-        mockScreenLoadingManager.reportManualScreenLoading(any, any, any));
+        mockScreenLoadingManager.reportManualScreenLoading(any, any, any),);
   });
 }

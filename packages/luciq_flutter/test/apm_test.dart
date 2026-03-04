@@ -4,7 +4,6 @@ import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
-import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

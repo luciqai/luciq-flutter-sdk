@@ -51,11 +51,14 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
-        token: 'ed6f659591566da19b67857e1b9d40ab',
+        token: '0174a800719ebdebf7b248fa6ae2ef17',
         invocationEvents: [InvocationEvent.floatingButton],
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',
       );
+
+      Luciq.setValueForStringWithKey('text you want',
+          CustomTextPlaceHolderKey.commentFieldHintForBugReport);
 
       BugReporting.setProactiveReportingConfigurations(
         const ProactiveReportingConfigs(

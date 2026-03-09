@@ -1,7 +1,7 @@
 PODS:
   - Flutter (1.0.0)
   - Luciq (19.4.1)
-  - luciq_flutter (19.2.2):
+  - luciq_flutter (19.3.0):
     - Flutter
     - Luciq (= 19.4.1)
 
@@ -20,7 +20,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/luciq_flutter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   Luciq: f29a09180b9b23f74f249b88176c73141643f271
   luciq_flutter: 067dbdd0a83877738be84ba652e6f35ef17af4ff
 

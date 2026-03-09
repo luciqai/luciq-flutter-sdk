@@ -28,10 +28,13 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
 
     final maskedScreenName = ScreenNameMasker.I.mask(lastUiTrace.screenName);
 
+    // Synchronously prepare the UI trace, then start screen render after validation.
     ScreenLoadingManager.I
-        .startUiTrace(maskedScreenName, lastUiTrace.screenName)
-        .then((uiTraceId) async {
-      if (uiTraceId == null) return;
+        .prepareUiTrace(maskedScreenName, lastUiTrace.screenName);
+
+    final uiTrace = ScreenLoadingManager.I.currentUiTrace;
+    uiTrace?.whenValidated.then((isValid) async {
+      if (!isValid) return;
 
       final isScreenRenderEnabled =
           await FlagsConfig.screenRendering.isEnabled();
@@ -46,7 +49,7 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
 
       //Start new ScreenRenderCollector.
       LuciqScreenRenderManager.I
-          .startScreenRenderCollectorForTraceId(uiTraceId);
+          .startScreenRenderCollectorForTraceId(uiTrace.traceId);
     });
   }
 

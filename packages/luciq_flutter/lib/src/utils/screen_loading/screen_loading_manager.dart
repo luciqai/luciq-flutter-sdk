@@ -231,8 +231,10 @@ class ScreenLoadingManager {
   }
 
   /// Starts a screen loading trace.
+  ///
+  /// Returns `true` if the trace was successfully started, `false` otherwise.
   @internal
-  Future<void> startScreenLoadingTrace(ScreenLoadingTrace trace) async {
+  Future<bool> startScreenLoadingTrace(ScreenLoadingTrace trace) async {
     try {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
@@ -241,7 +243,7 @@ class ScreenLoadingManager {
           'Luciq SDK is not built, skipping starting screen loading monitoring for screen: ${trace.screenName}.',
           tag: APM.tag,
         );
-        return;
+        return false;
       }
 
       final isScreenLoadingEnabled =
@@ -255,7 +257,7 @@ class ScreenLoadingManager {
           tag: APM.tag,
         );
 
-        return;
+        return false;
       }
 
       final isSameScreen = currentUiTrace?.matches(trace.screenName) == true;
@@ -269,7 +271,7 @@ class ScreenLoadingManager {
         );
         currentUiTrace?.didStartScreenLoading = true;
         currentScreenLoadingTrace = trace;
-        return;
+        return true;
       }
       LuciqLogger.I.d(
         'failed to start screen loading trace — screenName: ${trace.screenName}, startTimeInMicroseconds: ${trace.startTimeInMicroseconds}',
@@ -279,8 +281,10 @@ class ScreenLoadingManager {
         'didStartScreenLoading: $didStartLoading, isSameScreen: $isSameScreen',
         tag: APM.tag,
       );
+      return false;
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);
+      return false;
     }
   }
 
@@ -373,7 +377,10 @@ class ScreenLoadingManager {
 
   @internal
   Future<void> reportManualScreenLoading(
-      String screenName, int startTimeInMicroseconds, int duration,) async {
+    String screenName,
+    int startTimeInMicroseconds,
+    int duration,
+  ) async {
     try {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
@@ -399,7 +406,10 @@ class ScreenLoadingManager {
       }
 
       APM.reportManualScreenLoadingCP(
-          screenName, startTimeInMicroseconds, duration,);
+        screenName,
+        startTimeInMicroseconds,
+        duration,
+      );
       return;
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);

@@ -47,4 +47,18 @@ class ScreenLoadingTrace {
   String toString() {
     return 'ScreenLoadingTrace{screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, startMonotonicTimeInMicroseconds: $startMonotonicTimeInMicroseconds, endTimeInMicroseconds: $endTimeInMicroseconds, duration: $duration}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ScreenLoadingTrace &&
+        other.screenName == screenName &&
+        other.startTimeInMicroseconds == startTimeInMicroseconds &&
+        other.startMonotonicTimeInMicroseconds ==
+            startMonotonicTimeInMicroseconds;
+  }
+
+  @override
+  int get hashCode => Object.hash(screenName, startTimeInMicroseconds,
+      startMonotonicTimeInMicroseconds, endTimeInMicroseconds, duration);
 }

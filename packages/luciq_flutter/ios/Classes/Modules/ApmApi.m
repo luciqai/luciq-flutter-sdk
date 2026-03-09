@@ -143,7 +143,7 @@ NSMutableDictionary *traces;
 - (void)reportManualScreenLoadingCPScreenName:(nonnull NSString *)screenName startTimeStampMicro:(nonnull NSNumber *)startTimeStampMicro durationMicro:(nonnull NSNumber *)durationMicro error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     NSTimeInterval startTimeStampMicroMUS = [startTimeStampMicro doubleValue];
     NSTimeInterval durationMUS = [durationMicro doubleValue];
-    [LCQAPM reportManualScreenLoadingCPWithScreenName:screenName startTimestampMUS:startTimeStampMicroMUS durationMUS:durationMUS];
+    [LCQAPM reportScreenLoadingCPUITraceWithName:screenName screenLoadingStartMUS:startTimeStampMicroMUS screenLoadingDurationMUS:durationMUS stages:nil];
 }
 
 // This method is responsible for extend the end time if the screen loading custom

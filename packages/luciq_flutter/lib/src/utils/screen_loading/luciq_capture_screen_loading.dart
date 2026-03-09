@@ -78,21 +78,18 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
       startMonotonicTimeInMicroseconds: startMonotonicTimeInMicroseconds,
     );
 
-    ScreenLoadingManager.I.startScreenLoadingTrace(trace!);
+    final didStartTrace =
+        ScreenLoadingManager.I.startScreenLoadingTrace(trace!);
 
     // Ensures compatibility with Flutter versions before 3.0.0
     // ignore: invalid_null_aware_operator
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
       stopwatch.stop();
       final duration = stopwatch.elapsedMicroseconds;
       trace?.duration = duration;
       trace?.endTimeInMicroseconds = startTimeInMicroseconds + duration;
 
-      // Only the widget whose trace won the start (i.e. the most-parent)
-      // should report. Nested children will have a different trace object.
-      final isActiveTrace =
-          ScreenLoadingManager.I.currentScreenLoadingTrace == trace;
-      if (!isActiveTrace) return;
+      if (!await didStartTrace) return;
 
       if (widget.isManual) {
         ScreenLoadingManager.I.reportManualScreenLoading(

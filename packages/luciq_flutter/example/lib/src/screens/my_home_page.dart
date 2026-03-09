@@ -146,13 +146,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _navigateToApm() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ApmPage(),
-        settings: const RouteSettings(name: ApmPage.screenName),
-      ),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => const ApmPage(),
+    //     settings: const RouteSettings(name: ApmPage.screenName),
+    //   ),
+    // );
+    Navigator.pushNamed(context, ApmPage.screenName);
   }
 
   void _navigateToComplex() {

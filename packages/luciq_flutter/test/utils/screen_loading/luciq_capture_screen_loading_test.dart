@@ -16,14 +16,16 @@ void main() {
   /// Stubs [startScreenLoadingTrace] to capture the first trace as the
   /// "winning" trace, and makes [currentScreenLoadingTrace] return it.
   /// This mirrors the real [ScreenLoadingManager] behavior where only
-  /// the first call sets [currentScreenLoadingTrace].
+  /// the first call sets [currentScreenLoadingTrace] and returns `true`.
   void stubStartAndCaptureTrace() {
     ScreenLoadingTrace? capturedTrace;
 
     when(mockScreenLoadingManager.startScreenLoadingTrace(any))
         .thenAnswer((invocation) async {
-      capturedTrace ??=
+      if (capturedTrace != null) return false;
+      capturedTrace =
           invocation.positionalArguments[0] as ScreenLoadingTrace;
+      return true;
     });
 
     when(mockScreenLoadingManager.currentScreenLoadingTrace)

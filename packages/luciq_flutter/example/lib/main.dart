@@ -63,6 +63,9 @@ Future<void> main() async {
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
 
+      Luciq.setValueForStringWithKey('text you want',
+          CustomTextPlaceHolderKey.commentFieldHintForBugReport);
+
       BugReporting.setProactiveReportingConfigurations(
         const ProactiveReportingConfigs(
           enabled: true,

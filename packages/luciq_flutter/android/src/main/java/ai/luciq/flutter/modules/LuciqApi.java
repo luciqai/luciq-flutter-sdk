@@ -172,7 +172,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     }
 
     @Override
-    public void identifyUser(@NonNull String email, @Nullable String name, @Nullable String userId) {
+    public void identifyUser(@Nullable String email, @Nullable String name, @Nullable String userId) {
         Luciq.identifyUser(name, email, userId);
     }
 

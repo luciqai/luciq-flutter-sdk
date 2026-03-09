@@ -26,7 +26,7 @@ class _CorePageState extends State<CorePage> {
 
   CallbackHandlersProvider? callbackHandlerProvider;
 
-  void identifyUser(String email, String name, String id) {
+  void identifyUser(String? email, String? name, String id) {
     Luciq.identifyUser(email, name, id);
   }
 
@@ -240,10 +240,23 @@ class _CorePageState extends State<CorePage> {
           text: 'Identify User',
           symanticLabel: 'identify_user_btn',
           onPressed: () => identifyUser(
-            userEmailController.text,
+            userEmailController.text.isEmpty == true
+                ? null
+                : userEmailController.text,
             userNameController.text,
             userIdController.text,
           ),
+        ),
+        LuciqButton(
+          text: 'Identify User2',
+          symanticLabel: 'identify_user_btn2',
+          onPressed: () {
+            identifyUser(
+              null,
+              null,
+              userIdController.text,
+            );
+          },
         ),
         LuciqButton(
           text: 'Logout User',

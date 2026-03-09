@@ -1,11 +1,11 @@
 name: luciq_flutter
-version: 19.2.2
+version: 19.3.0
 description: >-
   The official SDK for Luciq, the Agentic Observability Platform for Mobile. 
   Use AI agents to resolve issues faster and empower your team to focus on building what matters.
 homepage: https://www.luciq.ai/platforms
 repository: https://github.com/luciqai/luciq-flutter-sdk
-documentation: https://docs.luciq.ai/docs/flutter-overview
+documentation: https://docs.luciq.ai/flutter
 
 dependencies:
   flutter:

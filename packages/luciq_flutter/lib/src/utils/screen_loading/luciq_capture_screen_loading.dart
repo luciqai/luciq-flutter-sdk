@@ -64,7 +64,8 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
       startMonotonicTimeInMicroseconds: startMonotonicTimeInMicroseconds,
     );
 
-    ScreenLoadingManager.I.startScreenLoadingTrace(trace!);
+    final startScreenLoadingTraceFuture =
+        ScreenLoadingManager.I.startScreenLoadingTrace(trace!);
 
     // Ensures compatibility with Flutter versions before 3.0.0
     // ignore: invalid_null_aware_operator
@@ -73,7 +74,9 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
       final duration = stopwatch.elapsedMicroseconds;
       trace?.duration = duration;
       trace?.endTimeInMicroseconds = startTimeInMicroseconds + duration;
-      ScreenLoadingManager.I.reportScreenLoading(trace);
+      startScreenLoadingTraceFuture.then((_) {
+        ScreenLoadingManager.I.reportScreenLoading(trace);
+      });
     });
   }
 

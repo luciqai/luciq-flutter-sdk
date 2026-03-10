@@ -3,7 +3,7 @@ description: CLI tool for migrating Flutter projects from Instabug to Luciq SDK
 version: 1.0.12
 homepage: https://github.com/luciqai/luciq-flutter-sdk
 repository: https://github.com/luciqai/luciq-flutter-sdk/tree/master/packages/luciq_cli
-documentation: https://docs.luciq.ai/docs/flutter-overview
+documentation: https://docs.luciq.ai/flutter
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

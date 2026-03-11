@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_classes_with_only_static_members
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -16,8 +15,6 @@ enum NonFatalExceptionLevel { error, critical, info, warning }
 class CrashReporting {
   static var _host = CrashReportingHostApi();
   static bool enabled = true;
-
-  static final _CrashReportQueue _queue = _CrashReportQueue();
 
   /// @nodoc
   @visibleForTesting
@@ -52,16 +49,13 @@ class CrashReporting {
     Map<String, String>? userAttributes,
     String? fingerprint,
     NonFatalExceptionLevel level = NonFatalExceptionLevel.error,
-  }) {
-    final capturedStack = stack ?? StackTrace.current;
-    return _queue.enqueue(
-      () => _sendHandledCrash(
-        exception,
-        capturedStack,
-        userAttributes,
-        fingerprint,
-        level,
-      ),
+  }) async {
+    await _sendHandledCrash(
+      exception,
+      stack ?? StackTrace.current,
+      userAttributes,
+      fingerprint,
+      level,
     );
   }
 
@@ -132,51 +126,4 @@ class CrashReporting {
   static Future<void> setNDKEnabled(bool isEnabled) async {
     return _host.setNDKEnabled(isEnabled);
   }
-}
-
-/// Serializes platform channel calls so only one is in-flight at a time,
-/// preventing main-thread flooding when many crash reports are sent rapidly.
-class _CrashReportQueue {
-  static const int _maxQueueSize = 1000;
-
-  final Queue<_QueueEntry> _pending = Queue<_QueueEntry>();
-  bool _processing = false;
-
-  Future<void> enqueue(Future<void> Function() task) {
-    final completer = Completer<void>();
-
-    if (_pending.length >= _maxQueueSize) {
-      _pending.removeFirst().completer.complete();
-    }
-
-    _pending.add(_QueueEntry(task: task, completer: completer));
-    _startProcessing();
-    return completer.future;
-  }
-
-  void _startProcessing() {
-    if (_processing) return;
-    _processing = true;
-    _drain();
-  }
-
-  Future<void> _drain() async {
-    while (_pending.isNotEmpty) {
-      final entry = _pending.removeFirst();
-      try {
-        await entry.task();
-        entry.completer.complete();
-      } catch (e, s) {
-        entry.completer.completeError(e, s);
-      }
-    }
-    _processing = false;
-  }
-}
-
-class _QueueEntry {
-  _QueueEntry({required this.task, required this.completer});
-
-  final Future<void> Function() task;
-  final Completer<void> completer;
 }

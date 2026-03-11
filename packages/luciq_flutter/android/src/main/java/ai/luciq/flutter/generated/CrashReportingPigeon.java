@@ -98,9 +98,10 @@ public class CrashReportingPigeon {
         }
       }
       {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.CrashReportingHostApi.send", getCodec());
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.CrashReportingHostApi.send", getCodec(), taskQueue);
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {
@@ -123,9 +124,10 @@ public class CrashReportingPigeon {
         }
       }
       {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
-                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.CrashReportingHostApi.sendNonFatalError", getCodec());
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.CrashReportingHostApi.sendNonFatalError", getCodec(), taskQueue);
         if (api != null) {
           channel.setMessageHandler(
               (message, reply) -> {

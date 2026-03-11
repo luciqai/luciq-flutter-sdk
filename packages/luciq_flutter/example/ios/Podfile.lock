@@ -35,10 +35,10 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Luciq (19.3.1)
+  - Luciq (19.4.0)
   - luciq_flutter (19.3.0):
     - Flutter
-    - Luciq (= 19.3.1)
+    - Luciq (= 19.4.0)
   - OCMock (3.6)
   - patrol (0.0.1):
     - CocoaAsyncSocket (~> 7.6)
@@ -55,7 +55,7 @@ PODS:
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
-  - Luciq (from `https://ios-releases.luciq.ai/custom/feature-react_native_screen_loading-wrapper/19.3.1/Luciq.podspec`)
+  - Luciq (from `https://ios-releases.luciq.ai/custom/feature-react_native_screen_loading-custom_build/19.4.0/Luciq.podspec`)
   - luciq_flutter (from `.symlinks/plugins/luciq_flutter/ios`)
   - OCMock (= 3.6)
   - patrol (from `.symlinks/plugins/patrol/darwin`)
@@ -76,7 +76,7 @@ EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   Luciq:
-    :podspec: https://ios-releases.luciq.ai/custom/feature-react_native_screen_loading-wrapper/19.3.1/Luciq.podspec
+    :podspec: https://ios-releases.luciq.ai/custom/feature-react_native_screen_loading-custom_build/19.4.0/Luciq.podspec
   luciq_flutter:
     :path: ".symlinks/plugins/luciq_flutter/ios"
   patrol:
@@ -90,14 +90,14 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Luciq: 1a6175646561f7f58627dcc03cd47532e0545a7f
-  luciq_flutter: 13175f0404b41177d5b3fb204f8a3a0c46376004
+  Luciq: f93deb820ea2387015f62bea05a96c4064f34d54
+  luciq_flutter: d3dcb12c68875b7a3033d9126da35a17d429f157
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
   patrol: 51b76cc7c11a2933ee3e72482d930c75b9d4ec73
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
 
-PODFILE CHECKSUM: 0fa95f5502de772eab923ce3e028bccfe6d3fb39
+PODFILE CHECKSUM: 2a779a71b397a0cb6aa0cb4dd8f80d8d591f7079
 
 COCOAPODS: 1.16.2

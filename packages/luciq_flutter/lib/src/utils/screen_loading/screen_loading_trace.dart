@@ -59,6 +59,11 @@ class ScreenLoadingTrace {
   }
 
   @override
-  int get hashCode => Object.hash(screenName, startTimeInMicroseconds,
-      startMonotonicTimeInMicroseconds, endTimeInMicroseconds, duration);
+  int get hashCode => Object.hash(
+        screenName,
+        startTimeInMicroseconds,
+        startMonotonicTimeInMicroseconds,
+        endTimeInMicroseconds,
+        duration,
+      );
 }

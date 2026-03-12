@@ -196,6 +196,7 @@ void main() {
       startTimeStampMicro,
       durationMicro,
       uiTraceId,
+      const [],
     );
 
     verify(
@@ -203,6 +204,7 @@ void main() {
         startTimeStampMicro,
         durationMicro,
         uiTraceId,
+        null,
       ),
     ).called(1);
   });
@@ -362,6 +364,7 @@ void main() {
         screenName,
         startTimeStampMicro,
         durationMicro,
+        const [],
       );
 
       verify(
@@ -369,6 +372,7 @@ void main() {
           screenName,
           startTimeStampMicro,
           durationMicro,
+          null,
         ),
       ).called(1);
     });

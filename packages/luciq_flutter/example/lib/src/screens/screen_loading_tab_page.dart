@@ -50,10 +50,10 @@ class _ScreenLoadingTabPageState extends State<ScreenLoadingTabPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _HomeTab(key: const ValueKey('home_tab')),
-          _ListTab(key: const ValueKey('list_tab')),
-          _GridTab(key: const ValueKey('grid_tab')),
+        children: const [
+          _HomeTab(key: ValueKey('home_tab')),
+          _ListTab(key: ValueKey('list_tab')),
+          _GridTab(key: ValueKey('grid_tab')),
         ],
       ),
     );

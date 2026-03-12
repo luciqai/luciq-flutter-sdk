@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_stage.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
 import 'package:mockito/mockito.dart';
 import '../luciq_navigator_observer_test.mocks.dart';
@@ -40,7 +41,7 @@ void main() {
     when(mockScreenLoadingManager.sanitizeScreenName(screenName))
         .thenReturn(screenName);
     stubStartAndCaptureTrace();
-    when(mockScreenLoadingManager.reportManualScreenLoading(any, any, any))
+    when(mockScreenLoadingManager.reportManualScreenLoading(any, any, any, stages: anyNamed('stages')))
         .thenAnswer((_) async {});
 
     await tester.pumpWidget(
@@ -58,6 +59,7 @@ void main() {
       screenName,
       any,
       any,
+      stages: anyNamed('stages'),
     ),).called(1);
     verifyNever(mockScreenLoadingManager.reportScreenLoading(any));
   });
@@ -87,7 +89,7 @@ void main() {
     await tester.pumpAndSettle();
     verify(mockScreenLoadingManager.reportScreenLoading(any)).called(1);
     verifyNever(
-        mockScreenLoadingManager.reportManualScreenLoading(any, any, any),);
+        mockScreenLoadingManager.reportManualScreenLoading(any, any, any, stages: anyNamed('stages')),);
   });
 
   testWidgets(
@@ -98,7 +100,7 @@ void main() {
     when(mockScreenLoadingManager.sanitizeScreenName(screenName))
         .thenReturn(screenName);
     stubStartAndCaptureTrace();
-    when(mockScreenLoadingManager.reportManualScreenLoading(any, any, any))
+    when(mockScreenLoadingManager.reportManualScreenLoading(any, any, any, stages: anyNamed('stages')))
         .thenAnswer((_) async {});
 
     await tester.pumpWidget(
@@ -165,7 +167,7 @@ void main() {
     when(mockScreenLoadingManager.sanitizeScreenName(screenName))
         .thenReturn(screenName);
     stubStartAndCaptureTrace();
-    when(mockScreenLoadingManager.reportManualScreenLoading(any, any, any))
+    when(mockScreenLoadingManager.reportManualScreenLoading(any, any, any, stages: anyNamed('stages')))
         .thenAnswer((_) async {});
 
     await tester.pumpWidget(
@@ -191,6 +193,7 @@ void main() {
       screenName,
       any,
       any,
+      stages: anyNamed('stages'),
     ),).called(1);
     verifyNever(mockScreenLoadingManager.reportScreenLoading(any));
   });
@@ -230,6 +233,50 @@ void main() {
     // Only the parent (whose trace matches currentScreenLoadingTrace) reports
     verify(mockScreenLoadingManager.reportScreenLoading(any)).called(1);
     verifyNever(
-        mockScreenLoadingManager.reportManualScreenLoading(any, any, any),);
+        mockScreenLoadingManager.reportManualScreenLoading(any, any, any, stages: anyNamed('stages')),);
+  });
+
+  testWidgets(
+      'LuciqCaptureScreenLoading collects 4 lifecycle stages in correct order',
+      (WidgetTester tester) async {
+    const screenName = "/StagesTest";
+    List<ScreenLoadingStage>? reportedStages;
+
+    when(mockScreenLoadingManager.sanitizeScreenName(screenName))
+        .thenReturn(screenName);
+    stubStartAndCaptureTrace();
+    when(mockScreenLoadingManager.reportManualScreenLoading(any, any, any, stages: anyNamed('stages')))
+        .thenAnswer((invocation) async {
+      reportedStages =
+          invocation.namedArguments[#stages] as List<ScreenLoadingStage>?;
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LuciqCaptureScreenLoading(
+          screenName: screenName,
+          child: Container(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(reportedStages, isNotNull);
+    expect(reportedStages!.length, 4);
+    expect(
+        reportedStages![0].type, ScreenLoadingStageType.initState,);
+    expect(reportedStages![1].type,
+        ScreenLoadingStageType.didChangeDependencies,);
+    expect(reportedStages![2].type, ScreenLoadingStageType.build);
+    expect(reportedStages![3].type,
+        ScreenLoadingStageType.postFrameRender,);
+
+    // All stages should have non-negative durations
+    for (final stage in reportedStages!) {
+      expect(stage.durationInMicroseconds, greaterThanOrEqualTo(0));
+      expect(
+          stage.startMonotonicTimeInMicroseconds, greaterThanOrEqualTo(0),);
+    }
   });
 }

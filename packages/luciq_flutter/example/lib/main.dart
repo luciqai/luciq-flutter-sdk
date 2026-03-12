@@ -7,11 +7,11 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
-import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter_example/src/app_routes.dart';
 import 'package:luciq_flutter_example/src/native/luciq_flutter_example_method_channel.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_handler_provider.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';
+import 'package:luciq_flutter_example/src/utils/show_messages.dart';
 import 'package:luciq_flutter_example/src/utils/widget_ext.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_button.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_clipboard_input.dart';
@@ -20,20 +20,18 @@ import 'package:luciq_flutter_example/src/widget/nested_view.dart';
 import 'package:luciq_flutter_example/src/widget/section_title.dart';
 import 'package:luciq_http_client/luciq_http_client.dart';
 import 'package:provider/provider.dart';
-import 'package:luciq_flutter_example/src/utils/show_messages.dart';
 
+part 'src/components/animated_box.dart';
+part 'src/components/apm_switch.dart';
 part 'src/components/fatal_crashes_content.dart';
 part 'src/components/flows_content.dart';
+part 'src/components/ndk_crashes_content.dart';
 part 'src/components/network_content.dart';
 part 'src/components/non_fatal_crashes_content.dart';
-part 'src/components/ndk_crashes_content.dart';
-part 'src/components/apm_switch.dart';
-part 'src/components/ui_traces_content.dart';
-part 'src/components/screen_render_switch.dart';
-part 'src/components/screen_render.dart';
-part 'src/components/animated_box.dart';
-
 part 'src/components/page.dart';
+part 'src/components/screen_render.dart';
+part 'src/components/screen_render_switch.dart';
+part 'src/components/ui_traces_content.dart';
 part 'src/screens/apm_page.dart';
 part 'src/screens/bug_reporting.dart';
 part 'src/screens/complex_page.dart';
@@ -41,11 +39,11 @@ part 'src/screens/core_page.dart';
 part 'src/screens/crashes_page.dart';
 part 'src/screens/my_home_page.dart';
 part 'src/screens/screen_capture_premature_extension_page.dart';
+part 'src/screens/screen_loading_delayed_page.dart';
 part 'src/screens/screen_loading_page.dart';
 part 'src/screens/screen_loading_tab_page.dart';
-part 'src/screens/screen_loading_delayed_page.dart';
-part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
+part 'src/screens/session_replay_page.dart';
 
 void main() {
   runZonedGuarded(
@@ -60,11 +58,10 @@ void main() {
       );
 
       Luciq.setValueForStringWithKey('text you want',
-          CustomTextPlaceHolderKey.commentFieldHintForBugReport);
+          CustomTextPlaceHolderKey.commentFieldHintForBugReport,);
 
       BugReporting.setProactiveReportingConfigurations(
         const ProactiveReportingConfigs(
-          enabled: true,
           gapBetweenModals: 2, //time in seconds
           modalDelayAfterDetection: 2, //time in seconds
         ),

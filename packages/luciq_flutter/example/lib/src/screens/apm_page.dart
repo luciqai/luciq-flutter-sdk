@@ -22,7 +22,7 @@ class _ApmPageState extends State<ApmPage> {
     );
   }
 
-  _endAppLaunch() => APM.endAppLaunch();
+  Future<void> _endAppLaunch() => APM.endAppLaunch();
 
   @override
   Widget build(BuildContext context) {

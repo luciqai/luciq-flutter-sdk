@@ -31,7 +31,7 @@ class _ScreenRenderPageState extends State<ScreenRenderPage> {
         text: 'Monitored Complex Page',
         onPressed: () => _navigateToComplexPage(context),
       ),
-    ]);
+    ],);
   }
 
   void _navigateToComplexPage(BuildContext context) {
@@ -47,7 +47,7 @@ class _ScreenRenderPageState extends State<ScreenRenderPage> {
   }
 
   // Simulates a computationally expensive task
-  _simulateHeavyComputation(int delayInMilliseconds) {
+  void _simulateHeavyComputation(int delayInMilliseconds) {
     setState(() {
       final startTime = DateTime.now();
       final pauseTime = delayInMilliseconds;

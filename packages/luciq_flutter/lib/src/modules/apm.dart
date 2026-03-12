@@ -9,6 +9,7 @@ import 'package:luciq_flutter/src/models/network_data.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
+import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_stage.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
@@ -252,15 +253,22 @@ class APM {
     int startTimeInMicroseconds,
     int durationInMicroseconds,
     int uiTraceId,
+    List<ScreenLoadingStage> stages,
   ) {
     LuciqLogger.I.d(
       'Reporting screen loading trace — traceId: $uiTraceId, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
       tag: APM.tag,
     );
+    final stagesData = stages.isNotEmpty
+        ? <String, Object>{
+            'stages': stages.map((s) => s.toMap()).toList(),
+          }
+        : null;
     return _host.reportScreenLoadingCP(
       startTimeInMicroseconds,
       durationInMicroseconds,
       uiTraceId,
+      stagesData,
     );
   }
 
@@ -284,13 +292,19 @@ class APM {
     String screenName,
     int startTimeInMicroseconds,
     int durationInMicroseconds,
+    List<ScreenLoadingStage> stages,
   ) {
     LuciqLogger.I.d(
       'Reporting manual screen loading trace — screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
       tag: APM.tag,
     );
+    final stagesData = stages.isNotEmpty
+        ? <String, Object>{
+            'stages': stages.map((s) => s.toMap()).toList(),
+          }
+        : null;
     return _host.reportManualScreenLoadingCP(
-        screenName, startTimeInMicroseconds, durationInMicroseconds,);
+        screenName, startTimeInMicroseconds, durationInMicroseconds, stagesData,);
   }
 
   /// Extends a screen loading trace with the provided end time and UI trace ID.

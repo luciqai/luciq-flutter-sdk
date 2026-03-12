@@ -804,10 +804,10 @@ class MockApmHostApi extends _i1.Mock implements _i14.ApmHostApi {
           returnValueForMissingStub: Future<void>.value()) as _i9.Future<void>);
   @override
   _i9.Future<void> reportScreenLoadingCP(int? arg_startTimeStampMicro,
-          int? arg_durationMicro, int? arg_uiTraceId) =>
+          int? arg_durationMicro, int? arg_uiTraceId, Map<String?, Object?>? arg_stagesData) =>
       (super.noSuchMethod(
           Invocation.method(#reportScreenLoadingCP,
-              [arg_startTimeStampMicro, arg_durationMicro, arg_uiTraceId]),
+              [arg_startTimeStampMicro, arg_durationMicro, arg_uiTraceId, arg_stagesData]),
           returnValue: Future<void>.value(),
           returnValueForMissingStub: Future<void>.value()) as _i9.Future<void>);
   @override

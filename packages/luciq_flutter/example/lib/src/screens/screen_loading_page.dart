@@ -28,11 +28,10 @@ class _ScreenLoadingPageState extends State<ScreenLoadingPage> {
     });
   }
 
-  void _extendScreenLoading() {
-    APM.endScreenLoading();
-  }
+  ///This is the production implementation as [APM.endScreenLoading()] is the method which users use from [APM] class
+  void _extendScreenLoading()  => APM.endScreenLoading();
 
-  void _extendScreenLoadingTesting() async {
+  Future<void> _extendScreenLoadingTesting() async {
     final isEnabled = await APM.isScreenLoadingEnabled();
     if (!isEnabled) {
       debugPrint(
@@ -125,8 +124,6 @@ class _ScreenLoadingPageState extends State<ScreenLoadingPage> {
       builder: (context) => LuciqCaptureScreenLoading(
         screenName: 'monitoredBottomSheet',
         child: DraggableScrollableSheet(
-          initialChildSize: 0.5,
-          minChildSize: 0.25,
           maxChildSize: 0.85,
           expand: false,
           builder: (context, scrollController) => Column(
@@ -334,7 +331,26 @@ class _ScreenLoadingPageState extends State<ScreenLoadingPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // ── Navigation Scenarios ──
-            const SectionTitle('Navigation Scenarios'),
+            LuciqCaptureScreenLoading(
+          screenName: "Header",
+          child: Column(
+            children: [
+              const AnimatedBox(),
+              SizedBox.fromSize(
+                size: const Size.fromHeight(12),
+              ),
+              LuciqButton(
+                text: 'Extend Screen Loading for header',
+                onPressed: _extendScreenLoading,
+                symanticLabel: 'extend_screen_loading_production',
+              ),
+            ],
+          ),
+        ),
+        SizedBox.fromSize(
+          size: const Size.fromHeight(12),
+        ),
+        const SectionTitle('Navigation Scenarios'),
             LuciqButton(
               text: 'Monitored Complex Page',
               onPressed: _navigateToComplexPage,

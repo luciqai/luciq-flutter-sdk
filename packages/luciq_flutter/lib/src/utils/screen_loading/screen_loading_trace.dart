@@ -1,3 +1,5 @@
+import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_stage.dart';
+
 class ScreenLoadingTrace {
   ScreenLoadingTrace(
     this.screenName, {
@@ -5,6 +7,7 @@ class ScreenLoadingTrace {
     required this.startMonotonicTimeInMicroseconds,
     this.endTimeInMicroseconds,
     this.duration,
+    this.stages = const [],
   });
 
   final String screenName;
@@ -24,12 +27,16 @@ class ScreenLoadingTrace {
   int? endTimeInMicroseconds;
   int? duration;
 
+  /// Lifecycle stage breakdown for this screen loading trace.
+  List<ScreenLoadingStage> stages;
+
   ScreenLoadingTrace copyWith({
     String? screenName,
     int? startTimeInMicroseconds,
     int? startMonotonicTimeInMicroseconds,
     int? endTimeInMicroseconds,
     int? duration,
+    List<ScreenLoadingStage>? stages,
   }) {
     return ScreenLoadingTrace(
       screenName ?? this.screenName,
@@ -40,12 +47,13 @@ class ScreenLoadingTrace {
       endTimeInMicroseconds:
           endTimeInMicroseconds ?? this.endTimeInMicroseconds,
       duration: duration ?? this.duration,
+      stages: stages ?? this.stages,
     );
   }
 
   @override
   String toString() {
-    return 'ScreenLoadingTrace{screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, startMonotonicTimeInMicroseconds: $startMonotonicTimeInMicroseconds, endTimeInMicroseconds: $endTimeInMicroseconds, duration: $duration}';
+    return 'ScreenLoadingTrace{screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, startMonotonicTimeInMicroseconds: $startMonotonicTimeInMicroseconds, endTimeInMicroseconds: $endTimeInMicroseconds, duration: $duration, stages: $stages}';
   }
 
   @override

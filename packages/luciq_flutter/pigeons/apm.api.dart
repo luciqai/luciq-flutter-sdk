@@ -25,12 +25,14 @@ abstract class ApmHostApi {
     int startTimeStampMicro,
     int durationMicro,
     int uiTraceId,
+    Map<String, Object>? stagesData,
   );
 
   void reportManualScreenLoadingCP(
     String screenName,
     int startTimeStampMicro,
     int durationMicro,
+    Map<String, Object>? stagesData,
   );
 
   void endScreenLoadingCP(int timeStampMicro, int uiTraceId);
@@ -52,4 +54,5 @@ abstract class ApmHostApi {
   void endScreenRenderForAutoUiTrace(Map<String, Object> data);
 
   void endScreenRenderForCustomUiTrace(Map<String, Object> data);
+
 }

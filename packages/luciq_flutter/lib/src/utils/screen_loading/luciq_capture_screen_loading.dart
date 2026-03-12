@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
+import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_stage.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
 import 'package:meta/meta.dart';
 
@@ -69,8 +70,15 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
   /// Stopwatch to measure screen loading time.
   final stopwatch = Stopwatch()..start();
 
+  /// Collected lifecycle stages.
+  final List<ScreenLoadingStage> _stages = [];
+
+  /// Monotonic time at build completion, used as postFrameRender start.
+  int _buildCompleteMicro = 0;
+
   @override
   void initState() {
+    final initStateStart = LuciqMonotonicClock.I.now;
     super.initState();
     trace = ScreenLoadingTrace(
       ScreenLoadingManager.I.sanitizeScreenName(widget.screenName),
@@ -85,9 +93,21 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
     // ignore: invalid_null_aware_operator
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
       stopwatch.stop();
+      final postFrameEnd = LuciqMonotonicClock.I.now;
       final duration = stopwatch.elapsedMicroseconds;
       trace?.duration = duration;
       trace?.endTimeInMicroseconds = startTimeInMicroseconds + duration;
+
+      // Record postFrameRender stage
+      if (_buildCompleteMicro > 0) {
+        _stages.add(ScreenLoadingStage(
+          type: ScreenLoadingStageType.postFrameRender,
+          startMonotonicTimeInMicroseconds: _buildCompleteMicro,
+          durationInMicroseconds: postFrameEnd - _buildCompleteMicro,
+        ),);
+      }
+
+      trace?.stages = List.unmodifiable(_stages);
 
       if (!await didStartTrace) return;
 
@@ -96,15 +116,43 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
           widget.screenName,
           startTimeInMicroseconds,
           duration,
+          stages: trace?.stages ?? const [],
         );
       } else {
         ScreenLoadingManager.I.reportScreenLoading(trace);
       }
     });
+
+    final initStateEnd = LuciqMonotonicClock.I.now;
+    _stages.add(ScreenLoadingStage(
+      type: ScreenLoadingStageType.initState,
+      startMonotonicTimeInMicroseconds: initStateStart,
+      durationInMicroseconds: initStateEnd - initStateStart,
+    ),);
+  }
+
+  @override
+  void didChangeDependencies() {
+    final start = LuciqMonotonicClock.I.now;
+    super.didChangeDependencies();
+    final end = LuciqMonotonicClock.I.now;
+    _stages.add(ScreenLoadingStage(
+      type: ScreenLoadingStageType.didChangeDependencies,
+      startMonotonicTimeInMicroseconds: start,
+      durationInMicroseconds: end - start,
+    ),);
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    final buildStart = LuciqMonotonicClock.I.now;
+    final child = widget.child;
+    _buildCompleteMicro = LuciqMonotonicClock.I.now;
+    _stages.add(ScreenLoadingStage(
+      type: ScreenLoadingStageType.build,
+      startMonotonicTimeInMicroseconds: buildStart,
+      durationInMicroseconds: _buildCompleteMicro - buildStart,
+    ),);
+    return child;
   }
 }

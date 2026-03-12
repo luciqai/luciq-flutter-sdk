@@ -3,6 +3,7 @@ import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
+import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_stage.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
@@ -339,7 +340,7 @@ class ScreenLoadingManager {
 
         if (isUiTraceValid != true) {
           LuciqLogger.I.d(
-            'Dropping screen loading trace — UI trace validation failed for screen: ${trace?.screenName}',
+            'Dropping screen loading trace — UI trace validation failed for screen: ${trace.screenName}',
             tag: APM.tag,
           );
           currentScreenLoadingTrace = null;
@@ -349,9 +350,10 @@ class ScreenLoadingManager {
         currentUiTrace?.didReportScreenLoading = true;
 
         APM.reportScreenLoadingCP(
-          trace?.startTimeInMicroseconds ?? 0,
-          duration ?? trace?.duration ?? 0,
+          trace.startTimeInMicroseconds,
+          duration ?? trace.duration ?? 0,
           currentUiTrace?.traceId ?? 0,
+          trace.stages,
         );
         return;
       } else {
@@ -379,8 +381,9 @@ class ScreenLoadingManager {
   Future<void> reportManualScreenLoading(
     String screenName,
     int startTimeInMicroseconds,
-    int duration,
-  ) async {
+    int duration, {
+    List<ScreenLoadingStage> stages = const [],
+  }) async {
     try {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
@@ -409,6 +412,7 @@ class ScreenLoadingManager {
         screenName,
         startTimeInMicroseconds,
         duration,
+        stages,
       );
       return;
     } catch (error, stackTrace) {

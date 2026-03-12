@@ -7,6 +7,7 @@ import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
+import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_stage.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
@@ -471,7 +472,7 @@ void main() {
           tag: APM.tag,
         ),
       ).called(1);
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
     });
 
     test(
@@ -507,7 +508,7 @@ void main() {
           tag: APM.tag,
         ),
       ).called(1);
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
     });
 
     test(
@@ -538,7 +539,7 @@ void main() {
         actualScreenLoadingTrace?.endTimeInMicroseconds,
         null,
       );
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
     });
 
     test(
@@ -580,7 +581,7 @@ void main() {
         actualScreenLoadingTrace?.startTimeInMicroseconds,
         time.microsecondsSinceEpoch,
       );
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
       verify(
         mLuciqLogger.e(
           "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — $differentTrace",
@@ -615,7 +616,7 @@ void main() {
         time.microsecondsSinceEpoch,
       );
 
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
       verify(
         mLuciqLogger.e(
           "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — $screenLoadingTrace",
@@ -646,7 +647,7 @@ void main() {
       final actualScreenLoadingTrace =
           ScreenLoadingManager.I.currentScreenLoadingTrace;
 
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
       expect(
         actualUiTrace?.didReportScreenLoading,
         false,
@@ -705,6 +706,7 @@ void main() {
           time.microsecondsSinceEpoch,
           duration,
           time.millisecondsSinceEpoch,
+          null,
         ),
       ).called(1);
       verify(
@@ -713,6 +715,82 @@ void main() {
           tag: APM.tag,
         ),
       );
+    });
+
+    test(
+        '[reportScreenLoading] should pass stagesData in reportScreenLoadingCP when stages are present',
+        () async {
+      duration = 1000;
+      final endTime = time.add(Duration(microseconds: duration ?? 0));
+      const isSameScreen = true;
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
+      when(LCQBuildInfo.I.isIOS).thenReturn(false);
+      when(
+        RouteMatcher.I.match(
+          routePath: screenName,
+          actualPath: screenName,
+        ),
+      ).thenReturn(isSameScreen);
+      screenLoadingTrace.endTimeInMicroseconds =
+          endTime.microsecondsSinceEpoch;
+      screenLoadingTrace.duration = duration;
+      screenLoadingTrace.stages = [
+        const ScreenLoadingStage(
+          type: ScreenLoadingStageType.initState,
+          startMonotonicTimeInMicroseconds: 100,
+          durationInMicroseconds: 50,
+        ),
+        const ScreenLoadingStage(
+          type: ScreenLoadingStageType.build,
+          startMonotonicTimeInMicroseconds: 150,
+          durationInMicroseconds: 30,
+        ),
+      ];
+
+      await ScreenLoadingManager.I.reportScreenLoading(
+        screenLoadingTrace,
+      );
+
+      verify(
+        mApmHost.reportScreenLoadingCP(
+          time.microsecondsSinceEpoch,
+          duration,
+          time.millisecondsSinceEpoch,
+          argThat(isA<Map<String, Object>>()),
+        ),
+      ).called(1);
+    });
+
+    test(
+        '[reportScreenLoading] should pass null stagesData in reportScreenLoadingCP when stages are empty',
+        () async {
+      duration = 1000;
+      final endTime = time.add(Duration(microseconds: duration ?? 0));
+      const isSameScreen = true;
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
+      when(LCQBuildInfo.I.isIOS).thenReturn(false);
+      when(
+        RouteMatcher.I.match(
+          routePath: screenName,
+          actualPath: screenName,
+        ),
+      ).thenReturn(isSameScreen);
+      screenLoadingTrace.endTimeInMicroseconds =
+          endTime.microsecondsSinceEpoch;
+      screenLoadingTrace.duration = duration;
+
+      await ScreenLoadingManager.I.reportScreenLoading(
+        screenLoadingTrace,
+      );
+
+      verify(
+        mApmHost.reportScreenLoadingCP(
+          time.microsecondsSinceEpoch,
+          duration,
+          time.millisecondsSinceEpoch,
+          null,
+        ),
+      ).called(1);
     });
   });
 
@@ -1187,7 +1265,7 @@ void main() {
             'Luciq SDK is not built, skipping reporting manual screen loading',),),
         tag: APM.tag,
       ),).called(1);
-      verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any, any));
     });
 
     test(
@@ -1207,7 +1285,7 @@ void main() {
             'Screen loading monitoring is disabled, skipping reporting manual screen loading',),),
         tag: APM.tag,
       ),).called(1);
-      verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any, any));
     });
 
     test(
@@ -1215,7 +1293,7 @@ void main() {
         () async {
       when(FlagsConfig.screenLoading.isEnabled())
           .thenAnswer((_) async => true);
-      when(mApmHost.reportManualScreenLoadingCP(any, any, any))
+      when(mApmHost.reportManualScreenLoadingCP(any, any, any, any))
           .thenAnswer((_) async => {});
 
       await ScreenLoadingManager.I.reportManualScreenLoading(
@@ -1228,6 +1306,7 @@ void main() {
         testScreenName,
         startTime,
         testDuration,
+        null,
       ),).called(1);
     });
   });
@@ -1268,7 +1347,7 @@ void main() {
       expect(mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
           isFalse,);
       expect(mScreenLoadingManager.currentScreenLoadingTrace, isNull);
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
       verify(mLuciqLogger.d(
         argThat(contains(
             'Dropping screen loading trace — UI trace validation failed',),),
@@ -1285,7 +1364,7 @@ void main() {
       expect(mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
           isFalse,);
       expect(mScreenLoadingManager.currentScreenLoadingTrace, isNull);
-      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
+      verifyNever(mApmHost.reportScreenLoadingCP(any, any, any, any));
       verify(mLuciqLogger.e(
         argThat(contains('UI trace validation timed out')),
         tag: APM.tag,

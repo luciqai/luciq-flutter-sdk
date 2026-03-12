@@ -1,4 +1,4 @@
-part of '../../main.dart';
+part of '../../../main.dart';
 
 class ScreenLoadingDelayedPage extends StatefulWidget {
   static const screenName = 'screenLoadingDelayed';

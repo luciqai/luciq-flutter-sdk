@@ -44,6 +44,9 @@ class ScreenLoadingManager {
   @internal
   final List<ScreenLoadingTrace> prematurelyEndedTraces = [];
 
+  /// Tracks which manual screen names have been claimed by a parent widget.
+  final Set<String> _activeManualScreenNames = {};
+
   /// Allows setting a custom instance for testing.
   @visibleForTesting
   // ignore: use_setters_to_change_properties
@@ -117,6 +120,7 @@ class ScreenLoadingManager {
 
     try {
       resetDidStartScreenLoading();
+      _activeManualScreenNames.clear();
 
       final sanitizedScreenName = sanitizeScreenName(screenName);
       final sanitizedMatchingScreenName =
@@ -414,6 +418,30 @@ class ScreenLoadingManager {
     } catch (error, stackTrace) {
       _logExceptionErrorAndStackTrace(error, stackTrace);
     }
+  }
+
+  /// Called by manual widgets when [startScreenLoadingTrace] fails (no UI trace).
+  /// Returns `true` if the manual trace was claimed (this widget is the parent).
+  @internal
+  bool claimManualScreenLoadingTrace(ScreenLoadingTrace trace) {
+    // If auto trace already started for this screen, don't also claim manual
+    if (currentUiTrace?.matches(trace.screenName) == true &&
+        currentUiTrace?.didStartScreenLoading == true) {
+      return false;
+    }
+    // Already claimed by a parent manual widget with same name → nested, skip
+    if (_activeManualScreenNames.contains(trace.screenName)) {
+      return false;
+    }
+    _activeManualScreenNames.add(trace.screenName);
+    currentScreenLoadingTrace = trace;
+    return true;
+  }
+
+  /// Called from widget dispose to release the manual claim.
+  @internal
+  void releaseManualScreenLoadingTrace(String screenName) {
+    _activeManualScreenNames.remove(screenName);
   }
 
   void _reportScreenLoadingDroppedError(ScreenLoadingTrace? trace) {

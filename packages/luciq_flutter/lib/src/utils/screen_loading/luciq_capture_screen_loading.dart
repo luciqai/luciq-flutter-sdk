@@ -69,17 +69,32 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
   /// Stopwatch to measure screen loading time.
   final stopwatch = Stopwatch()..start();
 
+  /// Whether this widget claimed a manual screen loading trace.
+  bool _didClaimManual = false;
+
+  /// The sanitized screen name used for manual trace claiming.
+  late final String _sanitizedScreenName;
+
   @override
   void initState() {
     super.initState();
+    _sanitizedScreenName =
+        ScreenLoadingManager.I.sanitizeScreenName(widget.screenName);
     trace = ScreenLoadingTrace(
-      ScreenLoadingManager.I.sanitizeScreenName(widget.screenName),
+      _sanitizedScreenName,
       startTimeInMicroseconds: startTimeInMicroseconds,
       startMonotonicTimeInMicroseconds: startMonotonicTimeInMicroseconds,
     );
 
     final didStartTrace =
         ScreenLoadingManager.I.startScreenLoadingTrace(trace!);
+
+    // For manual widgets, also try to claim a manual slot
+    // (for when no navigator observer fired)
+    if (widget.isManual) {
+      _didClaimManual =
+          ScreenLoadingManager.I.claimManualScreenLoadingTrace(trace!);
+    }
 
     // Ensures compatibility with Flutter versions before 3.0.0
     // ignore: invalid_null_aware_operator
@@ -89,18 +104,34 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
       trace?.duration = duration;
       trace?.endTimeInMicroseconds = startTimeInMicroseconds + duration;
 
-      if (!await didStartTrace) return;
-
       if (widget.isManual) {
-        ScreenLoadingManager.I.reportManualScreenLoading(
-          widget.screenName,
-          startTimeInMicroseconds,
-          duration,
-        );
+        final autoStarted = await didStartTrace;
+        if (autoStarted) {
+          // Navigator observer was triggered → use automatic path
+          ScreenLoadingManager.I.reportScreenLoading(trace);
+        } else if (_didClaimManual) {
+          // No navigator observer → use manual path (this widget is the parent)
+          ScreenLoadingManager.I.reportManualScreenLoading(
+            widget.screenName,
+            startTimeInMicroseconds,
+            duration,
+          );
+        }
+        // else: nested child with same screen name → skip
       } else {
+        if (!await didStartTrace) return;
         ScreenLoadingManager.I.reportScreenLoading(trace);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    if (_didClaimManual) {
+      ScreenLoadingManager.I
+          .releaseManualScreenLoadingTrace(_sanitizedScreenName);
+    }
+    super.dispose();
   }
 
   @override

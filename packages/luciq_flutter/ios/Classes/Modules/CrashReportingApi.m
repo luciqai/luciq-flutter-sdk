@@ -22,8 +22,6 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
                                                                options:NSJSONReadingMutableContainers
                
                                                                  error:&jsonError];
-    
-    NSLog(@"sendJsonCrash");
     BOOL isNonFatal = [isHandled boolValue];
 
     if (isNonFatal) {
@@ -38,7 +36,6 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
 
 - (void)sendNonFatalErrorJsonCrash:(nonnull NSString *)jsonCrash userAttributes:(nullable NSDictionary<NSString *,NSString *> *)userAttributes fingerprint:(nullable NSString *)fingerprint nonFatalExceptionLevel:(nonnull NSString *)nonFatalExceptionLevel error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     NSError *jsonError;
-    NSLog(@"sendNonFatalErrorJsonCrash");
     NSData *objectData = [jsonCrash dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *stackTrace = [NSJSONSerialization JSONObjectWithData:objectData
                                                                options:NSJSONReadingMutableContainers

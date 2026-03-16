@@ -454,8 +454,6 @@ void main() {
       LuciqLogger.setInstance(mLuciqLogger);
       APM.$setHostApi(mApmHostForErrorTest);
 
-      // Mock CrashReporting host to prevent platform channel calls
-      CrashReporting.$setHostApi(mCrashReportingHost);
     });
 
     test('should log error and stack trace when init() encounters an exception',

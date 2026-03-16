@@ -67,12 +67,7 @@ public final class ArgsRegistry {
         put("AutoMasking.none", MaskingType.MASK_NOTHING);
     }};
 
-   public static ArgsMap<LuciqNonFatalException.Level> nonFatalExceptionLevel = new ArgsMap<LuciqNonFatalException.Level>() {{
-        put("NonFatalExceptionLevel.critical", LuciqNonFatalException.Level.CRITICAL);
-        put("NonFatalExceptionLevel.error", LuciqNonFatalException.Level.ERROR);
-        put("NonFatalExceptionLevel.warning", LuciqNonFatalException.Level.WARNING);
-        put("NonFatalExceptionLevel.info", LuciqNonFatalException.Level.INFO);
-    }};
+
     public static final ArgsMap<LuciqFloatingButtonEdge> floatingButtonEdges = new ArgsMap<LuciqFloatingButtonEdge>() {{
         put("FloatingButtonEdge.left", LuciqFloatingButtonEdge.LEFT);
         put("FloatingButtonEdge.right", LuciqFloatingButtonEdge.RIGHT);

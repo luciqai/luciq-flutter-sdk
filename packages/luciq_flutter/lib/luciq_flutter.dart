@@ -9,7 +9,6 @@ export 'src/models/w3c_header.dart';
 // Modules
 export 'src/modules/apm.dart';
 export 'src/modules/bug_reporting.dart';
-export 'src/modules/crash_reporting.dart';
 export 'src/modules/feature_requests.dart';
 export 'src/modules/luciq.dart';
 export 'src/modules/luciq_log.dart';

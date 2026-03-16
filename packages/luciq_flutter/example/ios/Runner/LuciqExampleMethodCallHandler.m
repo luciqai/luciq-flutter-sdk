@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
 #import "LuciqExampleMethodCallHandler.h"
-#import <LuciqSDK/LCQCrashReporting.h>
 #import <LuciqSDK/LuciqSDK.h>
 #import <Flutter/Flutter.h>
 
@@ -97,9 +96,9 @@ NSString * const kLuciqChannelName = @"luciq_flutter_example";
 // MARK: - Helper Methods
 
 - (void)sendNativeNonFatal:(NSString *)exceptionObject {
-    LCQNonFatalException *nonFatalException = [LCQCrashReporting exception:[NSException exceptionWithName:@"native Handled NS Exception" reason:@"Test iOS Handled Crash" userInfo:@{@"Key": @"Value"}]];
-    
-    [nonFatalException report];
+//    LCQNonFatalException *nonFatalException = [LCQCrashReporting exception:[NSException exceptionWithName:@"native Handled NS Exception" reason:@"Test iOS Handled Crash" userInfo:@{@"Key": @"Value"}]];
+//
+//    [nonFatalException report];
 }
 
 - (void)sendNativeFatalCrash {

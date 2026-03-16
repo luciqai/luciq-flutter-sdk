@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui' show TimingsCallback, FrameTiming, FramePhase;
 
 import 'package:flutter/widgets.dart';
-import 'package:luciq_flutter/luciq_flutter.dart' show CrashReporting;
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
@@ -407,11 +406,6 @@ class LuciqScreenRenderManager {
       tag: tag,
     );
 
-    //Report nonfatal for the crash details.
-    CrashReporting.reportHandledCrash(
-      error,
-      stackTrace,
-    );
   }
 
   /// @nodoc

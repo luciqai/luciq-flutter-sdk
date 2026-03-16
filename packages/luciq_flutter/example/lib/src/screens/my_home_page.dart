@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _navigateToCrashes() {
     ///This way of navigation utilize screenLoading automatic approach [Navigator 1]
-    Navigator.pushNamed(context, CrashesPage.screenName);
+    // Navigator.pushNamed(context, CrashesPage.screenName);
 
     ///This way of navigation utilize screenLoading manual approach [Navigator 1]
     // Navigator.push(

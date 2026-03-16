@@ -2,7 +2,6 @@
 
 #import "ApmApi.h"
 #import "BugReportingApi.h"
-#import "CrashReportingApi.h"
 #import "FeatureRequestsApi.h"
 #import "LuciqApi.h"
 #import "LuciqLogApi.h"
@@ -17,7 +16,6 @@
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
     InitApmApi([registrar messenger]);
     InitBugReportingApi([registrar messenger]);
-    InitCrashReportingApi([registrar messenger]);
     InitFeatureRequestsApi([registrar messenger]);
     InitLuciqApi([registrar messenger]);
     InitLuciqLogApi([registrar messenger]);

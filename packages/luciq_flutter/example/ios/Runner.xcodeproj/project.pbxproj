@@ -87,7 +87,6 @@
 		B9D7806D6F888701A44C7014 /* Pods-Runner-RunnerUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.debug.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		BA5633844585BB93FE7BCCE7 /* Pods-LuciqTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LuciqTests.profile.xcconfig"; path = "Target Support Files/Pods-LuciqTests/Pods-LuciqTests.profile.xcconfig"; sourceTree = "<group>"; };
 		BE25C4E42E8D4EC600732F21 /* RunnerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		BE26C80C2BD55575009FECCF /* LCQCrashReporting+CP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LCQCrashReporting+CP.h"; sourceTree = "<group>"; };
 		BF9025BBD0A6FD7B193E903A /* Pods-LuciqTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LuciqTests.debug.xcconfig"; path = "Target Support Files/Pods-LuciqTests/Pods-LuciqTests.debug.xcconfig"; sourceTree = "<group>"; };
 		C090017925D9A030006F3DAE /* LuciqTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LuciqTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C090017D25D9A031006F3DAE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -244,7 +243,6 @@
 		CC78720A2938D1C5008CB2A5 /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				BE26C80C2BD55575009FECCF /* LCQCrashReporting+CP.h */,
 				CC78720E293CA8EE008CB2A5 /* Luciq+Test.h */,
 				CC198C62293E2392007077C8 /* LCQSurvey+Test.h */,
 			);

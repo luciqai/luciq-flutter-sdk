@@ -4,7 +4,6 @@
 #import "LuciqSDK/LCQCrashReporting.h"
 #import "LuciqSDK/LuciqSDK.h"
 #import "Util/Luciq+Test.h"
-#import "Util/LCQCrashReporting+CP.h"
 
 @interface CrashReportingApiTests : XCTestCase
 

@@ -19,7 +19,6 @@ import ai.luciq.flutter.generated.LuciqPigeon;
 import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.modules.ApmApi;
 import ai.luciq.flutter.modules.BugReportingApi;
-import ai.luciq.flutter.modules.CrashReportingApi;
 import ai.luciq.flutter.modules.FeatureRequestsApi;
 import ai.luciq.flutter.modules.LuciqApi;
 import ai.luciq.flutter.modules.LuciqLogApi;
@@ -151,7 +150,6 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
 
         ApmApi.init(messenger, refreshRateProvider);
         BugReportingApi.init(messenger);
-        CrashReportingApi.init(messenger);
         FeatureRequestsApi.init(messenger);
         LuciqApi.init(messenger, context, screenshotProvider);
         LuciqLogApi.init(messenger);

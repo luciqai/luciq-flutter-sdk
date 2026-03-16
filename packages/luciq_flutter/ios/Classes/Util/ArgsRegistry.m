@@ -105,16 +105,6 @@
         @"ExtendedBugReportMode.disabled" : @(LCQExtendedBugReportModeDisabled),
     };
 }
-+ (ArgsDictionary *)nonFatalExceptionLevel {
-    return @{
-        @"NonFatalExceptionLevel.info" : @(LCQNonFatalLevelInfo),
-        @"NonFatalExceptionLevel.error" : @(LCQNonFatalLevelError),
-        @"NonFatalExceptionLevel.warning" : @(LCQNonFatalLevelWarning),
-        @"NonFatalExceptionLevel.critical" : @(LCQNonFatalLevelCritical)
-
-
-    };
-}
 
 + (ArgsDictionary *)reproModes {
     return @{

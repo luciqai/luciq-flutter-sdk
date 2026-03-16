@@ -14,7 +14,6 @@ import 'package:flutter/services.dart' as _i5;
 import 'package:flutter/widgets.dart' as _i3;
 import 'package:luciq_flutter/luciq_flutter.dart' as _i16;
 import 'package:luciq_flutter/src/generated/apm.api.g.dart' as _i14;
-import 'package:luciq_flutter/src/generated/crash_reporting.api.g.dart' as _i13;
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart' as _i2;
 import 'package:luciq_flutter/src/utils/luciq_logger.dart' as _i15;
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart'
@@ -681,8 +680,7 @@ class MockFrameTiming extends _i1.Mock implements _i4.FrameTiming {
 /// A class which mocks [CrashReportingHostApi].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockCrashReportingHostApi extends _i1.Mock
-    implements _i13.CrashReportingHostApi {
+class MockCrashReportingHostApi extends _i1.Mock {
   MockCrashReportingHostApi() {
     _i1.throwOnMissingStub(this);
   }

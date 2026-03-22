@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/models/luciq_route.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
@@ -19,6 +20,14 @@ class LuciqNavigatorObserver extends NavigatorObserver {
 
   void screenChanged(Route newRoute) {
     try {
+      // Schedule observer work at idle priority to prevent blocking navigation
+      // animations. Work will run between frames only when no animations are
+      // active (after navigation completes), which is appropriate since:
+      // 1. Screen tracking doesn't need to be real-time during animations
+      // 2. The _screenReportDelay already waits for animation completion
+      // 3. This prevents choppy animations reported with go_router
+      SchedulerBinding.instance.scheduleTask(() async {
+    try {
       final rawScreenName = newRoute.settings.name.toString().trim();
       final screenName = rawScreenName.isEmpty
           ? ReproStepsConstants.emptyScreenFallback
@@ -30,9 +39,6 @@ class LuciqNavigatorObserver extends NavigatorObserver {
         name: maskedScreenName,
       );
 
-      //ignore: invalid_null_aware_operator
-      WidgetsBinding.instance?.addPostFrameCallback((_) async {
-        try {
           //Ends the last screen rendering collector if exists.
           LuciqScreenRenderManager.I.endScreenRenderCollector();
 
@@ -61,7 +67,7 @@ class LuciqNavigatorObserver extends NavigatorObserver {
           LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
           LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
         }
-      });
+      }, Priority.idle);
     } catch (e) {
       LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
       LuciqLogger.I.e(e.toString(), tag: Luciq.tag);

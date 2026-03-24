@@ -1384,4 +1384,149 @@ void main() {
       ),).called(1);
     });
   });
+
+  group('endScreenLoading - race condition: navigation during async gaps', () {
+    late DateTime time;
+    late UiTrace screenAUiTrace;
+    late int screenATraceId;
+    late ScreenLoadingTrace screenALoadingTrace;
+
+    setUp(() {
+      time = DateTime.now();
+      screenATraceId = time.millisecondsSinceEpoch;
+      screenAUiTrace = UiTrace(screenName: 'screenA', traceId: screenATraceId);
+      screenAUiTrace.validationCompleter.complete(true);
+      mScreenLoadingManager.currentUiTrace = screenAUiTrace;
+      when(mDateTime.now()).thenReturn(time);
+      when(mLuciqMonotonicClock.now).thenReturn(500);
+      screenALoadingTrace = ScreenLoadingTrace(
+        'screenA',
+        startTimeInMicroseconds: time.microsecondsSinceEpoch,
+        startMonotonicTimeInMicroseconds: 100,
+      );
+      screenALoadingTrace.endTimeInMicroseconds =
+          time.microsecondsSinceEpoch + 1000;
+      screenALoadingTrace.duration = 1000;
+      mScreenLoadingManager.currentScreenLoadingTrace = screenALoadingTrace;
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
+      when(FlagsConfig.endScreenLoading.isEnabled())
+          .thenAnswer((_) async => true);
+    });
+
+    test(
+        '[endScreenLoading] should extend screenA trace even when navigation to screenB happens during async gap',
+        () async {
+      final screenBTime = time.add(const Duration(milliseconds: 50));
+      final screenBTraceId = screenBTime.millisecondsSinceEpoch;
+      final screenBUiTrace =
+          UiTrace(screenName: 'screenB', traceId: screenBTraceId);
+      screenBUiTrace.validationCompleter.complete(true);
+      final screenBLoadingTrace = ScreenLoadingTrace(
+        'screenB',
+        startTimeInMicroseconds: screenBTime.microsecondsSinceEpoch,
+        startMonotonicTimeInMicroseconds: 200,
+      );
+
+      when(mLuciqHost.isBuilt()).thenAnswer((_) async {
+        mScreenLoadingManager.currentUiTrace = screenBUiTrace;
+        mScreenLoadingManager.currentScreenLoadingTrace = screenBLoadingTrace;
+        return true;
+      });
+
+      await ScreenLoadingManager.I.endScreenLoading();
+
+      final capturedEndTime =
+          verify(mApmHost.endScreenLoadingCP(captureAny, captureAny)).captured;
+
+      expect(capturedEndTime.length, 2);
+
+      final reportedTraceId = capturedEndTime[1] as int;
+
+      expect(
+        reportedTraceId,
+        screenATraceId,
+        reason:
+            'endScreenLoading should extend screenA trace (traceId=$screenATraceId) '
+            'but got screenB trace (traceId=$screenBTraceId). '
+            'The currentUiTrace was replaced during the async gap.',
+      );
+    });
+
+    test(
+        '[endScreenLoading] should compute duration from screenA trace even when screenB replaces currentScreenLoadingTrace',
+        () async {
+      final screenBTime = time.add(const Duration(milliseconds: 50));
+      final screenBUiTrace = UiTrace(
+        screenName: 'screenB',
+        traceId: screenBTime.millisecondsSinceEpoch,
+      );
+      screenBUiTrace.validationCompleter.complete(true);
+      final screenBLoadingTrace = ScreenLoadingTrace(
+        'screenB',
+        startTimeInMicroseconds: screenBTime.microsecondsSinceEpoch,
+        startMonotonicTimeInMicroseconds: 300,
+      );
+
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async {
+        mScreenLoadingManager.currentUiTrace = screenBUiTrace;
+        mScreenLoadingManager.currentScreenLoadingTrace = screenBLoadingTrace;
+        return true;
+      });
+
+      await ScreenLoadingManager.I.endScreenLoading();
+
+      final capturedArgs =
+          verify(mApmHost.endScreenLoadingCP(captureAny, captureAny)).captured;
+
+      expect(capturedArgs.length, 2);
+
+      final reportedEndTimeUs = capturedArgs[0] as int;
+      final reportedTraceId = capturedArgs[1] as int;
+
+      final expectedDuration = 500 - 100;
+      final expectedEndTimeUs = time.microsecondsSinceEpoch + expectedDuration;
+
+      expect(
+        reportedEndTimeUs,
+        expectedEndTimeUs,
+        reason:
+            'Duration should be computed from screenA start monotonic (100), '
+            'not screenB start monotonic (300)',
+      );
+      expect(
+        reportedTraceId,
+        screenATraceId,
+        reason: 'traceId should be from screenA, not screenB',
+      );
+    });
+
+    test(
+        '[endScreenLoading] should set didExtendScreenLoading on screenA trace, not screenB',
+        () async {
+      final screenBUiTrace = UiTrace(
+        screenName: 'screenB',
+        traceId: time.millisecondsSinceEpoch + 100,
+      );
+      screenBUiTrace.validationCompleter.complete(true);
+
+      when(FlagsConfig.endScreenLoading.isEnabled()).thenAnswer((_) async {
+        mScreenLoadingManager.currentUiTrace = screenBUiTrace;
+        return true;
+      });
+
+      await ScreenLoadingManager.I.endScreenLoading();
+
+      expect(
+        screenAUiTrace.didExtendScreenLoading,
+        isTrue,
+        reason: 'didExtendScreenLoading should be set on screenA trace',
+      );
+      expect(
+        screenBUiTrace.didExtendScreenLoading,
+        isFalse,
+        reason: 'didExtendScreenLoading should NOT be set on screenB trace',
+      );
+    });
+  });
 }

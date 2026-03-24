@@ -454,6 +454,9 @@ class ScreenLoadingManager {
   /// Extends the already ended screen loading adding a stage to it
   Future<void> endScreenLoading() async {
     try {
+      final uiTrace = currentUiTrace;
+      final screenLoadingTrace = currentScreenLoadingTrace;
+
       final isSDKBuilt = await _checkLuciqSDKBuilt("endScreenLoading");
       if (!isSDKBuilt) return;
 
@@ -485,8 +488,7 @@ class ScreenLoadingManager {
         return;
       }
 
-      final didExtendScreenLoading =
-          currentUiTrace?.didExtendScreenLoading == true;
+      final didExtendScreenLoading = uiTrace?.didExtendScreenLoading == true;
       if (didExtendScreenLoading) {
         LuciqLogger.I.e(
           'endScreenLoading has already been called for the current screen visit. Multiple calls to this API are not allowed during a single screen visit, only the first call will be considered.',
@@ -497,7 +499,7 @@ class ScreenLoadingManager {
 
       // Handles no active screen loading trace - cannot end
       final didStartScreenLoading =
-          currentScreenLoadingTrace?.startTimeInMicroseconds != null;
+          screenLoadingTrace?.startTimeInMicroseconds != null;
       if (!didStartScreenLoading) {
         LuciqLogger.I.e(
           "endScreenLoading wasn’t called as there is no active screen loading trace.",
@@ -509,15 +511,15 @@ class ScreenLoadingManager {
       final extendedMonotonicEndTimeInMicroseconds = LuciqMonotonicClock.I.now;
 
       var duration = extendedMonotonicEndTimeInMicroseconds -
-          currentScreenLoadingTrace!.startMonotonicTimeInMicroseconds;
+          screenLoadingTrace!.startMonotonicTimeInMicroseconds;
 
       var extendedEndTimeInMicroseconds =
-          currentScreenLoadingTrace!.startTimeInMicroseconds + duration;
+          screenLoadingTrace.startTimeInMicroseconds + duration;
 
       // cannot extend as the trace has not ended yet.
       // we report the extension timestamp as 0 and can be override later on.
       final didEndScreenLoadingPrematurely =
-          currentScreenLoadingTrace?.endTimeInMicroseconds == null;
+          screenLoadingTrace.endTimeInMicroseconds == null;
       if (didEndScreenLoadingPrematurely) {
         extendedEndTimeInMicroseconds = 0;
         duration = 0;
@@ -528,7 +530,7 @@ class ScreenLoadingManager {
         );
       }
       LuciqLogger.I.d(
-        'endTimeInMicroseconds: ${currentScreenLoadingTrace?.endTimeInMicroseconds}, '
+        'endTimeInMicroseconds: ${screenLoadingTrace.endTimeInMicroseconds}, '
         'didEndScreenLoadingPrematurely: $didEndScreenLoadingPrematurely, extendedEndTimeInMicroseconds: $extendedEndTimeInMicroseconds.',
         tag: APM.tag,
       );
@@ -538,7 +540,7 @@ class ScreenLoadingManager {
       );
 
       // Wait for UI trace validation before calling native API
-      final isUiTraceValid = await currentUiTrace?.whenValidated.timeout(
+      final isUiTraceValid = await uiTrace?.whenValidated.timeout(
         const Duration(milliseconds: _traceValidationTimeout),
         onTimeout: () {
           LuciqLogger.I.e(
@@ -560,9 +562,9 @@ class ScreenLoadingManager {
       // Ends screen loading trace
       APM.endScreenLoadingCP(
         extendedEndTimeInMicroseconds,
-        currentUiTrace?.traceId ?? 0,
+        uiTrace?.traceId ?? 0,
       );
-      currentUiTrace?.didExtendScreenLoading = true;
+      uiTrace?.didExtendScreenLoading = true;
 
       return;
     } catch (error, stackTrace) {

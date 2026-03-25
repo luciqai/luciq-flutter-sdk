@@ -50,25 +50,23 @@ void main() {
   runZonedGuarded(() {
     WidgetsFlutterBinding.ensureInitialized();
 
-    Luciq.init(
-      token: '0174a800719ebdebf7b248fa6ae2ef17',
-      invocationEvents: [InvocationEvent.floatingButton],
-      debugLogsLevel: LogLevel.verbose,
-      appVariant: 'variant 1',
-    );
-    BugReporting.setProactiveReportingConfigurations(
-      const ProactiveReportingConfigs(
-        enabled: true,
-        gapBetweenModals: 2, //time in seconds
-        modalDelayAfterDetection: 2, //time in seconds
-      ),
-    );
+      Luciq.init(
+        token: '0174a800719ebdebf7b248fa6ae2ef17',
+        invocationEvents: [InvocationEvent.floatingButton],
+        debugLogsLevel: LogLevel.verbose,
+        appVariant: 'variant 1',
+      );
 
-    CrashReporting.setNDKEnabled(true);
-    Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
-    FlutterError.onError = (FlutterErrorDetails details) {
-      Zone.current.handleUncaughtError(details.exception, details.stack!);
-    };
+      Luciq.setValueForStringWithKey('text you want',
+          CustomTextPlaceHolderKey.commentFieldHintForBugReport);
+
+      BugReporting.setProactiveReportingConfigurations(
+        const ProactiveReportingConfigs(
+          enabled: true,
+          gapBetweenModals: 2, //time in seconds
+          modalDelayAfterDetection: 2, //time in seconds
+        ),
+      );
 
     runApp(
       ChangeNotifierProvider(

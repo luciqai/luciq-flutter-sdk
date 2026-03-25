@@ -6,12 +6,12 @@ orbs:
   node: circleci/node@5.2.0
   ios: circleci/macos@2.5.4
   advanced-checkout: vsco/advanced-checkout@1.1.0
+  slack: circleci/slack@5.1.1
 
 executors:
   flutter-executor:
     docker:
       - image: cimg/base:stable
-
 
 commands:
   setup_flutter:
@@ -140,6 +140,42 @@ commands:
                       name: Build Pigeons
                       command: dart run build_runner build --delete-conflicting-outputs
 
+  notify_slack_with_release:
+    parameters:
+      channel:
+        type: string
+        default: C08F3Q30U7Q
+    steps:
+      - slack/notify:
+          channel: <<parameters.channel>>
+          event: pass
+          custom: |
+            {
+            	"blocks": [
+            		{
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": ":flutter: Flutter `v$(./scripts/releases/get_sdk_version.sh)` is released by <@$(./scripts/releases/get_job_approver.sh)> 🚀"
+                  }
+                },
+            		{
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "$(./scripts/releases/get_release_notes.sh)"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "cc: <@U5697F4EL> @support_team <@ULDFCC09J>"
+                  }
+                }
+              ]
+            }
+
 jobs:
   danger:
     executor:
@@ -172,7 +208,6 @@ jobs:
           root: ~/project
           paths:
             - coverage
-
 
   test_flutter_without_melos:
     parameters:
@@ -215,11 +250,11 @@ jobs:
       - setup_flutter
       - setup_patrol
       - android/create-avd:
-          avd-name: 'test'
+          avd-name: "test"
           install: true
           system-image: system-images;android-33;default;x86_64
       - android/start-emulator:
-          avd-name: 'test'
+          avd-name: "test"
           post-emulator-launch-assemble-command: ""
       - run:
           name: Run E2E Tests
@@ -229,8 +264,8 @@ jobs:
 
   test_ios:
     macos:
-      xcode: 16.0.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     environment:
       luciq_SOURCEMAPS_UPLOAD_DISABLE: true
     steps:
@@ -245,20 +280,20 @@ jobs:
                 -scheme Runner \
                 -resultBundlePath coverage/result.xcresult \
                 -sdk iphonesimulator \
-                -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.0' \
+                -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.5' \
                 -skip-testing:RunnerUITests \
                 test | xcpretty
 
   e2e_ios_patrol:
     macos:
-      xcode: 16.0.0
-    resource_class: m2pro.medium
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     steps:
       - advanced-checkout/shallow-checkout
       - setup_ios
       - setup_patrol
       - ios/preboot-simulator:
-          version: "18.0"
+          version: "18.5"
           device: "iPhone 16 Pro Max"
       - ios/wait-until-simulator-booted
       - run:
@@ -296,8 +331,8 @@ jobs:
 
   release_dio_plugin:
     macos:
-      xcode: 15.2.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
       - advanced-checkout/shallow-checkout:
@@ -321,11 +356,10 @@ jobs:
           working_directory: packages/luciq_dio_interceptor
           command: Escape flutter publish-dependancy
 
-
   release_http_adapter_plugin:
     macos:
-      xcode: 15.2.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
       - advanced-checkout/shallow-checkout:
@@ -351,8 +385,8 @@ jobs:
 
   release_modular_plugin:
     macos:
-      xcode: 15.2.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
       - advanced-checkout/shallow-checkout:
@@ -378,8 +412,8 @@ jobs:
 
   release_cli_plugin:
     macos:
-      xcode: 15.2.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
       - advanced-checkout/shallow-checkout:
@@ -404,8 +438,8 @@ jobs:
           command: Escape flutter publish-dependancy
   release_flutter_ndk_plugin:
     macos:
-      xcode: 15.2.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
       - advanced-checkout/shallow-checkout:
@@ -431,8 +465,8 @@ jobs:
 
   release_luciq_flutter:
     macos:
-      xcode: 15.2.0
-    resource_class: macos.m1.medium.gen1
+      xcode: 16.4.0
+    resource_class: m4pro.medium
     working_directory: "~/project"
     steps:
       - advanced-checkout/shallow-checkout:
@@ -455,6 +489,18 @@ jobs:
           name: Publish Package
           working_directory: packages/luciq_flutter
           command: Escape flutter publish-monorepo-luciq
+
+  release_slack_notification:
+    parameters:
+      channel:
+        type: string
+        default: C08F3Q30U7Q
+    docker:
+      - image: cimg/base:current
+    steps:
+      - advanced-checkout/shallow-checkout
+      - notify_slack_with_release:
+          channel: <<parameters.channel>>
 
 workflows:
   version: 2
@@ -567,3 +613,20 @@ workflows:
           filters:
             branches:
               only: master
+      - release_slack_notification:
+          channel: C8PDY2Q8H
+          requires:
+            - release_luciq_flutter
+          context: slack-app
+
+  send-release-notes-to-test-channel:
+    jobs:
+      - hold_slack_notification:
+          type: approval
+          filters:
+            branches:
+              only: ci/automate-release-notes-for-slack
+      - release_slack_notification:
+          requires:
+            - hold_slack_notification
+          context: slack-app

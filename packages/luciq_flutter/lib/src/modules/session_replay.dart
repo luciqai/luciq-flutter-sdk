@@ -105,7 +105,7 @@ class SessionReplay {
   ///
   /// - [intervalMs]: Time between captures in milliseconds
   /// - Default: 1000ms (1 screenshot per second)
-  /// - Minimum: 500ms (values below 500ms will automatically use 500ms)
+  /// - Minimum supported value: 500ms
   ///
   /// **Timer Reset Behavior:**
   /// The capture timer resets when:
@@ -122,6 +122,14 @@ class SessionReplay {
   /// await SessionReplay.setScreenshotCaptureInterval(2000);
   /// ```
   static Future<void> setScreenshotCaptureInterval(int intervalMs) async {
+    if (intervalMs < 500) {
+      throw ArgumentError.value(
+        intervalMs,
+        'intervalMs',
+        'must be greater than or equal to 500',
+      );
+    }
+
     return _host.setScreenshotCaptureInterval(intervalMs);
   }
 

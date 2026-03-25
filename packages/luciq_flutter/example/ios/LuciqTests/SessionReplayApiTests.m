@@ -68,5 +68,62 @@
 
 }
 
+- (void)testSetScreenshotCapturingModeNavigation {
+    FlutterError *error;
+
+    [self.api setScreenshotCapturingModeMode:ScreenshotCapturingModeNavigation error:&error];
+
+    OCMVerify([self.mSessionReplay setScreenshotCapturingMode:LCQScreenshotCapturingModeNavigation]);
+}
+
+- (void)testSetScreenshotCapturingModeInteraction {
+    FlutterError *error;
+
+    [self.api setScreenshotCapturingModeMode:ScreenshotCapturingModeInteraction error:&error];
+
+    OCMVerify([self.mSessionReplay setScreenshotCapturingMode:LCQScreenshotCapturingModeInteraction]);
+}
+
+- (void)testSetScreenshotCapturingModeFrequency {
+    FlutterError *error;
+
+    [self.api setScreenshotCapturingModeMode:ScreenshotCapturingModeFrequency error:&error];
+
+    OCMVerify([self.mSessionReplay setScreenshotCapturingMode:LCQScreenshotCapturingModeFrequency]);
+}
+
+- (void)testSetScreenshotCaptureInterval {
+    NSNumber *intervalMs = @1000;
+    FlutterError *error;
+
+    [self.api setScreenshotCaptureIntervalIntervalMs:intervalMs error:&error];
+
+    OCMVerify([self.mSessionReplay setScreenshotCaptureInterval:intervalMs.integerValue]);
+}
+
+- (void)testSetScreenshotQualityModeNormal {
+    FlutterError *error;
+
+    [self.api setScreenshotQualityModeMode:ScreenshotQualityModeNormal error:&error];
+
+    OCMVerify([self.mSessionReplay setScreenshotQualityMode:LCQScreenshotQualityModeNormal]);
+}
+
+- (void)testSetScreenshotQualityModeHigh {
+    FlutterError *error;
+
+    [self.api setScreenshotQualityModeMode:ScreenshotQualityModeHigh error:&error];
+
+    OCMVerify([self.mSessionReplay setScreenshotQualityMode:LCQScreenshotQualityModeHigh]);
+}
+
+- (void)testSetScreenshotQualityModeGreyScale {
+    FlutterError *error;
+
+    [self.api setScreenshotQualityModeMode:ScreenshotQualityModeGreyScale error:&error];
+
+    OCMVerify([self.mSessionReplay setScreenshotQualityMode:LCQScreenshotQualityModeGreyScale]);
+}
+
 
 @end

@@ -4,6 +4,8 @@ import ai.luciq.flutter.generated.SessionReplayPigeon;
 import ai.luciq.flutter.modules.SessionReplayApi;
 import ai.luciq.flutter.util.GlobalMocks;
 import ai.luciq.library.OnSessionReplayLinkReady;
+import ai.luciq.library.sessionreplay.CapturingMode;
+import ai.luciq.library.sessionreplay.ScreenshotQuality;
 import ai.luciq.library.sessionreplay.SessionReplay;
 import io.flutter.plugin.common.BinaryMessenger;
 import org.junit.After;
@@ -103,6 +105,60 @@ public class SessionReplayApiTest {
         verify(result, timeout(1000)).success(link);
 
 
+    }
+
+    @Test
+    public void testSetScreenshotCapturingModeNavigation() {
+        api.setScreenshotCapturingMode(SessionReplayPigeon.ScreenshotCapturingMode.NAVIGATION);
+
+        mSessionReplay.verify(() -> SessionReplay.setCapturingMode(CapturingMode.NAVIGATION));
+    }
+
+    @Test
+    public void testSetScreenshotCapturingModeInteraction() {
+        api.setScreenshotCapturingMode(SessionReplayPigeon.ScreenshotCapturingMode.INTERACTION);
+
+        mSessionReplay.verify(() -> SessionReplay.setCapturingMode(CapturingMode.INTERACTIONS));
+    }
+
+    @Test
+    public void testSetScreenshotCapturingModeFrequency() {
+        api.setScreenshotCapturingMode(SessionReplayPigeon.ScreenshotCapturingMode.FREQUENCY);
+
+        mSessionReplay.verify(() -> SessionReplay.setCapturingMode(CapturingMode.FREQUENCY));
+    }
+
+    @Test
+    public void testSetScreenshotCaptureInterval() {
+        api.setScreenshotCaptureInterval(1000L);
+
+        mSessionReplay.verify(() -> SessionReplay.setScreenshotCaptureInterval(1000));
+    }
+
+    @Test(expected = SessionReplayPigeon.FlutterError.class)
+    public void testSetScreenshotCaptureIntervalBelowMinimum() {
+        api.setScreenshotCaptureInterval(499L);
+    }
+
+    @Test
+    public void testSetScreenshotQualityModeNormal() {
+        api.setScreenshotQualityMode(SessionReplayPigeon.ScreenshotQualityMode.NORMAL);
+
+        mSessionReplay.verify(() -> SessionReplay.setScreenshotQuality(ScreenshotQuality.NORMAL));
+    }
+
+    @Test
+    public void testSetScreenshotQualityModeHigh() {
+        api.setScreenshotQualityMode(SessionReplayPigeon.ScreenshotQualityMode.HIGH);
+
+        mSessionReplay.verify(() -> SessionReplay.setScreenshotQuality(ScreenshotQuality.HIGH));
+    }
+
+    @Test
+    public void testSetScreenshotQualityModeGreyScale() {
+        api.setScreenshotQualityMode(SessionReplayPigeon.ScreenshotQualityMode.GREY_SCALE);
+
+        mSessionReplay.verify(() -> SessionReplay.setScreenshotQuality(ScreenshotQuality.GREYSCALE));
     }
 
 }

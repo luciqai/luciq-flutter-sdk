@@ -5,7 +5,6 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
@@ -21,20 +20,19 @@ import 'package:luciq_flutter_example/src/widget/nested_view.dart';
 import 'package:luciq_flutter_example/src/widget/section_title.dart';
 import 'package:luciq_http_client/luciq_http_client.dart';
 import 'package:provider/provider.dart';
-import 'package:luciq_flutter_example/src/utils/show_messages.dart';
 
 part 'src/components/fatal_crashes_content.dart';
 part 'src/components/flows_content.dart';
 part 'src/components/network_content.dart';
 part 'src/components/non_fatal_crashes_content.dart';
 part 'src/components/ndk_crashes_content.dart';
-part 'src/components/apm_switch.dart';
-part 'src/components/ui_traces_content.dart';
-part 'src/components/screen_render_switch.dart';
-part 'src/components/screen_render.dart';
-part 'src/components/animated_box.dart';
 
+part 'src/components/animated_box.dart';
+part 'src/components/apm_switch.dart';
 part 'src/components/page.dart';
+part 'src/components/screen_render.dart';
+part 'src/components/screen_render_switch.dart';
+part 'src/components/ui_traces_content.dart';
 part 'src/screens/apm_page.dart';
 part 'src/screens/bug_reporting.dart';
 part 'src/screens/complex_page.dart';
@@ -48,18 +46,9 @@ part 'src/screens/private_views_stress_page.dart';
 part 'src/screens/long_list_page.dart';
 part 'src/screens/screen_render_page.dart';
 
-const _videoLikeMode = ScreenshotCapturingMode.interaction; // baseline default
-const _captureIntervalMs = 500; // Only used when mode is frequency
-const _qualityMode = ScreenshotQualityMode.greyScale;
-// ==================================================================
-
 void main() {
-  runZonedGuarded(() async {
+  runZonedGuarded(() {
     WidgetsFlutterBinding.ensureInitialized();
-
-    await SessionReplay.setScreenshotCapturingMode(_videoLikeMode);
-    await SessionReplay.setScreenshotCaptureInterval(_captureIntervalMs);
-    await SessionReplay.setScreenshotQualityMode(_qualityMode);
 
     Luciq.init(
       token: '0174a800719ebdebf7b248fa6ae2ef17',
@@ -76,8 +65,6 @@ void main() {
     );
 
     CrashReporting.setNDKEnabled(true);
-    // APM.setScreenRenderingEnabled(true);
-    // APM.setAutoUITraceEnabled(false);
     Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
     FlutterError.onError = (FlutterErrorDetails details) {
       Zone.current.handleUncaughtError(details.exception, details.stack!);

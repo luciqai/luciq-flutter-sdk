@@ -66,4 +66,48 @@ void main() {
       mHost.getSessionReplayLink(),
     ).called(1);
   });
+
+  test('[setScreenshotCapturingMode] should call host method', () async {
+    await SessionReplay.setScreenshotCapturingMode(
+      ScreenshotCapturingMode.frequency,
+    );
+
+    verify(
+      mHost.setScreenshotCapturingMode(ScreenshotCapturingMode.frequency),
+    ).called(1);
+  });
+
+  test('[setScreenshotCaptureInterval] should call host method', () async {
+    const intervalMs = 1000;
+
+    await SessionReplay.setScreenshotCaptureInterval(intervalMs);
+
+    verify(
+      mHost.setScreenshotCaptureInterval(intervalMs),
+    ).called(1);
+  });
+
+  test(
+    '[setScreenshotCaptureInterval] should reject values below minimum',
+    () async {
+      await expectLater(
+        () => SessionReplay.setScreenshotCaptureInterval(499),
+        throwsA(isA<ArgumentError>()),
+      );
+
+      verifyNever(
+        mHost.setScreenshotCaptureInterval(any),
+      );
+    },
+  );
+
+  test('[setScreenshotQualityMode] should call host method', () async {
+    await SessionReplay.setScreenshotQualityMode(
+      ScreenshotQualityMode.greyScale,
+    );
+
+    verify(
+      mHost.setScreenshotQualityMode(ScreenshotQualityMode.greyScale),
+    ).called(1);
+  });
 }

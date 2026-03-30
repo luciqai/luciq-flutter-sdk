@@ -5,6 +5,15 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.json.JSONObject;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
 import ai.luciq.apm.APM;
 import ai.luciq.apm.InternalAPM;
 import ai.luciq.apm.configuration.cp.APMFeature;
@@ -16,17 +25,6 @@ import ai.luciq.apm.screenrendering.models.cp.LuciqFrameData;
 import ai.luciq.apm.screenrendering.models.cp.LuciqScreenRenderingData;
 import ai.luciq.flutter.generated.ApmPigeon;
 import ai.luciq.flutter.util.Reflection;
-import ai.luciq.flutter.util.ThreadManager;
-
-import org.json.JSONObject;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
 import io.flutter.plugin.common.BinaryMessenger;
 
 public class ApmApi implements ApmPigeon.ApmHostApi {
@@ -325,7 +323,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     @Override
     public void reportScreenLoadingCP(@NonNull Long startTimeStampMicro, @NonNull Long durationMicro, @NonNull Long uiTraceId) {
         try {
-            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId);
+            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -335,8 +333,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     @Override
     public void reportManualScreenLoadingCP(@NonNull String screenName, @NonNull Long startTimeStampMicro, @NonNull Long durationMicro) {
         try {
-            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, 0);
-//            InternalAPM._reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro);
+            InternalAPM._reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro, null);
         } catch (Exception e) {
             e.printStackTrace();
         }

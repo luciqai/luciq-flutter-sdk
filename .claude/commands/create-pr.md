@@ -97,11 +97,14 @@ Fill the template based on the actual changes:
 
 Extract the task ID from `taskUrl` (the part after `/browse/`).
 
-Generate PR title in format: `[TASK-ID] Brief description`
+Generate PR title in format: `<type>: [TASK-ID] brief description`
+
+Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`
 
 Examples:
-- `[MOB-20541] Add network request duration tracking to APM`
-- `[MOB-18732] Fix crash when initializing SDK on iOS 14`
+- `feat: [MOB-20541] add network request duration tracking to APM`
+- `fix: [MOB-18732] fix crash when initializing SDK on iOS 14`
+- `chore: [MOB-19000] update CI Flutter version to 3.24.3`
 
 **Present the title to the user for approval.**
 

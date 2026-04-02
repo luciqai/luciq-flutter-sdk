@@ -1,0 +1,22 @@
+{
+    "sourceFile": "packages/luciq_flutter/ios/Classes/Modules/SessionReplayApi.m",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1775128518105,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1775128586317,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -50,9 +50,8 @@\n     LCQSessionReplay.screenshotCaptureInterval = [intervalMs integerValue];\n }\n \n - (void)setScreenshotQualityModeMode:(ScreenshotQualityMode)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n-    // Map Pigeon enum to native SDK enum (same order: normal=0, high=1, greyScale=2)\n     LCQScreenshotQualityMode nativeMode;\n     switch (mode) {\n         case ScreenshotQualityModeNormal:\n             nativeMode = LCQScreenshotQualityModeNormal;\n"
+                }
+            ],
+            "date": 1775128518105,
+            "name": "Commit-0",
+            "content": "#import <LuciqSDK/LuciqSDK.h>\n#import <LuciqSDK/LCQSessionReplay.h>\n#import \"SessionReplayApi.h\"\n\nextern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {\n    SessionReplayApi *api = [[SessionReplayApi alloc] init];\n    SessionReplayHostApiSetup(messenger, api);\n}\n\n@implementation SessionReplayApi\n\n- (void)setEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n    LCQSessionReplay.enabled = [isEnabled boolValue];\n}\n\n- (void)setLuciqLogsEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n    LCQSessionReplay.LCQLogsEnabled = [isEnabled boolValue];\n}\n\n- (void)setNetworkLogsEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n    LCQSessionReplay.networkLogsEnabled = [isEnabled boolValue];\n}\n\n- (void)setUserStepsEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n    LCQSessionReplay.userStepsEnabled = [isEnabled boolValue];\n}\n\n- (void)getSessionReplayLinkWithCompletion:(void (^)(NSString *, FlutterError *))completion {\n    NSString *link = LCQSessionReplay.sessionReplayLink;\n    completion(link, nil);\n}\n\n- (void)setScreenshotCapturingModeMode:(ScreenshotCapturingMode)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n    LCQScreenshotCapturingMode nativeMode;\n    switch (mode) {\n        case ScreenshotCapturingModeNavigation:\n            nativeMode = LCQScreenshotCapturingModeNavigation;\n            break;\n        case ScreenshotCapturingModeInteraction:\n            nativeMode = LCQScreenshotCapturingModeInteraction;\n            break;\n        case ScreenshotCapturingModeFrequency:\n            nativeMode = LCQScreenshotCapturingModeFrequency;\n            break;\n    }\n    LCQSessionReplay.screenshotCapturingMode = nativeMode;\n}\n\n- (void)setScreenshotCaptureIntervalIntervalMs:(nonnull NSNumber *)intervalMs error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n    LCQSessionReplay.screenshotCaptureInterval = [intervalMs integerValue];\n}\n\n- (void)setScreenshotQualityModeMode:(ScreenshotQualityMode)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {\n    // Map Pigeon enum to native SDK enum (same order: normal=0, high=1, greyScale=2)\n    LCQScreenshotQualityMode nativeMode;\n    switch (mode) {\n        case ScreenshotQualityModeNormal:\n            nativeMode = LCQScreenshotQualityModeNormal;\n            break;\n        case ScreenshotQualityModeHigh:\n            nativeMode = LCQScreenshotQualityModeHigh;\n            break;\n        case ScreenshotQualityModeGreyScale:\n            nativeMode = LCQScreenshotQualityModeGreyScale;\n            break;\n    }\n    LCQSessionReplay.screenshotQualityMode = nativeMode;\n}\n\n@end\n"
+        }
+    ]
+}

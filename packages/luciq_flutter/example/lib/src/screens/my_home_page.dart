@@ -68,9 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void sendFeedback() {
-    BugReporting.show(ReportType.feedback, [
-      InvocationOption.emailFieldOptional,
-    ]);
+    BugReporting.show(
+        ReportType.feedback, [InvocationOption.emailFieldOptional]);
   }
 
   void showNpsSurvey() {
@@ -85,7 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getCurrentSessionReplaylink() async {
     final result = await SessionReplay.getSessionReplayLink();
-    final snackBar = SnackBar(content: Text(result));
+    final snackBar = SnackBar(
+      content: Text(result),
+    );
     ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(snackBar);
   }
 
@@ -177,14 +178,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _navigateToPrivateViewsStress() {
-    Navigator.pushNamed(context, PrivateViewsStressPage.screenName);
-  }
-
-  void _navigateToLongList() {
-    Navigator.pushNamed(context, LongListPage.screenName);
-  }
-
   final _formUserAttributeKey = GlobalKey<FormState>();
 
   @override
@@ -267,7 +260,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ).withSemanticsLabel('invocation_event_two_fingers'),
           ],
         ),
-        LuciqButton(onPressed: show, text: 'Invoke'),
+        LuciqButton(
+          onPressed: show,
+          text: 'Invoke',
+        ),
         LuciqButton(
           onPressed: setOnDismissCallback,
           text: 'Set On Dismiss Callback',
@@ -360,16 +356,6 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: _navigateToSessionReplay,
           text: 'Session Replay',
           symanticLabel: 'open_session_replay_page',
-        ),
-        LuciqButton(
-          onPressed: _navigateToPrivateViewsStress,
-          text: 'Private Views Stress Test',
-          symanticLabel: 'open_private_views_stress_test_page',
-        ),
-        LuciqButton(
-          onPressed: _navigateToLongList,
-          text: 'Long List (Scroll Stress)',
-          symanticLabel: 'open_long_list_stress_page',
         ),
         const SectionTitle('Sessions Replay'),
         LuciqButton(

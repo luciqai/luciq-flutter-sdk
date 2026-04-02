@@ -1,0 +1,18 @@
+{
+    "sourceFile": "packages/luciq_flutter/example/lib/src/app_routes.dart",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1775128925472,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1775128925472,
+            "name": "Commit-0",
+            "content": "import 'package:flutter/widgets.dart' show BuildContext;\nimport 'package:luciq_flutter_example/main.dart';\nimport 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';\n\nfinal appRoutes = {\n  /// [\"/\"] route name should only be used with [onGenerateRoute:] when no\n  /// Home Widget specified in MaterialApp() other wise the the Flutter engine\n  /// will throw a Runtime exception deo to Flutter restrictions\n\n  \"/\": (BuildContext context) =>\n      const MyHomePage(title: 'Flutter Demo Home Pag'),\n  CrashesPage.screenName: (BuildContext context) => const CrashesPage(),\n  BugReportingPage.screenName: (BuildContext context) =>\n      const BugReportingPage(),\n  CorePage.screenName: (BuildContext context) => const CorePage(),\n  CallbackScreen.screenName: (BuildContext context) => const CallbackScreen(),\n  ComplexPage.screenName: (BuildContext context) => const ComplexPage(),\n  SessionReplayPage.screenName: (BuildContext context) =>\n      const SessionReplayPage(),\n  TopTabBarScreen.route: (BuildContext context) => const TopTabBarScreen(),\n\n  ApmPage.screenName: (BuildContext context) => const ApmPage(),\n  ScreenLoadingPage.screenName: (BuildContext context) =>\n      const ScreenLoadingPage(),\n  ScreenCapturePrematureExtensionPage.screenName: (BuildContext context) =>\n      const ScreenCapturePrematureExtensionPage(),\n};\n"
+        }
+    ]
+}

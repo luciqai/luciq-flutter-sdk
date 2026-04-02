@@ -31,7 +31,6 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setScreenshotCapturingModeMode:(ScreenshotCapturingMode)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    // Map Pigeon enum to native SDK enum (same order: navigation=0, interaction=1, frequency=2)
     LCQScreenshotCapturingMode nativeMode;
     switch (mode) {
         case ScreenshotCapturingModeNavigation:
@@ -52,7 +51,6 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setScreenshotQualityModeMode:(ScreenshotQualityMode)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    // Map Pigeon enum to native SDK enum (same order: normal=0, high=1, greyScale=2)
     LCQScreenshotQualityMode nativeMode;
     switch (mode) {
         case ScreenshotQualityModeNormal:

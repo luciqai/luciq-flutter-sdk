@@ -1,0 +1,22 @@
+{
+    "sourceFile": "packages/luciq_flutter/example/ios/Podfile.lock",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1775128995593,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1775129004621,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -97,5 +97,5 @@\n   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b\n \n PODFILE CHECKSUM: 2fac70ef5212a738d3e6dd688a655571d8ec3c6e\n \n-COCOAPODS: 1.16.2\n\\ No newline at end of file\n+COCOAPODS: 1.16.2\n"
+                }
+            ],
+            "date": 1775128995593,
+            "name": "Commit-0",
+            "content": "PODS:\n  - CocoaAsyncSocket (7.6.5)\n  - DKImagePickerController/Core (4.3.9):\n    - DKImagePickerController/ImageDataManager\n    - DKImagePickerController/Resource\n  - DKImagePickerController/ImageDataManager (4.3.9)\n  - DKImagePickerController/PhotoGallery (4.3.9):\n    - DKImagePickerController/Core\n    - DKPhotoGallery\n  - DKImagePickerController/Resource (4.3.9)\n  - DKPhotoGallery (0.0.19):\n    - DKPhotoGallery/Core (= 0.0.19)\n    - DKPhotoGallery/Model (= 0.0.19)\n    - DKPhotoGallery/Preview (= 0.0.19)\n    - DKPhotoGallery/Resource (= 0.0.19)\n    - SDWebImage\n    - SwiftyGif\n  - DKPhotoGallery/Core (0.0.19):\n    - DKPhotoGallery/Model\n    - DKPhotoGallery/Preview\n    - SDWebImage\n    - SwiftyGif\n  - DKPhotoGallery/Model (0.0.19):\n    - SDWebImage\n    - SwiftyGif\n  - DKPhotoGallery/Preview (0.0.19):\n    - DKPhotoGallery/Model\n    - DKPhotoGallery/Resource\n    - SDWebImage\n    - SwiftyGif\n  - DKPhotoGallery/Resource (0.0.19):\n    - SDWebImage\n    - SwiftyGif\n  - file_picker (0.0.1):\n    - DKImagePickerController/PhotoGallery\n    - Flutter\n  - Flutter (1.0.0)\n  - Luciq (19.5.0)\n  - luciq_flutter (19.3.0):\n    - Flutter\n    - Luciq (= 19.5.0)\n  - OCMock (3.6)\n  - patrol (0.0.1):\n    - CocoaAsyncSocket (~> 7.6)\n    - Flutter\n    - FlutterMacOS\n  - SDWebImage (5.21.5):\n    - SDWebImage/Core (= 5.21.5)\n  - SDWebImage/Core (5.21.5)\n  - SwiftyGif (5.4.5)\n  - video_player_avfoundation (0.0.1):\n    - Flutter\n    - FlutterMacOS\n\nDEPENDENCIES:\n  - file_picker (from `.symlinks/plugins/file_picker/ios`)\n  - Flutter (from `Flutter`)\n  - luciq_flutter (from `.symlinks/plugins/luciq_flutter/ios`)\n  - OCMock (= 3.6)\n  - patrol (from `.symlinks/plugins/patrol/darwin`)\n  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)\n\nSPEC REPOS:\n  trunk:\n    - CocoaAsyncSocket\n    - DKImagePickerController\n    - DKPhotoGallery\n    - Luciq\n    - OCMock\n    - SDWebImage\n    - SwiftyGif\n\nEXTERNAL SOURCES:\n  file_picker:\n    :path: \".symlinks/plugins/file_picker/ios\"\n  Flutter:\n    :path: Flutter\n  luciq_flutter:\n    :path: \".symlinks/plugins/luciq_flutter/ios\"\n  patrol:\n    :path: \".symlinks/plugins/patrol/darwin\"\n  video_player_avfoundation:\n    :path: \".symlinks/plugins/video_player_avfoundation/darwin\"\n\nSPEC CHECKSUMS:\n  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99\n  DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c\n  DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60\n  file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be\n  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467\n  Luciq: 1df663b8b13c2796ae7a639e9982e3ba04b845c8\n  luciq_flutter: 84c7af1dbe5bfa93d2e1e6f199e16be1ccf63179\n  OCMock: 5ea90566be239f179ba766fd9fbae5885040b992\n  patrol: 51b76cc7c11a2933ee3e72482d930c75b9d4ec73\n  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838\n  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4\n  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b\n\nPODFILE CHECKSUM: 2fac70ef5212a738d3e6dd688a655571d8ec3c6e\n\nCOCOAPODS: 1.16.2"
+        }
+    ]
+}

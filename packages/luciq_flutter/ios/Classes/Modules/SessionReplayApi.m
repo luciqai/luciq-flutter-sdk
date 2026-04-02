@@ -1,3 +1,4 @@
+#import <Flutter/Flutter.h>
 #import <LuciqSDK/LuciqSDK.h>
 #import <LuciqSDK/LCQSessionReplay.h>
 #import "SessionReplayApi.h"

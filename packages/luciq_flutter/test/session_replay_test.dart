@@ -101,6 +101,19 @@ void main() {
     },
   );
 
+  test(
+    '[setScreenshotCaptureInterval] should accept exact minimum value',
+    () async {
+      const intervalMs = 500;
+
+      await SessionReplay.setScreenshotCaptureInterval(intervalMs);
+
+      verify(
+        mHost.setScreenshotCaptureInterval(intervalMs),
+      ).called(1);
+    },
+  );
+
   test('[setScreenshotQualityMode] should call host method', () async {
     await SessionReplay.setScreenshotQualityMode(
       ScreenshotQualityMode.greyScale,

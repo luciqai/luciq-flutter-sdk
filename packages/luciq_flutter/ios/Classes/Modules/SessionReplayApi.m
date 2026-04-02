@@ -42,11 +42,22 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
         case ScreenshotCapturingModeFrequency:
             nativeMode = LCQScreenshotCapturingModeFrequency;
             break;
+        default:
+            *error = [FlutterError errorWithCode:@"INVALID_CAPTURING_MODE"
+                                         message:[NSString stringWithFormat:@"Unknown ScreenshotCapturingMode: %lu", (unsigned long)mode]
+                                         details:nil];
+            return;
     }
     LCQSessionReplay.screenshotCapturingMode = nativeMode;
 }
 
 - (void)setScreenshotCaptureIntervalIntervalMs:(nonnull NSNumber *)intervalMs error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    if ([intervalMs integerValue] < 500) {
+        *error = [FlutterError errorWithCode:@"INVALID_CAPTURE_INTERVAL"
+                                     message:@"intervalMs must be >= 500 on iOS"
+                                     details:intervalMs];
+        return;
+    }
     LCQSessionReplay.screenshotCaptureInterval = [intervalMs integerValue];
 }
 
@@ -62,6 +73,11 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
         case ScreenshotQualityModeGreyScale:
             nativeMode = LCQScreenshotQualityModeGreyScale;
             break;
+        default:
+            *error = [FlutterError errorWithCode:@"INVALID_QUALITY_MODE"
+                                         message:[NSString stringWithFormat:@"Unknown ScreenshotQualityMode: %lu", (unsigned long)mode]
+                                         details:nil];
+            return;
     }
     LCQSessionReplay.screenshotQualityMode = nativeMode;
 }

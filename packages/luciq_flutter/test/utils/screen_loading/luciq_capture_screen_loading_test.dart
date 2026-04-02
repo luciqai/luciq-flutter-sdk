@@ -35,7 +35,7 @@ void main() {
   /// Stubs [claimManualScreenLoadingTrace] to capture the first trace as the
   /// "winning" manual trace — only the first call returns `true`.
   void stubClaimManualTrace() {
-    bool claimed = false;
+    var claimed = false;
 
     when(mockScreenLoadingManager.claimManualScreenLoadingTrace(any))
         .thenAnswer((invocation) {

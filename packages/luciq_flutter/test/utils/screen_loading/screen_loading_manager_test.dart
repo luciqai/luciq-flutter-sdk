@@ -1484,7 +1484,7 @@ void main() {
       final reportedEndTimeUs = capturedArgs[0] as int;
       final reportedTraceId = capturedArgs[1] as int;
 
-      final expectedDuration = 500 - 100;
+      const expectedDuration = 500 - 100;
       final expectedEndTimeUs = time.microsecondsSinceEpoch + expectedDuration;
 
       expect(

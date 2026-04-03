@@ -66,7 +66,7 @@ class _HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LuciqCaptureScreenLoading(
-      screenName: ScreenLoadingTabPage.screenName,
+      screenName: '${ScreenLoadingTabPage.screenName}/home',
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -106,7 +106,7 @@ class _ListTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LuciqCaptureScreenLoading(
-      screenName: ScreenLoadingTabPage.screenName,
+      screenName: '${ScreenLoadingTabPage.screenName}/list',
       child: ListView.builder(
         itemCount: 50,
         itemBuilder: (context, index) => ListTile(
@@ -125,7 +125,7 @@ class _GridTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LuciqCaptureScreenLoading(
-      screenName: ScreenLoadingTabPage.screenName,
+      screenName: '${ScreenLoadingTabPage.screenName}/grid',
       child: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

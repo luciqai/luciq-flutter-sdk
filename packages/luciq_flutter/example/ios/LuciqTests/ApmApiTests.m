@@ -199,7 +199,7 @@
 
     [self.api reportManualScreenLoadingCPScreenName:screenName startTimeStampMicro:startTimeStampMicro durationMicro:durationMicro error:&error];
 
-    OCMVerify([self.mAPM reportManualScreenLoadingCPWithScreenName:screenName startTimestampMUS:startTimeStampMicroMUS durationMUS:durationMUS]);
+    OCMVerify([self.mAPM reportScreenLoadingCPUITraceWithName:screenName screenLoadingStartMUS:startTimeStampMicroMUS screenLoadingDurationMUS:durationMUS stages:nil]);
 }
 
 - (void)testEndScreenLoading {

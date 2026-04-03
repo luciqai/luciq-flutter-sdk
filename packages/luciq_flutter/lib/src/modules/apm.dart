@@ -290,7 +290,10 @@ class APM {
       tag: APM.tag,
     );
     return _host.reportManualScreenLoadingCP(
-        screenName, startTimeInMicroseconds, durationInMicroseconds,);
+      screenName,
+      startTimeInMicroseconds,
+      durationInMicroseconds,
+    );
   }
 
   /// Extends a screen loading trace with the provided end time and UI trace ID.

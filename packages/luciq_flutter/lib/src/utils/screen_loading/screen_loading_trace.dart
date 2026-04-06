@@ -63,7 +63,5 @@ class ScreenLoadingTrace {
         screenName,
         startTimeInMicroseconds,
         startMonotonicTimeInMicroseconds,
-        endTimeInMicroseconds,
-        duration,
       );
 }

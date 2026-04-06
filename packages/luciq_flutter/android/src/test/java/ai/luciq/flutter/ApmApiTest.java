@@ -244,7 +244,19 @@ public class ApmApiTest {
 
         api.reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId);
 
-        mInternalApmStatic.verify(() -> InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId));
+        mInternalApmStatic.verify(() -> InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId, null));
+        mInternalApmStatic.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testReportManualScreenLoadingCP() {
+        String screenName = "screen-name";
+        long startTimeStampMicro = System.currentTimeMillis() / 1000;
+        long durationMicro = System.currentTimeMillis() / 1000;
+
+        api.reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro);
+
+        mInternalApmStatic.verify(() -> InternalAPM._reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro, null));
         mInternalApmStatic.verifyNoMoreInteractions();
     }
 

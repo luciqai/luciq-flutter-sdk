@@ -264,6 +264,38 @@ class APM {
     );
   }
 
+  /// Reports manual screen loading trace with specific details.
+  ///
+  /// Args:
+  ///   screenName (String): The [screenName] parameter represents the identifier of the screen or
+  /// page where the manual screen loading is being reported. It helps in identifying and tracking the performance of
+  /// that specific screen within the application.
+  ///   startTimeInMicroseconds (int): The [startTimeInMicroseconds] parameter represents the time when
+  /// the manual screen loading operation started, measured in microseconds.
+  ///   durationInMicroseconds (int): The [durationInMicroseconds] parameter represents the duration of
+  /// the manual screen loading process in microseconds. It indicates the time taken for the screen to load
+  /// completely from the start time specified by [startTimeInMicroseconds]. This parameter helps in
+  /// measuring and analyzing the performance of the manual screen loading operation.
+  ///
+  /// Returns:
+  ///   The method is returning a `Future<void>`.
+  @internal
+  static Future<void> reportManualScreenLoadingCP(
+    String screenName,
+    int startTimeInMicroseconds,
+    int durationInMicroseconds,
+  ) {
+    LuciqLogger.I.d(
+      'Reporting manual screen loading trace — screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
+      tag: APM.tag,
+    );
+    return _host.reportManualScreenLoadingCP(
+      screenName,
+      startTimeInMicroseconds,
+      durationInMicroseconds,
+    );
+  }
+
   /// Extends a screen loading trace with the provided end time and UI trace ID.
   ///
   /// Args:

@@ -3,6 +3,7 @@ import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
+import 'package:meta/meta.dart';
 
 /// A widget that tracks and reports screen loading times to Luciq.
 ///
@@ -29,6 +30,16 @@ class LuciqCaptureScreenLoading extends StatefulWidget {
     Key? key,
     required this.screenName,
     required this.child,
+  })  : isManual = true,
+        super(key: key);
+
+  /// Internal constructor that allows configuring [isManual].
+  @internal
+  const LuciqCaptureScreenLoading.withConfig({
+    Key? key,
+    required this.screenName,
+    required this.child,
+    this.isManual = true,
   }) : super(key: key);
 
   /// The UI component whose loading time is being measured.
@@ -36,6 +47,9 @@ class LuciqCaptureScreenLoading extends StatefulWidget {
 
   /// The name of the screen being monitored for loading performance.
   final String screenName;
+
+  /// Whether the screen loading is manual or automatic.
+  final bool isManual;
 
   @override
   State<LuciqCaptureScreenLoading> createState() =>
@@ -55,29 +69,69 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
   /// Stopwatch to measure screen loading time.
   final stopwatch = Stopwatch()..start();
 
+  /// Whether this widget claimed a manual screen loading trace.
+  bool _didClaimManual = false;
+
+  /// The sanitized screen name used for manual trace claiming.
+  late final String _sanitizedScreenName;
+
   @override
   void initState() {
     super.initState();
+    _sanitizedScreenName =
+        ScreenLoadingManager.I.sanitizeScreenName(widget.screenName);
     trace = ScreenLoadingTrace(
-      ScreenLoadingManager.I.sanitizeScreenName(widget.screenName),
+      _sanitizedScreenName,
       startTimeInMicroseconds: startTimeInMicroseconds,
       startMonotonicTimeInMicroseconds: startMonotonicTimeInMicroseconds,
     );
 
-    final startScreenLoadingTraceFuture =
+    final didStartTrace =
         ScreenLoadingManager.I.startScreenLoadingTrace(trace!);
+
+    // For manual widgets, also try to claim a manual slot
+    // (for when no navigator observer fired)
+    if (widget.isManual) {
+      _didClaimManual =
+          ScreenLoadingManager.I.claimManualScreenLoadingTrace(trace!);
+    }
 
     // Ensures compatibility with Flutter versions before 3.0.0
     // ignore: invalid_null_aware_operator
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
       stopwatch.stop();
       final duration = stopwatch.elapsedMicroseconds;
       trace?.duration = duration;
       trace?.endTimeInMicroseconds = startTimeInMicroseconds + duration;
-      startScreenLoadingTraceFuture.then((_) {
+
+      if (widget.isManual) {
+        final autoStarted = await didStartTrace;
+        if (autoStarted) {
+          // Navigator observer was triggered → use automatic path
+          ScreenLoadingManager.I.reportScreenLoading(trace);
+        } else if (_didClaimManual) {
+          // No navigator observer → use manual path (this widget is the parent)
+          ScreenLoadingManager.I.reportManualScreenLoading(
+            widget.screenName,
+            startTimeInMicroseconds,
+            duration,
+          );
+        }
+        // else: nested child with same screen name → skip
+      } else {
+        if (!await didStartTrace) return;
         ScreenLoadingManager.I.reportScreenLoading(trace);
-      });
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    if (_didClaimManual) {
+      ScreenLoadingManager.I
+          .releaseManualScreenLoadingTrace(_sanitizedScreenName);
+    }
+    super.dispose();
   }
 
   @override

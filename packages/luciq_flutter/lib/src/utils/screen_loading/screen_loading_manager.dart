@@ -9,6 +9,8 @@ import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
 
+const int _traceValidationTimeout = 500;
+
 /// Manages screen loading traces and UI traces for performance monitoring.
 ///
 /// This class handles the tracking of screen loading times and UI transitions,
@@ -105,6 +107,100 @@ class ScreenLoadingManager {
     );
   }
 
+  /// Synchronously prepares a new UI trace so that [currentUiTrace] is
+  /// immediately available for the widget's [startScreenLoadingTrace] call.
+  ///
+  /// Async validation (SDK built, feature flag) runs in the background.
+  /// Consumers must await [UiTrace.whenValidated] before calling native APIs.
+  @internal
+  void prepareUiTrace(String screenName, [String? matchingScreenName]) {
+    matchingScreenName ??= screenName;
+
+    try {
+      resetDidStartScreenLoading();
+
+      final sanitizedScreenName = sanitizeScreenName(screenName);
+      final sanitizedMatchingScreenName =
+          sanitizeScreenName(matchingScreenName);
+
+      final now = LCQDateTime.I.now();
+      final microTimeStamp = now.microsecondsSinceEpoch;
+      final uiTraceId = now.millisecondsSinceEpoch;
+
+      currentUiTrace = UiTrace(
+        screenName: sanitizedScreenName,
+        matchingScreenName: sanitizedMatchingScreenName,
+        traceId: uiTraceId,
+      );
+
+      LuciqLogger.I.d(
+        'Prepared UI trace — traceId: $uiTraceId, '
+        'screenName: $sanitizedScreenName (pending validation)',
+        tag: APM.tag,
+      );
+
+      _validateAndActivateUiTrace(
+        currentUiTrace!,
+        sanitizedScreenName,
+        microTimeStamp,
+      );
+    } catch (error, stackTrace) {
+      _logExceptionErrorAndStackTrace(error, stackTrace);
+    }
+  }
+
+  /// Runs the async checks and either activates or discards the trace.
+  Future<void> _validateAndActivateUiTrace(
+    UiTrace trace,
+    String screenName,
+    int startTimeStampMicro,
+  ) async {
+    try {
+      final isSDKBuilt =
+          await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
+      if (!isSDKBuilt) {
+        _discardUiTrace(trace, 'SDK not built');
+        return;
+      }
+
+      final isAutoUiTraceEnabled = await FlagsConfig.uiTrace.isEnabled();
+      if (!isAutoUiTraceEnabled) {
+        LuciqLogger.I.e(
+          'Auto UI trace is disabled, skipping starting the UI trace for screen: $screenName.\n'
+          'Please refer to the documentation for how to enable APM on your app: '
+          'https://docs.luciq.ai/docs/react-native-apm-disabling-enabling',
+          tag: APM.tag,
+        );
+        _discardUiTrace(trace, 'Auto UI trace disabled');
+        return;
+      }
+
+      APM.startCpUiTrace(screenName, startTimeStampMicro, trace.traceId);
+      trace.validationCompleter.complete(true);
+
+      LuciqLogger.I.d(
+        'UI trace validated — traceId: ${trace.traceId}, screenName: $screenName',
+        tag: APM.tag,
+      );
+    } catch (error, stackTrace) {
+      _discardUiTrace(trace, 'Exception: $error');
+      _logExceptionErrorAndStackTrace(error, stackTrace);
+    }
+  }
+
+  void _discardUiTrace(UiTrace trace, String reason) {
+    LuciqLogger.I.d(
+      'Discarding UI trace — reason: $reason',
+      tag: APM.tag,
+    );
+    if (!trace.validationCompleter.isCompleted) {
+      trace.validationCompleter.complete(false);
+    }
+    if (currentUiTrace == trace) {
+      currentUiTrace = null;
+    }
+  }
+
   /// The function `sanitizeScreenName` removes leading and trailing slashes from a screen name in Dart.
   ///
   /// Args:
@@ -133,57 +229,6 @@ class ScreenLoadingManager {
           sanitizedScreenName.substring(0, sanitizedScreenName.length - 1);
     }
     return sanitizedScreenName;
-  }
-
-  /// Starts a new UI trace with [screenName] as the public screen name and
-  /// [matchingScreenName] as the screen name used for matching the UI trace
-  /// with a Screen Loading trace.
-  @internal
-  Future<int?> startUiTrace(
-    String screenName, [
-    String? matchingScreenName,
-  ]) async {
-    matchingScreenName ??= screenName;
-
-    try {
-      resetDidStartScreenLoading();
-
-      final isSDKBuilt =
-          await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
-
-      if (!isSDKBuilt) return null;
-
-      final isAutoUiTraceEnabled = await FlagsConfig.uiTrace.isEnabled();
-
-      if (!isAutoUiTraceEnabled) {
-        LuciqLogger.I.e(
-          'Auto UI trace is disabled, skipping starting the UI trace for screen: $screenName.\n'
-          'Please refer to the documentation for how to enable APM on your app: '
-          'https://docs.luciq.ai/docs/react-native-apm-disabling-enabling',
-          tag: APM.tag,
-        );
-        return null;
-      }
-
-      final sanitizedScreenName = sanitizeScreenName(screenName);
-      final sanitizedMatchingScreenName =
-          sanitizeScreenName(matchingScreenName);
-
-      final microTimeStamp = LCQDateTime.I.now().microsecondsSinceEpoch;
-      final uiTraceId = LCQDateTime.I.now().millisecondsSinceEpoch;
-
-      APM.startCpUiTrace(sanitizedScreenName, microTimeStamp, uiTraceId);
-
-      currentUiTrace = UiTrace(
-        screenName: sanitizedScreenName,
-        matchingScreenName: sanitizedMatchingScreenName,
-        traceId: uiTraceId,
-      );
-      return uiTraceId;
-    } catch (error, stackTrace) {
-      _logExceptionErrorAndStackTrace(error, stackTrace);
-      return null;
-    }
   }
 
   /// Starts a screen loading trace.
@@ -215,7 +260,7 @@ class ScreenLoadingManager {
 
       if (isSameScreen && !didStartLoading) {
         LuciqLogger.I.d(
-          'starting screen loading trace — screenName: ${trace.screenName}, startTimeInMicroseconds: ${trace.startTimeInMicroseconds}',
+          'Starting screen loading trace — screenName: ${trace.screenName}, startTimeInMicroseconds: ${trace.startTimeInMicroseconds}',
           tag: APM.tag,
         );
         currentUiTrace?.didStartScreenLoading = true;
@@ -267,6 +312,27 @@ class ScreenLoadingManager {
 
       // Only report the first screen loading trace with the same name as the active UiTrace
       if (isSameScreen && !isReported && isValidTrace) {
+        // Wait for UI trace native-side activation before reporting
+        final isUiTraceValid = await currentUiTrace?.whenValidated.timeout(
+          const Duration(milliseconds: _traceValidationTimeout),
+          onTimeout: () {
+            LuciqLogger.I.e(
+              'UI trace validation timed out — dropping screen loading trace',
+              tag: APM.tag,
+            );
+            return false;
+          },
+        );
+
+        if (isUiTraceValid != true) {
+          LuciqLogger.I.d(
+            'Dropping screen loading trace — UI trace validation failed for screen: ${trace?.screenName}',
+            tag: APM.tag,
+          );
+          currentScreenLoadingTrace = null;
+          return;
+        }
+
         currentUiTrace?.didReportScreenLoading = true;
 
         APM.reportScreenLoadingCP(
@@ -392,6 +458,26 @@ class ScreenLoadingManager {
         'Ending screen loading capture — duration: $extendedEndTimeInMicroseconds',
         tag: APM.tag,
       );
+
+      // Wait for UI trace validation before calling native API
+      final isUiTraceValid = await currentUiTrace?.whenValidated.timeout(
+        const Duration(milliseconds: _traceValidationTimeout),
+        onTimeout: () {
+          LuciqLogger.I.e(
+            'UI trace validation timed out — dropping endScreenLoading',
+            tag: APM.tag,
+          );
+          return false;
+        },
+      );
+
+      if (isUiTraceValid != true) {
+        LuciqLogger.I.d(
+          'Dropping endScreenLoading — UI trace validation failed',
+          tag: APM.tag,
+        );
+        return;
+      }
 
       // Ends screen loading trace
       APM.endScreenLoadingCP(

@@ -241,7 +241,7 @@ class Luciq {
   /// It also reset the chats on device to that email and removes user attributes,
   /// user data and completed surveys.
   static Future<void> identifyUser(
-    String email, [
+    String? email, [
     String? name,
     String? id,
   ]) async {

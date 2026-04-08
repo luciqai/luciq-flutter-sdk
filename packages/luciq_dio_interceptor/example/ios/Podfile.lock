@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - Luciq (19.3.0)
-  - luciq_flutter (19.1.0):
+  - Luciq (19.4.1)
+  - luciq_flutter (19.4.0):
     - Flutter
-    - Luciq (= 19.3.0)
+    - Luciq (= 19.4.0)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)

@@ -8,7 +8,7 @@
 
 #import <LuciqSDK/LCQAPM.h>
 #import "LCQTimeIntervalUnits.h"
-#import <LuciqSDK/LCQFrameInfo.h>
+#import "LCQFrameInfo+CP.h"
 
 @interface LCQAPM (PrivateAPIs)
 

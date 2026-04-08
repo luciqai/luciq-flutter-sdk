@@ -37,7 +37,7 @@ abstract class LuciqHostApi {
 
   void showWelcomeMessageWithMode(String mode);
 
-  void identifyUser(String email, String? name, String? userId);
+  void identifyUser(String? email, String? name, String? userId);
 
   void setUserData(String data);
 

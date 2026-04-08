@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/models/luciq_route.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
@@ -18,27 +19,27 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   final List<LuciqRoute> _steps = [];
 
   void screenChanged(Route newRoute) {
-    try {
-      final rawScreenName = newRoute.settings.name.toString().trim();
-      final screenName = rawScreenName.isEmpty
-          ? ReproStepsConstants.emptyScreenFallback
-          : rawScreenName;
-      final maskedScreenName = ScreenNameMasker.I.mask(screenName);
-
-      final route = LuciqRoute(
-        route: newRoute,
-        name: maskedScreenName,
-      );
-
-      //Ends the last screen rendering collector if exists.
-      LuciqScreenRenderManager.I.endScreenRenderCollector();
-
-      // Synchronously prepares the UI trace so the widget can find it immediately.
-      ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
-
-      //ignore: invalid_null_aware_operator
-      WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    //// ignore: invalid_null_aware_operator
+    SchedulerBinding.instance?.scheduleTask(
+      () async {
         try {
+          final rawScreenName = newRoute.settings.name.toString().trim();
+          final screenName = rawScreenName.isEmpty
+              ? ReproStepsConstants.emptyScreenFallback
+              : rawScreenName;
+          final maskedScreenName = ScreenNameMasker.I.mask(screenName);
+
+          final route = LuciqRoute(
+            route: newRoute,
+            name: maskedScreenName,
+          );
+
+          //Ends the last screen rendering collector if exists.
+          LuciqScreenRenderManager.I.endScreenRenderCollector();
+
+          // Synchronously prepares the UI trace so the widget can find it immediately.
+          ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
+
           // Start screen render collector after UI trace validation completes and the new screen is mounted.
           final uiTrace = ScreenLoadingManager.I.currentUiTrace;
           uiTrace?.whenValidated.then((isValid) {
@@ -67,11 +68,9 @@ class LuciqNavigatorObserver extends NavigatorObserver {
           LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
           LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
         }
-      });
-    } catch (e) {
-      LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
-      LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
-    }
+      },
+      Priority.idle,
+    );
   }
 
   Future<void> reportScreenChange(String name) async {

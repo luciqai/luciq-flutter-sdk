@@ -291,9 +291,9 @@ class MigrateCommand {
   }
 
   static Future<void> _updatePackageDependencies(
-      String projectPath,
-      bool dryRun,
-      ) async {
+    String projectPath,
+    bool dryRun,
+  ) async {
     // Find all .yaml files in the project
     final yamlFiles = await _findYamlFiles(Directory(projectPath));
 
@@ -397,10 +397,10 @@ class MigrateCommand {
   }
 
   static Future<void> _executeVersionUpdates(
-      List<VersionUpdate> versionUpdates,
-      Directory projectDir,
-      bool dryRun,
-      ) async {
+    List<VersionUpdate> versionUpdates,
+    Directory projectDir,
+    bool dryRun,
+  ) async {
     stdout.writeln('\n🔄 Starting version updates...');
 
     for (final update in versionUpdates) {
@@ -409,10 +409,10 @@ class MigrateCommand {
   }
 
   static Future<void> _executeVersionUpdate(
-      VersionUpdate update,
-      Directory projectDir,
-      bool dryRun,
-      ) async {
+    VersionUpdate update,
+    Directory projectDir,
+    bool dryRun,
+  ) async {
     stdout.writeln(
       '\n📦 Processing version update: ${update.fromPattern} → ${update.toPattern}',
     );
@@ -429,10 +429,10 @@ class MigrateCommand {
   }
 
   static Future<List<File>> _findFilesWithPattern(
-      Directory projectDir,
-      String pattern,
-      List<String> targetExtensions,
-      ) async {
+    Directory projectDir,
+    String pattern,
+    List<String> targetExtensions,
+  ) async {
     final files = <File>[];
 
     await for (final entity in projectDir.list(recursive: true)) {
@@ -451,10 +451,10 @@ class MigrateCommand {
   }
 
   static Future<void> _updateFileVersion(
-      File file,
-      VersionUpdate update,
-      bool dryRun,
-      ) async {
+    File file,
+    VersionUpdate update,
+    bool dryRun,
+  ) async {
     try {
       final content = await file.readAsString();
       String newContent;
@@ -483,18 +483,18 @@ class MigrateCommand {
   }
 
   static Future<void> _executeMethod(
-      RefactorMethod method,
-      Directory projectDir,
-      bool dryRun,
-      ) async {
+    RefactorMethod method,
+    Directory projectDir,
+    bool dryRun,
+  ) async {
     await _walkAndProcessFiles(projectDir, method, dryRun);
   }
 
   static Future<void> _walkAndProcessFiles(
-      Directory dirPath,
-      RefactorMethod method,
-      bool dryRun,
-      ) async {
+    Directory dirPath,
+    RefactorMethod method,
+    bool dryRun,
+  ) async {
     if (_isIgnored(dirPath.path, method.ignoredDirs)) {
       return;
     }
@@ -519,10 +519,10 @@ class MigrateCommand {
   }
 
   static Future<void> _processFile(
-      File file,
-      RefactorMethod method,
-      bool dryRun,
-      ) async {
+    File file,
+    RefactorMethod method,
+    bool dryRun,
+  ) async {
     if (_isIgnored(file.path, method.ignoredDirs)) {
       return;
     }
@@ -578,9 +578,9 @@ class MigrateCommand {
   }
 
   static String _contextAwareReplace(
-      String content,
-      SearchReplace searchReplace,
-      ) {
+    String content,
+    SearchReplace searchReplace,
+  ) {
     // More sophisticated context-aware replacement
     var result = content;
     var offset = 0;

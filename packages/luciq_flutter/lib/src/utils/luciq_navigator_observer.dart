@@ -19,7 +19,8 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   final List<LuciqRoute> _steps = [];
 
   void screenChanged(Route newRoute) {
-    SchedulerBinding.instance.scheduleTask(() async {
+    //// ignore: invalid_null_aware_operator
+    SchedulerBinding.instance?.scheduleTask(() async {
       try {
         final rawScreenName = newRoute.settings.name.toString().trim();
         final screenName = rawScreenName.isEmpty
@@ -66,7 +67,7 @@ class LuciqNavigatorObserver extends NavigatorObserver {
         LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
         LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
       }
-    }, Priority.idle);
+    }, Priority.idle,);
   }
 
   Future<void> reportScreenChange(String name) async {

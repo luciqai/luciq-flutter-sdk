@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.0.0...18.2.1) 
+## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
 
 ### Added
 
@@ -11,6 +11,54 @@
     - Support for up to 100 concurrent spans
     - Comprehensive validation (name length, empty checks, timestamp validation)
     - Feature flag support to enable/disable custom spans
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.5.1 ([#48](https://github.com/luciqai/luciq-flutter-sdk/pull/48)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.5.1).
+
+- Bump Luciq Android SDK to v19.4.0 ([#48](https://github.com/luciqai/luciq-flutter-sdk/pull/48)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.4.0).
+
+## [19.3.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.3.0...19.2.2) (March 9, 2026)
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.5.0 ([#42](https://github.com/luciqai/luciq-flutter-sdk/pull/42)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.5.0).
+
+- Bump Luciq Android SDK to v19.3.0 ([#42](https://github.com/luciqai/luciq-flutter-sdk/pull/42)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.3.0).
+
+## [19.2.2] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.2...19.2.1) (February 24, 2026)
+
+### Added
+
+- Allow identification with nullable email. ([#40](https://github.com/luciqai/luciq-flutter-sdk/pull/40)).
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.4.1 ([#41](https://github.com/luciqai/luciq-flutter-sdk/pull/41)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.4.1).
+
+- Bump Luciq Android SDK to v19.2.2 ([#41](https://github.com/luciqai/luciq-flutter-sdk/pull/41)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.4.1).
+
+
+## [19.2.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.1...19.1.0) (January 28, 2026)
+
+### Added
+
+- Add new UserConsentActionType - noAutomaticBugGrouping.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.4.0 ([#36](https://github.com/luciqai/luciq-flutter-sdk/pull/36)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.4.0).
+
+- Bump Luciq Android SDK to v19.2.1 ([#36](https://github.com/luciqai/luciq-flutter-sdk/pull/36)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.2.1).
+
+
+## [19.1.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.3.0 ([#33](https://github.com/luciqai/luciq-flutter-sdk/pull/33)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.3.0).
+
+- Bump Luciq Android SDK to v19.1.0 ([#33](https://github.com/luciqai/luciq-flutter-sdk/pull/33)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.1.0).
 
 ## [19.0.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.0.0...18.2.1) (December 16, 2025)
 

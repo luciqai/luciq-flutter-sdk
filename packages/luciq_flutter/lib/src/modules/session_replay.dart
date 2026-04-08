@@ -5,8 +5,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:luciq_flutter/src/generated/session_replay.api.g.dart';
 
-export 'package:luciq_flutter/src/generated/session_replay.api.g.dart'
-    show ScreenshotCapturingMode, ScreenshotQualityMode;
+enum ScreenshotCapturingMode {
+  navigation,
+  interaction,
+  frequency,
+}
+
+enum ScreenshotQualityMode {
+  normal,
+  high,
+  greyScale,
+}
 
 class SessionReplay {
   static var _host = SessionReplayHostApi();
@@ -95,7 +104,7 @@ class SessionReplay {
   static Future<void> setScreenshotCapturingMode(
     ScreenshotCapturingMode mode,
   ) async {
-    return _host.setScreenshotCapturingMode(mode);
+    return _host.setScreenshotCapturingMode(mode.toString());
   }
 
   /// Sets the capture interval for Frequency mode.
@@ -159,6 +168,6 @@ class SessionReplay {
   static Future<void> setScreenshotQualityMode(
     ScreenshotQualityMode mode,
   ) async {
-    return _host.setScreenshotQualityMode(mode);
+    return _host.setScreenshotQualityMode(mode.toString());
   }
 }

@@ -3,8 +3,7 @@ package ai.luciq.flutter.modules;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import ai.luciq.flutter.generated.SessionReplayPigeon;
-import ai.luciq.library.sessionreplay.CapturingMode;
-import ai.luciq.library.sessionreplay.ScreenshotQuality;
+import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.library.sessionreplay.SessionReplay;
 import io.flutter.plugin.common.BinaryMessenger;
 
@@ -41,23 +40,8 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
     }
 
     @Override
-    public void setScreenshotCapturingMode(@NonNull SessionReplayPigeon.ScreenshotCapturingMode mode) {
-        final int capturingMode;
-        switch (mode) {
-            case NAVIGATION:
-                capturingMode = CapturingMode.NAVIGATION;
-                break;
-            case INTERACTION:
-                capturingMode = CapturingMode.INTERACTIONS;
-                break;
-            case FREQUENCY:
-                capturingMode = CapturingMode.FREQUENCY;
-                break;
-            default:
-                Log.e("SessionReplayApi", "Unknown ScreenshotCapturingMode: " + mode);
-                return;
-        }
-
+    public void setScreenshotCapturingMode(@NonNull String mode) {
+        final int capturingMode = ArgsRegistry.screenshotCapturingModes.get(mode);
         SessionReplay.setCapturingMode(capturingMode);
     }
 
@@ -71,23 +55,8 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
     }
 
     @Override
-    public void setScreenshotQualityMode(@NonNull SessionReplayPigeon.ScreenshotQualityMode mode) {
-        final int quality;
-        switch (mode) {
-            case NORMAL:
-                quality = ScreenshotQuality.NORMAL;
-                break;
-            case HIGH:
-                quality = ScreenshotQuality.HIGH;
-                break;
-            case GREY_SCALE:
-                quality = ScreenshotQuality.GREYSCALE;
-                break;
-            default:
-                Log.e("SessionReplayApi", "Unknown ScreenshotQualityMode: " + mode);
-                return;
-        }
-
+    public void setScreenshotQualityMode(@NonNull String mode) {
+        final int quality = ArgsRegistry.screenshotQualityModes.get(mode);
         SessionReplay.setScreenshotQuality(quality);
     }
 

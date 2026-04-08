@@ -73,7 +73,9 @@ void main() {
     );
 
     verify(
-      mHost.setScreenshotCapturingMode(ScreenshotCapturingMode.frequency),
+      mHost.setScreenshotCapturingMode(
+        ScreenshotCapturingMode.frequency.toString(),
+      ),
     ).called(1);
   });
 
@@ -120,7 +122,9 @@ void main() {
     );
 
     verify(
-      mHost.setScreenshotQualityMode(ScreenshotQualityMode.greyScale),
+      mHost.setScreenshotQualityMode(
+        ScreenshotQualityMode.greyScale.toString(),
+      ),
     ).called(1);
   });
 }

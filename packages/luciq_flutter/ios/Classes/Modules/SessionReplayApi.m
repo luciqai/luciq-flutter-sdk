@@ -2,6 +2,7 @@
 #import <LuciqSDK/LuciqSDK.h>
 #import <LuciqSDK/LCQSessionReplay.h>
 #import "SessionReplayApi.h"
+#import "ArgsRegistry.h"
 
 extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
     SessionReplayApi *api = [[SessionReplayApi alloc] init];
@@ -31,24 +32,8 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
     completion(link, nil);
 }
 
-- (void)setScreenshotCapturingModeMode:(ScreenshotCapturingMode)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    LCQScreenshotCapturingMode nativeMode;
-    switch (mode) {
-        case ScreenshotCapturingModeNavigation:
-            nativeMode = LCQScreenshotCapturingModeNavigation;
-            break;
-        case ScreenshotCapturingModeInteraction:
-            nativeMode = LCQScreenshotCapturingModeInteraction;
-            break;
-        case ScreenshotCapturingModeFrequency:
-            nativeMode = LCQScreenshotCapturingModeFrequency;
-            break;
-        default:
-            *error = [FlutterError errorWithCode:@"INVALID_CAPTURING_MODE"
-                                         message:[NSString stringWithFormat:@"Unknown ScreenshotCapturingMode: %lu", (unsigned long)mode]
-                                         details:nil];
-            return;
-    }
+- (void)setScreenshotCapturingModeMode:(NSString *)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    LCQScreenshotCapturingMode nativeMode = (ArgsRegistry.screenshotCapturingModes[mode]).integerValue;
     LCQSessionReplay.screenshotCapturingMode = nativeMode;
 }
 
@@ -62,24 +47,8 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
     LCQSessionReplay.screenshotCaptureInterval = [intervalMs integerValue];
 }
 
-- (void)setScreenshotQualityModeMode:(ScreenshotQualityMode)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    LCQScreenshotQualityMode nativeMode;
-    switch (mode) {
-        case ScreenshotQualityModeNormal:
-            nativeMode = LCQScreenshotQualityModeNormal;
-            break;
-        case ScreenshotQualityModeHigh:
-            nativeMode = LCQScreenshotQualityModeHigh;
-            break;
-        case ScreenshotQualityModeGreyScale:
-            nativeMode = LCQScreenshotQualityModeGreyScale;
-            break;
-        default:
-            *error = [FlutterError errorWithCode:@"INVALID_QUALITY_MODE"
-                                         message:[NSString stringWithFormat:@"Unknown ScreenshotQualityMode: %lu", (unsigned long)mode]
-                                         details:nil];
-            return;
-    }
+- (void)setScreenshotQualityModeMode:(NSString *)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    LCQScreenshotQualityMode nativeMode = (ArgsRegistry.screenshotQualityModes[mode]).integerValue;
     LCQSessionReplay.screenshotQualityMode = nativeMode;
 }
 

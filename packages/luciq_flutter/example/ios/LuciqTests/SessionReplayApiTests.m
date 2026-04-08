@@ -71,7 +71,7 @@
 - (void)testSetScreenshotCapturingModeNavigation {
     FlutterError *error;
 
-    [self.api setScreenshotCapturingModeMode:ScreenshotCapturingModeNavigation error:&error];
+    [self.api setScreenshotCapturingModeMode:@"ScreenshotCapturingMode.navigation" error:&error];
 
     OCMVerify([self.mSessionReplay setScreenshotCapturingMode:LCQScreenshotCapturingModeNavigation]);
 }
@@ -79,7 +79,7 @@
 - (void)testSetScreenshotCapturingModeInteraction {
     FlutterError *error;
 
-    [self.api setScreenshotCapturingModeMode:ScreenshotCapturingModeInteraction error:&error];
+    [self.api setScreenshotCapturingModeMode:@"ScreenshotCapturingMode.interaction" error:&error];
 
     OCMVerify([self.mSessionReplay setScreenshotCapturingMode:LCQScreenshotCapturingModeInteraction]);
 }
@@ -87,7 +87,7 @@
 - (void)testSetScreenshotCapturingModeFrequency {
     FlutterError *error;
 
-    [self.api setScreenshotCapturingModeMode:ScreenshotCapturingModeFrequency error:&error];
+    [self.api setScreenshotCapturingModeMode:@"ScreenshotCapturingMode.frequency" error:&error];
 
     OCMVerify([self.mSessionReplay setScreenshotCapturingMode:LCQScreenshotCapturingModeFrequency]);
 }
@@ -104,7 +104,7 @@
 - (void)testSetScreenshotQualityModeNormal {
     FlutterError *error;
 
-    [self.api setScreenshotQualityModeMode:ScreenshotQualityModeNormal error:&error];
+    [self.api setScreenshotQualityModeMode:@"ScreenshotQualityMode.normal" error:&error];
 
     OCMVerify([self.mSessionReplay setScreenshotQualityMode:LCQScreenshotQualityModeNormal]);
 }
@@ -112,7 +112,7 @@
 - (void)testSetScreenshotQualityModeHigh {
     FlutterError *error;
 
-    [self.api setScreenshotQualityModeMode:ScreenshotQualityModeHigh error:&error];
+    [self.api setScreenshotQualityModeMode:@"ScreenshotQualityMode.high" error:&error];
 
     OCMVerify([self.mSessionReplay setScreenshotQualityMode:LCQScreenshotQualityModeHigh]);
 }
@@ -120,7 +120,7 @@
 - (void)testSetScreenshotQualityModeGreyScale {
     FlutterError *error;
 
-    [self.api setScreenshotQualityModeMode:ScreenshotQualityModeGreyScale error:&error];
+    [self.api setScreenshotQualityModeMode:@"ScreenshotQualityMode.greyScale" error:&error];
 
     OCMVerify([self.mSessionReplay setScreenshotQualityMode:LCQScreenshotQualityModeGreyScale]);
 }

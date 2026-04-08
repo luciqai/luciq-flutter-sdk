@@ -84,10 +84,12 @@ void main() {
         final span = await manager.startCustomSpan('Test Span');
 
         expect(span, isNull);
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanSDKNotInitializedMessage,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanSDKNotInitializedMessage,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('returns null and logs when APM disabled', () async {
@@ -97,10 +99,12 @@ void main() {
         final span = await manager.startCustomSpan('Test Span');
 
         expect(span, isNull);
-        verify(mLuciqLogger.d(
-          LuciqStrings.customSpanAPMDisabledMessage,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.d(
+            LuciqStrings.customSpanAPMDisabledMessage,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('returns null and logs when custom span feature disabled', () async {
@@ -111,30 +115,36 @@ void main() {
         final span = await manager.startCustomSpan('Test Span');
 
         expect(span, isNull);
-        verify(mLuciqLogger.d(
-          LuciqStrings.customSpanDisabled,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.d(
+            LuciqStrings.customSpanDisabled,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('returns null and logs error for empty name', () async {
         final span = await manager.startCustomSpan('');
 
         expect(span, isNull);
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanNameEmpty,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanNameEmpty,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('returns null and logs error for whitespace-only name', () async {
         final span = await manager.startCustomSpan('   ');
 
         expect(span, isNull);
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanNameEmpty,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanNameEmpty,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('trims whitespace from name', () async {
@@ -156,10 +166,12 @@ void main() {
         final span = await manager.startCustomSpan(longName);
 
         expect(span?.name.length, 150);
-        verify(mLuciqLogger.d(
-          LuciqStrings.customSpanNameTruncated,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.d(
+            LuciqStrings.customSpanNameTruncated,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('accepts name exactly 150 characters without logging truncation',
@@ -172,10 +184,12 @@ void main() {
         final span = await manager.startCustomSpan(exactName);
 
         expect(span?.name.length, 150);
-        verifyNever(mLuciqLogger.d(
-          LuciqStrings.customSpanNameTruncated,
-          tag: anyNamed('tag'),
-        ),);
+        verifyNever(
+          mLuciqLogger.d(
+            LuciqStrings.customSpanNameTruncated,
+            tag: anyNamed('tag'),
+          ),
+        );
       });
 
       test('accepts special characters in name', () async {
@@ -232,10 +246,12 @@ void main() {
         final extraSpan = await manager.startCustomSpan('Extra Span');
 
         expect(extraSpan, isNull);
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanLimitReached,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanLimitReached,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('allows new span after ending one when at limit', () async {
@@ -306,11 +322,13 @@ void main() {
 
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
-        verify(mHost.syncCustomSpan(
-          'Test Span',
-          start.microsecondsSinceEpoch,
-          end.microsecondsSinceEpoch,
-        ),).called(1);
+        verify(
+          mHost.syncCustomSpan(
+            'Test Span',
+            start.microsecondsSinceEpoch,
+            end.microsecondsSinceEpoch,
+          ),
+        ).called(1);
       });
 
       test('logs error when SDK not initialized', () async {
@@ -320,10 +338,12 @@ void main() {
 
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanSDKNotInitializedMessage,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanSDKNotInitializedMessage,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs when APM disabled', () async {
@@ -334,10 +354,12 @@ void main() {
 
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
-        verify(mLuciqLogger.d(
-          LuciqStrings.customSpanAPMDisabledMessage,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.d(
+            LuciqStrings.customSpanAPMDisabledMessage,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs when custom span feature disabled', () async {
@@ -349,10 +371,12 @@ void main() {
 
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
-        verify(mLuciqLogger.d(
-          LuciqStrings.customSpanDisabled,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.d(
+            LuciqStrings.customSpanDisabled,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs error for empty name', () async {
@@ -361,10 +385,12 @@ void main() {
 
         await manager.addCompletedCustomSpan('', start, end);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanNameEmpty,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanNameEmpty,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs error for whitespace-only name', () async {
@@ -373,10 +399,12 @@ void main() {
 
         await manager.addCompletedCustomSpan('   ', start, end);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanNameEmpty,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanNameEmpty,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs error when end time equals start time', () async {
@@ -384,10 +412,12 @@ void main() {
 
         await manager.addCompletedCustomSpan('Test Span', sameTime, sameTime);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanEndTimeBeforeStartTime,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanEndTimeBeforeStartTime,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs error when end time before start time', () async {
@@ -396,10 +426,12 @@ void main() {
 
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanEndTimeBeforeStartTime,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanEndTimeBeforeStartTime,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('trims whitespace from name', () async {
@@ -411,11 +443,13 @@ void main() {
 
         await manager.addCompletedCustomSpan('  Test Span  ', start, end);
 
-        verify(mHost.syncCustomSpan(
-          'Test Span',
-          start.microsecondsSinceEpoch,
-          end.microsecondsSinceEpoch,
-        ),).called(1);
+        verify(
+          mHost.syncCustomSpan(
+            'Test Span',
+            start.microsecondsSinceEpoch,
+            end.microsecondsSinceEpoch,
+          ),
+        ).called(1);
       });
     });
 
@@ -423,28 +457,34 @@ void main() {
       test('logs error for empty name', () async {
         await manager.syncCustomSpan('', 1000, 2000);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanNameEmpty,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanNameEmpty,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs error when end timestamp equals start timestamp', () async {
         await manager.syncCustomSpan('Test', 1000, 1000);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanEndTimeBeforeStartTime,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanEndTimeBeforeStartTime,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs error when end timestamp before start timestamp', () async {
         await manager.syncCustomSpan('Test', 2000, 1000);
 
-        verify(mLuciqLogger.e(
-          LuciqStrings.customSpanEndTimeBeforeStartTime,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
+        verify(
+          mLuciqLogger.e(
+            LuciqStrings.customSpanEndTimeBeforeStartTime,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
       });
 
       test('logs when name is truncated', () async {
@@ -452,15 +492,19 @@ void main() {
 
         await manager.syncCustomSpan(longName, 1000, 2000);
 
-        verify(mLuciqLogger.d(
-          LuciqStrings.customSpanNameTruncated,
-          tag: CustomSpanManager.tag,
-        ),).called(1);
-        verify(mHost.syncCustomSpan(
-          argThat(hasLength(150)),
-          1000,
-          2000,
-        ),).called(1);
+        verify(
+          mLuciqLogger.d(
+            LuciqStrings.customSpanNameTruncated,
+            tag: CustomSpanManager.tag,
+          ),
+        ).called(1);
+        verify(
+          mHost.syncCustomSpan(
+            argThat(hasLength(150)),
+            1000,
+            2000,
+          ),
+        ).called(1);
       });
 
       test('sends valid inputs to native', () async {

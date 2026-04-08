@@ -36,7 +36,8 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
     }
   }
 
-  Future<void> _startMultipleSpans({int numberOfSpans = 5 , bool haveSameName = true}) async {
+  Future<void> _startMultipleSpans(
+      {int numberOfSpans = 5, bool haveSameName = true}) async {
     final spansList = <CustomSpan>[];
     for (var i = 1; i <= numberOfSpans; i++) {
       final name = haveSameName ? 'span' : 'span $i';
@@ -167,15 +168,14 @@ class _CustomSpansPageState extends State<CustomSpansPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: _activeSpans.entries
-                  .map((entry) =>
-                  Card(
-                    child: ListTile(
-                      title: Text(entry.key),
-                      subtitle: const Text('Click to end span'),
-                      trailing: const Icon(Icons.stop_circle_outlined),
-                      onTap: () => _endSpan(entry.key),
-                    ),
-                  ))
+                  .map((entry) => Card(
+                        child: ListTile(
+                          title: Text(entry.key),
+                          subtitle: const Text('Click to end span'),
+                          trailing: const Icon(Icons.stop_circle_outlined),
+                          onTap: () => _endSpan(entry.key),
+                        ),
+                      ))
                   .toList(),
             ),
           ),

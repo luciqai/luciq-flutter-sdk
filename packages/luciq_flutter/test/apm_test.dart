@@ -391,11 +391,13 @@ void main() {
 
       await APM.addCompletedCustomSpan('Test Span', start, end);
 
-      verify(mHost.syncCustomSpan(
-        'Test Span',
-        start.microsecondsSinceEpoch,
-        end.microsecondsSinceEpoch,
-      ),).called(1);
+      verify(
+        mHost.syncCustomSpan(
+          'Test Span',
+          start.microsecondsSinceEpoch,
+          end.microsecondsSinceEpoch,
+        ),
+      ).called(1);
     });
   });
 }

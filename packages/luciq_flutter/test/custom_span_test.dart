@@ -90,11 +90,13 @@ void main() {
         final span = CustomSpan('Test Span');
         await span.end();
 
-        verify(mockHost.syncCustomSpan(
-          'Test Span',
-          startTime,
-          1500000, // startTime + 500000 duration
-        ),).called(1);
+        verify(
+          mockHost.syncCustomSpan(
+            'Test Span',
+            startTime,
+            1500000, // startTime + 500000 duration
+          ),
+        ).called(1);
 
         expect(span.toString(), contains('hasEnded: true'));
         expect(span.toString(), contains('duration: 500000'));
@@ -163,11 +165,13 @@ void main() {
         final span = CustomSpan('Long Span');
         await span.end();
 
-        verify(mockHost.syncCustomSpan(
-          'Long Span',
-          startTime,
-          startTime + 3600000000,
-        ),).called(1);
+        verify(
+          mockHost.syncCustomSpan(
+            'Long Span',
+            startTime,
+            startTime + 3600000000,
+          ),
+        ).called(1);
       });
 
       test('unregisters span from CustomSpanManager active spans', () async {

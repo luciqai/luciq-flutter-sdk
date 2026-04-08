@@ -109,21 +109,21 @@ public class SessionReplayApiTest {
 
     @Test
     public void testSetScreenshotCapturingModeNavigation() {
-        api.setScreenshotCapturingMode(SessionReplayPigeon.ScreenshotCapturingMode.NAVIGATION);
+        api.setScreenshotCapturingMode("ScreenshotCapturingMode.navigation");
 
         mSessionReplay.verify(() -> SessionReplay.setCapturingMode(CapturingMode.NAVIGATION));
     }
 
     @Test
     public void testSetScreenshotCapturingModeInteraction() {
-        api.setScreenshotCapturingMode(SessionReplayPigeon.ScreenshotCapturingMode.INTERACTION);
+        api.setScreenshotCapturingMode("ScreenshotCapturingMode.interaction");
 
         mSessionReplay.verify(() -> SessionReplay.setCapturingMode(CapturingMode.INTERACTIONS));
     }
 
     @Test
     public void testSetScreenshotCapturingModeFrequency() {
-        api.setScreenshotCapturingMode(SessionReplayPigeon.ScreenshotCapturingMode.FREQUENCY);
+        api.setScreenshotCapturingMode("ScreenshotCapturingMode.frequency");
 
         mSessionReplay.verify(() -> SessionReplay.setCapturingMode(CapturingMode.FREQUENCY));
     }
@@ -142,21 +142,21 @@ public class SessionReplayApiTest {
 
     @Test
     public void testSetScreenshotQualityModeNormal() {
-        api.setScreenshotQualityMode(SessionReplayPigeon.ScreenshotQualityMode.NORMAL);
+        api.setScreenshotQualityMode("ScreenshotQualityMode.normal");
 
         mSessionReplay.verify(() -> SessionReplay.setScreenshotQuality(ScreenshotQuality.NORMAL));
     }
 
     @Test
     public void testSetScreenshotQualityModeHigh() {
-        api.setScreenshotQualityMode(SessionReplayPigeon.ScreenshotQualityMode.HIGH);
+        api.setScreenshotQualityMode("ScreenshotQualityMode.high");
 
         mSessionReplay.verify(() -> SessionReplay.setScreenshotQuality(ScreenshotQuality.HIGH));
     }
 
     @Test
     public void testSetScreenshotQualityModeGreyScale() {
-        api.setScreenshotQualityMode(SessionReplayPigeon.ScreenshotQualityMode.GREY_SCALE);
+        api.setScreenshotQualityMode("ScreenshotQualityMode.greyScale");
 
         mSessionReplay.verify(() -> SessionReplay.setScreenshotQuality(ScreenshotQuality.GREYSCALE));
     }

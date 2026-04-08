@@ -1,5 +1,6 @@
 package ai.luciq.flutter.modules;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import ai.luciq.flutter.generated.SessionReplayPigeon;
 import ai.luciq.library.sessionreplay.CapturingMode;
@@ -53,11 +54,8 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
                 capturingMode = CapturingMode.FREQUENCY;
                 break;
             default:
-                throw new SessionReplayPigeon.FlutterError(
-                        "INVALID_CAPTURING_MODE",
-                        "Unknown ScreenshotCapturingMode: " + mode,
-                        mode
-                );
+                Log.e("SessionReplayApi", "Unknown ScreenshotCapturingMode: " + mode);
+                return;
         }
 
         SessionReplay.setCapturingMode(capturingMode);
@@ -66,11 +64,8 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
     @Override
     public void setScreenshotCaptureInterval(@NonNull Long intervalMs) {
         if (intervalMs < 500L) {
-            throw new SessionReplayPigeon.FlutterError(
-                    "INVALID_CAPTURE_INTERVAL",
-                    "intervalMs must be >= 500 on Android",
-                    intervalMs
-            );
+            Log.e("SessionReplayApi", "intervalMs must be >= 500 on Android");
+            return;
         }
         SessionReplay.setScreenshotCaptureInterval(intervalMs.intValue());
     }
@@ -89,11 +84,8 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
                 quality = ScreenshotQuality.GREYSCALE;
                 break;
             default:
-                throw new SessionReplayPigeon.FlutterError(
-                        "INVALID_QUALITY_MODE",
-                        "Unknown ScreenshotQualityMode: " + mode,
-                        mode
-                );
+                Log.e("SessionReplayApi", "Unknown ScreenshotQualityMode: " + mode);
+                return;
         }
 
         SessionReplay.setScreenshotQuality(quality);

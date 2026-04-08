@@ -135,9 +135,11 @@ public class SessionReplayApiTest {
         mSessionReplay.verify(() -> SessionReplay.setScreenshotCaptureInterval(1000));
     }
 
-    @Test(expected = SessionReplayPigeon.FlutterError.class)
+    @Test
     public void testSetScreenshotCaptureIntervalBelowMinimum() {
         api.setScreenshotCaptureInterval(499L);
+
+        mSessionReplay.verifyNoInteractions();
     }
 
     @Test

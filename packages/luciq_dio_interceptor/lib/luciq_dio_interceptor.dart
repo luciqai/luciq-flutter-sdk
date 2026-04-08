@@ -70,7 +70,7 @@ class LuciqDioInterceptor extends Interceptor {
     response.headers
         .forEach((name, value) => responseHeaders[name] = value.join(', '));
 
-    var responseContentType = responseHeaders['content-type'] ?? '';
+    final responseContentType = responseHeaders['content-type'] ?? '';
 
     var requestBodySize = 0;
     if (response.requestOptions.headers.containsKey('content-length')) {

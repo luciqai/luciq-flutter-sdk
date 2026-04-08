@@ -44,6 +44,7 @@ part 'src/screens/screen_capture_premature_extension_page.dart';
 part 'src/screens/screen_loading_page.dart';
 part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
+part 'src/screens/custom_spans_page.dart';
 
 void main() {
   runZonedGuarded(

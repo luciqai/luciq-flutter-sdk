@@ -1,5 +1,6 @@
 // Models
 export 'src/models/crash_data.dart';
+export 'src/models/custom_span.dart' show CustomSpan;
 export 'src/models/exception_data.dart';
 export 'src/models/feature_flag.dart';
 export 'src/models/network_data.dart';

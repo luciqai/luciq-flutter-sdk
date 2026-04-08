@@ -18,6 +18,8 @@ import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.invocation.util.LuciqFloatingButtonEdge;
 import ai.luciq.library.invocation.util.LuciqVideoRecordingButtonPosition;
 import ai.luciq.library.model.StepType;
+import ai.luciq.library.sessionreplay.CapturingMode;
+import ai.luciq.library.sessionreplay.ScreenshotQuality;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
 
 import java.util.HashMap;
@@ -222,6 +224,18 @@ public final class ArgsRegistry {
         put("CustomTextPlaceHolderKey.screenRecording", Key.CHATS_TYPE_VIDEO);
         put("CustomTextPlaceHolderKey.messagesNotificationAndOthers", Key.CHATS_MULTIPLE_MESSAGE_NOTIFICATION);
         put("CustomTextPlaceHolderKey.insufficientContentMessage", Key.COMMENT_FIELD_INSUFFICIENT_CONTENT);
+    }};
+
+    public static final ArgsMap<Integer> screenshotCapturingModes = new ArgsMap<Integer>() {{
+        put("ScreenshotCapturingMode.navigation", CapturingMode.NAVIGATION);
+        put("ScreenshotCapturingMode.interaction", CapturingMode.INTERACTIONS);
+        put("ScreenshotCapturingMode.frequency", CapturingMode.FREQUENCY);
+    }};
+
+    public static final ArgsMap<Integer> screenshotQualityModes = new ArgsMap<Integer>() {{
+        put("ScreenshotQualityMode.normal", ScreenshotQuality.NORMAL);
+        put("ScreenshotQualityMode.high", ScreenshotQuality.HIGH);
+        put("ScreenshotQualityMode.greyScale", ScreenshotQuality.GREYSCALE);
     }};
 
     public static final ArgsMap<String> gestureStepType = new ArgsMap<String>() {{

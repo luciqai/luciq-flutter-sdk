@@ -4,6 +4,34 @@
 
 ### Added
 
+- **Session Replay Screenshot Quality Control:** New API to adjust the visual quality of captured screenshots.
+
+  ```dart
+  // Available quality options:
+  // - ScreenshotQualityMode.normal (default) - 25% WebP compression, balanced size/quality
+  // - ScreenshotQualityMode.high - 50% WebP compression, better clarity
+  // - ScreenshotQualityMode.greyScale - 25% WebP compression, reduced color data
+  SessionReplay.setScreenshotQualityMode(ScreenshotQualityMode.normal);
+  ```
+
+- **Video-like Session Replay (Experimental):** Capture screenshots based on user interactions or at fixed intervals for a video-like playback experience.
+
+  > **Warning:** Video-like Session Replay may capture sensitive UI unmasked in some cases. USE AT YOUR OWN DISCRETION TO PREVENT PII LEAKAGE. Opt in ONLY after validating masking/privacy in your app.
+
+  ```dart
+  // Set capturing mode
+  // - ScreenshotCapturingMode.navigation (default) - Captures on screen changes
+  // - ScreenshotCapturingMode.interaction - Captures on user interactions
+  // - ScreenshotCapturingMode.frequency - Captures at fixed intervals
+  SessionReplay.setScreenshotCapturingMode(ScreenshotCapturingMode.frequency);
+
+  // Set screenshot capture interval (only applies to ScreenshotCapturingMode.frequency)
+  // Value in milliseconds. Minimum: 500ms, Default: 1000ms
+  SessionReplay.setScreenshotCaptureInterval(500);
+  ```
+
+  > **Note:** On Android low-performance devices, only `ScreenshotCapturingMode.navigation` mode is available.
+  
 - **Custom Spans**: New feature to manually instrument code paths for performance tracking
     - `APM.startCustomSpan(name)` - Start a custom span and return a span object
     - `CustomSpan.end()` - End the span and report to SDK

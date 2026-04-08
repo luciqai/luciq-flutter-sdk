@@ -23,6 +23,9 @@ typedef NSDictionary<NSString *, NSNumber *> ArgsDictionary;
 + (ArgsDictionary *)locales;
 + (ArgsDictionary *)userStepsGesture;
 
++ (ArgsDictionary *)screenshotCapturingModes;
++ (ArgsDictionary *)screenshotQualityModes;
+
 + (NSDictionary<NSString *, NSString *> *)placeholders;
 + (ArgsDictionary *) userConsentActionTypes;
 

@@ -263,13 +263,18 @@ public class ApmApiTest {
     public void testIsEnabled() {
         boolean expected = true;
         ApmPigeon.Result<Boolean> result = spy(makeResult((actual) -> assertEquals(expected, actual)));
-        mInternalApmStatic.when(() -> InternalAPM._isFeatureEnabledCP(eq(APMFeature.SCREEN_LOADING), any(), any(FeatureAvailabilityCallback.class))).thenAnswer(invocation -> {
-            FeatureAvailabilityCallback callback = invocation.getArgument(1);
-            callback.invoke(expected);
-            return null;
-        });
+
+        mInternalApmStatic.when(() -> InternalAPM._isFeatureEnabledCP(any(), any(), any())).thenAnswer(
+                invocation -> {
+                    FeatureAvailabilityCallback callback = (FeatureAvailabilityCallback) invocation.getArguments()[2];
+                    callback.invoke(expected);
+                    return null;
+                });
 
         api.isEnabled(result);
+
+        mInternalApmStatic.verify(() -> InternalAPM._isFeatureEnabledCP(eq(APMFeature.APM), eq("APM"), any()));
+        mInternalApmStatic.verifyNoMoreInteractions();
 
         verify(result).success(expected);
     }
@@ -510,5 +515,92 @@ public class ApmApiTest {
 
         mInternalApmStatic.verify(() -> InternalAPM._endCustomUiTraceWithScreenRenderingCP(any()));
         mInternalApmStatic.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testIsCustomSpanEnabled() {
+        boolean expected = true;
+        ApmPigeon.Result<Boolean> result = spy(makeResult((actual) -> assertEquals(expected, actual)));
+
+        mInternalApmStatic.when(() -> InternalAPM._isFeatureEnabledCP(any(), any(), any())).thenAnswer(
+                invocation -> {
+                    FeatureAvailabilityCallback callback = (FeatureAvailabilityCallback) invocation.getArguments()[2];
+                    callback.invoke(expected);
+                    return null;
+                });
+
+        api.isCustomSpanEnabled(result);
+
+        mInternalApmStatic.verify(() -> InternalAPM._isFeatureEnabledCP(eq(APMFeature.CUSTOM_SPANS), eq("LuciqCustomSpan"), any()));
+        mInternalApmStatic.verifyNoMoreInteractions();
+
+        verify(result).success(expected);
+    }
+
+    @Test
+    public void testIsCustomSpanEnabledWhenDisabled() {
+        boolean expected = false;
+        ApmPigeon.Result<Boolean> result = spy(makeResult((actual) -> assertEquals(expected, actual)));
+
+        mInternalApmStatic.when(() -> InternalAPM._isFeatureEnabledCP(any(), any(), any())).thenAnswer(
+                invocation -> {
+                    FeatureAvailabilityCallback callback = (FeatureAvailabilityCallback) invocation.getArguments()[2];
+                    callback.invoke(expected);
+                    return null;
+                });
+
+        api.isCustomSpanEnabled(result);
+
+        mInternalApmStatic.verify(() -> InternalAPM._isFeatureEnabledCP(eq(APMFeature.CUSTOM_SPANS), eq("LuciqCustomSpan"), any()));
+        mInternalApmStatic.verifyNoMoreInteractions();
+
+        verify(result).success(expected);
+    }
+
+    @Test
+    public void testSyncCustomSpan() {
+        String name = "testSpan";
+        Long startTimestamp = 1000000L; // 1000 milliseconds (in microseconds)
+        Long endTimestamp = 2000000L;   // 2000 milliseconds (in microseconds)
+
+        api.syncCustomSpan(name, startTimestamp, endTimestamp);
+
+        // Verify APM.addCompletedCustomSpan is called with correct name and Date objects
+        // Timestamps are converted from microseconds to milliseconds (divided by 1000)
+        mAPM.verify(() -> APM.addCompletedCustomSpan(eq(name), any(java.util.Date.class), any(java.util.Date.class)));
+        mAPM.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testSyncCustomSpanWithDifferentValues() {
+        String name = "network-request";
+        Long startTimestamp = 5000000L; // 5000 milliseconds (in microseconds)
+        Long endTimestamp = 8000000L;   // 8000 milliseconds (in microseconds)
+
+        api.syncCustomSpan(name, startTimestamp, endTimestamp);
+
+        mAPM.verify(() -> APM.addCompletedCustomSpan(eq(name), any(java.util.Date.class), any(java.util.Date.class)));
+        mAPM.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void testSyncCustomSpanTimestampConversion() {
+        String name = "db-query";
+        Long startTimestampMicros = 1704067200000000L; // Some timestamp in microseconds
+        Long endTimestampMicros = 1704067200500000L;   // 500ms later in microseconds
+
+        // Expected millisecond values after conversion
+        long expectedStartMillis = startTimestampMicros / 1000;
+        long expectedEndMillis = endTimestampMicros / 1000;
+
+        api.syncCustomSpan(name, startTimestampMicros, endTimestampMicros);
+
+        // Verify the method was called - the Date conversion happens internally
+        mAPM.verify(() -> APM.addCompletedCustomSpan(
+                eq(name),
+                eq(new java.util.Date(expectedStartMillis)),
+                eq(new java.util.Date(expectedEndMillis))
+        ));
+        mAPM.verifyNoMoreInteractions();
     }
 }

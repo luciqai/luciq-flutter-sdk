@@ -24,4 +24,21 @@ plugins {
     id "org.jetbrains.kotlin.android" version "1.8.22" apply false
 }
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://storage.googleapis.com/download.flutter.io' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven {
+            url "https://mvn.luciq.ai/nexus/repository/luciq-internal/"
+            credentials {
+                username "luciq"
+                password System.getenv("LUCIQ_REPOSITORY_PASSWORD")
+            }
+        }
+    }
+}
+
 include ":app"

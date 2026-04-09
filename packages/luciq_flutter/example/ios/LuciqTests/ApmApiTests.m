@@ -512,4 +512,122 @@
     }]]);
 }
 
+#pragma mark - isCustomSpanEnabled Tests
+
+- (void)testIsCustomSpanEnabled {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Call completion handler"];
+
+    BOOL isCustomSpanEnabled = YES;
+    OCMStub([self.mAPM customSpansEnabled]).andReturn(isCustomSpanEnabled);
+
+    [self.api isCustomSpanEnabledWithCompletion:^(NSNumber *isEnabledNumber, FlutterError *error) {
+        [expectation fulfill];
+        
+        XCTAssertEqualObjects(isEnabledNumber, @(isCustomSpanEnabled));
+        XCTAssertNil(error);
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:5.0];
+}
+
+- (void)testIsCustomSpanEnabledWhenDisabled {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Call completion handler"];
+
+    BOOL isCustomSpanEnabled = NO;
+    OCMStub([self.mAPM customSpansEnabled]).andReturn(isCustomSpanEnabled);
+
+    [self.api isCustomSpanEnabledWithCompletion:^(NSNumber *isEnabledNumber, FlutterError *error) {
+        [expectation fulfill];
+        
+        XCTAssertEqualObjects(isEnabledNumber, @(isCustomSpanEnabled));
+        XCTAssertNil(error);
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:5.0];
+}
+
+#pragma mark - syncCustomSpan Tests
+
+- (void)testSyncCustomSpan {
+    NSString *spanName = @"custom-span-name";
+    NSNumber *startTimestamp = @(1000000); // 1 second in microseconds
+    NSNumber *endTimestamp = @(2000000);   // 2 seconds in microseconds
+    FlutterError *error;
+    
+    [self.api syncCustomSpanName:spanName startTimestamp:startTimestamp endTimestamp:endTimestamp error:&error];
+    
+    // Verify that addCompletedCustomSpanWithName was called with correct parameters
+    OCMVerify([self.mAPM addCompletedCustomSpanWithName:spanName
+                                             startDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        // 1000000 μs = 1 second
+        NSTimeInterval expectedInterval = 1000000.0 / 1e6;
+        return fabs([date timeIntervalSince1970] - expectedInterval) < 0.001;
+    }]
+                                               endDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        // 2000000 μs = 2 seconds
+        NSTimeInterval expectedInterval = 2000000.0 / 1e6;
+        return fabs([date timeIntervalSince1970] - expectedInterval) < 0.001;
+    }]]);
+}
+
+- (void)testSyncCustomSpanWithLargeTimestamps {
+    NSString *spanName = @"large-timestamp-span";
+    // Use realistic Unix timestamps in microseconds (e.g., Jan 1, 2024 00:00:00 UTC)
+    NSNumber *startTimestamp = @(1704067200000000.0); // 1704067200 seconds in microseconds
+    NSNumber *endTimestamp = @(1704067201000000.0);   // 1704067201 seconds in microseconds (1 second later)
+    FlutterError *error;
+    
+    [self.api syncCustomSpanName:spanName startTimestamp:startTimestamp endTimestamp:endTimestamp error:&error];
+    
+    // Verify that addCompletedCustomSpanWithName was called with correct parameters
+    OCMVerify([self.mAPM addCompletedCustomSpanWithName:spanName
+                                             startDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        NSTimeInterval expectedInterval = 1704067200.0;
+        return fabs([date timeIntervalSince1970] - expectedInterval) < 0.001;
+    }]
+                                               endDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        NSTimeInterval expectedInterval = 1704067201.0;
+        return fabs([date timeIntervalSince1970] - expectedInterval) < 0.001;
+    }]]);
+}
+
+- (void)testSyncCustomSpanWithZeroTimestamps {
+    NSString *spanName = @"zero-timestamp-span";
+    NSNumber *startTimestamp = @(0);
+    NSNumber *endTimestamp = @(500000); // 0.5 seconds in microseconds
+    FlutterError *error;
+    
+    [self.api syncCustomSpanName:spanName startTimestamp:startTimestamp endTimestamp:endTimestamp error:&error];
+    
+    // Verify that addCompletedCustomSpanWithName was called with correct parameters
+    OCMVerify([self.mAPM addCompletedCustomSpanWithName:spanName
+                                             startDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        return fabs([date timeIntervalSince1970] - 0.0) < 0.001;
+    }]
+                                               endDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        NSTimeInterval expectedInterval = 0.5;
+        return fabs([date timeIntervalSince1970] - expectedInterval) < 0.001;
+    }]]);
+}
+
+- (void)testSyncCustomSpanWithFractionalMicroseconds {
+    NSString *spanName = @"fractional-span";
+    NSNumber *startTimestamp = @(1500500.5); // 1.5005005 seconds in microseconds
+    NSNumber *endTimestamp = @(2750750.75);  // 2.75075075 seconds in microseconds
+    FlutterError *error;
+    
+    [self.api syncCustomSpanName:spanName startTimestamp:startTimestamp endTimestamp:endTimestamp error:&error];
+    
+    // Verify that addCompletedCustomSpanWithName was called with correct parameters
+    OCMVerify([self.mAPM addCompletedCustomSpanWithName:spanName
+                                             startDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        NSTimeInterval expectedInterval = 1500500.5 / 1e6;
+        return fabs([date timeIntervalSince1970] - expectedInterval) < 0.000001;
+    }]
+                                               endDate:[OCMArg checkWithBlock:^BOOL(NSDate *date) {
+        NSTimeInterval expectedInterval = 2750750.75 / 1e6;
+        return fabs([date timeIntervalSince1970] - expectedInterval) < 0.000001;
+    }]]);
+}
+
 @end

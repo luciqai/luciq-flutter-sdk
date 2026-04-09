@@ -1,7 +1,9 @@
 package ai.luciq.flutter.modules;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import ai.luciq.flutter.generated.SessionReplayPigeon;
+import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.library.sessionreplay.SessionReplay;
 import io.flutter.plugin.common.BinaryMessenger;
 
@@ -37,5 +39,25 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
         SessionReplay.getSessionReplayLink(result::success);
     }
 
+    @Override
+    public void setScreenshotCapturingMode(@NonNull String mode) {
+        final int capturingMode = ArgsRegistry.screenshotCapturingModes.get(mode);
+        SessionReplay.setCapturingMode(capturingMode);
+    }
+
+    @Override
+    public void setScreenshotCaptureInterval(@NonNull Long intervalMs) {
+        if (intervalMs < 500L) {
+            Log.e("SessionReplayApi", "intervalMs must be >= 500 on Android");
+            return;
+        }
+        SessionReplay.setScreenshotCaptureInterval(intervalMs.intValue());
+    }
+
+    @Override
+    public void setScreenshotQualityMode(@NonNull String mode) {
+        final int quality = ArgsRegistry.screenshotQualityModes.get(mode);
+        SessionReplay.setScreenshotQuality(quality);
+    }
 
 }

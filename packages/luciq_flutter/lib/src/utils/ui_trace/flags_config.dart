@@ -6,6 +6,7 @@ enum FlagsConfig {
   screenLoading,
   endScreenLoading,
   screenRendering,
+  customSpan,
 }
 
 extension FeatureExtensions on FlagsConfig {
@@ -21,6 +22,8 @@ extension FeatureExtensions on FlagsConfig {
         return APM.isEndScreenLoadingEnabled();
       case FlagsConfig.screenRendering:
         return APM.isScreenRenderEnabled();
+      case FlagsConfig.customSpan:
+        return APM.isCustomSpanEnabled();
       default:
         return false;
     }

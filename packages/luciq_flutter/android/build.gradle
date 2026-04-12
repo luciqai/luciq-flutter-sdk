@@ -17,9 +17,9 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
-        }
+       maven {
+ url "https://central.sonatype.com/repository/maven-snapshots/"
+}
     }
 }
 
@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:19.4.0'
+    api 'ai.luciq.library:luciq:19.4.0.7829140-SNAPSHOT'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

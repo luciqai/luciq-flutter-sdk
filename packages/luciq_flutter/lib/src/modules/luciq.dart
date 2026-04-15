@@ -212,6 +212,7 @@ class Luciq {
   }) async {
     $setup();
     LuciqLogger.I.logLevel = debugLogsLevel;
+    print("INIT");
     await _host.init(
       token,
       invocationEvents.mapToString(),

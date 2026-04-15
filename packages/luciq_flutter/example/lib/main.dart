@@ -51,6 +51,9 @@ void main() {
     () {
       WidgetsFlutterBinding.ensureInitialized();
 
+      SessionReplay.setScreenshotCaptureInterval(1000);
+      SessionReplay.setScreenshotQualityMode(ScreenshotQualityMode.greyScale);
+      SessionReplay.setScreenshotCapturingMode(ScreenshotCapturingMode.frequency);
       Luciq.init(
         token: '0174a800719ebdebf7b248fa6ae2ef17',
         invocationEvents: [InvocationEvent.floatingButton],
@@ -80,7 +83,7 @@ void main() {
       runApp(
         ChangeNotifierProvider(
           create: (_) => CallbackHandlersProvider(),
-          child: const MyApp(),
+          child: const  LuciqWidget(child:MyApp()),
         ),
       );
     },

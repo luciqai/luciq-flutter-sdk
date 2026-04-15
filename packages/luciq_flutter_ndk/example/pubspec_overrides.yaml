@@ -1,0 +1,4 @@
+# melos_managed_dependency_overrides: luciq_flutter_ndk
+dependency_overrides:
+  luciq_flutter_ndk:
+    path: ..

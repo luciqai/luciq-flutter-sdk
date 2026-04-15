@@ -166,6 +166,8 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
         try {
             final View view = activity.getWindow().getDecorView().getRootView();
 
+            Log.v("Screenshot","Screenshot captured  takeScreenshot"+(System.currentTimeMillis()));
+
             view.setDrawingCacheEnabled(true);
             final Bitmap bitmap = renderer.getBitmap();
             view.setDrawingCacheEnabled(false);

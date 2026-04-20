@@ -27,19 +27,19 @@ class MyInterceptor extends LuciqDioInterceptor {
   }
 
   @override
-  void onResponse(
+  Future<void> onResponse(
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
-  ) {
+  ) async {
     resposneCount++;
-    super.onResponse(response, handler);
+    await super.onResponse(response, handler);
   }
 
   @override
   // ignore: deprecated_member_use
-  void onError(DioError err, ErrorInterceptorHandler handler) {
+  Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
     errorCount++;
-    super.onError(err, handler);
+    await super.onError(err, handler);
   }
 }
 

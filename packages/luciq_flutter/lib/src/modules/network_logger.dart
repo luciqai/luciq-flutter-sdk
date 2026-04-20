@@ -74,6 +74,10 @@ class NetworkLogger {
   }
 
   Future<void> networkLog(NetworkData data) async {
+    LuciqLogger.I.d(
+      'networkLog received — ${data.method} ${data.url}',
+      tag: LuciqConstants.networkLoggerTag,
+    );
     final w3Header = await getW3CHeader(
       data.requestHeaders,
       data.startTime.millisecondsSinceEpoch,
@@ -82,13 +86,19 @@ class NetworkLogger {
         w3Header?.w3CGeneratedHeader != null) {
       data.requestHeaders['traceparent'] = w3Header?.w3CGeneratedHeader;
     }
-    networkLogInternal(data);
+    await networkLogInternal(data);
   }
 
   @internal
   Future<void> networkLogInternal(NetworkData data) async {
     final omit = await _manager.omitLog(data);
-    if (omit) return;
+    if (omit) {
+      LuciqLogger.I.d(
+        'networkLog omitted by callback — ${data.url}',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+      return;
+    }
 
     // Check size limits early to avoid processing large bodies
     final requestExceeds = await _manager.didRequestBodyExceedSizeLimit(data);
@@ -119,8 +129,34 @@ class NetworkLogger {
     }
 
     final obfuscated = await _manager.obfuscateLog(processedData);
-    await _host.networkLog(obfuscated.toJson());
-    await APM.networkLogAndroid(obfuscated);
+
+    // Dispatch to Bug Reporting and APM/Session Replay independently so a
+    // failure in one path cannot prevent the other from receiving the log.
+    try {
+      await _host.networkLog(obfuscated.toJson());
+      LuciqLogger.I.d(
+        'Bug Reporting log sent — ${obfuscated.url}',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    } catch (e, s) {
+      LuciqLogger.I.e(
+        'Bug Reporting log FAILED — ${obfuscated.url} — $e\n$s',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    }
+
+    try {
+      await APM.networkLogAndroid(obfuscated);
+      LuciqLogger.I.d(
+        'APM/Session Replay log sent — ${obfuscated.url}',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    } catch (e, s) {
+      LuciqLogger.I.e(
+        'APM/Session Replay log FAILED — ${obfuscated.url} — $e\n$s',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    }
   }
 
   @internal

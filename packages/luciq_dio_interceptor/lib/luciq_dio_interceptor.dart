@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 
 class LuciqDioInterceptor extends Interceptor {
+  static const String _tag = 'LuciqDioInterceptor';
   static final Map<int, NetworkData> _requests = <int, NetworkData>{};
   static final NetworkLogger _networklogger = NetworkLogger();
 
@@ -35,22 +37,40 @@ class LuciqDioInterceptor extends Interceptor {
   }
 
   @override
-  void onResponse(
+  Future<void> onResponse(
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
-  ) {
-    final data = _map(response);
-    _networklogger.networkLog(data);
+  ) async {
+    try {
+      final data = _map(response);
+      await _networklogger.networkLog(data);
+    } catch (e, s) {
+      // Logging must never disrupt the caller's request flow.
+      developer.log(
+        'Network logging failed in onResponse: $e\n$s',
+        name: _tag,
+        level: 1000,
+      );
+    }
     handler.next(response);
   }
 
   @override
   // Keep `DioError` instead of `DioException` for backward-compatibility, for now.
   // ignore: deprecated_member_use
-  void onError(DioError err, ErrorInterceptorHandler handler) {
+  Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
     if (err.response != null) {
-      final data = _map(err.response!);
-      _networklogger.networkLog(data);
+      try {
+        final data = _map(err.response!);
+        await _networklogger.networkLog(data);
+      } catch (e, s) {
+        // Logging must never disrupt the caller's error flow.
+        developer.log(
+          'Network logging failed in onError: $e\n$s',
+          name: _tag,
+          level: 1000,
+        );
+      }
     }
 
     handler.next(err);

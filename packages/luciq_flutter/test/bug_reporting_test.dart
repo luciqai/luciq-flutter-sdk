@@ -210,4 +210,32 @@ void main() {
 
     verify(mHost.setProactiveReportingConfigurations(true, 1, 1)).called(1);
   });
+
+  test(
+    '[setDidSelectPromptOptionHandler] should call host method on iOS and invoke callback',
+    () async {
+      when(mBuildInfo.isIOS).thenReturn(true);
+      String? received;
+
+      await BugReporting.setDidSelectPromptOptionHandler((promptOption) {
+        received = promptOption;
+      });
+
+      verify(mHost.bindOnDidSelectPromptOptionCallback()).called(1);
+
+      BugReporting().onDidSelectPromptOption('bug');
+      expect(received, 'bug');
+    },
+  );
+
+  test(
+    '[setDidSelectPromptOptionHandler] should not call host method on Android',
+    () async {
+      when(mBuildInfo.isIOS).thenReturn(false);
+
+      await BugReporting.setDidSelectPromptOptionHandler((_) {});
+
+      verifyNever(mHost.bindOnDidSelectPromptOptionCallback());
+    },
+  );
 }

@@ -117,6 +117,24 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     };
 }
 
+- (void)bindOnDidSelectPromptOptionCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
+    LCQBugReporting.didSelectPromptOptionHandler = ^(LCQPromptOption promptOption) {
+        NSString *promptOptionString;
+        if (promptOption == LCQPromptOptionBug) {
+            promptOptionString = @"bug";
+        } else if (promptOption == LCQPromptOptionFeedback) {
+            promptOptionString = @"feedback";
+        } else if (promptOption == LCQPromptOptionChat) {
+            promptOptionString = @"chat";
+        } else {
+            promptOptionString = @"none";
+        }
+        [self->_flutterApi onDidSelectPromptOptionPromptOption:promptOptionString
+                                                    completion:^(FlutterError *_Nullable _){
+                                                    }];
+    };
+}
+
 - (void)bindOnDismissCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
     LCQBugReporting.didDismissHandler = ^(LCQDismissType dismissType, LCQReportCategory reportType) {
       // Parse dismiss type enum

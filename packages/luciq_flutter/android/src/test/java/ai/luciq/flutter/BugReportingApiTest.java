@@ -177,6 +177,13 @@ public class BugReportingApiTest {
     }
 
     @Test
+    public void testBindOnDidSelectPromptOptionCallbackIsNoOpOnAndroid() {
+        api.bindOnDidSelectPromptOptionCallback();
+
+        mBugReporting.verifyNoInteractions();
+    }
+
+    @Test
     public void testSetDisclaimerText() {
         String text = "My very own disclaimer text";
 

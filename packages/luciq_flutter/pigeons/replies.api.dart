@@ -19,4 +19,11 @@ abstract class RepliesHostApi {
   bool hasChats();
 
   void bindOnNewReplyCallback();
+
+  void setPushNotificationsEnabled(bool isEnabled);
+  void setPushNotificationRegistrationTokenAndroid(String token);
+  void showNotificationAndroid(Map<String, String> data);
+  void setNotificationIconAndroid(int resourceId);
+  void setPushNotificationChannelIdAndroid(String id);
+  void setSystemReplyNotificationSoundEnabledAndroid(bool isEnabled);
 }

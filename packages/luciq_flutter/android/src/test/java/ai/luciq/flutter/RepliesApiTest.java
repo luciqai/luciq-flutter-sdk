@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -19,6 +20,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import io.flutter.plugin.common.BinaryMessenger;
 
@@ -125,5 +129,75 @@ public class RepliesApiTest {
         api.bindOnNewReplyCallback();
 
         mReplies.verify(() -> Replies.setOnNewReplyReceivedCallback(any(Runnable.class)));
+    }
+
+    @Test
+    public void testSetPushNotificationsEnabledGivenTrue() {
+        api.setPushNotificationsEnabled(true);
+
+        mReplies.verify(() -> Replies.setPushNotificationState(Feature.State.ENABLED));
+    }
+
+    @Test
+    public void testSetPushNotificationsEnabledGivenFalse() {
+        api.setPushNotificationsEnabled(false);
+
+        mReplies.verify(() -> Replies.setPushNotificationState(Feature.State.DISABLED));
+    }
+
+    @Test
+    public void testSetPushNotificationRegistrationTokenAndroid() {
+        String token = "fcm-token";
+
+        api.setPushNotificationRegistrationTokenAndroid(token);
+
+        mReplies.verify(() -> Replies.setPushNotificationRegistrationToken(token));
+    }
+
+    @Test
+    public void testShowNotificationAndroidWhenLuciqNotification() {
+        Map<String, String> data = new HashMap<>();
+        data.put("body", "hello");
+        mReplies.when(() -> Replies.isLuciqNotification(data)).thenReturn(true);
+
+        api.showNotificationAndroid(data);
+
+        mReplies.verify(() -> Replies.showNotification(data));
+    }
+
+    @Test
+    public void testShowNotificationAndroidWhenNotLuciqNotification() {
+        Map<String, String> data = new HashMap<>();
+        data.put("body", "hello");
+        mReplies.when(() -> Replies.isLuciqNotification(data)).thenReturn(false);
+
+        api.showNotificationAndroid(data);
+
+        mReplies.verify(() -> Replies.showNotification(data), never());
+    }
+
+    @Test
+    public void testSetNotificationIconAndroid() {
+        long resourceId = 42;
+
+        api.setNotificationIconAndroid(resourceId);
+
+        mReplies.verify(() -> Replies.setNotificationIcon((int) resourceId));
+    }
+
+    @Test
+    public void testSetPushNotificationChannelIdAndroid() {
+        String id = "channel-id";
+
+        api.setPushNotificationChannelIdAndroid(id);
+
+        mReplies.verify(() -> Replies.setPushNotificationChannelId(id));
+    }
+
+    @Test
+    public void testSetSystemReplyNotificationSoundEnabledAndroid() {
+        api.setSystemReplyNotificationSoundEnabledAndroid(true);
+
+        mReplies.verify(() -> Replies.setSystemReplyNotificationSoundEnabled(true));
     }
 }

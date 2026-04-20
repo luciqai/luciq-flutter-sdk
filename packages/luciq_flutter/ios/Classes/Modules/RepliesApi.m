@@ -48,4 +48,28 @@ extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
     };
 }
 
+- (void)setPushNotificationsEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    LCQReplies.pushNotificationsEnabled = [isEnabled boolValue];
+}
+
+- (void)setPushNotificationRegistrationTokenAndroidToken:(NSString *)token error:(FlutterError *_Nullable *_Nonnull)error {
+    // Android Only
+}
+
+- (void)showNotificationAndroidData:(NSDictionary<NSString *, NSString *> *)data error:(FlutterError *_Nullable *_Nonnull)error {
+    // Android Only
+}
+
+- (void)setNotificationIconAndroidResourceId:(NSNumber *)resourceId error:(FlutterError *_Nullable *_Nonnull)error {
+    // Android Only
+}
+
+- (void)setPushNotificationChannelIdAndroidId:(NSString *)id error:(FlutterError *_Nullable *_Nonnull)error {
+    // Android Only
+}
+
+- (void)setSystemReplyNotificationSoundEnabledAndroidIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    // Android Only
+}
+
 @end

@@ -39,4 +39,14 @@ void main() {
       mHost.setEmailFieldRequired(required, types.mapToString()),
     ).called(1);
   });
+
+  test('[setEnabled] should call host method', () async {
+    const enabled = true;
+
+    await FeatureRequests.setEnabled(enabled);
+
+    verify(
+      mHost.setEnabled(enabled),
+    ).called(1);
+  });
 }

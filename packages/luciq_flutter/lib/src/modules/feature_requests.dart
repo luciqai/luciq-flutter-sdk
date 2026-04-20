@@ -23,6 +23,12 @@ class FeatureRequests {
     return _host.show();
   }
 
+  /// Enables or disables the Feature Requests module.
+  /// [isEnabled] A boolean that enables or disables Feature Requests.
+  static Future<void> setEnabled(bool isEnabled) async {
+    return _host.setEnabled(isEnabled);
+  }
+
   /// Sets whether users are required to enter an email address or not when sending reports.
   /// Defaults to YES.
   /// [isRequired] A boolean to indicate whether email

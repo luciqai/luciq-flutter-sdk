@@ -804,4 +804,58 @@ public class LuciqApiTest {
         api.setNetworkAutoMaskingEnabled(isEnabled);
         mLuciq.verify(() -> Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED));
     }
+
+    @Test
+    public void testBindOnReportSubmitHandler() {
+        api.bindOnReportSubmitHandler();
+
+        mLuciq.verify(() -> Luciq.onReportSubmitHandler(any(ai.luciq.library.model.Report.OnReportCreatedListener.class)));
+    }
+
+    @Test
+    public void testReportMutatorsForwardToCurrentReport() {
+        ai.luciq.library.model.Report report = mock(ai.luciq.library.model.Report.class);
+        api.currentReport = report;
+
+        api.appendTagToReport("tag");
+        api.appendConsoleLogToReport("console");
+        api.setUserAttributeToReport("k", "v");
+        api.logDebugToReport("d");
+        api.logVerboseToReport("v");
+        api.logInfoToReport("i");
+        api.logWarnToReport("w");
+        api.logErrorToReport("e");
+        api.addFileAttachmentWithURLToReport("/path/f.txt", "f.txt");
+        api.addFileAttachmentWithDataToReport(new byte[]{1, 2, 3}, "bin");
+
+        verify(report).addTag("tag");
+        verify(report).appendToConsoleLogs("console");
+        verify(report).setUserAttribute("k", "v");
+        verify(report).logDebug("d");
+        verify(report).logVerbose("v");
+        verify(report).logInfo("i");
+        verify(report).logWarn("w");
+        verify(report).logError("e");
+        // Uri.parse() returns null under JUnit (no Android framework present),
+        // so we just verify the method ran with fileName passed through.
+        verify(report).addFileAttachment((android.net.Uri) isNull(), eq("f.txt"));
+        verify(report).addFileAttachment(any(byte[].class), eq("bin"));
+    }
+
+    @Test
+    public void testReportMutatorsAreNoOpWhenNoCurrentReport() {
+        api.currentReport = null;
+
+        // None of these should throw even when no report is present.
+        api.appendTagToReport("tag");
+        api.appendConsoleLogToReport("console");
+        api.setUserAttributeToReport("k", "v");
+        api.logDebugToReport("d");
+        api.logVerboseToReport("v");
+        api.logInfoToReport("i");
+        api.logWarnToReport("w");
+        api.logErrorToReport("e");
+        api.addFileAttachmentWithURLToReport("/path", "f.txt");
+        api.addFileAttachmentWithDataToReport(new byte[]{0}, "bin");
+    }
 }

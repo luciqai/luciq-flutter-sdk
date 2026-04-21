@@ -476,6 +476,67 @@ void main() {
     ).called(1);
   });
 
+  group('onReportSubmitHandler', () {
+    test('binds host handler', () async {
+      await Luciq.onReportSubmitHandler((_) {});
+
+      verify(mHost.bindOnReportSubmitHandler()).called(1);
+    });
+
+    test('Report mutators forward to host', () async {
+      final report = Report(host: mHost);
+
+      await report.appendTag('t');
+      await report.appendConsoleLog('c');
+      await report.setUserAttribute('k', 'v');
+      await report.logVerbose('v-log');
+      await report.logDebug('d-log');
+      await report.logInfo('i-log');
+      await report.logWarn('w-log');
+      await report.logError('e-log');
+      await report.addFileAttachmentWithURL('/path/f.txt', 'f.txt');
+      await report.addFileAttachmentWithData(Uint8List.fromList([1, 2, 3]), 'bin');
+
+      verify(mHost.appendTagToReport('t')).called(1);
+      verify(mHost.appendConsoleLogToReport('c')).called(1);
+      verify(mHost.setUserAttributeToReport('k', 'v')).called(1);
+      verify(mHost.logVerboseToReport('v-log')).called(1);
+      verify(mHost.logDebugToReport('d-log')).called(1);
+      verify(mHost.logInfoToReport('i-log')).called(1);
+      verify(mHost.logWarnToReport('w-log')).called(1);
+      verify(mHost.logErrorToReport('e-log')).called(1);
+      verify(
+        mHost.addFileAttachmentWithURLToReport('/path/f.txt', 'f.txt'),
+      ).called(1);
+      verify(
+        mHost.addFileAttachmentWithDataToReport(
+          argThat(
+            predicate<Uint8List>((b) => b.length == 3 && b[0] == 1 && b[2] == 3),
+          ),
+          'bin',
+        ),
+      ).called(1);
+
+      expect(report.tags, ['t']);
+      expect(report.consoleLogs, ['c']);
+      expect(report.userAttributes, {'k': 'v'});
+      expect(report.luciqLogs.length, 5);
+      expect(
+        report.luciqLogs.map((l) => l.type),
+        [
+          ReportLogLevel.verbose,
+          ReportLogLevel.debug,
+          ReportLogLevel.info,
+          ReportLogLevel.warn,
+          ReportLogLevel.error,
+        ],
+      );
+      expect(report.fileAttachments.length, 2);
+      expect(report.fileAttachments[0].isData, false);
+      expect(report.fileAttachments[1].isData, true);
+    });
+  });
+
   group('Disposal Manager', () {
     test('LuciqFlutterApi dispose should call widget binding observer dispose',
         () {

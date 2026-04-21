@@ -11,12 +11,21 @@
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
 
 extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
-    LuciqApi *api = [[LuciqApi alloc] init];
+    LuciqFlutterApi *flutterApi = [[LuciqFlutterApi alloc] initWithBinaryMessenger:messenger];
+    LuciqApi *api = [[LuciqApi alloc] initWithFlutterApi:flutterApi];
     LuciqHostApiSetup(messenger, api);
 }
 
 @implementation LuciqApi {
     NSMutableSet<NSString *> *_registeredFonts;
+}
+
+- (instancetype)initWithFlutterApi:(LuciqFlutterApi *)api {
+    self = [super init];
+    if (self) {
+        _flutterApi = api;
+    }
+    return self;
 }
 
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
@@ -615,6 +624,76 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
 - (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
+}
+
+#pragma mark - Pre-sending handler
+
+- (NSDictionary *)serializeReport:(LCQReport *)report {
+    return @{
+        @"tagsArray": report.tags ?: @[],
+        @"consoleLogs": report.consoleLogs ?: @[],
+        @"luciqLogs": report.luciqLogs ?: @[],
+        @"userAttributes": report.userAttributes ?: @{},
+        @"fileAttachments": report.fileLocations ?: @[],
+    };
+}
+
+- (void)bindOnReportSubmitHandlerWithError:(FlutterError *_Nullable *_Nonnull)error {
+    __weak __typeof(self) weakSelf = self;
+    Luciq.willSendReportHandler = ^LCQReport *(LCQReport *report) {
+        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return report;
+        }
+        strongSelf.currentReport = report;
+        [strongSelf.flutterApi onReportSubmitSnapshot:[strongSelf serializeReport:report]
+                                          completion:^(FlutterError *_Nullable _){
+                                          }];
+        return report;
+    };
+}
+
+- (void)appendTagToReportTag:(NSString *)tag error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport appendTag:tag];
+}
+
+- (void)appendConsoleLogToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport appendToConsoleLogs:log];
+}
+
+- (void)setUserAttributeToReportKey:(NSString *)key value:(NSString *)value error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport setUserAttribute:value withKey:key];
+}
+
+- (void)logDebugToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport logDebug:log];
+}
+
+- (void)logVerboseToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport logVerbose:log];
+}
+
+- (void)logInfoToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport logInfo:log];
+}
+
+- (void)logWarnToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport logWarn:log];
+}
+
+- (void)logErrorToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport logError:log];
+}
+
+- (void)addFileAttachmentWithURLToReportFilePath:(NSString *)filePath fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
+    NSURL *url = [NSURL URLWithString:filePath] ?: [NSURL fileURLWithPath:filePath];
+    if (url) {
+        [self.currentReport addFileAttachmentWithURL:url];
+    }
+}
+
+- (void)addFileAttachmentWithDataToReportData:(FlutterStandardTypedData *)data fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
+    [self.currentReport addFileAttachmentWithData:data.data andName:fileName];
 }
 
 @end

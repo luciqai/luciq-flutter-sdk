@@ -33,7 +33,9 @@ import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.InternalCore;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
+import ai.luciq.library.model.ConsoleLog;
 import ai.luciq.library.model.NetworkLog;
+import ai.luciq.library.model.Report;
 import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
 
@@ -64,18 +66,35 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     private final LuciqCustomTextPlaceHolder placeHolder = new LuciqCustomTextPlaceHolder();
 
     private final LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi;
+    private final LuciqPigeon.LuciqFlutterApi flutterApi;
+
+    @VisibleForTesting
+    public Report currentReport;
 
     public static void init(BinaryMessenger messenger, Context context, Callable<Bitmap> screenshotProvider) {
-        final LuciqPigeon.FeatureFlagsFlutterApi flutterApi = new LuciqPigeon.FeatureFlagsFlutterApi(messenger);
+        final LuciqPigeon.FeatureFlagsFlutterApi featureFlagsApi =
+                new LuciqPigeon.FeatureFlagsFlutterApi(messenger);
+        final LuciqPigeon.LuciqFlutterApi flutterApi =
+                new LuciqPigeon.LuciqFlutterApi(messenger);
 
-        final LuciqApi api = new LuciqApi(context, screenshotProvider, flutterApi);
+        final LuciqApi api = new LuciqApi(context, screenshotProvider, featureFlagsApi, flutterApi);
         LuciqPigeon.LuciqHostApi.setup(messenger, api);
     }
 
-    public LuciqApi(Context context, Callable<Bitmap> screenshotProvider, LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi) {
+    public LuciqApi(Context context,
+                    Callable<Bitmap> screenshotProvider,
+                    LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi) {
+        this(context, screenshotProvider, featureFlagsFlutterApi, null);
+    }
+
+    public LuciqApi(Context context,
+                    Callable<Bitmap> screenshotProvider,
+                    LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi,
+                    LuciqPigeon.LuciqFlutterApi flutterApi) {
         this.context = context;
         this.screenshotProvider = screenshotProvider;
         this.featureFlagsFlutterApi = featureFlagsFlutterApi;
+        this.flutterApi = flutterApi;
     }
 
     @VisibleForTesting
@@ -777,6 +796,126 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 Luciq.setNetworkAutoMaskingState(Feature.State.DISABLED);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // ==============================
+    // Pre-sending handler
+    // ==============================
+
+    private Map<String, Object> serializeReport(Report report) {
+        final Map<String, Object> map = new HashMap<>();
+
+        final List<String> tags = report.getTags();
+        map.put("tagsArray", tags != null ? new ArrayList<>(tags) : new ArrayList<>());
+
+        final List<Map<String, Object>> consoleLogs = new ArrayList<>();
+        if (report.getConsoleLog() != null) {
+            for (ConsoleLog log : report.getConsoleLog()) {
+                final Map<String, Object> entry = new HashMap<>();
+                entry.put("message", log.getMessage());
+                entry.put("date", log.getTimeStamp());
+                consoleLogs.add(entry);
+            }
+        }
+        map.put("consoleLogs", consoleLogs);
+
+        // Note: Report.getInstabugLogs() exposes LuciqLog.LogMessage whose
+        // fields are package-private on Android, so the snapshot omits them
+        // (matching the React Native SDK's behavior on Android).
+        map.put("luciqLogs", new ArrayList<>());
+
+        final Map<String, String> userAttributes = report.getUserAttributes();
+        map.put("userAttributes",
+                userAttributes != null ? new HashMap<>(userAttributes) : new HashMap<>());
+
+        final List<Map<String, Object>> fileAttachments = new ArrayList<>();
+        if (report.getFileAttachments() != null) {
+            for (Map.Entry<Uri, String> entry : report.getFileAttachments().entrySet()) {
+                final Map<String, Object> item = new HashMap<>();
+                item.put("file", String.valueOf(entry.getKey()));
+                item.put("type", "url");
+                fileAttachments.add(item);
+            }
+        }
+        map.put("fileAttachments", fileAttachments);
+
+        return map;
+    }
+
+    @Override
+    public void bindOnReportSubmitHandler() {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Luciq.onReportSubmitHandler(new Report.OnReportCreatedListener() {
+                    @Override
+                    public void onReportCreated(Report report) {
+                        currentReport = report;
+                        if (flutterApi == null) return;
+                        flutterApi.onReportSubmit(serializeReport(report),
+                                new LuciqPigeon.LuciqFlutterApi.Reply<Void>() {
+                                    @Override
+                                    public void reply(Void reply) {
+                                    }
+                                });
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public void appendTagToReport(@NonNull String tag) {
+        if (currentReport != null) currentReport.addTag(tag);
+    }
+
+    @Override
+    public void appendConsoleLogToReport(@NonNull String log) {
+        if (currentReport != null) currentReport.appendToConsoleLogs(log);
+    }
+
+    @Override
+    public void setUserAttributeToReport(@NonNull String key, @NonNull String value) {
+        if (currentReport != null) currentReport.setUserAttribute(key, value);
+    }
+
+    @Override
+    public void logDebugToReport(@NonNull String log) {
+        if (currentReport != null) currentReport.logDebug(log);
+    }
+
+    @Override
+    public void logVerboseToReport(@NonNull String log) {
+        if (currentReport != null) currentReport.logVerbose(log);
+    }
+
+    @Override
+    public void logInfoToReport(@NonNull String log) {
+        if (currentReport != null) currentReport.logInfo(log);
+    }
+
+    @Override
+    public void logWarnToReport(@NonNull String log) {
+        if (currentReport != null) currentReport.logWarn(log);
+    }
+
+    @Override
+    public void logErrorToReport(@NonNull String log) {
+        if (currentReport != null) currentReport.logError(log);
+    }
+
+    @Override
+    public void addFileAttachmentWithURLToReport(@NonNull String filePath, @NonNull String fileName) {
+        if (currentReport != null) {
+            currentReport.addFileAttachment(Uri.parse(filePath), fileName);
+        }
+    }
+
+    @Override
+    public void addFileAttachmentWithDataToReport(@NonNull byte[] data, @NonNull String fileName) {
+        if (currentReport != null) {
+            currentReport.addFileAttachment(data, fileName);
         }
     }
 }

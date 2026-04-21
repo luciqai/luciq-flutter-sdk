@@ -4,15 +4,22 @@ import ai.luciq.flutter.generated.SessionReplayPigeon;
 import ai.luciq.flutter.modules.SessionReplayApi;
 import ai.luciq.flutter.util.GlobalMocks;
 import ai.luciq.library.OnSessionReplayLinkReady;
+import ai.luciq.library.SessionSyncListener;
 import ai.luciq.library.sessionreplay.CapturingMode;
 import ai.luciq.library.sessionreplay.ScreenshotQuality;
 import ai.luciq.library.sessionreplay.SessionReplay;
+import ai.luciq.library.sessionreplay.model.SessionMetadata;
 import io.flutter.plugin.common.BinaryMessenger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.util.Collections;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -22,7 +29,10 @@ import static org.mockito.Mockito.verify;
 
 
 public class SessionReplayApiTest {
-    private final SessionReplayApi api = new SessionReplayApi();
+    private final BinaryMessenger mMessenger = mock(BinaryMessenger.class);
+    private final SessionReplayPigeon.SessionReplayFlutterApi flutterApi =
+            new SessionReplayPigeon.SessionReplayFlutterApi(mMessenger);
+    private final SessionReplayApi api = new SessionReplayApi(flutterApi);
     private MockedStatic<SessionReplay> mSessionReplay;
     private MockedStatic<SessionReplayPigeon.SessionReplayHostApi> mHostApi;
 
@@ -163,5 +173,66 @@ public class SessionReplayApiTest {
         mSessionReplay.verify(() -> SessionReplay.setScreenshotQuality(ScreenshotQuality.GREYSCALE));
     }
 
+    @Test
+    public void testBindOnSyncCallbackInstallsListener() {
+        api.bindOnSyncCallback();
+
+        mSessionReplay.verify(() -> SessionReplay.setSyncCallback(any(SessionSyncListener.class)));
+    }
+
+    @Test
+    public void testEvaluateSyncReturnsValueToListener() throws InterruptedException {
+        final SessionMetadata metadata = new SessionMetadata.Builder(
+                "iPhone15,2", "iOS 17.0", "1.2.3", 42L, true,
+                "Cold", 1500L, Collections.emptyList()
+        ).build();
+
+        final ArgumentCaptor<SessionSyncListener> listenerCaptor =
+                ArgumentCaptor.forClass(SessionSyncListener.class);
+        api.bindOnSyncCallback();
+        mSessionReplay.verify(() -> SessionReplay.setSyncCallback(listenerCaptor.capture()));
+        final SessionSyncListener listener = listenerCaptor.getValue();
+
+        final boolean[] result = new boolean[1];
+        final Thread listenerThread = new Thread(() -> {
+            result[0] = listener.onSessionReadyToSync(metadata);
+        });
+        listenerThread.start();
+
+        // Give the listener time to reach latch.await()
+        Thread.sleep(100);
+
+        api.evaluateSync(false);
+        listenerThread.join(1000);
+
+        assertFalse("listener should return evaluateSync's value", result[0]);
+    }
+
+    @Test
+    public void testEvaluateSyncTrue() throws InterruptedException {
+        final SessionMetadata metadata = new SessionMetadata.Builder(
+                "pixel", "Android 13", "1.0.0", 10L, false,
+                null, null, Collections.emptyList()
+        ).build();
+
+        final ArgumentCaptor<SessionSyncListener> listenerCaptor =
+                ArgumentCaptor.forClass(SessionSyncListener.class);
+        api.bindOnSyncCallback();
+        mSessionReplay.verify(() -> SessionReplay.setSyncCallback(listenerCaptor.capture()));
+        final SessionSyncListener listener = listenerCaptor.getValue();
+
+        final boolean[] result = new boolean[1];
+        final Thread listenerThread = new Thread(() -> {
+            result[0] = listener.onSessionReadyToSync(metadata);
+        });
+        listenerThread.start();
+
+        Thread.sleep(100);
+
+        api.evaluateSync(true);
+        listenerThread.join(1000);
+
+        assertTrue(result[0]);
+    }
 }
 

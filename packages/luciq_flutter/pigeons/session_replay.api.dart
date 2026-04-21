@@ -1,11 +1,19 @@
 import 'package:pigeon/pigeon.dart';
 
+@FlutterApi()
+abstract class SessionReplayFlutterApi {
+  void onShouldSyncSession(Map<String, Object?> metadata);
+}
+
 @HostApi()
 abstract class SessionReplayHostApi {
   void setEnabled(bool isEnabled);
   void setNetworkLogsEnabled(bool isEnabled);
   void setLuciqLogsEnabled(bool isEnabled);
   void setUserStepsEnabled(bool isEnabled);
+
+  void bindOnSyncCallback();
+  void evaluateSync(bool result);
 
   @async
   String getSessionReplayLink();

@@ -1,15 +1,23 @@
 #import <Flutter/Flutter.h>
 #import <LuciqSDK/LuciqSDK.h>
 #import <LuciqSDK/LCQSessionReplay.h>
+#import <LuciqSDK/LCQSessionMetadata.h>
 #import "SessionReplayApi.h"
 #import "ArgsRegistry.h"
 
 extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
-    SessionReplayApi *api = [[SessionReplayApi alloc] init];
+    SessionReplayFlutterApi *flutterApi = [[SessionReplayFlutterApi alloc] initWithBinaryMessenger:messenger];
+    SessionReplayApi *api = [[SessionReplayApi alloc] initWithFlutterApi:flutterApi];
     SessionReplayHostApiSetup(messenger, api);
 }
 
 @implementation SessionReplayApi
+
+- (instancetype)initWithFlutterApi:(SessionReplayFlutterApi *)api {
+    self = [super init];
+    self.flutterApi = api;
+    return self;
+}
 
 - (void)setEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     LCQSessionReplay.enabled = [isEnabled boolValue];
@@ -50,6 +58,70 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 - (void)setScreenshotQualityModeMode:(NSString *)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     LCQScreenshotQualityMode nativeMode = (ArgsRegistry.screenshotQualityModes[mode]).integerValue;
     LCQSessionReplay.screenshotQualityMode = nativeMode;
+}
+
+- (NSArray<NSDictionary *> *)serializeNetworkLogs:(NSArray<LCQSessionMetadataNetworkLogs *> *)logs {
+    NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+    for (LCQSessionMetadataNetworkLogs *log in logs) {
+        [result addObject:@{
+            @"url": log.url ?: [NSNull null],
+            @"duration": @(log.duration),
+            @"statusCode": @(log.statusCode),
+        }];
+    }
+    return result;
+}
+
+- (NSDictionary *)serializeSessionMetadata:(LCQSessionMetadata *)metadata {
+    NSString *launchTypeString;
+    switch (metadata.launchType) {
+        case LaunchTypeCold:
+            launchTypeString = @"Cold";
+            break;
+        case LaunchTypeHot:
+            launchTypeString = @"Hot";
+            break;
+        default:
+            launchTypeString = @"Unknown";
+            break;
+    }
+    return @{
+        @"appVersion": metadata.appVersion ?: [NSNull null],
+        @"os": metadata.os ?: [NSNull null],
+        @"device": metadata.device ?: [NSNull null],
+        @"sessionDurationInSeconds": @(metadata.sessionDuration),
+        @"hasLinkToAppReview": @(metadata.hasLinkToAppReview),
+        @"launchType": launchTypeString,
+        @"launchDuration": @(metadata.launchDuration),
+        @"bugsCount": @(metadata.bugsCount),
+        @"fatalCrashCount": @(metadata.fatalCrashCount),
+        @"oomCrashCount": @(metadata.oomCrashCount),
+        @"networkLogs": [self serializeNetworkLogs:metadata.networkLogs] ?: @[],
+    };
+}
+
+- (void)bindOnSyncCallbackWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    __weak __typeof(self) weakSelf = self;
+    LCQSessionReplay.syncCallbackWithHandler = ^(LCQSessionMetadata *metadataObject, SessionEvaluationCompletion completion) {
+        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            completion(YES);
+            return;
+        }
+        strongSelf.pendingSessionEvaluationCompletion = completion;
+        NSDictionary *payload = [strongSelf serializeSessionMetadata:metadataObject];
+        [strongSelf.flutterApi onShouldSyncSessionMetadata:payload
+                                               completion:^(FlutterError * _Nullable _) {
+                                               }];
+    };
+}
+
+- (void)evaluateSyncResult:(NSNumber *)result error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    void (^completion)(BOOL) = self.pendingSessionEvaluationCompletion;
+    if (completion) {
+        self.pendingSessionEvaluationCompletion = nil;
+        completion([result boolValue]);
+    }
 }
 
 @end

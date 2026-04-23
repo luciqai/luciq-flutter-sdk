@@ -7,19 +7,19 @@ You are tasked with creating a comprehensive Root Cause Analysis (RCA) document.
 ## Parameters
 
 - `prUrls` (optional): One or more GitHub PR URLs related to the incident/fix, comma-separated
-  - Single PR: `prUrls=https://github.com/Instabug/Luciq-Flutter/pull/45`
-  - Multiple PRs: `prUrls=https://github.com/Instabug/Luciq-Flutter/pull/45,https://github.com/Instabug/ios/pull/6534`
+  - Single PR: `prUrls=https://github.com/luciqai/luciq-flutter-sdk/pull/45`
+  - Multiple PRs: `prUrls=https://github.com/luciqai/luciq-flutter-sdk/pull/45,https://github.com/Instabug/ios/pull/6534`
 
 - `taskUrl` (required): The Jira task/incident URL
   - Example: `taskUrl=https://instabug.atlassian.net/browse/MOB-21429`
 
 ## 0. Prerequisites Check
 
-**IMPORTANT**: This command requires GitHub CLI (`gh`) and Jira CLI (`jira`). Check if they are installed:
+**IMPORTANT**: This command requires GitHub CLI (`gh`) and Atlassian CLI (`acli`). Check if they are installed:
 
 ```bash
 gh --version 2>/dev/null || echo "GH_CLI_NOT_INSTALLED"
-jira version 2>/dev/null || echo "JIRA_CLI_NOT_INSTALLED"
+acli --version 2>/dev/null || echo "ACLI_NOT_INSTALLED"
 ```
 
 ### GitHub CLI Setup
@@ -34,20 +34,10 @@ GitHub CLI Required
 For more info: https://cli.github.com/
 ```
 
-### Jira CLI Setup
+### Atlassian CLI Setup
 
-If Jira CLI is not installed:
-
-```
-Jira CLI Required
-========================
-1. Install: brew install ankitpokhrel/jira-cli/jira-cli
-2. Initialize: jira init
-3. Server URL: https://instabug.atlassian.net
-4. Auth type: API Token
-5. Generate token: https://id.atlassian.com/manage-profile/security/api-tokens
-For more info: https://github.com/ankitpokhrel/jira-cli
-```
+If Atlassian CLI is not installed, follow the official docs:
+https://developer.atlassian.com/cloud/acli/guides/getting-started/
 
 **Only proceed if both CLIs are installed and authenticated.**
 
@@ -89,18 +79,14 @@ From `taskUrl`, extract the task ID (e.g., `MOB-21429` from the URL).
 ### Step 2.2: Fetch Jira Ticket Details
 
 ```bash
-jira issue view <TASK_ID> --plain
+acli jira workitem view <TASK_ID>
 ```
 
 Extract: summary, description, status, priority, reporter, assignee, created date, labels, components, comments.
 
 ### Step 2.3: Fetch Related Issues
 
-```bash
-jira issue view <TASK_ID> --comments
-```
-
-Document key events and timeline from comments.
+Use `acli jira workitem view <TASK_ID> -h` to see options for retrieving comments and related links, then document key events and timeline.
 
 ## 3. Generate RCA Document
 
@@ -271,6 +257,6 @@ EOF
 
 ```
 /create-rca taskUrl=https://instabug.atlassian.net/browse/MOB-21429
-/create-rca taskUrl=https://instabug.atlassian.net/browse/MOB-21429 prUrls=https://github.com/Instabug/Luciq-Flutter/pull/45
-/create-rca taskUrl=https://instabug.atlassian.net/browse/MOB-21429 prUrls=https://github.com/Instabug/Luciq-Flutter/pull/45,https://github.com/Instabug/ios/pull/6534
+/create-rca taskUrl=https://instabug.atlassian.net/browse/MOB-21429 prUrls=https://github.com/luciqai/luciq-flutter-sdk/pull/45
+/create-rca taskUrl=https://instabug.atlassian.net/browse/MOB-21429 prUrls=https://github.com/luciqai/luciq-flutter-sdk/pull/45,https://github.com/Instabug/ios/pull/6534
 ```

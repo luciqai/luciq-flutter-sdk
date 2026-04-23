@@ -71,7 +71,26 @@ This fetches:
 - Author (who left the comment)
 - Timestamp (when it was created)
 
-**Note**: We filter for `in_reply_to_id == null` to get only top-level comments, not replies.
+**Note**: `in_reply_to_id == null` only excludes replies - it does NOT exclude comments whose threads have been marked resolved in the GitHub UI. The REST endpoint above does not expose thread resolution state. To filter out resolved threads, use the GraphQL API instead:
+
+```bash
+gh api graphql -f query='
+  query($owner: String!, $repo: String!, $number: Int!) {
+    repository(owner: $owner, name: $repo) {
+      pullRequest(number: $number) {
+        reviewThreads(first: 100) {
+          nodes {
+            isResolved
+            comments(first: 10) {
+              nodes { id databaseId path line body author { login } createdAt }
+            }
+          }
+        }
+      }
+    }
+  }' -f owner=<owner> -f repo=<repo> -F number=<pr_number> \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false) | .comments.nodes[0]'
+```
 
 ## 3. Iterate Through Comments
 

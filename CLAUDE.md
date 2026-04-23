@@ -90,7 +90,7 @@ All public exports are defined in `packages/luciq_flutter/lib/luciq_flutter.dart
 
 - Linting: `analysis_options.yaml` extends `package:lint/analysis_options_package.yaml`
 - Generated files (`*.g.dart`, `*.mocks.dart`) are excluded from analysis
-- CI: CircleCI with Flutter 3.24.3
+- CI: CircleCI (see `.circleci/config.yml` for the current Flutter version)
 
 ## Output
 - Answer is always line 1. Reasoning comes after, never before.

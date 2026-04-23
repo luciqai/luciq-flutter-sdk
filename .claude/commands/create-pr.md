@@ -62,14 +62,20 @@ feat(luciq_flutter): add screen loading time tracking
 
 **Present the suggested commit message and wait for user approval.**
 
-Once approved, stage and commit:
+Once approved, show the user what will be staged and confirm before committing:
 
 ```bash
-git add -A
+# Show current status so the user can review untracked/modified files
+git status
+
+# Stage explicit files only (never `git add -A` - it can sweep in .env, build artifacts, etc.)
+git add <file1> <file2> ...
+
+# Commit with the approved message
 git commit -m "<approved-message>"
 ```
 
-**Do not proceed until the user approves and the commit succeeds.**
+**Do not proceed until the user approves the file list, the message, and the commit succeeds.**
 
 ---
 
@@ -114,16 +120,17 @@ Once approved:
 # Push the branch
 git push -u origin HEAD
 
-# Save PR description
-cat > /tmp/pr-description.txt << 'EOF'
+# Save PR description to a safe, unique temp file
+tmpfile=$(mktemp)
+cat > "$tmpfile" << 'EOF'
 <filled PR template from Step 2>
 EOF
 
 # Create draft PR
-gh pr create --base {baseBranch} --title "<approved-title>" --body-file /tmp/pr-description.txt --draft --assignee @me
+gh pr create --base {baseBranch} --title "<approved-title>" --body-file "$tmpfile" --draft --assignee @me
 
 # Clean up
-rm /tmp/pr-description.txt
+rm "$tmpfile"
 ```
 
 Display the PR URL when done.

@@ -139,7 +139,7 @@ enum CustomTextPlaceHolderKey {
 
 enum ReproStepsMode { enabled, disabled, enabledWithNoScreenshots }
 
-typedef OnReportSubmitCallback = void Function(Report report);
+typedef OnReportSubmitCallback = FutureOr<void> Function(Report report);
 
 /// Disposal manager for handling Android lifecycle events
 class _LuciqDisposalManager implements LuciqFlutterApi {
@@ -159,7 +159,7 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
   }
 
   @override
-  void onReportSubmit(Map<String?, Object?> snapshot) {
+  Future<void> onReportSubmit(Map<String?, Object?> snapshot) async {
     final callback = Luciq.$onReportSubmitCallback;
     if (callback == null) return;
 
@@ -229,7 +229,7 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
       fileAttachments: parseAttachments(snapshot['fileAttachments']),
     );
 
-    callback(report);
+    await callback(report);
   }
 
   static ReportLogLevel _parseLogLevel(String? raw) {

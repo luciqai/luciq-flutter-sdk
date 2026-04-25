@@ -646,10 +646,23 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
             return report;
         }
         strongSelf.currentReport = report;
-        [strongSelf.flutterApi onReportSubmitSnapshot:[strongSelf serializeReport:report]
-                                          completion:^(FlutterError *_Nullable _){
-                                          }];
-        return report;
+        NSDictionary *snapshot = [strongSelf serializeReport:report];
+        if ([NSThread isMainThread]) {
+            [strongSelf.flutterApi onReportSubmitSnapshot:snapshot
+                                              completion:^(FlutterError *_Nullable _){}];
+            return strongSelf.currentReport ?: report;
+        }
+        dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [strongSelf.flutterApi onReportSubmitSnapshot:snapshot
+                                              completion:^(FlutterError *_Nullable _){
+                                                  dispatch_semaphore_signal(sema);
+                                              }];
+        });
+        dispatch_semaphore_wait(sema,
+                                dispatch_time(DISPATCH_TIME_NOW,
+                                              (int64_t)(10 * NSEC_PER_SEC)));
+        return strongSelf.currentReport ?: report;
     };
 }
 

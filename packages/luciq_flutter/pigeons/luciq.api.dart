@@ -3,6 +3,7 @@ import 'package:pigeon/pigeon.dart';
 @FlutterApi()
 abstract class LuciqFlutterApi {
   void dispose();
+  @async
   void onReportSubmit(Map<String, Object?> snapshot);
 }
 

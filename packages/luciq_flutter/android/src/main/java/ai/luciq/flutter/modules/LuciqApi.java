@@ -58,8 +58,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class LuciqApi implements LuciqPigeon.LuciqHostApi {
+    private static final long ON_REPORT_SUBMIT_TIMEOUT_SECONDS = 10;
     private final String TAG = LuciqApi.class.getName();
     private final Context context;
     private final Callable<Bitmap> screenshotProvider;
@@ -851,6 +854,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 currentReport = report;
                 if (flutterApi == null) return;
                 final Map<String, Object> snapshot = serializeReport(report);
+                final CountDownLatch latch = new CountDownLatch(1);
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
@@ -858,10 +862,16 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                                 new LuciqPigeon.LuciqFlutterApi.Reply<Void>() {
                                     @Override
                                     public void reply(Void reply) {
+                                        latch.countDown();
                                     }
                                 });
                     }
                 });
+                try {
+                    latch.await(ON_REPORT_SUBMIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Interrupted while waiting for Flutter onReportSubmit handler", e);
+                }
             }
         });
     }

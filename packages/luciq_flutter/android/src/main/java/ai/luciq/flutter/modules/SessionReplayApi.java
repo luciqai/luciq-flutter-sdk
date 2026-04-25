@@ -83,9 +83,6 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
 
     @Override
     public void bindOnSyncCallback() {
-        ThreadManager.runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
                 SessionReplay.setSyncCallback(new SessionSyncListener() {
                     @Override
                     public boolean onSessionReadyToSync(@NonNull SessionMetadata metadata) {
@@ -94,13 +91,18 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
                         // Pigeon FlutterApi messages are delivered on the main (platform) thread.
                         // The SDK invokes this sync listener on a background thread, so
                         // awaiting the latch here does not block the Flutter bridge.
-                        flutterApi.onShouldSyncSession(
-                                serializeMetadata(metadata),
-                                new SessionReplayPigeon.SessionReplayFlutterApi.Reply<Void>() {
-                                    @Override
-                                    public void reply(Void reply) {
-                                    }
-                                });
+
+                        ThreadManager.runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                flutterApi.onShouldSyncSession(
+                                        serializeMetadata(metadata),
+                                        new SessionReplayPigeon.SessionReplayFlutterApi.Reply<Void>() {
+                                            @Override
+                                            public void reply(Void reply) {
+                                            }
+                                        });
+                            }});
 
                         try {
                             latch.await();
@@ -112,8 +114,8 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
                     }
                 });
             }
-        });
-    }
+
+
 
     @Override
     public void evaluateSync(@NonNull Boolean result) {

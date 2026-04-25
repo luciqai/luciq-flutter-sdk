@@ -845,15 +845,16 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void bindOnReportSubmitHandler() {
-        ThreadManager.runOnMainThread(new Runnable() {
+        Luciq.onReportSubmitHandler(new Report.OnReportCreatedListener() {
             @Override
-            public void run() {
-                Luciq.onReportSubmitHandler(new Report.OnReportCreatedListener() {
+            public void onReportCreated(Report report) {
+                currentReport = report;
+                if (flutterApi == null) return;
+                final Map<String, Object> snapshot = serializeReport(report);
+                ThreadManager.runOnMainThread(new Runnable() {
                     @Override
-                    public void onReportCreated(Report report) {
-                        currentReport = report;
-                        if (flutterApi == null) return;
-                        flutterApi.onReportSubmit(serializeReport(report),
+                    public void run() {
+                        flutterApi.onReportSubmit(snapshot,
                                 new LuciqPigeon.LuciqFlutterApi.Reply<Void>() {
                                     @Override
                                     public void reply(Void reply) {

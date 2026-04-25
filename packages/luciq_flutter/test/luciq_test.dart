@@ -495,7 +495,8 @@ void main() {
       await report.logWarn('w-log');
       await report.logError('e-log');
       await report.addFileAttachmentWithURL('/path/f.txt', 'f.txt');
-      await report.addFileAttachmentWithData(Uint8List.fromList([1, 2, 3]), 'bin');
+      await report.addFileAttachmentWithData(
+          Uint8List.fromList([1, 2, 3]), 'bin');
 
       verify(mHost.appendTagToReport('t')).called(1);
       verify(mHost.appendConsoleLogToReport('c')).called(1);
@@ -511,7 +512,8 @@ void main() {
       verify(
         mHost.addFileAttachmentWithDataToReport(
           argThat(
-            predicate<Uint8List>((b) => b.length == 3 && b[0] == 1 && b[2] == 3),
+            predicate<Uint8List>(
+                (b) => b.length == 3 && b[0] == 1 && b[2] == 3),
           ),
           'bin',
         ),

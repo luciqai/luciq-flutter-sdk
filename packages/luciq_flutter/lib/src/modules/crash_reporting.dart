@@ -2,12 +2,14 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:luciq_flutter/src/generated/crash_reporting.api.g.dart';
 import 'package:luciq_flutter/src/models/crash_data.dart';
 import 'package:luciq_flutter/src/models/exception_data.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 enum NonFatalExceptionLevel { error, critical, info, warning }
@@ -15,6 +17,51 @@ enum NonFatalExceptionLevel { error, critical, info, warning }
 class CrashReporting {
   static var _host = CrashReportingHostApi();
   static bool enabled = true;
+
+  static FlutterExceptionHandler? _originalFlutterOnError;
+  static ErrorCallback? _originalPlatformOnError;
+  static bool _handlersInstalled = false;
+
+  /// Whether error handlers have been installed by [installErrorHandlers].
+  @internal
+  static bool get handlersInstalled => _handlersInstalled;
+
+  /// Installs global error handlers for [FlutterError.onError] and
+  /// [PlatformDispatcher.instance.onError] that forward errors to
+  /// [reportCrash]. Chains to any previously installed handlers.
+  ///
+  /// This method is idempotent — calling it multiple times has no effect.
+  @internal
+  static void installErrorHandlers() {
+    if (_handlersInstalled) return;
+
+    _originalFlutterOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      reportCrash(details.exception, details.stack ?? StackTrace.empty);
+      _originalFlutterOnError?.call(details);
+    };
+
+    _originalPlatformOnError = PlatformDispatcher.instance.onError;
+    PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+      reportCrash(error, stack);
+      return _originalPlatformOnError?.call(error, stack) ?? true;
+    };
+
+    _handlersInstalled = true;
+  }
+
+  /// Restores the original error handlers that were saved during
+  /// [installErrorHandlers]. After this call, the SDK will no longer
+  /// capture unhandled errors automatically.
+  @internal
+  static void restoreErrorHandlers() {
+    if (!_handlersInstalled) return;
+    FlutterError.onError = _originalFlutterOnError;
+    PlatformDispatcher.instance.onError = _originalPlatformOnError;
+    _originalFlutterOnError = null;
+    _originalPlatformOnError = null;
+    _handlersInstalled = false;
+  }
 
   /// @nodoc
   @visibleForTesting

@@ -1,17 +1,14 @@
 // ignore_for_file: avoid_classes_with_only_static_members
 
 import 'dart:async';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:typed_data';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unused_import
 import 'package:flutter/services.dart';
@@ -204,11 +201,28 @@ class Luciq {
   /// The [invocationEvents] are the events that invoke the SDK's UI.
   /// The [debugLogsLevel] used to debug Luciq's SDK.
   /// The [appVariant] used to set current App variant name.
+  /// The [appRunner] is an optional callback that, when provided,
+  /// automatically installs error handlers ([FlutterError.onError],
+  /// [PlatformDispatcher.instance.onError]) and wraps the callback in
+  /// [runZonedGuarded] for automatic crash reporting. This eliminates the
+  /// need to manually set up [runZonedGuarded] and error handlers.
+  ///
+  /// Example usage with [appRunner]:
+  /// ```dart
+  /// void main() {
+  ///   Luciq.init(
+  ///     token: 'APP_TOKEN',
+  ///     invocationEvents: [InvocationEvent.shake],
+  ///     appRunner: () => runApp(MyApp()),
+  ///   );
+  /// }
+  /// ```
   static Future<void> init({
     required String token,
     required List<InvocationEvent> invocationEvents,
     LogLevel debugLogsLevel = LogLevel.error,
     String? appVariant,
+    FutureOr<void> Function()? appRunner,
   }) async {
     $setup();
     LuciqLogger.I.logLevel = debugLogsLevel;
@@ -218,7 +232,27 @@ class Luciq {
       debugLogsLevel.toString(),
       appVariant,
     );
-    return FeatureFlagsManager().registerFeatureFlagsListener();
+    await FeatureFlagsManager().registerFeatureFlagsListener();
+
+    if (appRunner != null) {
+      WidgetsFlutterBinding.ensureInitialized();
+      CrashReporting.installErrorHandlers();
+      runZonedGuarded(
+        () async {
+          await appRunner();
+        },
+        CrashReporting.reportCrash,
+      );
+    }
+  }
+
+  /// Closes the SDK and restores any error handlers installed during [init].
+  ///
+  /// After calling this method, crash reporting handlers will be restored to
+  /// their pre-init state. The SDK will no longer automatically capture
+  /// unhandled errors.
+  static Future<void> close() async {
+    CrashReporting.restoreErrorHandlers();
   }
 
   /// Sets a [callback] to be called wehenever a screen name is captured to mask

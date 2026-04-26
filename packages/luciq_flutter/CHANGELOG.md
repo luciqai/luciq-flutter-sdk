@@ -1,5 +1,15 @@
 # Changelog
 
+## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 23, 2026)
+
+### Added
+
+- Add `appRunner` parameter to `Luciq.init()` for automatic error handler installation. When
+  provided, the SDK auto-installs `FlutterError.onError`, `PlatformDispatcher.onError`, and wraps
+  the callback in `runZonedGuarded` — eliminating the need for manual crash reporting boilerplate.
+
+- Add `Luciq.close()` method to restore original error handlers and tear down the SDK.
+
 ## [19.3.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.3.0...19.2.2) (March 9, 2026)
 
 ### Changed

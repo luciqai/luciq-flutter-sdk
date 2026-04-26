@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:typed_data';
+// ignore: unnecessary_import
+import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -490,6 +492,135 @@ void main() {
         },
         returnsNormally,
       );
+    });
+  });
+
+  group('init with appRunner', () {
+    setUp(() {
+      when(mHost.isW3CFeatureFlagsEnabled()).thenAnswer(
+        (_) => Future.value({
+          "isW3cExternalTraceIDEnabled": true,
+          "isW3cExternalGeneratedHeaderEnabled": true,
+          "isW3cCaughtHeaderEnabled": true,
+        }),
+      );
+      when(mHost.getNetworkBodyMaxSize()).thenAnswer(
+        (_) => Future.value(10240),
+      );
+      when(mApmHost.isScreenRenderEnabled()).thenAnswer((_) async => false);
+    });
+
+    tearDown(() {
+      CrashReporting.restoreErrorHandlers();
+    });
+
+    test('[init] with appRunner should invoke the callback', () async {
+      var callbackInvoked = false;
+
+      await Luciq.init(
+        token: '068ba9a8c3615035e163dc5f829c73be',
+        invocationEvents: [InvocationEvent.shake],
+        appRunner: () {
+          callbackInvoked = true;
+        },
+      );
+
+      expect(callbackInvoked, isTrue);
+    });
+
+    test('[init] with appRunner should install error handlers', () async {
+      expect(CrashReporting.handlersInstalled, isFalse);
+
+      await Luciq.init(
+        token: '068ba9a8c3615035e163dc5f829c73be',
+        invocationEvents: [InvocationEvent.shake],
+        appRunner: () {},
+      );
+
+      expect(CrashReporting.handlersInstalled, isTrue);
+    });
+
+    test('[init] without appRunner should NOT install error handlers',
+        () async {
+      expect(CrashReporting.handlersInstalled, isFalse);
+
+      await Luciq.init(
+        token: '068ba9a8c3615035e163dc5f829c73be',
+        invocationEvents: [InvocationEvent.shake],
+      );
+
+      expect(CrashReporting.handlersInstalled, isFalse);
+    });
+
+    test('[init] with appRunner should still call host init', () async {
+      const token = '068ba9a8c3615035e163dc5f829c73be';
+      const events = [InvocationEvent.shake];
+
+      clearInteractions(mHost);
+
+      await Luciq.init(
+        token: token,
+        invocationEvents: events,
+        appRunner: () {},
+      );
+
+      verify(
+        mHost.init(
+          token,
+          events.mapToString(),
+          LogLevel.error.toString(),
+          null,
+        ),
+      ).called(1);
+    });
+  });
+
+  group('close', () {
+    setUp(() {
+      when(mHost.isW3CFeatureFlagsEnabled()).thenAnswer(
+        (_) => Future.value({
+          "isW3cExternalTraceIDEnabled": true,
+          "isW3cExternalGeneratedHeaderEnabled": true,
+          "isW3cCaughtHeaderEnabled": true,
+        }),
+      );
+      when(mHost.getNetworkBodyMaxSize()).thenAnswer(
+        (_) => Future.value(10240),
+      );
+      when(mApmHost.isScreenRenderEnabled()).thenAnswer((_) async => false);
+    });
+
+    tearDown(() {
+      CrashReporting.restoreErrorHandlers();
+    });
+
+    test('[close] should restore error handlers', () async {
+      final originalFlutterHandler = FlutterError.onError;
+      final originalPlatformHandler = PlatformDispatcher.instance.onError;
+
+      await Luciq.init(
+        token: '068ba9a8c3615035e163dc5f829c73be',
+        invocationEvents: [InvocationEvent.shake],
+        appRunner: () {},
+      );
+
+      expect(CrashReporting.handlersInstalled, isTrue);
+
+      await Luciq.close();
+
+      expect(CrashReporting.handlersInstalled, isFalse);
+      expect(FlutterError.onError, equals(originalFlutterHandler));
+      expect(
+        PlatformDispatcher.instance.onError,
+        equals(originalPlatformHandler),
+      );
+    });
+
+    test('[close] should be safe to call without prior init with appRunner',
+        () async {
+      expect(CrashReporting.handlersInstalled, isFalse);
+      await Luciq.close();
+      expect(CrashReporting.handlersInstalled, isFalse);
     });
   });
 }

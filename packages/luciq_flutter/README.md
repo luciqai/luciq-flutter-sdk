@@ -37,28 +37,34 @@ flutter packages get
 
 ### Initializing Luciq
 
-Initialize the SDK in your `main` function. This starts the SDK with the default behavior and sets it to be shown when the device is shaken.
+Initialize the SDK in your `main` function with the `appRunner` callback. This starts the SDK and
+automatically sets up crash reporting by installing error handlers and wrapping your app in a
+guarded zone.
 
 ```dart
 import 'package:luciq_flutter/luciq_flutter.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
   Luciq.init(
     token: 'APP_TOKEN',
     invocationEvents: [InvocationEvent.shake],
+    appRunner: () => runApp(MyApp()),
   );
-
-  runApp(MyApp());
 }
 ```
 
 ## Crash reporting
 
-Luciq automatically captures every crash of your app and sends relevant details to the crashes page of your dashboard. 
+When you use the `appRunner` parameter, Luciq automatically installs `FlutterError.onError`,
+`PlatformDispatcher.onError`, and `runZonedGuarded` error handlers. Every unhandled crash in your
+app is captured and sent to the crashes page of your dashboard.
 
 ⚠️ **Crashes will only be reported in release mode and not in debug mode.**
+
+### Advanced: Manual Error Handler Setup
+
+If you need custom error handling logic, you can skip `appRunner` and set up error handlers
+manually:
 
 ```dart
 void main() {

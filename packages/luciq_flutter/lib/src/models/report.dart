@@ -106,7 +106,9 @@ class Report {
 
   /// Attaches raw binary data as a file to the report.
   Future<void> addFileAttachmentWithData(
-      Uint8List data, String fileName) async {
+    Uint8List data,
+    String fileName,
+  ) async {
     fileAttachments.add(ReportFileAttachment(file: fileName, isData: true));
     _pendingDataAttachments
         .add(_PendingDataAttachment(data: data, fileName: fileName));
@@ -119,18 +121,37 @@ class Report {
       'consoleLogs': List<String>.from(_pendingConsoleLogs),
       'userAttributes': Map<String, String>.from(_pendingUserAttributes),
       'logs': _pendingLogs
-          .map((e) => <String, Object?>{
-                'log': e.log,
-                'type': e.level.name,
-              })
+          .map(
+            (e) => <String, Object?>{
+              'log': e.log,
+              'type': _levelName(e.level),
+            },
+          )
           .toList(),
       'dataAttachments': _pendingDataAttachments
-          .map((e) => <String, Object?>{
-                'data': e.data,
-                'fileName': e.fileName,
-              })
+          .map(
+            (e) => <String, Object?>{
+              'data': e.data,
+              'fileName': e.fileName,
+            },
+          )
           .toList(),
     };
+  }
+
+  static String _levelName(ReportLogLevel level) {
+    switch (level) {
+      case ReportLogLevel.verbose:
+        return 'verbose';
+      case ReportLogLevel.debug:
+        return 'debug';
+      case ReportLogLevel.info:
+        return 'info';
+      case ReportLogLevel.warn:
+        return 'warn';
+      case ReportLogLevel.error:
+        return 'error';
+    }
   }
 }
 

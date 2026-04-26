@@ -496,7 +496,9 @@ void main() {
       await report.logWarn('w-log');
       await report.logError('e-log');
       await report.addFileAttachmentWithData(
-          Uint8List.fromList([1, 2, 3]), 'bin');
+        Uint8List.fromList([1, 2, 3]),
+        'bin',
+      );
 
       // Local view is updated.
       expect(report.tags, ['t']);
@@ -521,13 +523,14 @@ void main() {
       expect(mutations['tags'], ['t']);
       expect(mutations['consoleLogs'], ['c']);
       expect(mutations['userAttributes'], {'k': 'v'});
-      final logs = mutations['logs'] as List;
-      expect(logs.length, 5);
-      expect(logs[0]['type'], 'verbose');
-      expect(logs[4]['type'], 'error');
-      final dataAttachments = mutations['dataAttachments'] as List;
-      expect(dataAttachments.length, 1);
-      expect(dataAttachments[0]['fileName'], 'bin');
+      final logs = (mutations['logs'] as List?)?.cast<Map<String, dynamic>>();
+      expect(logs?.length, 5);
+      expect(logs?[0]['type'], 'verbose');
+      expect(logs?[4]['type'], 'error');
+      final dataAttachments =
+          (mutations['dataAttachments'] as List?)?.cast<Map<String, dynamic>>();
+      expect(dataAttachments?.length, 1);
+      expect(dataAttachments?[0]['fileName'], 'bin');
     });
   });
 

@@ -160,7 +160,8 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
 
   @override
   Future<Map<String?, Object?>?> onReportSubmit(
-      Map<String?, Object?> snapshot) async {
+    Map<String?, Object?> snapshot,
+  ) async {
     final callback = Luciq.$onReportSubmitCallback;
     if (callback == null) return null;
 

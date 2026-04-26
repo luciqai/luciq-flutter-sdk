@@ -1,7 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
-
 /// Severity of a log attached to the report.
 enum ReportLogLevel { verbose, debug, info, warn, error }
 
@@ -29,98 +27,121 @@ class ReportFileAttachment {
 /// [Luciq.onReportSubmitHandler].
 ///
 /// Use the mutator methods to enrich the report that the SDK is about to send.
-/// Each method forwards to the native SDK so mutations are applied to the
-/// outgoing report.
+/// Mutations are accumulated locally in Dart and applied to the native report
+/// in a single batch when the callback returns.
 class Report {
   /// @nodoc
   Report({
-    required LuciqHostApi host,
     List<String> tags = const [],
     List<String> consoleLogs = const [],
     List<ReportLog> luciqLogs = const [],
     Map<String, String> userAttributes = const {},
     List<ReportFileAttachment> fileAttachments = const [],
-  })  : _host = host,
-        tags = List<String>.from(tags),
+  })  : tags = List<String>.from(tags),
         consoleLogs = List<String>.from(consoleLogs),
         luciqLogs = List<ReportLog>.from(luciqLogs),
         userAttributes = Map<String, String>.from(userAttributes),
         fileAttachments = List<ReportFileAttachment>.from(fileAttachments);
 
-  final LuciqHostApi _host;
-
-  /// Tags already attached to the report when the handler was invoked.
+  /// Tags on the report (initial + appended in this callback).
   final List<String> tags;
 
-  /// Console logs already attached to the report.
+  /// Console logs on the report (initial + appended in this callback).
   final List<String> consoleLogs;
 
-  /// Luciq logs already attached to the report.
+  /// Luciq logs on the report (initial + appended in this callback).
   final List<ReportLog> luciqLogs;
 
-  /// User attributes already attached to the report.
+  /// User attributes on the report (initial + set in this callback).
   final Map<String, String> userAttributes;
 
-  /// File attachments already attached to the report.
+  /// File attachments on the report (initial + appended in this callback).
   final List<ReportFileAttachment> fileAttachments;
 
+  /// Mutations recorded by mutator methods, drained by the disposal manager
+  /// after the user callback returns.
+  final List<String> _pendingTags = [];
+  final List<String> _pendingConsoleLogs = [];
+  final List<_PendingLog> _pendingLogs = [];
+  final Map<String, String> _pendingUserAttributes = {};
+  final List<_PendingDataAttachment> _pendingDataAttachments = [];
+
   /// Appends a tag to the report.
-  Future<void> appendTag(String tag) {
+  Future<void> appendTag(String tag) async {
     tags.add(tag);
-    return _host.appendTagToReport(tag);
+    _pendingTags.add(tag);
   }
 
   /// Appends a console log entry to the report.
-  Future<void> appendConsoleLog(String log) {
+  Future<void> appendConsoleLog(String log) async {
     consoleLogs.add(log);
-    return _host.appendConsoleLogToReport(log);
+    _pendingConsoleLogs.add(log);
   }
 
   /// Sets a user attribute on the report.
-  Future<void> setUserAttribute(String key, String value) {
+  Future<void> setUserAttribute(String key, String value) async {
     userAttributes[key] = value;
-    return _host.setUserAttributeToReport(key, value);
+    _pendingUserAttributes[key] = value;
   }
 
   /// Attaches a verbose log line to the report.
-  Future<void> logVerbose(String log) {
-    luciqLogs.add(ReportLog(log: log, type: ReportLogLevel.verbose));
-    return _host.logVerboseToReport(log);
-  }
+  Future<void> logVerbose(String log) => _addLog(log, ReportLogLevel.verbose);
 
   /// Attaches a debug log line to the report.
-  Future<void> logDebug(String log) {
-    luciqLogs.add(ReportLog(log: log, type: ReportLogLevel.debug));
-    return _host.logDebugToReport(log);
-  }
+  Future<void> logDebug(String log) => _addLog(log, ReportLogLevel.debug);
 
   /// Attaches an info log line to the report.
-  Future<void> logInfo(String log) {
-    luciqLogs.add(ReportLog(log: log, type: ReportLogLevel.info));
-    return _host.logInfoToReport(log);
-  }
+  Future<void> logInfo(String log) => _addLog(log, ReportLogLevel.info);
 
   /// Attaches a warn log line to the report.
-  Future<void> logWarn(String log) {
-    luciqLogs.add(ReportLog(log: log, type: ReportLogLevel.warn));
-    return _host.logWarnToReport(log);
-  }
+  Future<void> logWarn(String log) => _addLog(log, ReportLogLevel.warn);
 
   /// Attaches an error log line to the report.
-  Future<void> logError(String log) {
-    luciqLogs.add(ReportLog(log: log, type: ReportLogLevel.error));
-    return _host.logErrorToReport(log);
-  }
+  Future<void> logError(String log) => _addLog(log, ReportLogLevel.error);
 
-  /// Attaches a file (by file system path/URL) to the report.
-  Future<void> addFileAttachmentWithURL(String filePath, String fileName) {
-    fileAttachments.add(ReportFileAttachment(file: filePath, isData: false));
-    return _host.addFileAttachmentWithURLToReport(filePath, fileName);
+  Future<void> _addLog(String log, ReportLogLevel level) async {
+    luciqLogs.add(ReportLog(log: log, type: level));
+    _pendingLogs.add(_PendingLog(log: log, level: level));
   }
 
   /// Attaches raw binary data as a file to the report.
-  Future<void> addFileAttachmentWithData(Uint8List data, String fileName) {
+  Future<void> addFileAttachmentWithData(
+      Uint8List data, String fileName) async {
     fileAttachments.add(ReportFileAttachment(file: fileName, isData: true));
-    return _host.addFileAttachmentWithDataToReport(data, fileName);
+    _pendingDataAttachments
+        .add(_PendingDataAttachment(data: data, fileName: fileName));
   }
+
+  /// @nodoc
+  Map<String, Object?> drainMutations() {
+    return <String, Object?>{
+      'tags': List<String>.from(_pendingTags),
+      'consoleLogs': List<String>.from(_pendingConsoleLogs),
+      'userAttributes': Map<String, String>.from(_pendingUserAttributes),
+      'logs': _pendingLogs
+          .map((e) => <String, Object?>{
+                'log': e.log,
+                'type': e.level.name,
+              })
+          .toList(),
+      'dataAttachments': _pendingDataAttachments
+          .map((e) => <String, Object?>{
+                'data': e.data,
+                'fileName': e.fileName,
+              })
+          .toList(),
+    };
+  }
+}
+
+class _PendingLog {
+  _PendingLog({required this.log, required this.level});
+  final String log;
+  final ReportLogLevel level;
+}
+
+class _PendingDataAttachment {
+  _PendingDataAttachment({required this.data, required this.fileName});
+  final Uint8List data;
+  final String fileName;
 }

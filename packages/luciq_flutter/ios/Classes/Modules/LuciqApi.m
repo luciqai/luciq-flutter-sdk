@@ -647,66 +647,104 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
         }
         strongSelf.currentReport = report;
         NSDictionary *snapshot = [strongSelf serializeReport:report];
-        if ([NSThread isMainThread]) {
-            [strongSelf.flutterApi onReportSubmitSnapshot:snapshot
-                                              completion:^(FlutterError *_Nullable _){}];
-            return strongSelf.currentReport ?: report;
-        }
+
         dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-        dispatch_async(dispatch_get_main_queue(), ^{
+        __block NSDictionary *mutations = nil;
+
+        void (^sendCall)(void) = ^{
             [strongSelf.flutterApi onReportSubmitSnapshot:snapshot
-                                              completion:^(FlutterError *_Nullable _){
-                                                  dispatch_semaphore_signal(sema);
-                                              }];
-        });
-        dispatch_semaphore_wait(sema,
-                                dispatch_time(DISPATCH_TIME_NOW,
-                                              (int64_t)(10 * NSEC_PER_SEC)));
-        return strongSelf.currentReport ?: report;
+                                              completion:^(NSDictionary *_Nullable result,
+                                                           FlutterError *_Nullable _){
+                mutations = result;
+                dispatch_semaphore_signal(sema);
+            }];
+        };
+        BOOL onMain = [NSThread isMainThread];
+        if (onMain) {
+            sendCall();
+        } else {
+            dispatch_async(dispatch_get_main_queue(), sendCall);
+        }
+
+        NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:10];
+        if (onMain) {
+            // Spin the run loop on main thread so the FlutterApi reply
+            // (delivered as a main-queue dispatch) can be processed.
+            while (dispatch_semaphore_wait(sema, DISPATCH_TIME_NOW) != 0) {
+                if ([deadline timeIntervalSinceNow] <= 0) break;
+                [[NSRunLoop currentRunLoop]
+                    runMode:NSDefaultRunLoopMode
+                 beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+            }
+        } else {
+            dispatch_semaphore_wait(sema,
+                                    dispatch_time(DISPATCH_TIME_NOW,
+                                                  (int64_t)(10 * NSEC_PER_SEC)));
+        }
+
+        [strongSelf applyMutations:mutations toReport:report];
+        return report;
     };
 }
 
-- (void)appendTagToReportTag:(NSString *)tag error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport appendTag:tag];
-}
+- (void)applyMutations:(NSDictionary *)mutations toReport:(LCQReport *)report {
+    if (!mutations || ![mutations isKindOfClass:[NSDictionary class]]) return;
 
-- (void)appendConsoleLogToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport appendToConsoleLogs:log];
-}
-
-- (void)setUserAttributeToReportKey:(NSString *)key value:(NSString *)value error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport setUserAttribute:value withKey:key];
-}
-
-- (void)logDebugToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport logDebug:log];
-}
-
-- (void)logVerboseToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport logVerbose:log];
-}
-
-- (void)logInfoToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport logInfo:log];
-}
-
-- (void)logWarnToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport logWarn:log];
-}
-
-- (void)logErrorToReportLog:(NSString *)log error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport logError:log];
-}
-
-- (void)addFileAttachmentWithURLToReportFilePath:(NSString *)filePath fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
-    NSURL *url = [NSURL URLWithString:filePath] ?: [NSURL fileURLWithPath:filePath];
-    if (url) {
-        [self.currentReport addFileAttachmentWithURL:url];
+    NSArray *tags = mutations[@"tags"];
+    if ([tags isKindOfClass:[NSArray class]]) {
+        for (NSString *tag in tags) {
+            if ([tag isKindOfClass:[NSString class]]) [report appendTag:tag];
+        }
     }
-}
 
-- (void)addFileAttachmentWithDataToReportData:(FlutterStandardTypedData *)data fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
-    [self.currentReport addFileAttachmentWithData:data.data andName:fileName];
+    NSArray *consoleLogs = mutations[@"consoleLogs"];
+    if ([consoleLogs isKindOfClass:[NSArray class]]) {
+        for (NSString *log in consoleLogs) {
+            if ([log isKindOfClass:[NSString class]]) [report appendToConsoleLogs:log];
+        }
+    }
+
+    NSDictionary *userAttributes = mutations[@"userAttributes"];
+    if ([userAttributes isKindOfClass:[NSDictionary class]]) {
+        [userAttributes enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+            if ([key isKindOfClass:[NSString class]] && [value isKindOfClass:[NSString class]]) {
+                [report setUserAttribute:value withKey:key];
+            }
+        }];
+    }
+
+    NSArray *logs = mutations[@"logs"];
+    if ([logs isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *entry in logs) {
+            if (![entry isKindOfClass:[NSDictionary class]]) continue;
+            NSString *log = entry[@"log"];
+            NSString *type = entry[@"type"];
+            if (![log isKindOfClass:[NSString class]]) continue;
+            if ([type isEqualToString:@"verbose"]) [report logVerbose:log];
+            else if ([type isEqualToString:@"debug"]) [report logDebug:log];
+            else if ([type isEqualToString:@"info"]) [report logInfo:log];
+            else if ([type isEqualToString:@"warn"]) [report logWarn:log];
+            else [report logError:log];
+        }
+    }
+
+    NSArray *dataAttachments = mutations[@"dataAttachments"];
+    if ([dataAttachments isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *entry in dataAttachments) {
+            if (![entry isKindOfClass:[NSDictionary class]]) continue;
+            id rawData = entry[@"data"];
+            NSString *fileName = entry[@"fileName"];
+            NSData *data = nil;
+            if ([rawData isKindOfClass:[FlutterStandardTypedData class]]) {
+                data = ((FlutterStandardTypedData *)rawData).data;
+            } else if ([rawData isKindOfClass:[NSData class]]) {
+                data = rawData;
+            }
+            if (data && [fileName isKindOfClass:[NSString class]]) {
+                [report addFileAttachmentWithData:data andName:fileName];
+            }
+        }
+    }
 }
 
 @end

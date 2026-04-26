@@ -4,7 +4,7 @@ import 'package:pigeon/pigeon.dart';
 abstract class LuciqFlutterApi {
   void dispose();
   @async
-  void onReportSubmit(Map<String, Object?> snapshot);
+  Map<String, Object?>? onReportSubmit(Map<String, Object?> snapshot);
 }
 
 @FlutterApi()
@@ -126,14 +126,4 @@ abstract class LuciqHostApi {
   void setNetworkAutoMaskingEnabled(bool isEnabled);
 
   void bindOnReportSubmitHandler();
-  void appendTagToReport(String tag);
-  void appendConsoleLogToReport(String log);
-  void setUserAttributeToReport(String key, String value);
-  void logDebugToReport(String log);
-  void logVerboseToReport(String log);
-  void logInfoToReport(String log);
-  void logWarnToReport(String log);
-  void logErrorToReport(String log);
-  void addFileAttachmentWithURLToReport(String filePath, String fileName);
-  void addFileAttachmentWithDataToReport(Uint8List data, String fileName);
 }

@@ -483,8 +483,9 @@ void main() {
       verify(mHost.bindOnReportSubmitHandler()).called(1);
     });
 
-    test('Report mutators forward to host', () async {
-      final report = Report(host: mHost);
+    test('Report mutators accumulate locally and drain into a mutations map',
+        () async {
+      final report = Report();
 
       await report.appendTag('t');
       await report.appendConsoleLog('c');
@@ -494,31 +495,10 @@ void main() {
       await report.logInfo('i-log');
       await report.logWarn('w-log');
       await report.logError('e-log');
-      await report.addFileAttachmentWithURL('/path/f.txt', 'f.txt');
       await report.addFileAttachmentWithData(
           Uint8List.fromList([1, 2, 3]), 'bin');
 
-      verify(mHost.appendTagToReport('t')).called(1);
-      verify(mHost.appendConsoleLogToReport('c')).called(1);
-      verify(mHost.setUserAttributeToReport('k', 'v')).called(1);
-      verify(mHost.logVerboseToReport('v-log')).called(1);
-      verify(mHost.logDebugToReport('d-log')).called(1);
-      verify(mHost.logInfoToReport('i-log')).called(1);
-      verify(mHost.logWarnToReport('w-log')).called(1);
-      verify(mHost.logErrorToReport('e-log')).called(1);
-      verify(
-        mHost.addFileAttachmentWithURLToReport('/path/f.txt', 'f.txt'),
-      ).called(1);
-      verify(
-        mHost.addFileAttachmentWithDataToReport(
-          argThat(
-            predicate<Uint8List>(
-                (b) => b.length == 3 && b[0] == 1 && b[2] == 3),
-          ),
-          'bin',
-        ),
-      ).called(1);
-
+      // Local view is updated.
       expect(report.tags, ['t']);
       expect(report.consoleLogs, ['c']);
       expect(report.userAttributes, {'k': 'v'});
@@ -533,9 +513,21 @@ void main() {
           ReportLogLevel.error,
         ],
       );
-      expect(report.fileAttachments.length, 2);
-      expect(report.fileAttachments[0].isData, false);
-      expect(report.fileAttachments[1].isData, true);
+      expect(report.fileAttachments.length, 1);
+      expect(report.fileAttachments[0].isData, true);
+
+      // Drained mutations describe what to apply on the native side.
+      final mutations = report.drainMutations();
+      expect(mutations['tags'], ['t']);
+      expect(mutations['consoleLogs'], ['c']);
+      expect(mutations['userAttributes'], {'k': 'v'});
+      final logs = mutations['logs'] as List;
+      expect(logs.length, 5);
+      expect(logs[0]['type'], 'verbose');
+      expect(logs[4]['type'], 'error');
+      final dataAttachments = mutations['dataAttachments'] as List;
+      expect(dataAttachments.length, 1);
+      expect(dataAttachments[0]['fileName'], 'bin');
     });
   });
 

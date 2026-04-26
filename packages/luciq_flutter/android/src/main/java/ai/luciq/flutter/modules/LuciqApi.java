@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     private static final long ON_REPORT_SUBMIT_TIMEOUT_SECONDS = 10;
@@ -850,18 +851,21 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     public void bindOnReportSubmitHandler() {
         Luciq.onReportSubmitHandler(new Report.OnReportCreatedListener() {
             @Override
-            public void onReportCreated(Report report) {
+            public void onReportCreated(final Report report) {
                 currentReport = report;
                 if (flutterApi == null) return;
                 final Map<String, Object> snapshot = serializeReport(report);
                 final CountDownLatch latch = new CountDownLatch(1);
+                final AtomicReference<Map<String, Object>> mutationsRef =
+                        new AtomicReference<>();
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
                         flutterApi.onReportSubmit(snapshot,
-                                new LuciqPigeon.LuciqFlutterApi.Reply<Void>() {
+                                new LuciqPigeon.LuciqFlutterApi.Reply<Map<String, Object>>() {
                                     @Override
-                                    public void reply(Void reply) {
+                                    public void reply(Map<String, Object> mutations) {
+                                        mutationsRef.set(mutations);
                                         latch.countDown();
                                     }
                                 });
@@ -872,61 +876,57 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 } catch (InterruptedException e) {
                     Log.w(TAG, "Interrupted while waiting for Flutter onReportSubmit handler", e);
                 }
+                applyMutations(report, mutationsRef.get());
             }
         });
     }
 
-    @Override
-    public void appendTagToReport(@NonNull String tag) {
-        if (currentReport != null) currentReport.addTag(tag);
-    }
-
-    @Override
-    public void appendConsoleLogToReport(@NonNull String log) {
-        if (currentReport != null) currentReport.appendToConsoleLogs(log);
-    }
-
-    @Override
-    public void setUserAttributeToReport(@NonNull String key, @NonNull String value) {
-        if (currentReport != null) currentReport.setUserAttribute(key, value);
-    }
-
-    @Override
-    public void logDebugToReport(@NonNull String log) {
-        if (currentReport != null) currentReport.logDebug(log);
-    }
-
-    @Override
-    public void logVerboseToReport(@NonNull String log) {
-        if (currentReport != null) currentReport.logVerbose(log);
-    }
-
-    @Override
-    public void logInfoToReport(@NonNull String log) {
-        if (currentReport != null) currentReport.logInfo(log);
-    }
-
-    @Override
-    public void logWarnToReport(@NonNull String log) {
-        if (currentReport != null) currentReport.logWarn(log);
-    }
-
-    @Override
-    public void logErrorToReport(@NonNull String log) {
-        if (currentReport != null) currentReport.logError(log);
-    }
-
-    @Override
-    public void addFileAttachmentWithURLToReport(@NonNull String filePath, @NonNull String fileName) {
-        if (currentReport != null) {
-            currentReport.addFileAttachment(Uri.parse(filePath), fileName);
-        }
-    }
-
-    @Override
-    public void addFileAttachmentWithDataToReport(@NonNull byte[] data, @NonNull String fileName) {
-        if (currentReport != null) {
-            currentReport.addFileAttachment(data, fileName);
+    @SuppressWarnings("unchecked")
+    private void applyMutations(Report report, Map<String, Object> mutations) {
+        if (report == null || mutations == null) return;
+        try {
+            final List<String> tags = (List<String>) mutations.get("tags");
+            if (tags != null) {
+                for (String tag : tags) report.addTag(tag);
+            }
+            final List<String> consoleLogs = (List<String>) mutations.get("consoleLogs");
+            if (consoleLogs != null) {
+                for (String log : consoleLogs) report.appendToConsoleLogs(log);
+            }
+            final Map<String, String> userAttributes =
+                    (Map<String, String>) mutations.get("userAttributes");
+            if (userAttributes != null) {
+                for (Map.Entry<String, String> e : userAttributes.entrySet()) {
+                    report.setUserAttribute(e.getKey(), e.getValue());
+                }
+            }
+            final List<Map<String, Object>> logs =
+                    (List<Map<String, Object>>) mutations.get("logs");
+            if (logs != null) {
+                for (Map<String, Object> entry : logs) {
+                    final String log = (String) entry.get("log");
+                    final String type = (String) entry.get("type");
+                    if (log == null) continue;
+                    if ("verbose".equals(type)) report.logVerbose(log);
+                    else if ("debug".equals(type)) report.logDebug(log);
+                    else if ("info".equals(type)) report.logInfo(log);
+                    else if ("warn".equals(type)) report.logWarn(log);
+                    else report.logError(log);
+                }
+            }
+            final List<Map<String, Object>> dataAttachments =
+                    (List<Map<String, Object>>) mutations.get("dataAttachments");
+            if (dataAttachments != null) {
+                for (Map<String, Object> entry : dataAttachments) {
+                    final byte[] data = (byte[]) entry.get("data");
+                    final String fileName = (String) entry.get("fileName");
+                    if (data != null && fileName != null) {
+                        report.addFileAttachment(data, fileName);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "Failed to apply onReportSubmit mutations", t);
         }
     }
 }

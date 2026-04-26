@@ -159,9 +159,10 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
   }
 
   @override
-  Future<void> onReportSubmit(Map<String?, Object?> snapshot) async {
+  Future<Map<String?, Object?>?> onReportSubmit(
+      Map<String?, Object?> snapshot) async {
     final callback = Luciq.$onReportSubmitCallback;
-    if (callback == null) return;
+    if (callback == null) return null;
 
     List<String> parseStringList(Object? raw) {
       if (raw is List) {
@@ -221,7 +222,6 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
     }
 
     final report = Report(
-      host: Luciq.$host,
       tags: parseStringList(snapshot['tagsArray']),
       consoleLogs: parseStringList(snapshot['consoleLogs']),
       luciqLogs: parseLogs(snapshot['luciqLogs']),
@@ -229,7 +229,12 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
       fileAttachments: parseAttachments(snapshot['fileAttachments']),
     );
 
-    await callback(report);
+    try {
+      await callback(report);
+    } catch (e, st) {
+      LuciqLogger.I.e('onReportSubmit callback threw: $e\n$st');
+    }
+    return report.drainMutations();
   }
 
   static ReportLogLevel _parseLogLevel(String? raw) {

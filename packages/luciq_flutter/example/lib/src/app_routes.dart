@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:luciq_flutter_example/main.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';
+import 'package:luciq_flutter_example/src/screens/inapp_webview_page.dart';
+import 'package:luciq_flutter_example/src/screens/web_view_page.dart';
+import 'package:luciq_flutter_example/src/screens/webview_google_fullscreen_page.dart';
 
 final appRoutes = {
   /// ["/"] route name should only be used with [onGenerateRoute:] when no
@@ -24,4 +27,9 @@ final appRoutes = {
       const ScreenLoadingPage(),
   ScreenCapturePrematureExtensionPage.screenName: (BuildContext context) =>
       const ScreenCapturePrematureExtensionPage(),
+  WebViewPage.screenName: (BuildContext context) => const WebViewPage(),
+  WebViewGoogleFullscreenPage.screenName: (BuildContext context) =>
+      const WebViewGoogleFullscreenPage(),
+  InAppWebViewPage.screenName: (BuildContext context) =>
+      const InAppWebViewPage(),
 };

@@ -6,7 +6,7 @@ import 'package:luciq_flutter/src/generated/luciq_private_view.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
 
-enum AutoMasking { labels, textInputs, media, none }
+enum AutoMasking { labels, textInputs, media, webViews, none }
 
 extension ValidationMethod on AutoMasking {
   bool Function(Widget) hides() {
@@ -17,6 +17,10 @@ extension ValidationMethod on AutoMasking {
         return isTextInputWidget;
       case AutoMasking.media:
         return isMedia;
+      case AutoMasking.webViews:
+        // WebViews are native platform views, not Flutter widgets, so masking
+        // is handled entirely by the native SDK. No Flutter-level predicate.
+        return (_) => false;
       case AutoMasking.none:
         return (_) => false;
     }

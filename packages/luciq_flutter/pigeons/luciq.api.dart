@@ -122,4 +122,17 @@ abstract class LuciqHostApi {
   void setTheme(Map<String, Object> themeConfig);
   void setFullscreen(bool isEnabled);
   void setNetworkAutoMaskingEnabled(bool isEnabled);
+
+  /// Master switch for all WebView tracking (user interactions,
+  /// network logs and WebView screen loading in APM).
+  /// Enabled by default on the native SDK.
+  void setWebViewMonitoringEnabled(bool isEnabled);
+
+  /// Enables capturing user interactions inside WebViews
+  /// (tap, scroll, navigation). Disabled by default.
+  void setWebViewUserInteractionsTrackingEnabled(bool isEnabled);
+
+  /// Enables capturing network logs (Fetch/XHR) triggered from
+  /// inside WebViews. Disabled by default.
+  void setWebViewNetworkTrackingEnabled(bool isEnabled);
 }

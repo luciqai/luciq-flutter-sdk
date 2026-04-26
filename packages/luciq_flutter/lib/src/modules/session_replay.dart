@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:luciq_flutter/src/generated/session_replay.api.g.dart';
 import 'package:luciq_flutter/src/models/session_metadata.dart';
+import 'package:meta/meta.dart';
 
 enum ScreenshotCapturingMode {
   navigation,

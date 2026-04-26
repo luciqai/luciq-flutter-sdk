@@ -21,6 +21,7 @@ import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart'
     show LuciqScreenRenderManager;
@@ -541,6 +542,67 @@ class Luciq {
   /// [boolean] isEnabled
   static Future<void> enableUserSteps(bool isEnabled) async {
     return _host.setEnableUserSteps(isEnabled);
+  }
+
+  /// Master switch that controls all WebView tracking data collection,
+  /// including user interactions, network logs and WebView screen loading
+  /// in APM.
+  ///
+  /// The master switch is enabled by default on the native SDK. When set
+  /// to `false`, all other WebView APIs have no effect.
+  ///
+  /// Only `WKWebView` (iOS) and Android's native `WebView` are supported.
+  ///
+  /// Note: On Android, you must also enable WebView tracking at build time
+  /// by adding `luciq { webViewsTrackingEnabled = true }` to your app's
+  /// `build.gradle`. Without this, no WebView tracking code is compiled
+  /// into your app.
+  static Future<void> setWebViewMonitoringEnabled(bool isEnabled) async {
+    return _host.setWebViewMonitoringEnabled(isEnabled);
+  }
+
+  /// Enables capturing user interactions inside WebViews (tap, scroll,
+  /// navigation, swipe). These are reported in the logs section and
+  /// in Repro Steps.
+  ///
+  /// Disabled by default. Requires the master switch
+  /// [setWebViewMonitoringEnabled] to be enabled.
+  static Future<void> setWebViewUserInteractionsTrackingEnabled(
+    bool isEnabled,
+  ) async {
+    return _host.setWebViewUserInteractionsTrackingEnabled(isEnabled);
+  }
+
+  /// Enables capturing network logs (Fetch/XHR) triggered from inside
+  /// WebViews. Captured requests appear in the logs section of bug,
+  /// crash and session replay reports.
+  ///
+  /// Disabled by default. Requires the master switch
+  /// [setWebViewMonitoringEnabled] to be enabled.
+  static Future<void> setWebViewNetworkTrackingEnabled(bool isEnabled) async {
+    return _host.setWebViewNetworkTrackingEnabled(isEnabled);
+  }
+
+  /// Sets the screenshot auto-masking types to apply before screenshots
+  /// are sent with reports.
+  ///
+  /// Pass a single-element list of [AutoMasking.none] to disable masking
+  /// entirely, or any combination of the other values to opt-in to
+  /// masking those categories:
+  /// - [AutoMasking.labels]: mask all Flutter `Text` widgets.
+  /// - [AutoMasking.textInputs]: mask all text input widgets.
+  /// - [AutoMasking.media]: mask images and videos.
+  /// - [AutoMasking.webViews]: mask native `WKWebView` / Android `WebView`
+  ///   content (default when WebView tracking is enabled).
+  ///
+  /// Example:
+  /// ```dart
+  /// Luciq.setAutoMaskScreenshotTypes([AutoMasking.webViews, AutoMasking.labels]);
+  /// ```
+  static Future<void> setAutoMaskScreenshotTypes(
+    List<AutoMasking> types,
+  ) async {
+    PrivateViewsManager.I.addAutoMasking(types);
   }
 
   /// Enables and disables manual invocation and prompt options for bug and feedback.

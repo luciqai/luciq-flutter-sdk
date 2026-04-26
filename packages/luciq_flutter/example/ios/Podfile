@@ -26,6 +26,16 @@ end
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 flutter_ios_podfile_setup
+
+# WebView POC: custom Luciq pod from feature branch with WebView support.
+# The public 19.x Luciq pod only swizzles -[WKWebView initWithCoder:]
+# (storyboard path). Flutter's webview_flutter_wkwebview creates WKWebView
+# via -[WKWebView initWithFrame:configuration:], so the stock pod never
+# registers a WebViewListener interceptor and in-WebView user-steps go
+# uncaptured. This custom build adds the missing swizzler. Remove this
+# override once the change lands in a public Luciq iOS release.
+#pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/feature-enable_cp_web_view_navigation/19.4.0/Luciq.podspec'
+
 target 'Runner' do
 
   use_frameworks!

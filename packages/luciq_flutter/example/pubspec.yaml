@@ -31,6 +31,8 @@ dependencies:
   file_picker: <10.0.0
   provider:
   video_player:
+  webview_flutter: ^4.7.0
+  flutter_inappwebview: ^6.1.5
 
 dev_dependencies:
   flutter_driver:
@@ -48,6 +50,11 @@ dependency_overrides:
   http: ^1.1.0
   luciq_flutter:
     path: ../
+  # Pin webview_flutter_android to the last release compatible with Kotlin 1.8.22.
+  # Newer versions (>= 4.10.10) bump kotlin_version to 2.x and >= 4.10.14 switched
+  # to the Kotlin DSL (compilerOptions {}), which fails on this example project's
+  # KGP 1.8.22.
+  webview_flutter_android: 4.10.9
 patrol:
   app_name: Luciq example
   android:

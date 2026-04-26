@@ -12,6 +12,9 @@ import 'package:luciq_flutter_example/src/app_routes.dart';
 import 'package:luciq_flutter_example/src/native/luciq_flutter_example_method_channel.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_handler_provider.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';
+import 'package:luciq_flutter_example/src/screens/inapp_webview_page.dart';
+import 'package:luciq_flutter_example/src/screens/web_view_page.dart';
+import 'package:luciq_flutter_example/src/screens/webview_google_fullscreen_page.dart';
 import 'package:luciq_flutter_example/src/utils/widget_ext.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_button.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_clipboard_input.dart';
@@ -45,9 +48,9 @@ part 'src/screens/screen_loading_page.dart';
 part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
 
-void main() {
-  runZonedGuarded(
-    () {
+Future<void> main() async {
+  await runZonedGuarded(
+    () async {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
@@ -56,6 +59,9 @@ void main() {
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',
       );
+
+      await Luciq.setWebViewMonitoringEnabled(true);
+      await Luciq.setWebViewNetworkTrackingEnabled(true);
 
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
@@ -72,14 +78,21 @@ void main() {
       // APM.setScreenRenderingEnabled(true);
       // APM.setAutoUITraceEnabled(false);
       Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
+
       FlutterError.onError = (FlutterErrorDetails details) {
         Zone.current.handleUncaughtError(details.exception, details.stack!);
       };
 
       runApp(
-        ChangeNotifierProvider(
-          create: (_) => CallbackHandlersProvider(),
-          child: const MyApp(),
+        // LuciqWidget is required to register the private-view screenshot
+        // masking pipeline (LuciqPrivateView rects and AutoMasking of Flutter
+        // widgets). Without it, Luciq.setAutoMaskScreenshotTypes has no effect
+        // on Flutter-rendered content (including WebView platform views).
+        LuciqWidget(
+          child: ChangeNotifierProvider(
+            create: (_) => CallbackHandlersProvider(),
+            child: const MyApp(),
+          ),
         ),
       );
     },

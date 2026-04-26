@@ -64,6 +64,7 @@ public final class ArgsRegistry {
         put("AutoMasking.labels", MaskingType.LABELS);
         put("AutoMasking.textInputs", MaskingType.TEXT_INPUTS);
         put("AutoMasking.media", MaskingType.MEDIA);
+        put("AutoMasking.webViews", MaskingType.WEB_VIEWS);
         put("AutoMasking.none", MaskingType.MASK_NOTHING);
     }};
 

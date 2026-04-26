@@ -6,6 +6,17 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+// Luciq Gradle plugin — required at build time for WebView tracking bytecode
+// instrumentation. Must be applied AFTER the Android plugin.
+apply plugin: 'luciq'
+
+luciq {
+    // Include the WebView tracking module in the build. The runtime master
+    // switch (Luciq.setWebViewMonitoringEnabled) also needs to remain enabled
+    // (it is on by default) for WebView tracking to actually run.
+    webViewsTrackingEnabled = true
+}
+
 android {
     namespace = "ai.luciq.flutter.example"
     compileSdk = flutter.compileSdkVersion

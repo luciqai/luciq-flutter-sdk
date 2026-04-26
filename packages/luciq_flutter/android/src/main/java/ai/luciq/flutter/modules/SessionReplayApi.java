@@ -21,8 +21,8 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
 
     private final SessionReplayPigeon.SessionReplayFlutterApi flutterApi;
 
-    private boolean shouldSync = true;
-    private CountDownLatch latch;
+    private volatile boolean shouldSync = true;
+    private volatile CountDownLatch latch;
 
     public static void init(BinaryMessenger messenger) {
         final SessionReplayPigeon.SessionReplayFlutterApi flutterApi =

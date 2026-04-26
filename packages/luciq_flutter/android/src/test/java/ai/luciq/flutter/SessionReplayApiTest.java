@@ -193,19 +193,19 @@ public class SessionReplayApiTest {
         mSessionReplay.verify(() -> SessionReplay.setSyncCallback(listenerCaptor.capture()));
         final SessionSyncListener listener = listenerCaptor.getValue();
 
-        final boolean[] result = new boolean[1];
-        final Thread listenerThread = new Thread(() -> {
-            result[0] = listener.onSessionReadyToSync(metadata);
+        // Run the listener on this test thread so Mockito's thread-local static mock
+        // for ThreadManager applies. evaluateSync must come from a different thread
+        // so it can countDown the latch the listener awaits.
+        final Thread evaluator = new Thread(() -> {
+            try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+            api.evaluateSync(false);
         });
-        listenerThread.start();
+        evaluator.start();
 
-        // Give the listener time to reach latch.await()
-        Thread.sleep(100);
+        boolean result = listener.onSessionReadyToSync(metadata);
+        evaluator.join(1000);
 
-        api.evaluateSync(false);
-        listenerThread.join(1000);
-
-        assertFalse("listener should return evaluateSync's value", result[0]);
+        assertFalse("listener should return evaluateSync's value", result);
     }
 
     @Test
@@ -221,18 +221,16 @@ public class SessionReplayApiTest {
         mSessionReplay.verify(() -> SessionReplay.setSyncCallback(listenerCaptor.capture()));
         final SessionSyncListener listener = listenerCaptor.getValue();
 
-        final boolean[] result = new boolean[1];
-        final Thread listenerThread = new Thread(() -> {
-            result[0] = listener.onSessionReadyToSync(metadata);
+        final Thread evaluator = new Thread(() -> {
+            try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+            api.evaluateSync(true);
         });
-        listenerThread.start();
+        evaluator.start();
 
-        Thread.sleep(100);
+        boolean result = listener.onSessionReadyToSync(metadata);
+        evaluator.join(1000);
 
-        api.evaluateSync(true);
-        listenerThread.join(1000);
-
-        assertTrue(result[0]);
+        assertTrue(result);
     }
 }
 

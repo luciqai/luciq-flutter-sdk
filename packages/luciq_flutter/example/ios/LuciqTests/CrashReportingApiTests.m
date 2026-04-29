@@ -47,20 +47,32 @@
     NSString *fingerPrint = @"fingerprint";
     NSDictionary *userAttributes = @{@"key": @"value",};
     NSString *lcqNonFatalLevel = @"NonFatalExceptionLevel.error";
-    
+
     FlutterError *error;
-    
+
     [self.api sendNonFatalErrorJsonCrash:jsonCrash
                           userAttributes:userAttributes
                              fingerprint:fingerPrint
                   nonFatalExceptionLevel:lcqNonFatalLevel
                                    error:&error];
-    
+
     OCMVerify([self.mCrashReporting cp_reportNonFatalCrashWithStackTrace:@{}
                 level:LCQNonFatalLevelError
                 groupingString:fingerPrint
                 userAttributes:userAttributes
               ]);
+}
+
+// MOB-22385: defense-in-depth — the LCQRunCatching wrapper must absorb
+// native NSException so the host app is never crashed by Luciq.
+- (void)testSetEnabledSwallowsNSException_MOB22385 {
+    OCMStub([self.mCrashReporting setEnabled:YES])
+        .andThrow([NSException exceptionWithName:@"NativeBoom"
+                                          reason:@"simulated native failure"
+                                        userInfo:nil]);
+
+    FlutterError *error;
+    XCTAssertNoThrow([self.api setEnabledIsEnabled:@1 error:&error]);
 }
 
 @end

@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:luciq_flutter/src/generated/feature_requests.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 import 'package:meta/meta.dart';
 
 enum ActionType { requestNewFeature, addCommentToFeature }
@@ -19,8 +20,10 @@ class FeatureRequests {
   }
 
   /// Shows the UI for feature requests list
-  static Future<void> show() async {
-    return _host.show();
+  static Future<void> show() {
+    return runCatchingAsync('FeatureRequests.show', () async {
+      await _host.show();
+    });
   }
 
   /// Sets whether users are required to enter an email address or not when sending reports.
@@ -31,7 +34,12 @@ class FeatureRequests {
   static Future<void> setEmailFieldRequired(
     bool isRequired,
     List<ActionType>? actionTypes,
-  ) async {
-    return _host.setEmailFieldRequired(isRequired, actionTypes.mapToString());
+  ) {
+    return runCatchingAsync('FeatureRequests.setEmailFieldRequired', () async {
+      await _host.setEmailFieldRequired(
+        isRequired,
+        actionTypes.mapToString(),
+      );
+    });
   }
 }

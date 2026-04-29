@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
@@ -92,9 +93,11 @@ void main() {
   test(
     '[setScreenshotCaptureInterval] should reject values below minimum',
     () async {
+      // The validation throws ArgumentError, which is swallowed by the
+      // runCatching wrapper (MOB-22385) — the host must still NOT be called.
       await expectLater(
-        () => SessionReplay.setScreenshotCaptureInterval(499),
-        throwsA(isA<ArgumentError>()),
+        SessionReplay.setScreenshotCaptureInterval(499),
+        completes,
       );
 
       verifyNever(
@@ -126,5 +129,10 @@ void main() {
         ScreenshotQualityMode.greyScale.toString(),
       ),
     ).called(1);
+  });
+
+  test('[setEnabled] swallows host PlatformException (MOB-22385)', () async {
+    when(mHost.setEnabled(any)).thenThrow(PlatformException(code: 'X'));
+    await expectLater(SessionReplay.setEnabled(true), completes);
   });
 }

@@ -1,6 +1,6 @@
 // ignore_for_file: deprecated_member_use
-import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
@@ -492,4 +492,17 @@ void main() {
       );
     });
   });
+
+  test('[setEnabled] swallows host PlatformException (MOB-22385)', () async {
+    when(mHost.setEnabled(any)).thenThrow(PlatformException(code: 'X'));
+    await expectLater(Luciq.setEnabled(true), completes);
+  });
+
+  test(
+    '[getUserAttributes] returns empty map fallback on host exception (MOB-22385)',
+    () async {
+      when(mHost.getUserAttributes()).thenThrow(PlatformException(code: 'X'));
+      expect(await Luciq.getUserAttributes(), isEmpty);
+    },
+  );
 }

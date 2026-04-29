@@ -1,5 +1,6 @@
 #import "PrivateViewApi.h"
 #import "../Util/FlutterPluginRegistrar+FlutterEngine.h"
+#import "../Util/LCQRunCatching.h"
 
 extern PrivateViewApi* InitPrivateViewApi(
     id<FlutterBinaryMessenger> messenger,
@@ -26,17 +27,22 @@ static long long currentTimeMillis;
 
 - (void)mask:(UIImage *)screenshot
   completion:(void (^)(UIImage *))completion {
-    
-    __weak typeof(self) weakSelf = self;
-    // Wait for the Cupertino animation to complete
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    [self.flutterApi getPrivateViewsWithCompletion:^(NSArray<NSNumber *> *rectangles, FlutterError *error) {
-        UIImage *capturedScreenshot = [self captureScreenshot];
-            [weakSelf handlePrivateViewsResult:rectangles
-                                         error:error
-                                    screenshot:capturedScreenshot
-                                    completion:completion];
-      }];
+    LCQRunCatching(@"PrivateViewApi.mask", ^{
+        __weak typeof(self) weakSelf = self;
+        // Wait for the Cupertino animation to complete
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            LCQRunCatching(@"PrivateViewApi.mask.callback", ^{
+                [self.flutterApi getPrivateViewsWithCompletion:^(NSArray<NSNumber *> *rectangles, FlutterError *error) {
+                    LCQRunCatching(@"PrivateViewApi.mask.getPrivateViewsCallback", ^{
+                        UIImage *capturedScreenshot = [self captureScreenshot];
+                        [weakSelf handlePrivateViewsResult:rectangles
+                                                     error:error
+                                                screenshot:capturedScreenshot
+                                                completion:completion];
+                    });
+                }];
+            });
+        });
     });
 }
 

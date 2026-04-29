@@ -13,7 +13,6 @@ import ai.luciq.chat.Replies;
 import ai.luciq.flutter.generated.RepliesPigeon;
 import ai.luciq.flutter.modules.RepliesApi;
 import ai.luciq.flutter.util.GlobalMocks;
-import ai.luciq.library.Feature;
 
 import org.junit.After;
 import org.junit.Before;

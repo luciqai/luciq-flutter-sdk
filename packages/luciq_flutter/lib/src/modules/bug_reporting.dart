@@ -6,6 +6,7 @@ import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/bug_reporting.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 import 'package:meta/meta.dart';
 
 enum InvocationOption {
@@ -68,41 +69,47 @@ class BugReporting implements BugReportingFlutterApi {
   @internal
   @override
   void onSdkInvoke() {
-    _onInvokeCallback?.call();
+    runCatching('BugReportingFlutterApi.onSdkInvoke', () {
+      _onInvokeCallback?.call();
+    });
   }
 
   /// @nodoc
   @internal
   @override
   void onSdkDismiss(String dismissType, String reportType) {
-    final dismissTypeKey = dismissType.toUpperCase();
-    final reportTypeKey = reportType.toUpperCase();
+    runCatching('BugReportingFlutterApi.onSdkDismiss', () {
+      final dismissTypeKey = dismissType.toUpperCase();
+      final reportTypeKey = reportType.toUpperCase();
 
-    const dismissTypeMapper = {
-      'CANCEL': DismissType.cancel,
-      'SUBMIT': DismissType.submit,
-      'ADD_ATTACHMENT': DismissType.addAttachment,
-    };
+      const dismissTypeMapper = {
+        'CANCEL': DismissType.cancel,
+        'SUBMIT': DismissType.submit,
+        'ADD_ATTACHMENT': DismissType.addAttachment,
+      };
 
-    const reportTypeMapper = {
-      'BUG': ReportType.bug,
-      'FEEDBACK': ReportType.feedback,
-      'OTHER': ReportType.other,
-    };
+      const reportTypeMapper = {
+        'BUG': ReportType.bug,
+        'FEEDBACK': ReportType.feedback,
+        'OTHER': ReportType.other,
+      };
 
-    if (dismissTypeMapper.containsKey(dismissTypeKey) &&
-        reportTypeMapper.containsKey(reportTypeKey)) {
-      _onDismissCallback?.call(
-        dismissTypeMapper[dismissTypeKey]!,
-        reportTypeMapper[reportTypeKey]!,
-      );
-    }
+      if (dismissTypeMapper.containsKey(dismissTypeKey) &&
+          reportTypeMapper.containsKey(reportTypeKey)) {
+        _onDismissCallback?.call(
+          dismissTypeMapper[dismissTypeKey]!,
+          reportTypeMapper[reportTypeKey]!,
+        );
+      }
+    });
   }
 
   /// Enables and disables manual invocation and prompt options for bug and feedback.
   /// [boolean] isEnabled
-  static Future<void> setEnabled(bool isEnabled) async {
-    return _host.setEnabled(isEnabled);
+  static Future<void> setEnabled(bool isEnabled) {
+    return runCatchingAsync('BugReporting.setEnabled', () async {
+      await _host.setEnabled(isEnabled);
+    });
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
@@ -111,9 +118,11 @@ class BugReporting implements BugReportingFlutterApi {
   /// [callback]  A callback that gets executed before invoking the SDK
   static Future<void> setOnInvokeCallback(
     OnSDKInvokeCallback callback,
-  ) async {
-    _onInvokeCallback = callback;
-    return _host.bindOnInvokeCallback();
+  ) {
+    return runCatchingAsync('BugReporting.setOnInvokeCallback', () async {
+      _onInvokeCallback = callback;
+      await _host.bindOnInvokeCallback();
+    });
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
@@ -122,9 +131,11 @@ class BugReporting implements BugReportingFlutterApi {
   /// [callback]  A callback that gets executed before invoking the SDK
   static Future<void> setOnDismissCallback(
     OnSDKDismissCallback callback,
-  ) async {
-    _onDismissCallback = callback;
-    return _host.bindOnDismissCallback();
+  ) {
+    return runCatchingAsync('BugReporting.setOnDismissCallback', () async {
+      _onDismissCallback = callback;
+      await _host.bindOnDismissCallback();
+    });
   }
 
   /// Sets the events that invoke the feedback form.
@@ -132,8 +143,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// [invocationEvents] invocationEvent List of events that invokes the
   static Future<void> setInvocationEvents(
     List<InvocationEvent>? invocationEvents,
-  ) async {
-    return _host.setInvocationEvents(invocationEvents.mapToString());
+  ) {
+    return runCatchingAsync('BugReporting.setInvocationEvents', () async {
+      await _host.setInvocationEvents(invocationEvents.mapToString());
+    });
   }
 
   /// Sets whether attachments in bug reporting and in-app messaging are enabled or not.
@@ -148,24 +161,29 @@ class BugReporting implements BugReportingFlutterApi {
     bool extraScreenshot,
     bool galleryImage,
     bool screenRecording,
-  ) async {
-    return _host.setEnabledAttachmentTypes(
-      screenshot,
-      extraScreenshot,
-      galleryImage,
-      screenRecording,
-    );
+  ) {
+    return runCatchingAsync('BugReporting.setEnabledAttachmentTypes', () async {
+      await _host.setEnabledAttachmentTypes(
+        screenshot,
+        extraScreenshot,
+        galleryImage,
+        screenRecording,
+      );
+    });
   }
 
   /// Sets what type of reports, bug or feedback, should be invoked.
   /// [reportTypes] - List of reportTypes
-  static Future<void> setReportTypes(List<ReportType>? reportTypes) async {
-    if (reportTypes != null) {
-      final types = List.of(reportTypes);
-      types.remove(ReportType.other); //removed from report types
-      return _host.setReportTypes(types.mapToString());
-    }
-    return _host.setReportTypes(reportTypes.mapToString());
+  static Future<void> setReportTypes(List<ReportType>? reportTypes) {
+    return runCatchingAsync('BugReporting.setReportTypes', () async {
+      if (reportTypes != null) {
+        final types = List.of(reportTypes);
+        types.remove(ReportType.other); //removed from report types
+        await _host.setReportTypes(types.mapToString());
+        return;
+      }
+      await _host.setReportTypes(reportTypes.mapToString());
+    });
   }
 
   /// Sets whether the extended bug report mode should be disabled, enabled with
@@ -173,8 +191,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// [extendedBugReportMode] ExtendedBugReportMode enum
   static Future<void> setExtendedBugReportMode(
     ExtendedBugReportMode extendedBugReportMode,
-  ) async {
-    return _host.setExtendedBugReportMode(extendedBugReportMode.toString());
+  ) {
+    return runCatchingAsync('BugReporting.setExtendedBugReportMode', () async {
+      await _host.setExtendedBugReportMode(extendedBugReportMode.toString());
+    });
   }
 
   /// Sets the invocation options.
@@ -182,8 +202,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// [invocationOptions] List of invocation options
   static Future<void> setInvocationOptions(
     List<InvocationOption>? invocationOptions,
-  ) async {
-    return _host.setInvocationOptions(invocationOptions.mapToString());
+  ) {
+    return runCatchingAsync('BugReporting.setInvocationOptions', () async {
+      await _host.setInvocationOptions(invocationOptions.mapToString());
+    });
   }
 
   /// Sets the floating button position.
@@ -192,19 +214,27 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setFloatingButtonEdge(
     FloatingButtonEdge floatingButtonEdge,
     int offsetFromTop,
-  ) async {
-    return _host.setFloatingButtonEdge(
-      floatingButtonEdge.toString(),
-      offsetFromTop,
-    );
+  ) {
+    return runCatchingAsync('BugReporting.setFloatingButtonEdge', () async {
+      await _host.setFloatingButtonEdge(
+        floatingButtonEdge.toString(),
+        offsetFromTop,
+      );
+    });
   }
 
   /// Sets the position of the video recording button when using the screen recording attachment functionality.
   /// [position] Position of the video recording floating button on the screen.
   static Future<void> setVideoRecordingFloatingButtonPosition(
     Position position,
-  ) async {
-    return _host.setVideoRecordingFloatingButtonPosition(position.toString());
+  ) {
+    return runCatchingAsync(
+      'BugReporting.setVideoRecordingFloatingButtonPosition',
+      () async {
+        await _host
+            .setVideoRecordingFloatingButtonPosition(position.toString());
+      },
+    );
   }
 
   /// Invoke bug reporting with report type and options.
@@ -213,26 +243,38 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> show(
     ReportType reportType,
     List<InvocationOption>? invocationOptions,
-  ) async {
-    return _host.show(reportType.toString(), invocationOptions.mapToString());
+  ) {
+    return runCatchingAsync('BugReporting.show', () async {
+      await _host.show(reportType.toString(), invocationOptions.mapToString());
+    });
   }
 
   /// Sets the threshold value of the shake gesture for iPhone/iPod Touch
   /// Default for iPhone is 2.5.
   /// [threshold] iPhoneShakingThreshold double
-  static Future<void> setShakingThresholdForiPhone(double threshold) async {
-    if (LCQBuildInfo.instance.isIOS) {
-      return _host.setShakingThresholdForiPhone(threshold);
-    }
+  static Future<void> setShakingThresholdForiPhone(double threshold) {
+    return runCatchingAsync(
+      'BugReporting.setShakingThresholdForiPhone',
+      () async {
+        if (LCQBuildInfo.instance.isIOS) {
+          await _host.setShakingThresholdForiPhone(threshold);
+        }
+      },
+    );
   }
 
   /// Sets the threshold value of the shake gesture for iPad
   /// Default for iPhone is 0.6.
   /// [threshold] iPhoneShakingThreshold double
-  static Future<void> setShakingThresholdForiPad(double threshold) async {
-    if (LCQBuildInfo.instance.isIOS) {
-      return _host.setShakingThresholdForiPad(threshold);
-    }
+  static Future<void> setShakingThresholdForiPad(double threshold) {
+    return runCatchingAsync(
+      'BugReporting.setShakingThresholdForiPad',
+      () async {
+        if (LCQBuildInfo.instance.isIOS) {
+          await _host.setShakingThresholdForiPad(threshold);
+        }
+      },
+    );
   }
 
   /// Sets the threshold value of the shake gesture for android devices.
@@ -240,17 +282,24 @@ class BugReporting implements BugReportingFlutterApi {
   /// you could increase the shaking difficulty level by
   /// increasing the `350` value and vice versa
   /// [threshold] iPhoneShakingThreshold int
-  static Future<void> setShakingThresholdForAndroid(int threshold) async {
-    if (LCQBuildInfo.instance.isAndroid) {
-      return _host.setShakingThresholdForAndroid(threshold);
-    }
+  static Future<void> setShakingThresholdForAndroid(int threshold) {
+    return runCatchingAsync(
+      'BugReporting.setShakingThresholdForAndroid',
+      () async {
+        if (LCQBuildInfo.instance.isAndroid) {
+          await _host.setShakingThresholdForAndroid(threshold);
+        }
+      },
+    );
   }
 
   /// Adds a disclaimer text within the bug reporting form,
   /// which can include hyperlinked text.
   /// [text] String text
-  static Future<void> setDisclaimerText(String text) async {
-    return _host.setDisclaimerText(text);
+  static Future<void> setDisclaimerText(String text) {
+    return runCatchingAsync('BugReporting.setDisclaimerText', () async {
+      await _host.setDisclaimerText(text);
+    });
   }
 
   /// Sets a minimum number of characters as a requirement for
@@ -261,10 +310,15 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setCommentMinimumCharacterCount(
     int limit, [
     List<ReportType>? reportTypes,
-  ]) async {
-    return _host.setCommentMinimumCharacterCount(
-      limit,
-      reportTypes.mapToString(),
+  ]) {
+    return runCatchingAsync(
+      'BugReporting.setCommentMinimumCharacterCount',
+      () async {
+        await _host.setCommentMinimumCharacterCount(
+          limit,
+          reportTypes.mapToString(),
+        );
+      },
     );
   }
 
@@ -280,25 +334,32 @@ class BugReporting implements BugReportingFlutterApi {
     required bool mandatory,
     required bool checked,
     UserConsentActionType? actionType,
-  }) async {
-    return _host.addUserConsents(
-      key,
-      description,
-      mandatory,
-      checked,
-      actionType?.toString(),
-    );
+  }) {
+    return runCatchingAsync('BugReporting.addUserConsents', () async {
+      await _host.addUserConsents(
+        key,
+        description,
+        mandatory,
+        checked,
+        actionType?.toString(),
+      );
+    });
   }
 
   /// prompts end users to submit their feedback after our SDK automatically detects a frustrating experience.
   /// [config] configuration of proActive  bug report.
   static Future<void> setProactiveReportingConfigurations(
     ProactiveReportingConfigs config,
-  ) async {
-    _host.setProactiveReportingConfigurations(
-      config.enabled,
-      config.gapBetweenModals,
-      config.modalDelayAfterDetection,
+  ) {
+    return runCatchingAsync(
+      'BugReporting.setProactiveReportingConfigurations',
+      () async {
+        await _host.setProactiveReportingConfigurations(
+          config.enabled,
+          config.gapBetweenModals,
+          config.modalDelayAfterDetection,
+        );
+      },
     );
   }
 }

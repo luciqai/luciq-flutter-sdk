@@ -115,4 +115,15 @@ public class CrashReportingApiTest {
 
         mCrashReporting.verify(() -> CrashReporting.setNDKCrashesState(Feature.State.DISABLED));
     }
+
+    @Test
+    public void testSetEnabledSwallowsThrowable_MOB22385() {
+        // Defense-in-depth: the RunCatching wrapper must absorb native throws
+        // so the host app is never crashed by Luciq.
+        mCrashReporting.when(() -> CrashReporting.setState(Feature.State.ENABLED))
+                .thenThrow(new RuntimeException("native boom"));
+
+        // Should NOT throw — completes normally.
+        api.setEnabled(true);
+    }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
@@ -94,4 +95,18 @@ void main() {
       mHost.bindOnNewReplyCallback(),
     ).called(1);
   });
+
+  test('[setEnabled] swallows host PlatformException (MOB-22385)', () async {
+    when(mHost.setEnabled(any)).thenThrow(PlatformException(code: 'X'));
+    await expectLater(Replies.setEnabled(true), completes);
+  });
+
+  test(
+    '[getUnreadRepliesCount] returns fallback -1 on host exception (MOB-22385)',
+    () async {
+      when(mHost.getUnreadRepliesCount())
+          .thenThrow(PlatformException(code: 'X'));
+      expect(await Replies.getUnreadRepliesCount(), -1);
+    },
+  );
 }

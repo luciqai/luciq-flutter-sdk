@@ -127,6 +127,8 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
         } else if (promptOption == LCQPromptOptionChat) {
             promptOptionString = @"chat";
         } else {
+            // Maps both LCQPromptOptionNone (user closed prompt) and any
+            // future, unrecognized LCQPromptOption value to "none".
             promptOptionString = @"none";
         }
         [self->_flutterApi onDidSelectPromptOptionPromptOption:promptOptionString

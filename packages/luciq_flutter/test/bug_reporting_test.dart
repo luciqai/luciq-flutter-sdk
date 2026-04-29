@@ -212,10 +212,10 @@ void main() {
   });
 
   test(
-    '[setDidSelectPromptOptionHandler] should call host method on iOS and invoke callback',
+    '[setDidSelectPromptOptionHandler] should call host method on iOS, map every value, and ignore unknown values',
     () async {
       when(mBuildInfo.isIOS).thenReturn(true);
-      String? received;
+      PromptOption? received;
 
       await BugReporting.setDidSelectPromptOptionHandler((promptOption) {
         received = promptOption;
@@ -223,8 +223,22 @@ void main() {
 
       verify(mHost.bindOnDidSelectPromptOptionCallback()).called(1);
 
-      BugReporting().onDidSelectPromptOption('bug');
-      expect(received, 'bug');
+      const cases = {
+        'bug': PromptOption.bug,
+        'feedback': PromptOption.feedback,
+        'chat': PromptOption.chat,
+        'none': PromptOption.none,
+      };
+
+      cases.forEach((raw, expected) {
+        received = null;
+        BugReporting().onDidSelectPromptOption(raw);
+        expect(received, expected, reason: 'failed for "$raw"');
+      });
+
+      received = null;
+      BugReporting().onDidSelectPromptOption('unknown');
+      expect(received, isNull);
     },
   );
 

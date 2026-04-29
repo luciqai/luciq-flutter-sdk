@@ -51,6 +51,10 @@ void main() {
     () {
       WidgetsFlutterBinding.ensureInitialized();
 
+      SessionReplay.setSyncCallback((session){
+        print(session);
+        return true;
+      });
       Luciq.init(
         token: '0174a800719ebdebf7b248fa6ae2ef17',
         invocationEvents: [InvocationEvent.floatingButton],

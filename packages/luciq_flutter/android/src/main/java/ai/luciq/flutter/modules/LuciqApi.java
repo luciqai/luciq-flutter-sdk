@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.graphics.Typeface;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -71,9 +72,6 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     private final LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi;
     private final LuciqPigeon.LuciqFlutterApi flutterApi;
-
-    @VisibleForTesting
-    public Report currentReport;
 
     public static void init(BinaryMessenger messenger, Context context, Callable<Bitmap> screenshotProvider) {
         final LuciqPigeon.FeatureFlagsFlutterApi featureFlagsApi =
@@ -807,7 +805,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     // Pre-sending handler
     // ==============================
 
-    private Map<String, Object> serializeReport(Report report) {
+    @VisibleForTesting
+    public Map<String, Object> serializeReport(Report report) {
         final Map<String, Object> map = new HashMap<>();
 
         final List<String> tags = report.getTags();
@@ -852,8 +851,14 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         Luciq.onReportSubmitHandler(new Report.OnReportCreatedListener() {
             @Override
             public void onReportCreated(final Report report) {
-                currentReport = report;
                 if (flutterApi == null) return;
+                // Pigeon dispatches the call (and its reply) on the main thread.
+                // If the SDK fires us on main, awaiting here would deadlock the
+                // main thread for the full timeout — skip mutations in that case.
+                if (Looper.myLooper() == Looper.getMainLooper()) {
+                    Log.w(TAG, "onReportSubmit fired on main thread; skipping Dart mutations to avoid ANR");
+                    return;
+                }
                 final Map<String, Object> snapshot = serializeReport(report);
                 final CountDownLatch latch = new CountDownLatch(1);
                 final AtomicReference<Map<String, Object>> mutationsRef =
@@ -881,8 +886,9 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         });
     }
 
+    @VisibleForTesting
     @SuppressWarnings("unchecked")
-    private void applyMutations(Report report, Map<String, Object> mutations) {
+    public void applyMutations(Report report, Map<String, Object> mutations) {
         if (report == null || mutations == null) return;
         try {
             final List<String> tags = (List<String>) mutations.get("tags");
@@ -911,7 +917,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                     else if ("debug".equals(type)) report.logDebug(log);
                     else if ("info".equals(type)) report.logInfo(log);
                     else if ("warn".equals(type)) report.logWarn(log);
-                    else report.logError(log);
+                    else if ("error".equals(type)) report.logError(log);
+                    else Log.w(TAG, "Skipping log entry with unknown type: " + type);
                 }
             }
             final List<Map<String, Object>> dataAttachments =

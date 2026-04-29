@@ -629,12 +629,27 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 #pragma mark - Pre-sending handler
 
 - (NSDictionary *)serializeReport:(LCQReport *)report {
+    NSMutableArray<NSDictionary *> *fileAttachments = [NSMutableArray array];
+    for (id location in (report.fileLocations ?: @[])) {
+        NSString *path = nil;
+        if ([location isKindOfClass:[NSURL class]]) {
+            path = [(NSURL *)location absoluteString];
+        } else if ([location isKindOfClass:[NSString class]]) {
+            path = location;
+        }
+        if (path) {
+            [fileAttachments addObject:@{@"file": path, @"type": @"url"}];
+        }
+    }
+
     return @{
         @"tagsArray": report.tags ?: @[],
         @"consoleLogs": report.consoleLogs ?: @[],
-        @"luciqLogs": report.luciqLogs ?: @[],
+        // Match Android: skip the read-only luciqLogs snapshot (LCQLog/LogMessage
+        // fields are package-private on Android, so neither platform exposes them).
+        @"luciqLogs": @[],
         @"userAttributes": report.userAttributes ?: @{},
-        @"fileAttachments": report.fileLocations ?: @[],
+        @"fileAttachments": fileAttachments,
     };
 }
 
@@ -645,7 +660,6 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
         if (!strongSelf) {
             return report;
         }
-        strongSelf.currentReport = report;
         NSDictionary *snapshot = [strongSelf serializeReport:report];
 
         dispatch_semaphore_t sema = dispatch_semaphore_create(0);
@@ -668,8 +682,11 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
         NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:10];
         if (onMain) {
-            // Spin the run loop on main thread so the FlutterApi reply
-            // (delivered as a main-queue dispatch) can be processed.
+            // Why: the Flutter reply for `onReportSubmit` is delivered as a
+            // main-queue dispatch. If we block main with a plain semaphore_wait
+            // the queued reply never runs and we deadlock until the timeout.
+            // Spin the run loop in short slices so the reply can land while we
+            // wait, mirroring how Pigeon-style sync calls bridge async replies.
             while (dispatch_semaphore_wait(sema, DISPATCH_TIME_NOW) != 0) {
                 if ([deadline timeIntervalSinceNow] <= 0) break;
                 [[NSRunLoop currentRunLoop]
@@ -724,7 +741,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
             else if ([type isEqualToString:@"debug"]) [report logDebug:log];
             else if ([type isEqualToString:@"info"]) [report logInfo:log];
             else if ([type isEqualToString:@"warn"]) [report logWarn:log];
-            else [report logError:log];
+            else if ([type isEqualToString:@"error"]) [report logError:log];
         }
     }
 

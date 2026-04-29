@@ -67,48 +67,45 @@ class Report {
   final List<_PendingDataAttachment> _pendingDataAttachments = [];
 
   /// Appends a tag to the report.
-  Future<void> appendTag(String tag) async {
+  void appendTag(String tag) {
     tags.add(tag);
     _pendingTags.add(tag);
   }
 
   /// Appends a console log entry to the report.
-  Future<void> appendConsoleLog(String log) async {
+  void appendConsoleLog(String log) {
     consoleLogs.add(log);
     _pendingConsoleLogs.add(log);
   }
 
   /// Sets a user attribute on the report.
-  Future<void> setUserAttribute(String key, String value) async {
+  void setUserAttribute(String key, String value) {
     userAttributes[key] = value;
     _pendingUserAttributes[key] = value;
   }
 
   /// Attaches a verbose log line to the report.
-  Future<void> logVerbose(String log) => _addLog(log, ReportLogLevel.verbose);
+  void logVerbose(String log) => _addLog(log, ReportLogLevel.verbose);
 
   /// Attaches a debug log line to the report.
-  Future<void> logDebug(String log) => _addLog(log, ReportLogLevel.debug);
+  void logDebug(String log) => _addLog(log, ReportLogLevel.debug);
 
   /// Attaches an info log line to the report.
-  Future<void> logInfo(String log) => _addLog(log, ReportLogLevel.info);
+  void logInfo(String log) => _addLog(log, ReportLogLevel.info);
 
   /// Attaches a warn log line to the report.
-  Future<void> logWarn(String log) => _addLog(log, ReportLogLevel.warn);
+  void logWarn(String log) => _addLog(log, ReportLogLevel.warn);
 
   /// Attaches an error log line to the report.
-  Future<void> logError(String log) => _addLog(log, ReportLogLevel.error);
+  void logError(String log) => _addLog(log, ReportLogLevel.error);
 
-  Future<void> _addLog(String log, ReportLogLevel level) async {
+  void _addLog(String log, ReportLogLevel level) {
     luciqLogs.add(ReportLog(log: log, type: level));
     _pendingLogs.add(_PendingLog(log: log, level: level));
   }
 
   /// Attaches raw binary data as a file to the report.
-  Future<void> addFileAttachmentWithData(
-    Uint8List data,
-    String fileName,
-  ) async {
+  void addFileAttachmentWithData(Uint8List data, String fileName) {
     fileAttachments.add(ReportFileAttachment(file: fileName, isData: true));
     _pendingDataAttachments
         .add(_PendingDataAttachment(data: data, fileName: fileName));

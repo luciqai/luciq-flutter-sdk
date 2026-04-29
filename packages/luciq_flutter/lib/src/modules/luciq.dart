@@ -162,7 +162,7 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
   Future<Map<String?, Object?>?> onReportSubmit(
     Map<String?, Object?> snapshot,
   ) async {
-    final callback = Luciq.$onReportSubmitCallback;
+    final callback = Luciq._onReportSubmitCallback;
     if (callback == null) return null;
 
     List<String> parseStringList(Object? raw) {
@@ -259,17 +259,9 @@ class Luciq {
   static var _host = LuciqHostApi();
 
   static OnReportSubmitCallback? _onReportSubmitCallback;
+  static bool _onReportSubmitBound = false;
 
   static const tag = 'Luciq';
-
-  /// @nodoc
-  @internal
-  static LuciqHostApi get $host => _host;
-
-  /// @nodoc
-  @internal
-  static OnReportSubmitCallback? get $onReportSubmitCallback =>
-      _onReportSubmitCallback;
 
   /// @nodoc
   @visibleForTesting
@@ -277,6 +269,20 @@ class Luciq {
   static void $setHostApi(LuciqHostApi host) {
     _host = host;
   }
+
+  /// @nodoc
+  @visibleForTesting
+  static void $resetOnReportSubmitBindingForTesting() {
+    _onReportSubmitBound = false;
+    _onReportSubmitCallback = null;
+  }
+
+  /// @nodoc
+  @visibleForTesting
+  static Future<Map<String?, Object?>?> $invokeOnReportSubmitForTesting(
+    Map<String?, Object?> snapshot,
+  ) =>
+      _LuciqDisposalManager.instance.onReportSubmit(snapshot);
 
   /// @nodoc
   @internal
@@ -679,6 +685,8 @@ class Luciq {
     OnReportSubmitCallback? callback,
   ) async {
     _onReportSubmitCallback = callback;
+    if (callback == null || _onReportSubmitBound) return;
+    _onReportSubmitBound = true;
     return _host.bindOnReportSubmitHandler();
   }
 }

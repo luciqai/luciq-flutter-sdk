@@ -94,4 +94,140 @@ void main() {
       mHost.bindOnNewReplyCallback(),
     ).called(1);
   });
+
+  test('[setPushNotificationsEnabled] should call host method', () async {
+    const enabled = true;
+
+    await Replies.setPushNotificationsEnabled(enabled);
+
+    verify(
+      mHost.setPushNotificationsEnabled(enabled),
+    ).called(1);
+  });
+
+  test(
+    '[setPushNotificationRegistrationTokenAndroid] should call host method on Android',
+    () async {
+      const token = 'fcm-token';
+      when(mBuildInfo.isAndroid).thenReturn(true);
+
+      await Replies.setPushNotificationRegistrationTokenAndroid(token);
+
+      verify(
+        mHost.setPushNotificationRegistrationTokenAndroid(token),
+      ).called(1);
+    },
+  );
+
+  test(
+    '[setPushNotificationRegistrationTokenAndroid] should not call host method on iOS',
+    () async {
+      const token = 'fcm-token';
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.setPushNotificationRegistrationTokenAndroid(token);
+
+      verifyNever(mHost.setPushNotificationRegistrationTokenAndroid(token));
+    },
+  );
+
+  test(
+    '[showNotificationAndroid] should call host method on Android',
+    () async {
+      const data = {'body': 'hello'};
+      when(mBuildInfo.isAndroid).thenReturn(true);
+
+      await Replies.showNotificationAndroid(data);
+
+      verify(mHost.showNotificationAndroid(data)).called(1);
+    },
+  );
+
+  test(
+    '[showNotificationAndroid] should not call host method on iOS',
+    () async {
+      const data = {'body': 'hello'};
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.showNotificationAndroid(data);
+
+      verifyNever(mHost.showNotificationAndroid(data));
+    },
+  );
+
+  test(
+    '[setNotificationIconAndroid] should call host method on Android',
+    () async {
+      const resourceId = 42;
+      when(mBuildInfo.isAndroid).thenReturn(true);
+
+      await Replies.setNotificationIconAndroid(resourceId);
+
+      verify(mHost.setNotificationIconAndroid(resourceId)).called(1);
+    },
+  );
+
+  test(
+    '[setNotificationIconAndroid] should not call host method on iOS',
+    () async {
+      const resourceId = 42;
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.setNotificationIconAndroid(resourceId);
+
+      verifyNever(mHost.setNotificationIconAndroid(resourceId));
+    },
+  );
+
+  test(
+    '[setPushNotificationChannelIdAndroid] should call host method on Android',
+    () async {
+      const id = 'channel-id';
+      when(mBuildInfo.isAndroid).thenReturn(true);
+
+      await Replies.setPushNotificationChannelIdAndroid(id);
+
+      verify(mHost.setPushNotificationChannelIdAndroid(id)).called(1);
+    },
+  );
+
+  test(
+    '[setPushNotificationChannelIdAndroid] should not call host method on iOS',
+    () async {
+      const id = 'channel-id';
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.setPushNotificationChannelIdAndroid(id);
+
+      verifyNever(mHost.setPushNotificationChannelIdAndroid(id));
+    },
+  );
+
+  test(
+    '[setSystemReplyNotificationSoundEnabledAndroid] should call host method on Android',
+    () async {
+      const enabled = true;
+      when(mBuildInfo.isAndroid).thenReturn(true);
+
+      await Replies.setSystemReplyNotificationSoundEnabledAndroid(enabled);
+
+      verify(
+        mHost.setSystemReplyNotificationSoundEnabledAndroid(enabled),
+      ).called(1);
+    },
+  );
+
+  test(
+    '[setSystemReplyNotificationSoundEnabledAndroid] should not call host method on iOS',
+    () async {
+      const enabled = true;
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.setSystemReplyNotificationSoundEnabledAndroid(enabled);
+
+      verifyNever(
+        mHost.setSystemReplyNotificationSoundEnabledAndroid(enabled),
+      );
+    },
+  );
 }

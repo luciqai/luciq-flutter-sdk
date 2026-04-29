@@ -125,5 +125,36 @@
     OCMVerify([self.mSessionReplay setScreenshotQualityMode:LCQScreenshotQualityModeGreyScale]);
 }
 
+- (void)testEvaluateSyncResolvesPendingCompletionsInFifoOrder {
+    // Two pending completions are queued (mirrors two concurrent invocations of the
+    // sync listener). Each evaluateSync call must resolve exactly one pending entry
+    // in FIFO order — not overwrite a single shared slot.
+    XCTestExpectation *firstCalled = [self expectationWithDescription:@"first completion called with NO"];
+    XCTestExpectation *secondCalled = [self expectationWithDescription:@"second completion called with YES"];
+
+    self.api.pendingSessionEvaluationCompletions = [NSMutableArray array];
+    [self.api.pendingSessionEvaluationCompletions addObject:[^(BOOL value) {
+        XCTAssertFalse(value);
+        [firstCalled fulfill];
+    } copy]];
+    [self.api.pendingSessionEvaluationCompletions addObject:[^(BOOL value) {
+        XCTAssertTrue(value);
+        [secondCalled fulfill];
+    } copy]];
+
+    FlutterError *error;
+    [self.api evaluateSyncResult:@NO error:&error];
+    [self.api evaluateSyncResult:@YES error:&error];
+
+    [self waitForExpectations:@[firstCalled, secondCalled] timeout:1.0 enforceOrder:YES];
+    XCTAssertEqual(self.api.pendingSessionEvaluationCompletions.count, 0);
+}
+
+- (void)testEvaluateSyncBeforeBindIsNoOp {
+    // Calling evaluateSync with no pending completion must not crash.
+    self.api.pendingSessionEvaluationCompletions = [NSMutableArray array];
+    FlutterError *error;
+    [self.api evaluateSyncResult:@YES error:&error];
+}
 
 @end

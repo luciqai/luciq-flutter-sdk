@@ -20,6 +20,11 @@ void main() {
     SessionReplay.$setHostApi(mHost);
   });
 
+  tearDown(() {
+    SessionReplay.$resetSyncCallback();
+    reset(mHost);
+  });
+
   test('[setEnabled] should call host method', () async {
     const isEnabled = true;
     await SessionReplay.setEnabled(isEnabled);
@@ -126,5 +131,99 @@ void main() {
         ScreenshotQualityMode.greyScale.toString(),
       ),
     ).called(1);
+  });
+
+  test(
+    '[onShouldSyncSession] should default to syncing when no callback is set',
+    () async {
+      SessionReplay().onShouldSyncSession(const <String?, Object?>{});
+
+      verify(mHost.evaluateSync(true)).called(1);
+    },
+  );
+
+  test('[setSyncCallback] should bind native callback', () async {
+    await SessionReplay.setSyncCallback((_) => true);
+
+    verify(mHost.bindOnSyncCallback()).called(1);
+  });
+
+  test(
+    '[onShouldSyncSession] should invoke callback and call evaluateSync with its result',
+    () async {
+      SessionMetadata? received;
+
+      await SessionReplay.setSyncCallback((metadata) {
+        received = metadata;
+        return false;
+      });
+
+      final payload = <String?, Object?>{
+        'appVersion': '1.2.3',
+        'os': 'iOS 17.0',
+        'device': 'iPhone15,2',
+        'sessionDurationInSeconds': 42,
+        'hasLinkToAppReview': true,
+        'launchType': 'Cold',
+        'launchDuration': 1500,
+        'bugsCount': 1,
+        'fatalCrashCount': 0,
+        'oomCrashCount': 0,
+        'networkLogs': [
+          {'url': 'https://example.com', 'duration': 120, 'statusCode': 200},
+        ],
+      };
+
+      SessionReplay().onShouldSyncSession(payload);
+
+      expect(received, isNotNull);
+      expect(received!.appVersion, '1.2.3');
+      expect(received!.os, 'iOS 17.0');
+      expect(received!.device, 'iPhone15,2');
+      expect(received!.sessionDurationInSeconds, 42);
+      expect(received!.hasLinkToAppReview, true);
+      expect(received!.launchType, LaunchType.cold);
+      expect(received!.launchDuration, 1500);
+      expect(received!.bugsCount, 1);
+      expect(received!.networkLogs, hasLength(1));
+      expect(received!.networkLogs.first.url, 'https://example.com');
+      expect(received!.networkLogs.first.statusCode, 200);
+
+      verify(mHost.evaluateSync(false)).called(1);
+    },
+  );
+
+  test('[onShouldSyncSession] should map Android-only Warm launch type',
+      () async {
+    SessionMetadata? received;
+
+    await SessionReplay.setSyncCallback((metadata) {
+      received = metadata;
+      return true;
+    });
+
+    SessionReplay().onShouldSyncSession(const <String?, Object?>{
+      'launchType': 'Warm',
+    });
+
+    expect(received, isNotNull);
+    expect(received!.launchType, LaunchType.warm);
+  });
+
+  test('[onShouldSyncSession] should map unknown launch type strings',
+      () async {
+    SessionMetadata? received;
+
+    await SessionReplay.setSyncCallback((metadata) {
+      received = metadata;
+      return true;
+    });
+
+    SessionReplay().onShouldSyncSession(const <String?, Object?>{
+      'launchType': 'Bogus',
+    });
+
+    expect(received, isNotNull);
+    expect(received!.launchType, LaunchType.unknown);
   });
 }

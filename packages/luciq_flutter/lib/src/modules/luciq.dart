@@ -174,6 +174,7 @@ class Luciq {
   static void $setup() {
     BugReporting.$setup();
     Replies.$setup();
+    SessionReplay.$setup();
     Surveys.$setup();
     // Set up LuciqFlutterApi for Android onDestroy disposal
     LuciqFlutterApi.setup(_LuciqDisposalManager.instance);

@@ -2,8 +2,9 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:luciq_flutter/src/generated/session_replay.api.g.dart';
+import 'package:luciq_flutter/src/models/session_metadata.dart';
+import 'package:meta/meta.dart';
 
 enum ScreenshotCapturingMode {
   navigation,
@@ -17,14 +18,44 @@ enum ScreenshotQualityMode {
   greyScale,
 }
 
-class SessionReplay {
+typedef SessionSyncCallback = bool Function(SessionMetadata metadata);
+
+class SessionReplay implements SessionReplayFlutterApi {
   static var _host = SessionReplayHostApi();
+  static final _instance = SessionReplay();
+
+  static SessionSyncCallback? _syncCallback;
 
   /// @nodoc
   @visibleForTesting
   // ignore: use_setters_to_change_properties
   static void $setHostApi(SessionReplayHostApi host) {
     _host = host;
+  }
+
+  /// @nodoc
+  @visibleForTesting
+  static void $resetSyncCallback() {
+    _syncCallback = null;
+  }
+
+  /// @nodoc
+  @internal
+  static void $setup() {
+    SessionReplayFlutterApi.setup(_instance);
+  }
+
+  /// @nodoc
+  @internal
+  @override
+  void onShouldSyncSession(Map<String?, Object?> metadata) {
+    final cleaned = <Object?, Object?>{};
+    metadata.forEach((key, value) {
+      if (key != null) cleaned[key] = value;
+    });
+    final parsed = SessionMetadata.fromMap(cleaned);
+    final result = _syncCallback?.call(parsed) ?? true;
+    _host.evaluateSync(result);
   }
 
   /// Enables or disables Session Replay for your Luciq integration.
@@ -169,5 +200,22 @@ class SessionReplay {
     ScreenshotQualityMode mode,
   ) async {
     return _host.setScreenshotQualityMode(mode.toString());
+  }
+
+  /// Registers a callback that decides whether to sync a Session Replay.
+  ///
+  /// The callback receives a [SessionMetadata] describing the previous session
+  /// and must return `true` to sync or `false` to drop it.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// SessionReplay.setSyncCallback((metadata) {
+  ///   return metadata.sessionDurationInSeconds > 60;
+  /// });
+  /// ```
+  static Future<void> setSyncCallback(SessionSyncCallback callback) async {
+    _syncCallback = callback;
+    return _host.bindOnSyncCallback();
   }
 }

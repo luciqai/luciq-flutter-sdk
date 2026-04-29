@@ -284,6 +284,26 @@ void main() {
     ).called(1);
   });
 
+  test('[addFeatureFlag] should forward to addFeatureFlags host method',
+      () async {
+    await Luciq.addFeatureFlag(
+      FeatureFlag(name: 'name1', variant: 'variant1'),
+    );
+
+    verify(
+      mHost.addFeatureFlags(<String, String>{'name1': 'variant1'}),
+    ).called(1);
+  });
+
+  test('[removeFeatureFlag] should forward to removeFeatureFlags host method',
+      () async {
+    await Luciq.removeFeatureFlag('exp-1');
+
+    verify(
+      mHost.removeFeatureFlags(['exp-1']),
+    ).called(1);
+  });
+
   test('[clearAllFeatureFlags] should call host method', () async {
     await Luciq.clearAllFeatureFlags();
 
@@ -473,6 +493,40 @@ void main() {
 
     verify(
       mHost.setTheme(themeConfig.toMap()),
+    ).called(1);
+  });
+
+  test(
+    '[setLCQLogPrintsToConsole] should call host method on iOS',
+    () async {
+      when(mBuildInfo.isIOS).thenReturn(true);
+
+      await Luciq.setLCQLogPrintsToConsole(true);
+
+      verify(
+        mHost.setLCQLogPrintsToConsole(true),
+      ).called(1);
+    },
+  );
+
+  test(
+    '[setLCQLogPrintsToConsole] should not call host method on Android',
+    () async {
+      when(mBuildInfo.isIOS).thenReturn(false);
+
+      await Luciq.setLCQLogPrintsToConsole(true);
+
+      verifyNever(
+        mHost.setLCQLogPrintsToConsole(true),
+      );
+    },
+  );
+
+  test('[clearLogs] should call host method', () async {
+    await Luciq.clearLogs();
+
+    verify(
+      mHost.clearLogs(),
     ).called(1);
   });
 

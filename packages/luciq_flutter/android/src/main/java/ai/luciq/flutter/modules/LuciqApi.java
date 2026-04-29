@@ -33,6 +33,7 @@ import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.InternalCore;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
+import ai.luciq.library.logging.LuciqLog;
 import ai.luciq.library.model.NetworkLog;
 import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
@@ -778,5 +779,20 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void setLCQLogPrintsToConsole(@NonNull Boolean printsToConsole) {
+        // iOS Only
+    }
+
+    @Override
+    public void clearLogs() {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                LuciqLog.clearLogs();
+            }
+        });
     }
 }

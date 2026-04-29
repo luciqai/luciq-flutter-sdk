@@ -78,10 +78,10 @@ void main() {
       };
 
       Luciq.onReportSubmitHandler((report) async {
-        await report.appendTag("tag");
-        await report.setUserAttribute("key", "value");
-        await report.appendConsoleLog("log");
-        await report.logError("log Error");
+         report.appendTag("tag");
+         report.setUserAttribute("key", "value");
+         report.appendConsoleLog("log");
+         report.logError("log Error");
       });
       runApp(
         ChangeNotifierProvider(

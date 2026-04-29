@@ -139,6 +139,8 @@ enum CustomTextPlaceHolderKey {
 
 enum ReproStepsMode { enabled, disabled, enabledWithNoScreenshots }
 
+typedef OnReportSubmitCallback = FutureOr<void> Function(Report report);
+
 /// Disposal manager for handling Android lifecycle events
 class _LuciqDisposalManager implements LuciqFlutterApi {
   _LuciqDisposalManager._();
@@ -155,10 +157,109 @@ class _LuciqDisposalManager implements LuciqFlutterApi {
     //Save the screen rendering data for the active traces Auto|Custom.
     LuciqScreenRenderManager.I.syncCollectedScreenRenderingData();
   }
+
+  @override
+  Future<Map<String?, Object?>?> onReportSubmit(
+    Map<String?, Object?> snapshot,
+  ) async {
+    final callback = Luciq._onReportSubmitCallback;
+    if (callback == null) return null;
+
+    List<String> parseStringList(Object? raw) {
+      if (raw is List) {
+        return raw.whereType<String>().toList();
+      }
+      return const <String>[];
+    }
+
+    Map<String, String> parseStringMap(Object? raw) {
+      final result = <String, String>{};
+      if (raw is Map) {
+        raw.forEach((key, value) {
+          if (key is String && value is String) result[key] = value;
+        });
+      }
+      return result;
+    }
+
+    List<ReportLog> parseLogs(Object? raw) {
+      final out = <ReportLog>[];
+      if (raw is List) {
+        for (final entry in raw) {
+          if (entry is Map) {
+            final log = entry['log'] as String?;
+            final type = entry['type'] as String?;
+            if (log == null) continue;
+            out.add(
+              ReportLog(
+                log: log,
+                type: _parseLogLevel(type),
+              ),
+            );
+          }
+        }
+      }
+      return out;
+    }
+
+    List<ReportFileAttachment> parseAttachments(Object? raw) {
+      final out = <ReportFileAttachment>[];
+      if (raw is List) {
+        for (final entry in raw) {
+          if (entry is Map) {
+            final file = entry['file'] as String?;
+            final type = entry['type'] as String?;
+            if (file == null) continue;
+            out.add(
+              ReportFileAttachment(
+                file: file,
+                isData: type == 'data',
+              ),
+            );
+          }
+        }
+      }
+      return out;
+    }
+
+    final report = Report(
+      tags: parseStringList(snapshot['tagsArray']),
+      consoleLogs: parseStringList(snapshot['consoleLogs']),
+      luciqLogs: parseLogs(snapshot['luciqLogs']),
+      userAttributes: parseStringMap(snapshot['userAttributes']),
+      fileAttachments: parseAttachments(snapshot['fileAttachments']),
+    );
+
+    try {
+      await callback(report);
+    } catch (e, st) {
+      LuciqLogger.I.e('onReportSubmit callback threw: $e\n$st');
+    }
+    return report.drainMutations();
+  }
+
+  static ReportLogLevel _parseLogLevel(String? raw) {
+    switch (raw) {
+      case 'verbose':
+        return ReportLogLevel.verbose;
+      case 'debug':
+        return ReportLogLevel.debug;
+      case 'info':
+        return ReportLogLevel.info;
+      case 'warn':
+        return ReportLogLevel.warn;
+      case 'error':
+      default:
+        return ReportLogLevel.error;
+    }
+  }
 }
 
 class Luciq {
   static var _host = LuciqHostApi();
+
+  static OnReportSubmitCallback? _onReportSubmitCallback;
+  static bool _onReportSubmitBound = false;
 
   static const tag = 'Luciq';
 
@@ -168,6 +269,20 @@ class Luciq {
   static void $setHostApi(LuciqHostApi host) {
     _host = host;
   }
+
+  /// @nodoc
+  @visibleForTesting
+  static void $resetOnReportSubmitBindingForTesting() {
+    _onReportSubmitBound = false;
+    _onReportSubmitCallback = null;
+  }
+
+  /// @nodoc
+  @visibleForTesting
+  static Future<Map<String?, Object?>?> $invokeOnReportSubmitForTesting(
+    Map<String?, Object?> snapshot,
+  ) =>
+      _LuciqDisposalManager.instance.onReportSubmit(snapshot);
 
   /// @nodoc
   @internal
@@ -551,5 +666,27 @@ class Luciq {
     String? viewName,
   ) async {
     return _host.logUserSteps(gestureType.toString(), message, viewName);
+  }
+
+  /// Registers a callback that is invoked before each bug/crash/feedback report
+  /// is sent, giving you a chance to enrich it with tags, console logs, user
+  /// attributes, Luciq logs, or file attachments.
+  ///
+  /// Pass `null` to clear a previously registered handler.
+  ///
+  /// Example:
+  /// ```dart
+  /// Luciq.onReportSubmitHandler((report) {
+  ///   report.appendTag('checkout');
+  ///   report.setUserAttribute('tier', 'pro');
+  /// });
+  /// ```
+  static Future<void> onReportSubmitHandler(
+    OnReportSubmitCallback? callback,
+  ) async {
+    _onReportSubmitCallback = callback;
+    if (callback == null || _onReportSubmitBound) return;
+    _onReportSubmitBound = true;
+    return _host.bindOnReportSubmitHandler();
   }
 }

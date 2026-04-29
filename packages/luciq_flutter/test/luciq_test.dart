@@ -476,6 +476,163 @@ void main() {
     ).called(1);
   });
 
+  group('onReportSubmitHandler', () {
+    setUp(() {
+      Luciq.$resetOnReportSubmitBindingForTesting();
+      clearInteractions(mHost);
+    });
+
+    test('binds host handler', () async {
+      await Luciq.onReportSubmitHandler((_) {});
+
+      verify(mHost.bindOnReportSubmitHandler()).called(1);
+    });
+
+    test('binds host handler only once across multiple set calls', () async {
+      await Luciq.onReportSubmitHandler((_) {});
+      await Luciq.onReportSubmitHandler((_) {});
+      await Luciq.onReportSubmitHandler((_) {});
+
+      verify(mHost.bindOnReportSubmitHandler()).called(1);
+    });
+
+    test('does not call native bind when clearing with null first', () async {
+      await Luciq.onReportSubmitHandler(null);
+
+      verifyNever(mHost.bindOnReportSubmitHandler());
+    });
+
+    test('onReportSubmit returns null when no callback is registered',
+        () async {
+      await Luciq.onReportSubmitHandler(null);
+
+      final result = await Luciq.$invokeOnReportSubmitForTesting(<String?, Object?>{
+        'tagsArray': <String>['t'],
+      });
+
+      expect(result, isNull);
+    });
+
+    test('onReportSubmit parses snapshot fields and drains mutations',
+        () async {
+      Report? captured;
+      await Luciq.onReportSubmitHandler((report) {
+        captured = report;
+        report.appendTag('added');
+        report.setUserAttribute('k', 'v');
+        report.logInfo('hello');
+        report.addFileAttachmentWithData(
+          Uint8List.fromList([9, 9]),
+          'blob.bin',
+        );
+      });
+
+      final snapshot = <String?, Object?>{
+        'tagsArray': <Object?>['initial', 42, 'second'],
+        'consoleLogs': <Object?>['c1'],
+        'luciqLogs': <Object?>[
+          <String, Object?>{'log': 'l1', 'type': 'warn'},
+          <String, Object?>{'log': 'l2', 'type': 'unknown'},
+          <String, Object?>{'type': 'info'},
+        ],
+        'userAttributes': <Object?, Object?>{'a': 'b', 1: 'numeric-key'},
+        'fileAttachments': <Object?>[
+          <String, Object?>{'file': '/tmp/a.txt', 'type': 'url'},
+          <String, Object?>{'type': 'url'},
+        ],
+      };
+
+      final mutations = await Luciq.$invokeOnReportSubmitForTesting(snapshot);
+
+      expect(captured, isNotNull);
+      expect(captured!.tags, ['initial', 'second', 'added']);
+      expect(captured!.consoleLogs, ['c1']);
+      expect(captured!.userAttributes, {'a': 'b', 'k': 'v'});
+      expect(captured!.luciqLogs.length, 3);
+      expect(captured!.luciqLogs[0].type, ReportLogLevel.warn);
+      expect(captured!.luciqLogs[1].type, ReportLogLevel.error);
+      expect(captured!.fileAttachments.length, 2);
+      expect(captured!.fileAttachments[0].file, '/tmp/a.txt');
+      expect(captured!.fileAttachments[0].isData, false);
+      expect(captured!.fileAttachments[1].file, 'blob.bin');
+      expect(captured!.fileAttachments[1].isData, true);
+
+      expect(mutations, isNotNull);
+      expect(mutations!['tags'], ['added']);
+      expect(mutations['userAttributes'], {'k': 'v'});
+      final logs = (mutations['logs'] as List?)?.cast<Map<String, dynamic>>();
+      expect(logs?.single['type'], 'info');
+      final dataAttachments =
+          (mutations['dataAttachments'] as List?)?.cast<Map<String, dynamic>>();
+      expect(dataAttachments?.single['fileName'], 'blob.bin');
+    });
+
+    test('onReportSubmit swallows callback exceptions and still drains',
+        () async {
+      await Luciq.onReportSubmitHandler((report) {
+        report.appendTag('before-throw');
+        throw StateError('boom');
+      });
+
+      final mutations = await Luciq.$invokeOnReportSubmitForTesting(
+        <String?, Object?>{},
+      );
+
+      expect(mutations, isNotNull);
+      expect(mutations!['tags'], ['before-throw']);
+    });
+
+    test('Report mutators accumulate locally and drain into a mutations map',
+        () async {
+      final report = Report();
+
+      report.appendTag('t');
+      report.appendConsoleLog('c');
+      report.setUserAttribute('k', 'v');
+      report.logVerbose('v-log');
+      report.logDebug('d-log');
+      report.logInfo('i-log');
+      report.logWarn('w-log');
+      report.logError('e-log');
+      report.addFileAttachmentWithData(
+        Uint8List.fromList([1, 2, 3]),
+        'bin',
+      );
+
+      // Local view is updated.
+      expect(report.tags, ['t']);
+      expect(report.consoleLogs, ['c']);
+      expect(report.userAttributes, {'k': 'v'});
+      expect(report.luciqLogs.length, 5);
+      expect(
+        report.luciqLogs.map((l) => l.type),
+        [
+          ReportLogLevel.verbose,
+          ReportLogLevel.debug,
+          ReportLogLevel.info,
+          ReportLogLevel.warn,
+          ReportLogLevel.error,
+        ],
+      );
+      expect(report.fileAttachments.length, 1);
+      expect(report.fileAttachments[0].isData, true);
+
+      // Drained mutations describe what to apply on the native side.
+      final mutations = report.drainMutations();
+      expect(mutations['tags'], ['t']);
+      expect(mutations['consoleLogs'], ['c']);
+      expect(mutations['userAttributes'], {'k': 'v'});
+      final logs = (mutations['logs'] as List?)?.cast<Map<String, dynamic>>();
+      expect(logs?.length, 5);
+      expect(logs?[0]['type'], 'verbose');
+      expect(logs?[4]['type'], 'error');
+      final dataAttachments =
+          (mutations['dataAttachments'] as List?)?.cast<Map<String, dynamic>>();
+      expect(dataAttachments?.length, 1);
+      expect(dataAttachments?[0]['fileName'], 'bin');
+    });
+  });
+
   group('Disposal Manager', () {
     test('LuciqFlutterApi dispose should call widget binding observer dispose',
         () {

@@ -804,4 +804,130 @@ public class LuciqApiTest {
         api.setNetworkAutoMaskingEnabled(isEnabled);
         mLuciq.verify(() -> Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED));
     }
+
+    @Test
+    public void testBindOnReportSubmitHandler() {
+        api.bindOnReportSubmitHandler();
+
+        mLuciq.verify(() -> Luciq.onReportSubmitHandler(any(ai.luciq.library.model.Report.OnReportCreatedListener.class)));
+    }
+
+    @Test
+    public void testSerializeReportMapsFieldsAndAttachments() {
+        ai.luciq.library.model.Report report = mock(ai.luciq.library.model.Report.class);
+        when(report.getTags()).thenReturn(new ArrayList<>(Arrays.asList("tag-a", "tag-b")));
+        ai.luciq.library.model.ConsoleLog log = mock(ai.luciq.library.model.ConsoleLog.class);
+        when(log.getMessage()).thenReturn("hello");
+        when(log.getTimeStamp()).thenReturn(123L);
+        ArrayList<ai.luciq.library.model.ConsoleLog> consoleLogList = new ArrayList<>();
+        consoleLogList.add(log);
+        when(report.getConsoleLog()).thenReturn(consoleLogList);
+        HashMap<String, String> attrs = new HashMap<>();
+        attrs.put("plan", "pro");
+        when(report.getUserAttributes()).thenReturn(attrs);
+        HashMap<Uri, String> attachments = new HashMap<>();
+        Uri uri = mock(Uri.class);
+        when(uri.toString()).thenReturn("file:///tmp/dump.txt");
+        attachments.put(uri, "dump.txt");
+        when(report.getFileAttachments()).thenReturn(attachments);
+
+        Map<String, Object> snapshot = api.serializeReport(report);
+
+        assertEquals(Arrays.asList("tag-a", "tag-b"), snapshot.get("tagsArray"));
+        List<Map<String, Object>> consoleLogs = (List<Map<String, Object>>) snapshot.get("consoleLogs");
+        assertEquals(1, consoleLogs.size());
+        assertEquals("hello", consoleLogs.get(0).get("message"));
+        assertEquals(123L, consoleLogs.get(0).get("date"));
+        assertEquals(attrs, snapshot.get("userAttributes"));
+        assertEquals(new ArrayList<>(), snapshot.get("luciqLogs"));
+        List<Map<String, Object>> fileAttachments = (List<Map<String, Object>>) snapshot.get("fileAttachments");
+        assertEquals(1, fileAttachments.size());
+        assertEquals("file:///tmp/dump.txt", fileAttachments.get(0).get("file"));
+        assertEquals("url", fileAttachments.get(0).get("type"));
+    }
+
+    @Test
+    public void testSerializeReportHandlesNullCollections() {
+        ai.luciq.library.model.Report report = mock(ai.luciq.library.model.Report.class);
+        when(report.getTags()).thenReturn(null);
+        when(report.getConsoleLog()).thenReturn(null);
+        when(report.getUserAttributes()).thenReturn(null);
+        when(report.getFileAttachments()).thenReturn(null);
+
+        Map<String, Object> snapshot = api.serializeReport(report);
+
+        assertEquals(new ArrayList<>(), snapshot.get("tagsArray"));
+        assertEquals(new ArrayList<>(), snapshot.get("consoleLogs"));
+        assertEquals(new HashMap<>(), snapshot.get("userAttributes"));
+        assertEquals(new ArrayList<>(), snapshot.get("luciqLogs"));
+        assertEquals(new ArrayList<>(), snapshot.get("fileAttachments"));
+    }
+
+    @Test
+    public void testApplyMutationsAppliesAllSupportedFields() {
+        ai.luciq.library.model.Report report = mock(ai.luciq.library.model.Report.class);
+
+        Map<String, Object> mutations = new HashMap<>();
+        mutations.put("tags", Arrays.asList("t1", "t2"));
+        mutations.put("consoleLogs", Collections.singletonList("c1"));
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("k", "v");
+        mutations.put("userAttributes", attrs);
+        List<Map<String, Object>> logs = new ArrayList<>();
+        for (String type : Arrays.asList("verbose", "debug", "info", "warn", "error")) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("log", type + "-msg");
+            entry.put("type", type);
+            logs.add(entry);
+        }
+        mutations.put("logs", logs);
+        Map<String, Object> dataAttachment = new HashMap<>();
+        byte[] data = new byte[]{1, 2, 3};
+        dataAttachment.put("data", data);
+        dataAttachment.put("fileName", "blob.bin");
+        mutations.put("dataAttachments", Collections.singletonList(dataAttachment));
+
+        api.applyMutations(report, mutations);
+
+        verify(report).addTag("t1");
+        verify(report).addTag("t2");
+        verify(report).appendToConsoleLogs("c1");
+        verify(report).setUserAttribute("k", "v");
+        verify(report).logVerbose("verbose-msg");
+        verify(report).logDebug("debug-msg");
+        verify(report).logInfo("info-msg");
+        verify(report).logWarn("warn-msg");
+        verify(report).logError("error-msg");
+        verify(report).addFileAttachment(data, "blob.bin");
+    }
+
+    @Test
+    public void testApplyMutationsSkipsUnknownLogType() {
+        ai.luciq.library.model.Report report = mock(ai.luciq.library.model.Report.class);
+
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("log", "ignored");
+        entry.put("type", "trace");
+        Map<String, Object> mutations = new HashMap<>();
+        mutations.put("logs", Collections.singletonList(entry));
+
+        api.applyMutations(report, mutations);
+
+        verify(report, never()).logError(anyString());
+        verify(report, never()).logWarn(anyString());
+        verify(report, never()).logInfo(anyString());
+        verify(report, never()).logDebug(anyString());
+        verify(report, never()).logVerbose(anyString());
+    }
+
+    @Test
+    public void testApplyMutationsTolerantOfNulls() {
+        ai.luciq.library.model.Report report = mock(ai.luciq.library.model.Report.class);
+
+        api.applyMutations(report, null);
+        api.applyMutations(null, new HashMap<>());
+
+        verify(report, never()).addTag(anyString());
+    }
+
 }

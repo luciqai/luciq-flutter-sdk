@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.graphics.Typeface;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -33,7 +34,9 @@ import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.InternalCore;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
+import ai.luciq.library.model.ConsoleLog;
 import ai.luciq.library.model.NetworkLog;
+import ai.luciq.library.model.Report;
 import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
 
@@ -56,26 +59,44 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LuciqApi implements LuciqPigeon.LuciqHostApi {
+    private static final long ON_REPORT_SUBMIT_TIMEOUT_SECONDS = 10;
     private final String TAG = LuciqApi.class.getName();
     private final Context context;
     private final Callable<Bitmap> screenshotProvider;
     private final LuciqCustomTextPlaceHolder placeHolder = new LuciqCustomTextPlaceHolder();
 
     private final LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi;
+    private final LuciqPigeon.LuciqFlutterApi flutterApi;
 
     public static void init(BinaryMessenger messenger, Context context, Callable<Bitmap> screenshotProvider) {
-        final LuciqPigeon.FeatureFlagsFlutterApi flutterApi = new LuciqPigeon.FeatureFlagsFlutterApi(messenger);
+        final LuciqPigeon.FeatureFlagsFlutterApi featureFlagsApi =
+                new LuciqPigeon.FeatureFlagsFlutterApi(messenger);
+        final LuciqPigeon.LuciqFlutterApi flutterApi =
+                new LuciqPigeon.LuciqFlutterApi(messenger);
 
-        final LuciqApi api = new LuciqApi(context, screenshotProvider, flutterApi);
+        final LuciqApi api = new LuciqApi(context, screenshotProvider, featureFlagsApi, flutterApi);
         LuciqPigeon.LuciqHostApi.setup(messenger, api);
     }
 
-    public LuciqApi(Context context, Callable<Bitmap> screenshotProvider, LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi) {
+    public LuciqApi(Context context,
+                    Callable<Bitmap> screenshotProvider,
+                    LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi) {
+        this(context, screenshotProvider, featureFlagsFlutterApi, null);
+    }
+
+    public LuciqApi(Context context,
+                    Callable<Bitmap> screenshotProvider,
+                    LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi,
+                    LuciqPigeon.LuciqFlutterApi flutterApi) {
         this.context = context;
         this.screenshotProvider = screenshotProvider;
         this.featureFlagsFlutterApi = featureFlagsFlutterApi;
+        this.flutterApi = flutterApi;
     }
 
     @VisibleForTesting
@@ -777,6 +798,142 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 Luciq.setNetworkAutoMaskingState(Feature.State.DISABLED);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // ==============================
+    // Pre-sending handler
+    // ==============================
+
+    @VisibleForTesting
+    public Map<String, Object> serializeReport(Report report) {
+        final Map<String, Object> map = new HashMap<>();
+
+        final List<String> tags = report.getTags();
+        map.put("tagsArray", tags != null ? new ArrayList<>(tags) : new ArrayList<>());
+
+        final List<Map<String, Object>> consoleLogs = new ArrayList<>();
+        if (report.getConsoleLog() != null) {
+            for (ConsoleLog log : report.getConsoleLog()) {
+                final Map<String, Object> entry = new HashMap<>();
+                entry.put("message", log.getMessage());
+                entry.put("date", log.getTimeStamp());
+                consoleLogs.add(entry);
+            }
+        }
+        map.put("consoleLogs", consoleLogs);
+
+        // Note: Report.getInstabugLogs() exposes LuciqLog.LogMessage whose
+        // fields are package-private on Android, so the snapshot omits them
+        // (matching the React Native SDK's behavior on Android).
+        map.put("luciqLogs", new ArrayList<>());
+
+        final Map<String, String> userAttributes = report.getUserAttributes();
+        map.put("userAttributes",
+                userAttributes != null ? new HashMap<>(userAttributes) : new HashMap<>());
+
+        final List<Map<String, Object>> fileAttachments = new ArrayList<>();
+        if (report.getFileAttachments() != null) {
+            for (Map.Entry<Uri, String> entry : report.getFileAttachments().entrySet()) {
+                final Map<String, Object> item = new HashMap<>();
+                item.put("file", String.valueOf(entry.getKey()));
+                item.put("type", "url");
+                fileAttachments.add(item);
+            }
+        }
+        map.put("fileAttachments", fileAttachments);
+
+        return map;
+    }
+
+    @Override
+    public void bindOnReportSubmitHandler() {
+        Luciq.onReportSubmitHandler(new Report.OnReportCreatedListener() {
+            @Override
+            public void onReportCreated(final Report report) {
+                if (flutterApi == null) return;
+                // Pigeon dispatches the call (and its reply) on the main thread.
+                // If the SDK fires us on main, awaiting here would deadlock the
+                // main thread for the full timeout — skip mutations in that case.
+                if (Looper.myLooper() == Looper.getMainLooper()) {
+                    Log.w(TAG, "onReportSubmit fired on main thread; skipping Dart mutations to avoid ANR");
+                    return;
+                }
+                final Map<String, Object> snapshot = serializeReport(report);
+                final CountDownLatch latch = new CountDownLatch(1);
+                final AtomicReference<Map<String, Object>> mutationsRef =
+                        new AtomicReference<>();
+                ThreadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        flutterApi.onReportSubmit(snapshot,
+                                new LuciqPigeon.LuciqFlutterApi.Reply<Map<String, Object>>() {
+                                    @Override
+                                    public void reply(Map<String, Object> mutations) {
+                                        mutationsRef.set(mutations);
+                                        latch.countDown();
+                                    }
+                                });
+                    }
+                });
+                try {
+                    latch.await(ON_REPORT_SUBMIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Interrupted while waiting for Flutter onReportSubmit handler", e);
+                }
+                applyMutations(report, mutationsRef.get());
+            }
+        });
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    public void applyMutations(Report report, Map<String, Object> mutations) {
+        if (report == null || mutations == null) return;
+        try {
+            final List<String> tags = (List<String>) mutations.get("tags");
+            if (tags != null) {
+                for (String tag : tags) report.addTag(tag);
+            }
+            final List<String> consoleLogs = (List<String>) mutations.get("consoleLogs");
+            if (consoleLogs != null) {
+                for (String log : consoleLogs) report.appendToConsoleLogs(log);
+            }
+            final Map<String, String> userAttributes =
+                    (Map<String, String>) mutations.get("userAttributes");
+            if (userAttributes != null) {
+                for (Map.Entry<String, String> e : userAttributes.entrySet()) {
+                    report.setUserAttribute(e.getKey(), e.getValue());
+                }
+            }
+            final List<Map<String, Object>> logs =
+                    (List<Map<String, Object>>) mutations.get("logs");
+            if (logs != null) {
+                for (Map<String, Object> entry : logs) {
+                    final String log = (String) entry.get("log");
+                    final String type = (String) entry.get("type");
+                    if (log == null) continue;
+                    if ("verbose".equals(type)) report.logVerbose(log);
+                    else if ("debug".equals(type)) report.logDebug(log);
+                    else if ("info".equals(type)) report.logInfo(log);
+                    else if ("warn".equals(type)) report.logWarn(log);
+                    else if ("error".equals(type)) report.logError(log);
+                    else Log.w(TAG, "Skipping log entry with unknown type: " + type);
+                }
+            }
+            final List<Map<String, Object>> dataAttachments =
+                    (List<Map<String, Object>>) mutations.get("dataAttachments");
+            if (dataAttachments != null) {
+                for (Map<String, Object> entry : dataAttachments) {
+                    final byte[] data = (byte[]) entry.get("data");
+                    final String fileName = (String) entry.get("fileName");
+                    if (data != null && fileName != null) {
+                        report.addFileAttachment(data, fileName);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "Failed to apply onReportSubmit mutations", t);
         }
     }
 }

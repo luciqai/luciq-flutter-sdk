@@ -77,6 +77,12 @@ void main() {
         Zone.current.handleUncaughtError(details.exception, details.stack!);
       };
 
+      Luciq.onReportSubmitHandler((report) async {
+         report.appendTag("tag");
+         report.setUserAttribute("key", "value");
+         report.appendConsoleLog("log");
+         report.logError("log Error");
+      });
       runApp(
         ChangeNotifierProvider(
           create: (_) => CallbackHandlersProvider(),

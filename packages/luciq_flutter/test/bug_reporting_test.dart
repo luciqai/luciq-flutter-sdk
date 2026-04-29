@@ -212,12 +212,12 @@ void main() {
   });
 
   test(
-    '[setDidSelectPromptOptionHandler] should call host method on iOS, map every value, and ignore unknown values',
+    '[setDidSelectPromptOptionIOSHandler] should call host method on iOS, map every value, and ignore unknown values',
     () async {
       when(mBuildInfo.isIOS).thenReturn(true);
       PromptOption? received;
 
-      await BugReporting.setDidSelectPromptOptionHandler((promptOption) {
+      await BugReporting.setDidSelectPromptOptionIOSHandler((promptOption) {
         received = promptOption;
       });
 
@@ -243,11 +243,11 @@ void main() {
   );
 
   test(
-    '[setDidSelectPromptOptionHandler] should not call host method on Android',
+    '[setDidSelectPromptOptionIOSHandler] should not call host method on Android',
     () async {
       when(mBuildInfo.isIOS).thenReturn(false);
 
-      await BugReporting.setDidSelectPromptOptionHandler((_) {});
+      await BugReporting.setDidSelectPromptOptionIOSHandler((_) {});
 
       verifyNever(mHost.bindOnDidSelectPromptOptionCallback());
     },

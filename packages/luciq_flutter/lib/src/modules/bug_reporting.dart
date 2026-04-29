@@ -153,7 +153,7 @@ class BugReporting implements BugReportingFlutterApi {
   /// iOS Only
   /// Sets a block of code to be executed when a prompt option is selected.
   /// The [callback] receives the selected [PromptOption].
-  static Future<void> setDidSelectPromptOptionHandler(
+  static Future<void> setDidSelectPromptOptionIOSHandler(
     OnDidSelectPromptOptionCallback callback,
   ) async {
     if (LCQBuildInfo.instance.isIOS) {

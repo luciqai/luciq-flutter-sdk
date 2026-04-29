@@ -210,4 +210,46 @@ void main() {
 
     verify(mHost.setProactiveReportingConfigurations(true, 1, 1)).called(1);
   });
+
+  test(
+    '[setDidSelectPromptOptionIOSHandler] should call host method on iOS, map every value, and ignore unknown values',
+    () async {
+      when(mBuildInfo.isIOS).thenReturn(true);
+      PromptOption? received;
+
+      await BugReporting.setDidSelectPromptOptionIOSHandler((promptOption) {
+        received = promptOption;
+      });
+
+      verify(mHost.bindOnDidSelectPromptOptionCallback()).called(1);
+
+      const cases = {
+        'bug': PromptOption.bug,
+        'feedback': PromptOption.feedback,
+        'chat': PromptOption.chat,
+        'none': PromptOption.none,
+      };
+
+      cases.forEach((raw, expected) {
+        received = null;
+        BugReporting().onDidSelectPromptOption(raw);
+        expect(received, expected, reason: 'failed for "$raw"');
+      });
+
+      received = null;
+      BugReporting().onDidSelectPromptOption('unknown');
+      expect(received, isNull);
+    },
+  );
+
+  test(
+    '[setDidSelectPromptOptionIOSHandler] should not call host method on Android',
+    () async {
+      when(mBuildInfo.isIOS).thenReturn(false);
+
+      await BugReporting.setDidSelectPromptOptionIOSHandler((_) {});
+
+      verifyNever(mHost.bindOnDidSelectPromptOptionCallback());
+    },
+  );
 }

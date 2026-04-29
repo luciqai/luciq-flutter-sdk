@@ -26,6 +26,8 @@ enum DismissType { cancel, submit, addAttachment }
 
 enum ReportType { bug, feedback, question, other }
 
+enum PromptOption { bug, feedback, chat, none }
+
 enum ExtendedBugReportMode {
   enabledWithRequiredFields,
   enabledWithOptionalFields,
@@ -43,6 +45,9 @@ enum Position {
 
 typedef OnSDKInvokeCallback = void Function();
 typedef OnSDKDismissCallback = void Function(DismissType, ReportType);
+typedef OnDidSelectPromptOptionCallback = void Function(
+  PromptOption promptOption,
+);
 
 class BugReporting implements BugReportingFlutterApi {
   static var _host = BugReportingHostApi();
@@ -50,6 +55,7 @@ class BugReporting implements BugReportingFlutterApi {
 
   static OnSDKInvokeCallback? _onInvokeCallback;
   static OnSDKDismissCallback? _onDismissCallback;
+  static OnDidSelectPromptOptionCallback? _onDidSelectPromptOptionCallback;
 
   /// @nodoc
   @visibleForTesting
@@ -69,6 +75,23 @@ class BugReporting implements BugReportingFlutterApi {
   @override
   void onSdkInvoke() {
     _onInvokeCallback?.call();
+  }
+
+  /// @nodoc
+  @internal
+  @override
+  void onDidSelectPromptOption(String promptOption) {
+    const promptOptionMapper = {
+      'bug': PromptOption.bug,
+      'feedback': PromptOption.feedback,
+      'chat': PromptOption.chat,
+      'none': PromptOption.none,
+    };
+
+    final mapped = promptOptionMapper[promptOption];
+    if (mapped != null) {
+      _onDidSelectPromptOptionCallback?.call(mapped);
+    }
   }
 
   /// @nodoc
@@ -125,6 +148,18 @@ class BugReporting implements BugReportingFlutterApi {
   ) async {
     _onDismissCallback = callback;
     return _host.bindOnDismissCallback();
+  }
+
+  /// iOS Only
+  /// Sets a block of code to be executed when a prompt option is selected.
+  /// The [callback] receives the selected [PromptOption].
+  static Future<void> setDidSelectPromptOptionIOSHandler(
+    OnDidSelectPromptOptionCallback callback,
+  ) async {
+    if (LCQBuildInfo.instance.isIOS) {
+      _onDidSelectPromptOptionCallback = callback;
+      return _host.bindOnDidSelectPromptOptionCallback();
+    }
   }
 
   /// Sets the events that invoke the feedback form.

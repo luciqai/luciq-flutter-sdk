@@ -92,7 +92,7 @@ class SessionMetadata {
     }
     return SessionMetadata(
       appVersion: map['appVersion'] as String?,
-      os: (map['os'] ?? map['OS']) as String?,
+      os: map['os'] as String?,
       device: map['device'] as String?,
       sessionDurationInSeconds:
           (map['sessionDurationInSeconds'] as num?)?.toInt() ?? 0,
@@ -107,29 +107,15 @@ class SessionMetadata {
   }
 
   static LaunchType _parseLaunchType(Object? raw) {
-    if (raw is String) {
-      switch (raw) {
-        case 'Cold':
-          return LaunchType.cold;
-        case 'Warm':
-          return LaunchType.warm;
-        case 'Hot':
-          return LaunchType.hot;
-        default:
-          return LaunchType.unknown;
-      }
+    switch (raw) {
+      case 'Cold':
+        return LaunchType.cold;
+      case 'Warm':
+        return LaunchType.warm;
+      case 'Hot':
+        return LaunchType.hot;
+      default:
+        return LaunchType.unknown;
     }
-    if (raw is num) {
-      // iOS LCQSessionMetadata.launchType: Cold=0, Hot=1, Unknown=-1
-      switch (raw.toInt()) {
-        case 0:
-          return LaunchType.cold;
-        case 1:
-          return LaunchType.hot;
-        default:
-          return LaunchType.unknown;
-      }
-    }
-    return LaunchType.unknown;
   }
 }

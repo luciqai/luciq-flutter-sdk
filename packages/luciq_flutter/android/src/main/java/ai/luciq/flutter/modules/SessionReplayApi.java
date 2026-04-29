@@ -13,16 +13,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import io.flutter.plugin.common.BinaryMessenger;
 
 public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostApi {
 
+    static final long SYNC_CALLBACK_TIMEOUT_SECONDS = 5L;
+
     private final SessionReplayPigeon.SessionReplayFlutterApi flutterApi;
 
-    private volatile boolean shouldSync = true;
-    private volatile CountDownLatch latch;
+    private final ConcurrentLinkedDeque<PendingSync> pendingSyncs = new ConcurrentLinkedDeque<>();
+
+    private static final class PendingSync {
+        final CountDownLatch latch = new CountDownLatch(1);
+        volatile boolean shouldSync = true;
+    }
 
     public static void init(BinaryMessenger messenger) {
         final SessionReplayPigeon.SessionReplayFlutterApi flutterApi =
@@ -83,45 +91,51 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
 
     @Override
     public void bindOnSyncCallback() {
-                SessionReplay.setSyncCallback(new SessionSyncListener() {
+        SessionReplay.setSyncCallback(new SessionSyncListener() {
+            @Override
+            public boolean onSessionReadyToSync(@NonNull SessionMetadata metadata) {
+                final PendingSync sync = new PendingSync();
+                pendingSyncs.addLast(sync);
+
+                // Pigeon FlutterApi messages are delivered on the main (platform) thread.
+                // The SDK invokes this sync listener on a background thread, so awaiting
+                // the latch here does not block the Flutter bridge.
+                ThreadManager.runOnMainThread(new Runnable() {
                     @Override
-                    public boolean onSessionReadyToSync(@NonNull SessionMetadata metadata) {
-                        latch = new CountDownLatch(1);
-
-                        // Pigeon FlutterApi messages are delivered on the main (platform) thread.
-                        // The SDK invokes this sync listener on a background thread, so
-                        // awaiting the latch here does not block the Flutter bridge.
-
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                flutterApi.onShouldSyncSession(
-                                        serializeMetadata(metadata),
-                                        new SessionReplayPigeon.SessionReplayFlutterApi.Reply<Void>() {
-                                            @Override
-                                            public void reply(Void reply) {
-                                            }
-                                        });
-                            }});
-
-                        try {
-                            latch.await();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            return true;
-                        }
-                        return shouldSync;
+                    public void run() {
+                        flutterApi.onShouldSyncSession(
+                                serializeMetadata(metadata),
+                                new SessionReplayPigeon.SessionReplayFlutterApi.Reply<Void>() {
+                                    @Override
+                                    public void reply(Void reply) {
+                                    }
+                                });
                     }
                 });
+
+                try {
+                    if (!sync.latch.await(SYNC_CALLBACK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                        // Flutter isolate did not respond in time — drop the pending entry
+                        // and fall back to syncing rather than wedging the SDK thread.
+                        pendingSyncs.remove(sync);
+                        return true;
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    pendingSyncs.remove(sync);
+                    return true;
+                }
+                return sync.shouldSync;
             }
-
-
+        });
+    }
 
     @Override
     public void evaluateSync(@NonNull Boolean result) {
-        shouldSync = result;
-        if (latch != null) {
-            latch.countDown();
+        final PendingSync sync = pendingSyncs.pollFirst();
+        if (sync != null) {
+            sync.shouldSync = result;
+            sync.latch.countDown();
         }
     }
 

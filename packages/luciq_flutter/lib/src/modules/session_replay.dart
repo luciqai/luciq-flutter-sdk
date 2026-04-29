@@ -34,6 +34,12 @@ class SessionReplay implements SessionReplayFlutterApi {
   }
 
   /// @nodoc
+  @visibleForTesting
+  static void $resetSyncCallback() {
+    _syncCallback = null;
+  }
+
+  /// @nodoc
   @internal
   static void $setup() {
     SessionReplayFlutterApi.setup(_instance);

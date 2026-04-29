@@ -20,6 +20,11 @@ void main() {
     SessionReplay.$setHostApi(mHost);
   });
 
+  tearDown(() {
+    SessionReplay.$resetSyncCallback();
+    reset(mHost);
+  });
+
   test('[setEnabled] should call host method', () async {
     const isEnabled = true;
     await SessionReplay.setEnabled(isEnabled);
@@ -187,4 +192,38 @@ void main() {
       verify(mHost.evaluateSync(false)).called(1);
     },
   );
+
+  test('[onShouldSyncSession] should map Android-only Warm launch type',
+      () async {
+    SessionMetadata? received;
+
+    await SessionReplay.setSyncCallback((metadata) {
+      received = metadata;
+      return true;
+    });
+
+    SessionReplay().onShouldSyncSession(const <String?, Object?>{
+      'launchType': 'Warm',
+    });
+
+    expect(received, isNotNull);
+    expect(received!.launchType, LaunchType.warm);
+  });
+
+  test('[onShouldSyncSession] should map unknown launch type strings',
+      () async {
+    SessionMetadata? received;
+
+    await SessionReplay.setSyncCallback((metadata) {
+      received = metadata;
+      return true;
+    });
+
+    SessionReplay().onShouldSyncSession(const <String?, Object?>{
+      'launchType': 'Bogus',
+    });
+
+    expect(received, isNotNull);
+    expect(received!.launchType, LaunchType.unknown);
+  });
 }

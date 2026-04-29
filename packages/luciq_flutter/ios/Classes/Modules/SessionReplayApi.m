@@ -16,6 +16,7 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 - (instancetype)initWithFlutterApi:(SessionReplayFlutterApi *)api {
     self = [super init];
     self.flutterApi = api;
+    self.pendingSessionEvaluationCompletions = [NSMutableArray array];
     return self;
 }
 
@@ -96,7 +97,7 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
         @"bugsCount": @(metadata.bugsCount),
         @"fatalCrashCount": @(metadata.fatalCrashCount),
         @"oomCrashCount": @(metadata.oomCrashCount),
-        @"networkLogs": [self serializeNetworkLogs:metadata.networkLogs] ?: @[],
+        @"networkLogs": [self serializeNetworkLogs:metadata.networkLogs],
     };
 }
 
@@ -108,7 +109,9 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
             completion(YES);
             return;
         }
-        strongSelf.pendingSessionEvaluationCompletion = completion;
+        @synchronized (strongSelf.pendingSessionEvaluationCompletions) {
+            [strongSelf.pendingSessionEvaluationCompletions addObject:[completion copy]];
+        }
         NSDictionary *payload = [strongSelf serializeSessionMetadata:metadataObject];
         [strongSelf.flutterApi onShouldSyncSessionMetadata:payload
                                                completion:^(FlutterError * _Nullable _) {
@@ -117,9 +120,14 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)evaluateSyncResult:(NSNumber *)result error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    void (^completion)(BOOL) = self.pendingSessionEvaluationCompletion;
+    void (^completion)(BOOL) = nil;
+    @synchronized (self.pendingSessionEvaluationCompletions) {
+        if (self.pendingSessionEvaluationCompletions.count > 0) {
+            completion = self.pendingSessionEvaluationCompletions.firstObject;
+            [self.pendingSessionEvaluationCompletions removeObjectAtIndex:0];
+        }
+    }
     if (completion) {
-        self.pendingSessionEvaluationCompletion = nil;
         completion([result boolValue]);
     }
 }

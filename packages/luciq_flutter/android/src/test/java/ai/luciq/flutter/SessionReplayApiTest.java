@@ -232,5 +232,45 @@ public class SessionReplayApiTest {
 
         assertTrue(result);
     }
-}
 
+    @Test
+    public void testListenerCanBeReinvokedAfterEvaluation() throws InterruptedException {
+        // A second listener invocation after the first has been resolved must not
+        // reuse the already-counted-down latch. Each invocation creates a fresh
+        // PendingSync; this test guards against regressing to a single shared slot.
+        final SessionMetadata metadata = new SessionMetadata.Builder(
+                "pixel", "Android 13", "1.0.0", 10L, false,
+                "Cold", null, Collections.emptyList()
+        ).build();
+
+        final ArgumentCaptor<SessionSyncListener> listenerCaptor =
+                ArgumentCaptor.forClass(SessionSyncListener.class);
+        api.bindOnSyncCallback();
+        mSessionReplay.verify(() -> SessionReplay.setSyncCallback(listenerCaptor.capture()));
+        final SessionSyncListener listener = listenerCaptor.getValue();
+
+        final Thread evaluator1 = new Thread(() -> {
+            try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+            api.evaluateSync(false);
+        });
+        evaluator1.start();
+        final boolean firstResult = listener.onSessionReadyToSync(metadata);
+        evaluator1.join(1000);
+        assertFalse("first invocation should reflect first evaluateSync", firstResult);
+
+        final Thread evaluator2 = new Thread(() -> {
+            try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+            api.evaluateSync(true);
+        });
+        evaluator2.start();
+        final boolean secondResult = listener.onSessionReadyToSync(metadata);
+        evaluator2.join(1000);
+        assertTrue("second invocation should reflect second evaluateSync", secondResult);
+    }
+
+    @Test
+    public void testEvaluateSyncBeforeBindIsNoOp() {
+        api.evaluateSync(false);
+        api.evaluateSync(true);
+    }
+}

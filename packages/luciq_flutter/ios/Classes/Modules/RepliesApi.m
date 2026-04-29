@@ -64,7 +64,7 @@ extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
     // Android Only
 }
 
-- (void)setPushNotificationChannelIdAndroidId:(NSString *)id error:(FlutterError *_Nullable *_Nonnull)error {
+- (void)setPushNotificationChannelIdAndroidId:(NSString *)channelId error:(FlutterError *_Nullable *_Nonnull)error {
     // Android Only
 }
 

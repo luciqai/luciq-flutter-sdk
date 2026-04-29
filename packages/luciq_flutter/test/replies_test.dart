@@ -144,6 +144,18 @@ void main() {
   );
 
   test(
+    '[showNotificationAndroid] should not call host method on iOS',
+    () async {
+      const data = {'body': 'hello'};
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.showNotificationAndroid(data);
+
+      verifyNever(mHost.showNotificationAndroid(data));
+    },
+  );
+
+  test(
     '[setNotificationIconAndroid] should call host method on Android',
     () async {
       const resourceId = 42;
@@ -152,6 +164,18 @@ void main() {
       await Replies.setNotificationIconAndroid(resourceId);
 
       verify(mHost.setNotificationIconAndroid(resourceId)).called(1);
+    },
+  );
+
+  test(
+    '[setNotificationIconAndroid] should not call host method on iOS',
+    () async {
+      const resourceId = 42;
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.setNotificationIconAndroid(resourceId);
+
+      verifyNever(mHost.setNotificationIconAndroid(resourceId));
     },
   );
 
@@ -168,6 +192,18 @@ void main() {
   );
 
   test(
+    '[setPushNotificationChannelIdAndroid] should not call host method on iOS',
+    () async {
+      const id = 'channel-id';
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.setPushNotificationChannelIdAndroid(id);
+
+      verifyNever(mHost.setPushNotificationChannelIdAndroid(id));
+    },
+  );
+
+  test(
     '[setSystemReplyNotificationSoundEnabledAndroid] should call host method on Android',
     () async {
       const enabled = true;
@@ -178,6 +214,20 @@ void main() {
       verify(
         mHost.setSystemReplyNotificationSoundEnabledAndroid(enabled),
       ).called(1);
+    },
+  );
+
+  test(
+    '[setSystemReplyNotificationSoundEnabledAndroid] should not call host method on iOS',
+    () async {
+      const enabled = true;
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await Replies.setSystemReplyNotificationSoundEnabledAndroid(enabled);
+
+      verifyNever(
+        mHost.setSystemReplyNotificationSoundEnabledAndroid(enabled),
+      );
     },
   );
 }

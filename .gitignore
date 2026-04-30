@@ -90,3 +90,6 @@ android/gradlew.bat
 
 # FVM Version Cache
 .fvm/
+
+# Claude Code per-developer local settings
+.claude/settings.local.json

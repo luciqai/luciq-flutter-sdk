@@ -117,7 +117,7 @@ public class CrashReportingApiTest {
     }
 
     @Test
-    public void testSetEnabledSwallowsThrowable_MOB22385() {
+    public void testSetEnabledSwallowsThrowable() {
         // Defense-in-depth: the RunCatching wrapper must absorb native throws
         // so the host app is never crashed by Luciq.
         mCrashReporting.when(() -> CrashReporting.setState(Feature.State.ENABLED))

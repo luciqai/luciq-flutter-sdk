@@ -104,5 +104,4 @@ class Replies implements RepliesFlutterApi {
       }
     });
   }
-
 }

@@ -640,5 +640,4 @@ class Luciq {
       await _host.logUserSteps(gestureType.toString(), message, viewName);
     });
   }
-
 }

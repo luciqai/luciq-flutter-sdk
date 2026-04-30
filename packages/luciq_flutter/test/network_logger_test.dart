@@ -422,7 +422,7 @@ void main() {
   });
 
   test(
-    '[setNetworkAutoMaskingEnabled] swallows host PlatformException (MOB-22385)',
+    '[setNetworkAutoMaskingEnabled] swallows host PlatformException',
     () async {
       when(mLuciqHost.setNetworkAutoMaskingEnabled(any))
           .thenThrow(PlatformException(code: 'X'));

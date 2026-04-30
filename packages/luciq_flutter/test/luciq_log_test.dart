@@ -79,7 +79,7 @@ void main() {
     ).called(1);
   });
 
-  test('[logInfo] swallows host PlatformException (MOB-22385)', () async {
+  test('[logInfo] swallows host PlatformException', () async {
     when(mHost.logInfo(any)).thenThrow(PlatformException(code: 'X'));
     await expectLater(LuciqLog.logInfo('msg'), completes);
   });

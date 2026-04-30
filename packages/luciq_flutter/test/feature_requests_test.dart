@@ -41,7 +41,7 @@ void main() {
     ).called(1);
   });
 
-  test('[show] swallows host PlatformException (MOB-22385)', () async {
+  test('[show] swallows host PlatformException', () async {
     when(mHost.show()).thenThrow(PlatformException(code: 'X'));
     await expectLater(FeatureRequests.show(), completes);
   });

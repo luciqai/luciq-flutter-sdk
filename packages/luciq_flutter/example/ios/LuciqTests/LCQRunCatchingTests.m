@@ -1,8 +1,8 @@
 #import <XCTest/XCTest.h>
 #import "LCQRunCatching.h"
 
-/// Tests for the iOS-side defensive @try/@catch helper introduced in
-/// MOB-22385. Mirrors the Dart `runCatching` and Java `RunCatching` tests.
+/// Tests for the iOS-side defensive @try/@catch helper.
+/// Mirrors the Dart `runCatching` and Java `RunCatching` tests.
 @interface LCQRunCatchingTests : XCTestCase
 @end
 

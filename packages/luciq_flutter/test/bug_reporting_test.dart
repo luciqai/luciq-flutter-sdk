@@ -212,7 +212,7 @@ void main() {
     verify(mHost.setProactiveReportingConfigurations(true, 1, 1)).called(1);
   });
 
-  test('[setEnabled] swallows host PlatformException (MOB-22385)', () async {
+  test('[setEnabled] swallows host PlatformException', () async {
     when(mHost.setEnabled(any)).thenThrow(PlatformException(code: 'X'));
     await expectLater(BugReporting.setEnabled(true), completes);
   });

@@ -63,9 +63,9 @@
               ]);
 }
 
-// MOB-22385: defense-in-depth — the LCQRunCatching wrapper must absorb
+// Defense-in-depth: the LCQRunCatching wrapper must absorb
 // native NSException so the host app is never crashed by Luciq.
-- (void)testSetEnabledSwallowsNSException_MOB22385 {
+- (void)testSetEnabledSwallowsNSException {
     OCMStub([self.mCrashReporting setEnabled:YES])
         .andThrow([NSException exceptionWithName:@"NativeBoom"
                                           reason:@"simulated native failure"

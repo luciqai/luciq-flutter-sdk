@@ -95,7 +95,7 @@ void main() {
     ).called(1);
   });
 
-  test('[setEnabled] swallows host PlatformException (MOB-22385)', () async {
+  test('[setEnabled] swallows host PlatformException', () async {
     when(mHost.setEnabled(any)).thenThrow(PlatformException(code: 'X'));
     await expectLater(CrashReporting.setEnabled(true), completes);
   });

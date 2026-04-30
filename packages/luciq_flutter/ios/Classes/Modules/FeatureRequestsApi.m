@@ -23,4 +23,8 @@ extern void InitFeatureRequestsApi(id<FlutterBinaryMessenger> messenger) {
     [LCQFeatureRequests setEmailFieldRequired:[isRequired boolValue] forAction:resolvedTypes];
 }
 
+- (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    LCQFeatureRequests.enabled = [isEnabled boolValue];
+}
+
 @end

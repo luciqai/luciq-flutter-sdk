@@ -3,6 +3,7 @@ package ai.luciq.flutter.modules;
 import androidx.annotation.NonNull;
 
 import ai.luciq.flutter.generated.SurveysPigeon;
+import ai.luciq.flutter.util.RunCatching;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.Feature;
 import ai.luciq.survey.Survey;
@@ -30,31 +31,33 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        if (isEnabled) {
-            Surveys.setState(Feature.State.ENABLED);
-        } else {
-            Surveys.setState(Feature.State.DISABLED);
-        }
+        RunCatching.runCatching("SurveysApi.setEnabled", () -> {
+            if (isEnabled) {
+                Surveys.setState(Feature.State.ENABLED);
+            } else {
+                Surveys.setState(Feature.State.DISABLED);
+            }
+        });
     }
 
     @Override
     public void showSurveyIfAvailable() {
-        Surveys.showSurveyIfAvailable();
+        RunCatching.runCatching("SurveysApi.showSurveyIfAvailable", Surveys::showSurveyIfAvailable);
     }
 
     @Override
     public void showSurvey(@NonNull String surveyToken) {
-        Surveys.showSurvey(surveyToken);
+        RunCatching.runCatching("SurveysApi.showSurvey", () -> Surveys.showSurvey(surveyToken));
     }
 
     @Override
     public void setAutoShowingEnabled(@NonNull Boolean isEnabled) {
-        Surveys.setAutoShowingEnabled(isEnabled);
+        RunCatching.runCatching("SurveysApi.setAutoShowingEnabled", () -> Surveys.setAutoShowingEnabled(isEnabled));
     }
 
     @Override
     public void setShouldShowWelcomeScreen(@NonNull Boolean shouldShowWelcomeScreen) {
-        Surveys.setShouldShowWelcomeScreen(shouldShowWelcomeScreen);
+        RunCatching.runCatching("SurveysApi.setShouldShowWelcomeScreen", () -> Surveys.setShouldShowWelcomeScreen(shouldShowWelcomeScreen));
     }
 
     @Override
@@ -64,82 +67,100 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
 
     @Override
     public void hasRespondedToSurvey(@NonNull String surveyToken, SurveysPigeon.Result<Boolean> result) {
-        ThreadManager.runOnBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        final boolean hasResponded = Surveys.hasRespondToSurvey(surveyToken);
+        RunCatching.runCatching("SurveysApi.hasRespondedToSurvey", () -> {
+            ThreadManager.runOnBackground(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            final boolean hasResponded = RunCatching.runCatchingReturn(
+                                    "SurveysApi.hasRespondedToSurvey.bg",
+                                    false,
+                                    () -> Surveys.hasRespondToSurvey(surveyToken)
+                            );
 
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                result.success(hasResponded);
-                            }
-                        });
+                            ThreadManager.runOnMainThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    result.success(hasResponded);
+                                }
+                            });
+                        }
                     }
-                }
-        );
+            );
+        });
     }
 
     @Override
     public void getAvailableSurveys(SurveysPigeon.Result<List<String>> result) {
-        ThreadManager.runOnBackground(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        List<Survey> surveys = Surveys.getAvailableSurveys();
+        RunCatching.runCatching("SurveysApi.getAvailableSurveys", () -> {
+            ThreadManager.runOnBackground(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            ArrayList<String> titles = RunCatching.runCatchingReturn(
+                                    "SurveysApi.getAvailableSurveys.bg",
+                                    new ArrayList<>(),
+                                    () -> {
+                                        List<Survey> surveys = Surveys.getAvailableSurveys();
+                                        ArrayList<String> out = new ArrayList<>();
+                                        for (Survey survey : surveys != null ? surveys : new ArrayList<Survey>()) {
+                                            out.add(survey.getTitle());
+                                        }
+                                        return out;
+                                    }
+                            );
 
-                        ArrayList<String> titles = new ArrayList<>();
-                        for (Survey survey : surveys != null ? surveys : new ArrayList<Survey>()) {
-                            titles.add(survey.getTitle());
+                            ThreadManager.runOnMainThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    result.success(titles);
+                                }
+                            });
                         }
-
-                        ThreadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                result.success(titles);
-                            }
-                        });
                     }
-                }
-        );
+            );
+        });
     }
 
     @Override
     public void bindOnShowSurveyCallback() {
-        Surveys.setOnShowCallback(new OnShowCallback() {
-            @Override
-            public void onShow() {
-                ThreadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterApi.onShowSurvey(new SurveysPigeon.SurveysFlutterApi.Reply<Void>() {
-                            @Override
-                            public void reply(Void reply) {
-                            }
-                        });
-                    }
-                });
-            }
+        RunCatching.runCatching("SurveysApi.bindOnShowSurveyCallback", () -> {
+            Surveys.setOnShowCallback(new OnShowCallback() {
+                @Override
+                public void onShow() {
+                    ThreadManager.runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            flutterApi.onShowSurvey(new SurveysPigeon.SurveysFlutterApi.Reply<Void>() {
+                                @Override
+                                public void reply(Void reply) {
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         });
     }
 
     @Override
     public void bindOnDismissSurveyCallback() {
-        Surveys.setOnDismissCallback(new OnDismissCallback() {
-            @Override
-            public void onDismiss() {
-                ThreadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterApi.onDismissSurvey(new SurveysPigeon.SurveysFlutterApi.Reply<Void>() {
-                            @Override
-                            public void reply(Void reply) {
-                            }
-                        });
-                    }
-                });
-            }
+        RunCatching.runCatching("SurveysApi.bindOnDismissSurveyCallback", () -> {
+            Surveys.setOnDismissCallback(new OnDismissCallback() {
+                @Override
+                public void onDismiss() {
+                    ThreadManager.runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            flutterApi.onDismissSurvey(new SurveysPigeon.SurveysFlutterApi.Reply<Void>() {
+                                @Override
+                                public void reply(Void reply) {
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         });
     }
 }

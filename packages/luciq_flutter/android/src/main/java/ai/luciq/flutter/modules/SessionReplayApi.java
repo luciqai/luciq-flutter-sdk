@@ -4,6 +4,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import ai.luciq.flutter.generated.SessionReplayPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.RunCatching;
 import ai.luciq.library.sessionreplay.SessionReplay;
 import io.flutter.plugin.common.BinaryMessenger;
 
@@ -16,48 +17,59 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        SessionReplay.setEnabled(isEnabled);
+        RunCatching.runCatching("SessionReplayApi.setEnabled",
+                () -> SessionReplay.setEnabled(isEnabled));
     }
 
     @Override
     public void setNetworkLogsEnabled(@NonNull Boolean isEnabled) {
-        SessionReplay.setNetworkLogsEnabled(isEnabled);
+        RunCatching.runCatching("SessionReplayApi.setNetworkLogsEnabled",
+                () -> SessionReplay.setNetworkLogsEnabled(isEnabled));
     }
 
     @Override
     public void setLuciqLogsEnabled(@NonNull Boolean isEnabled) {
-        SessionReplay.setLuciqLogsEnabled(isEnabled);
+        RunCatching.runCatching("SessionReplayApi.setLuciqLogsEnabled",
+                () -> SessionReplay.setLuciqLogsEnabled(isEnabled));
     }
 
     @Override
     public void setUserStepsEnabled(@NonNull Boolean isEnabled) {
-        SessionReplay.setUserStepsEnabled(isEnabled);
+        RunCatching.runCatching("SessionReplayApi.setUserStepsEnabled",
+                () -> SessionReplay.setUserStepsEnabled(isEnabled));
     }
 
     @Override
     public void getSessionReplayLink(@NonNull SessionReplayPigeon.Result<String> result) {
-        SessionReplay.getSessionReplayLink(result::success);
+        RunCatching.runCatching("SessionReplayApi.getSessionReplayLink",
+                () -> SessionReplay.getSessionReplayLink(result::success));
     }
 
     @Override
     public void setScreenshotCapturingMode(@NonNull String mode) {
-        final int capturingMode = ArgsRegistry.screenshotCapturingModes.get(mode);
-        SessionReplay.setCapturingMode(capturingMode);
+        RunCatching.runCatching("SessionReplayApi.setScreenshotCapturingMode", () -> {
+            final int capturingMode = ArgsRegistry.screenshotCapturingModes.get(mode);
+            SessionReplay.setCapturingMode(capturingMode);
+        });
     }
 
     @Override
     public void setScreenshotCaptureInterval(@NonNull Long intervalMs) {
-        if (intervalMs < 500L) {
-            Log.e("SessionReplayApi", "intervalMs must be >= 500 on Android");
-            return;
-        }
-        SessionReplay.setScreenshotCaptureInterval(intervalMs.intValue());
+        RunCatching.runCatching("SessionReplayApi.setScreenshotCaptureInterval", () -> {
+            if (intervalMs < 500L) {
+                Log.e("SessionReplayApi", "intervalMs must be >= 500 on Android");
+                return;
+            }
+            SessionReplay.setScreenshotCaptureInterval(intervalMs.intValue());
+        });
     }
 
     @Override
     public void setScreenshotQualityMode(@NonNull String mode) {
-        final int quality = ArgsRegistry.screenshotQualityModes.get(mode);
-        SessionReplay.setScreenshotQuality(quality);
+        RunCatching.runCatching("SessionReplayApi.setScreenshotQualityMode", () -> {
+            final int quality = ArgsRegistry.screenshotQualityModes.get(mode);
+            SessionReplay.setScreenshotQuality(quality);
+        });
     }
 
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
@@ -76,5 +77,10 @@ void main() {
     verify(
       mHost.clearAllLogs(),
     ).called(1);
+  });
+
+  test('[logInfo] swallows host PlatformException', () async {
+    when(mHost.logInfo(any)).thenThrow(PlatformException(code: 'X'));
+    await expectLater(LuciqLog.logInfo('msg'), completes);
   });
 }

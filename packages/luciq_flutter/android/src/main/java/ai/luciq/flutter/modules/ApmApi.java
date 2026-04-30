@@ -26,6 +26,7 @@ import ai.luciq.apm.screenrendering.models.cp.LuciqFrameData;
 import ai.luciq.apm.screenrendering.models.cp.LuciqScreenRenderingData;
 import ai.luciq.flutter.generated.ApmPigeon;
 import ai.luciq.flutter.util.Reflection;
+import ai.luciq.flutter.util.RunCatching;
 import io.flutter.plugin.common.BinaryMessenger;
 
 public class ApmApi implements ApmPigeon.ApmHostApi {
@@ -42,168 +43,57 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
         ApmPigeon.ApmHostApi.setup(messenger, api);
     }
 
-    /**
-     * The function sets the enabled status of APM.
-     *
-     * @param isEnabled The `setEnabled` method in the code snippet is used to enable or disable a
-     *                  feature, and it takes a `Boolean` parameter named `isEnabled`. When this method is called with
-     *                  `true`, it enables the feature, and when called with `false`, it disables the feature. The method
-     *                  internally calls
-     */
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        try {
-            APM.setEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.setEnabled", () -> APM.setEnabled(isEnabled));
     }
 
-    /**
-     * Sets the cold app launch enabled status using the APM library.
-     *
-     * @param isEnabled The `isEnabled` parameter is a Boolean value that indicates whether cold app launch
-     *                  is enabled or not. When `isEnabled` is set to `true`, cold app launch is enabled, and when it is set
-     *                  to `false`, cold app launch is disabled.
-     */
     @Override
     public void setColdAppLaunchEnabled(@NonNull Boolean isEnabled) {
-        try {
-            APM.setColdAppLaunchEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.setColdAppLaunchEnabled",
+                () -> APM.setColdAppLaunchEnabled(isEnabled));
     }
 
-    /**
-     * The function sets the auto UI trace enabled status in an APM system, handling any exceptions that
-     * may occur.
-     *
-     * @param isEnabled The `isEnabled` parameter is a Boolean value that indicates whether the Auto UI
-     *                  trace feature should be enabled or disabled. When `isEnabled` is set to `true`, the Auto UI trace
-     *                  feature is enabled, and when it is set to `false`, the feature is disabled.
-     */
     @Override
     public void setAutoUITraceEnabled(@NonNull Boolean isEnabled) {
-        try {
-            APM.setAutoUITraceEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.setAutoUITraceEnabled",
+                () -> APM.setAutoUITraceEnabled(isEnabled));
     }
 
-
-    /**
-     * Starts an AppFlow with the specified name.
-     * <br/>
-     * On starting two flows with the same name the older flow will end with force abandon end reason.
-     * AppFlow name cannot exceed 150 characters otherwise it's truncated,
-     * leading and trailing whitespaces are also ignored.
-     *
-     * @param name AppFlow name. It can not be empty string or null.
-     *             Starts a new AppFlow, if APM is enabled, feature is enabled
-     *             and Luciq SDK is initialized.
-     */
     @Override
     public void startFlow(@NonNull String name) {
-        try {
-            APM.startFlow(name);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.startFlow", () -> APM.startFlow(name));
     }
 
-    /**
-     * Sets custom attributes for AppFlow with a given name.
-     * <br/>
-     * Setting an attribute value to null will remove its corresponding key if it already exists.
-     * <br/>
-     * Attribute key name cannot exceed 30 characters.
-     * Leading and trailing whitespaces are also ignored.
-     * Does not accept empty strings or null.
-     * <br/>
-     * Attribute value name cannot exceed 60 characters,
-     * leading and trailing whitespaces are also ignored.
-     * Does not accept empty strings.
-     * <br/>
-     * If a trace is ended, attributes will not be added and existing ones will not be updated.
-     * <br/>
-     *
-     * @param name  AppFlow name. It can not be empty string or null
-     * @param key   AppFlow attribute key. It can not be empty string or null
-     * @param value AppFlow attribute value. It can not be empty string. Null to remove attribute
-     */
     @Override
     public void setFlowAttribute(@NonNull String name, @NonNull String key, @Nullable String value) {
-        try {
-            APM.setFlowAttribute(name, key, value);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.setFlowAttribute",
+                () -> APM.setFlowAttribute(name, key, value));
     }
 
-    /**
-     * Ends AppFlow with a given name.
-     *
-     * @param name AppFlow name to be ended. It can not be empty string or null
-     */
     @Override
     public void endFlow(@NonNull String name) {
-        try {
-            APM.endFlow(name);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.endFlow", () -> APM.endFlow(name));
     }
 
-
-    /**
-     * Starts a UI trace.
-     *
-     * @param name string name of the UI trace.
-     */
     @Override
     public void startUITrace(@NonNull String name) {
-        try {
-            APM.startUITrace(name);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.startUITrace", () -> APM.startUITrace(name));
     }
 
-    /**
-     * This method is used to terminate the currently active UI trace.
-     */
     @Override
     public void endUITrace() {
-        try {
-            APM.endUITrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.endUITrace", APM::endUITrace);
     }
 
-    /**
-     * This method is used to signal the end of the app launch process.
-     */
     @Override
     public void endAppLaunch() {
-        try {
-            APM.endAppLaunch();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.endAppLaunch", APM::endAppLaunch);
     }
 
-
-    /**
-     * logs network-related information
-     *
-     * @param data Map of network data object.
-     */
     @Override
     public void networkLogAndroid(@NonNull Map<String, Object> data) {
-        try {
+        RunCatching.runCatching("ApmApi.networkLogAndroid", () -> {
             APMNetworkLogger apmNetworkLogger = new APMNetworkLogger();
             final String requestUrl = (String) data.get("url");
             final String requestBody = (String) data.get("requestBody");
@@ -249,32 +139,22 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             }
 
             if (data.containsKey("partialId")) {
-
-
                 partialId = ((Number) data.get("partialId"));
-
             }
             if (data.containsKey("networkStartTimeInSeconds")) {
                 networkStartTimeInSeconds = ((Number) data.get("networkStartTimeInSeconds"));
             }
 
             if (data.containsKey("w3CGeneratedHeader")) {
-
                 w3CGeneratedHeader = (String) data.get("w3CGeneratedHeader");
-
-
             }
             if (data.containsKey("w3CCaughtHeader")) {
                 w3CCaughtHeader = (String) data.get("w3CCaughtHeader");
-
             }
-
 
             APMCPNetworkLog.W3CExternalTraceAttributes w3cExternalTraceAttributes = null;
             if (isW3cHeaderFound != null) {
-                w3cExternalTraceAttributes = new APMCPNetworkLog.W3CExternalTraceAttributes(isW3cHeaderFound, partialId == null ? null : partialId.longValue(), networkStartTimeInSeconds == null ? null : networkStartTimeInSeconds.longValue(), w3CGeneratedHeader, w3CCaughtHeader
-
-                );
+                w3cExternalTraceAttributes = new APMCPNetworkLog.W3CExternalTraceAttributes(isW3cHeaderFound, partialId == null ? null : partialId.longValue(), networkStartTimeInSeconds == null ? null : networkStartTimeInSeconds.longValue(), w3CGeneratedHeader, w3CCaughtHeader);
             }
 
             Method method = Reflection.getMethod(Class.forName("ai.luciq.apm.networking.APMNetworkLogger"), "log", long.class, long.class, String.class, String.class, long.class, String.class, String.class, String.class, String.class, String.class, long.class, int.class, String.class, String.class, String.class, String.class, APMCPNetworkLog.W3CExternalTraceAttributes.class);
@@ -283,74 +163,27 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             } else {
                 Log.e(TAG, "APMNetworkLogger.log was not found by reflection");
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
-
-    /**
-     * This method is responsible for initiating a custom performance UI trace
-     * in the APM module. It takes three parameters:
-     *
-     * @param screenName:     A string representing the name of the screen or UI element being traced.
-     * @param microTimeStamp: A number representing the timestamp in microseconds when the trace is started.
-     * @param traceId:        A number representing the unique identifier for the trace.
-     */
     @Override
     public void startCpUiTrace(@NonNull String screenName, @NonNull Long microTimeStamp, @NonNull Long traceId) {
-        try {
-            InternalAPM._startUiTraceCP(screenName, microTimeStamp, traceId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.startCpUiTrace",
+                () -> InternalAPM._startUiTraceCP(screenName, microTimeStamp, traceId));
     }
 
-
-    /**
-     * This method is responsible for reporting the screen
-     * loading data from Dart side to Android side. It takes three parameters:
-     *
-     * @param startTimeStampMicro: A number representing the start timestamp in microseconds of the screen
-     *                             loading custom performance data.
-     * @param durationMicro:       A number representing the duration in microseconds of the screen loading custom
-     *                             performance data.
-     * @param uiTraceId:           A number representing the unique identifier for the UI trace associated with the
-     *                             screen loading.
-     */
     @Override
     public void reportScreenLoadingCP(@NonNull Long startTimeStampMicro, @NonNull Long durationMicro, @NonNull Long uiTraceId) {
-        try {
-            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.reportScreenLoadingCP",
+                () -> InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId));
     }
 
-
-    /**
-     * This method is responsible for extend the end time if the screen loading custom
-     * trace. It takes two parameters:
-     *
-     * @param timeStampMicro: A number representing the timestamp in microseconds when the screen loading
-     *                        custom trace is ending.
-     * @param uiTraceId:      A number representing the unique identifier for the UI trace associated with the
-     *                        screen loading.
-     */
     @Override
     public void endScreenLoadingCP(@NonNull Long timeStampMicro, @NonNull Long uiTraceId) {
-        try {
-            InternalAPM._endScreenLoadingCP(timeStampMicro, uiTraceId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.endScreenLoadingCP",
+                () -> InternalAPM._endScreenLoadingCP(timeStampMicro, uiTraceId));
     }
 
-
-    /**
-     * This method is used to check whether the end screen loading feature is enabled or not.
-     */
     @Override
     public void isEndScreenLoadingEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
         isScreenLoadingEnabled(result);
@@ -358,101 +191,79 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void isAutoUiTraceEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
-        try {
+        RunCatching.runCatching("ApmApi.isAutoUiTraceEnabled", () -> {
             InternalAPM._isFeatureEnabledCP(APMFeature.UI_TRACE, "LuciqCaptureScreenLoading", new FeatureAvailabilityCallback() {
                 @Override
                 public void invoke(boolean isFeatureAvailable) {
                     result.success(isFeatureAvailable);
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
     public void isEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
-        try {
+        RunCatching.runCatching("ApmApi.isEnabled", () -> {
             InternalAPM._isFeatureEnabledCP(APMFeature.APM, "APM", new FeatureAvailabilityCallback() {
                 @Override
                 public void invoke(boolean isEnabled) {
                     result.success(isEnabled);
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
-    /**
-     * checks whether the screen loading feature is enabled.
-     */
     @Override
     public void isScreenLoadingEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
-        try {
+        RunCatching.runCatching("ApmApi.isScreenLoadingEnabled", () -> {
             InternalAPM._isFeatureEnabledCP(APMFeature.SCREEN_LOADING, "LuciqCaptureScreenLoading", new FeatureAvailabilityCallback() {
                 @Override
                 public void invoke(boolean isFeatureAvailable) {
                     result.success(isFeatureAvailable);
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
-    /**
-     * This method is setting the enabled state of the screen loading feature.
-     */
     @Override
     public void setScreenLoadingEnabled(@NonNull Boolean isEnabled) {
-        try {
-            APM.setScreenLoadingEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.setScreenLoadingEnabled",
+                () -> APM.setScreenLoadingEnabled(isEnabled));
     }
 
     @Override
     public void setScreenRenderEnabled(@NonNull Boolean isEnabled) {
-        try {
-            APM.setScreenRenderingEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RunCatching.runCatching("ApmApi.setScreenRenderEnabled",
+                () -> APM.setScreenRenderingEnabled(isEnabled));
     }
 
     @Override
     public void isScreenRenderEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
-        try {
+        RunCatching.runCatching("ApmApi.isScreenRenderEnabled", () -> {
             InternalAPM._isFeatureEnabledCP(APMFeature.SCREEN_RENDERING, "LuciqCaptureScreenRender", new FeatureAvailabilityCallback() {
                 @Override
                 public void invoke(boolean isEnabled) {
                     result.success(isEnabled);
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
     public void isCustomSpanEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
-        try {
+        RunCatching.runCatching("ApmApi.isCustomSpanEnabled", () -> {
             InternalAPM._isFeatureEnabledCP(APMFeature.CUSTOM_SPANS, "LuciqCustomSpan", new FeatureAvailabilityCallback() {
                 @Override
                 public void invoke(boolean isEnabled) {
                     result.success(isEnabled);
                 }
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
     public void getDeviceRefreshRateAndTolerance(@NonNull ApmPigeon.Result<List<Double>> result) {
-        try {
+        RunCatching.runCatching("ApmApi.getDeviceRefreshRateAndTolerance", () -> {
             final double refreshRate = refreshRateCallback.call().doubleValue();
             InternalAPM._getToleranceValueForScreenRenderingCP(new ToleranceValueCallback() {
                 @Override
@@ -460,15 +271,12 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
                     result.success(java.util.Arrays.asList(refreshRate, (double) tolerance));
                 }
             });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
     public void endScreenRenderForAutoUiTrace(@NonNull Map<String, Object> data) {
-        try {
+        RunCatching.runCatching("ApmApi.endScreenRenderForAutoUiTrace", () -> {
             final long traceId = ((Number) data.get("traceId")).longValue();
             final long slowFramesTotalDuration = ((Number) data.get("slowFramesTotalDuration")).longValue();
             final long frozenFramesTotalDuration = ((Number) data.get("frozenFramesTotalDuration")).longValue();
@@ -490,14 +298,12 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             }
             LuciqScreenRenderingData screenRenderingData = new LuciqScreenRenderingData(traceId, slowFramesTotalDuration, frozenFramesTotalDuration, frames);
             InternalAPM._endAutoUiTraceWithScreenRendering(screenRenderingData, endTime);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
     public void endScreenRenderForCustomUiTrace(@NonNull Map<String, Object> data) {
-        try {
+        RunCatching.runCatching("ApmApi.endScreenRenderForCustomUiTrace", () -> {
             final long traceId = ((Number) data.get("traceId")).longValue();
             final long slowFramesTotalDuration = ((Number) data.get("slowFramesTotalDuration")).longValue();
             final long frozenFramesTotalDuration = ((Number) data.get("frozenFramesTotalDuration")).longValue();
@@ -516,23 +322,18 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             }
             LuciqScreenRenderingData screenRenderingData = new LuciqScreenRenderingData(traceId, slowFramesTotalDuration, frozenFramesTotalDuration, frames);
             InternalAPM._endCustomUiTraceWithScreenRenderingCP(screenRenderingData);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
     public void syncCustomSpan(@NonNull String name, @NonNull Long startTimestamp, @NonNull Long endTimestamp) {
-        try {
+        RunCatching.runCatching("ApmApi.syncCustomSpan", () -> {
             // Convert microseconds to milliseconds for Date objects
             Date startDate = new Date(startTimestamp / 1000);
             Date endDate = new Date(endTimestamp / 1000);
 
             APM.addCompletedCustomSpan(name, startDate, endDate);
-
-        } catch (Exception e) {
-            Log.e("IB-CP-Bridge", "Error syncing span", e);
-        }
+        });
     }
 
 }

@@ -8,6 +8,7 @@ import 'package:luciq_flutter/src/generated/crash_reporting.api.g.dart';
 import 'package:luciq_flutter/src/models/crash_data.dart';
 import 'package:luciq_flutter/src/models/exception_data.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 enum NonFatalExceptionLevel { error, critical, info, warning }
@@ -25,19 +26,17 @@ class CrashReporting {
 
   /// Enables and disables Enables and disables automatic crash reporting.
   /// [boolean] isEnabled
-  static Future<void> setEnabled(bool isEnabled) async {
-    enabled = isEnabled;
-    return _host.setEnabled(isEnabled);
+  static Future<void> setEnabled(bool isEnabled) {
+    return runCatchingAsync('CrashReporting.setEnabled', () async {
+      enabled = isEnabled;
+      await _host.setEnabled(isEnabled);
+    });
   }
 
-  static Future<void> reportCrash(Object exception, StackTrace stack) async {
-    if (LCQBuildInfo.instance.isReleaseMode && enabled) {
+  static Future<void> reportCrash(Object exception, StackTrace stack) {
+    return runCatchingAsync('CrashReporting.reportCrash', () async {
       await _reportUnhandledCrash(exception, stack);
-    } else {
-      FlutterError.dumpErrorToConsole(
-        FlutterErrorDetails(stack: stack, exception: exception),
-      );
-    }
+    });
   }
 
   /// Reports a handled crash to you dashboard
@@ -49,14 +48,16 @@ class CrashReporting {
     Map<String, String>? userAttributes,
     String? fingerprint,
     NonFatalExceptionLevel level = NonFatalExceptionLevel.error,
-  }) async {
-    await _sendHandledCrash(
-      exception,
-      stack ?? StackTrace.current,
-      userAttributes,
-      fingerprint,
-      level,
-    );
+  }) {
+    return runCatchingAsync('CrashReporting.reportHandledCrash', () async {
+      await _sendHandledCrash(
+        exception,
+        stack ?? StackTrace.current,
+        userAttributes,
+        fingerprint,
+        level,
+      );
+    });
   }
 
   static Future<void> _reportUnhandledCrash(
@@ -123,7 +124,9 @@ class CrashReporting {
   /// Requires the [Luciq NDK package](https://pub.dev/packages/luciq_flutter_ndk to be added to the project for this to work.
   ///
   /// This method is Android-only and has no effect on iOS.
-  static Future<void> setNDKEnabled(bool isEnabled) async {
-    return _host.setNDKEnabled(isEnabled);
+  static Future<void> setNDKEnabled(bool isEnabled) {
+    return runCatchingAsync('CrashReporting.setNDKEnabled', () async {
+      await _host.setNDKEnabled(isEnabled);
+    });
   }
 }

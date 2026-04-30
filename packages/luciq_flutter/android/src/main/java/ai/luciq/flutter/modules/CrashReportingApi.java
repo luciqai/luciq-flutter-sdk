@@ -10,6 +10,7 @@ import ai.luciq.crash.models.LuciqNonFatalException;
 import ai.luciq.flutter.generated.CrashReportingPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.Reflection;
+import ai.luciq.flutter.util.RunCatching;
 import ai.luciq.library.Feature;
 
 import org.json.JSONObject;
@@ -29,11 +30,13 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        if (isEnabled) {
-            CrashReporting.setState(Feature.State.ENABLED);
-        } else {
-            CrashReporting.setState(Feature.State.DISABLED);
-        }
+        RunCatching.runCatching("CrashReportingApi.setEnabled", () -> {
+            if (isEnabled) {
+                CrashReporting.setState(Feature.State.ENABLED);
+            } else {
+                CrashReporting.setState(Feature.State.DISABLED);
+            }
+        });
     }
 
     @Override
@@ -72,11 +75,13 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
 
     @Override
     public void setNDKEnabled(@NonNull Boolean isEnabled) {
-        if (isEnabled) {
-            CrashReporting.setNDKCrashesState(Feature.State.ENABLED);
-        } else {
-            CrashReporting.setNDKCrashesState(Feature.State.DISABLED);
-        }
+        RunCatching.runCatching("CrashReportingApi.setNDKEnabled", () -> {
+            if (isEnabled) {
+                CrashReporting.setNDKCrashesState(Feature.State.ENABLED);
+            } else {
+                CrashReporting.setNDKCrashesState(Feature.State.DISABLED);
+            }
+        });
     }
 
 }

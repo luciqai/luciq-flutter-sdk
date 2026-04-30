@@ -5,6 +5,7 @@ import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/luciq_constants.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 
 typedef ObfuscateLogCallback = FutureOr<NetworkData> Function(NetworkData data);
 typedef OmitLogCallback = FutureOr<bool> Function(NetworkData data);
@@ -40,7 +41,11 @@ class NetworkManager {
       return data;
     }
 
-    return _obfuscateLogCallback!(data);
+    return runCatchingReturn<NetworkData>(
+      'NetworkManager.obfuscateLog.callback',
+      () => _obfuscateLogCallback!(data),
+      fallback: data,
+    );
   }
 
   FutureOr<bool> omitLog(NetworkData data) {
@@ -48,7 +53,11 @@ class NetworkManager {
       return false;
     }
 
-    return _omitLogCallback!(data);
+    return runCatchingReturn<bool>(
+      'NetworkManager.omitLog.callback',
+      () => _omitLogCallback!(data),
+      fallback: false,
+    );
   }
 
   /// Checks if network request body exceeds backend size limits

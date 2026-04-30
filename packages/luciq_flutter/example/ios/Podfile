@@ -35,7 +35,7 @@ flutter_ios_podfile_setup
 # uncaptured. This custom build adds the missing swizzler. Remove this
 # override once the change lands in a public Luciq iOS release.
 #pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/feature-enable_cp_web_view_navigation/19.4.0/Luciq.podspec'
-
+pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/fix-cp_repro_steps_screenshots/19.6.1/Luciq.podspec'
 target 'Runner' do
 
   use_frameworks!

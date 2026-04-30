@@ -4,8 +4,10 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:luciq_dio_interceptor/luciq_dio_interceptor.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter_example/src/app_routes.dart';
@@ -59,10 +61,14 @@ Future<void> main() async {
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',
       );
-
+      Luciq.setReproStepsConfig(
+        bug: ReproStepsMode.enabled,
+      );
+      NetworkLogger.setNetworkAutoMaskingEnabled(true);
+      NetworkLogger.setNetworkLogBodyEnabled(false);
       await Luciq.setWebViewMonitoringEnabled(true);
+      await Luciq.setWebViewUserInteractionsTrackingEnabled(true);
       await Luciq.setWebViewNetworkTrackingEnabled(true);
-
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
 

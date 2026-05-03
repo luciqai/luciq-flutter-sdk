@@ -4,10 +4,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:luciq_dio_interceptor/luciq_dio_interceptor.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter_example/src/app_routes.dart';

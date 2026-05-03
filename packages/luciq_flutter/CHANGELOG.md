@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Add a defensive `runCatching` wrapper across Dart, iOS, and Android module boundaries so unexpected throws in platform-channel calls and host-API implementations cannot crash the host app. ([MOB-22423](https://instabug.atlassian.net/browse/MOB-22423))
+
+
 ## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
 
 ### Added

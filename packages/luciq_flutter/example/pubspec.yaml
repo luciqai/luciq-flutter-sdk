@@ -32,7 +32,6 @@ dependencies:
   provider:
   video_player:
   webview_flutter: ^4.7.0
-  flutter_inappwebview: ^6.1.5
   dio: ^5.4.0
   luciq_dio_interceptor:
     path: ../../luciq_dio_interceptor

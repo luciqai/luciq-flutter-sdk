@@ -18,8 +18,6 @@ extension ValidationMethod on AutoMasking {
       case AutoMasking.media:
         return isMedia;
       case AutoMasking.webViews:
-        // WebViews are native platform views, not Flutter widgets, so masking
-        // is handled entirely by the native SDK. No Flutter-level predicate.
         return (_) => false;
       case AutoMasking.none:
         return (_) => false;

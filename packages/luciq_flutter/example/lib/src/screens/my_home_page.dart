@@ -178,16 +178,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _navigateToWebView() {
-    Navigator.pushNamed(context, WebViewPage.screenName);
-  }
-
   void _navigateToWebViewGoogleFullscreen() {
     Navigator.pushNamed(context, WebViewGoogleFullscreenPage.screenName);
-  }
-
-  void _navigateToInAppWebView() {
-    Navigator.pushNamed(context, InAppWebViewPage.screenName);
   }
 
   final _formUserAttributeKey = GlobalKey<FormState>();
@@ -370,19 +362,9 @@ class _MyHomePageState extends State<MyHomePage> {
           symanticLabel: 'open_session_replay_page',
         ),
         LuciqButton(
-          onPressed: _navigateToWebView,
-          text: 'WebView',
-          symanticLabel: 'open_webview_page',
-        ),
-        LuciqButton(
           onPressed: _navigateToWebViewGoogleFullscreen,
           text: 'WebView (Google, full-screen)',
           symanticLabel: 'open_webview_google_fullscreen_page',
-        ),
-        LuciqButton(
-          onPressed: _navigateToInAppWebView,
-          text: 'InAppWebView (Google)',
-          symanticLabel: 'open_inapp_webview_page',
         ),
         const SectionTitle('Sessions Replay'),
         LuciqButton(

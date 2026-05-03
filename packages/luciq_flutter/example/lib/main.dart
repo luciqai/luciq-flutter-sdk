@@ -14,8 +14,6 @@ import 'package:luciq_flutter_example/src/app_routes.dart';
 import 'package:luciq_flutter_example/src/native/luciq_flutter_example_method_channel.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_handler_provider.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';
-import 'package:luciq_flutter_example/src/screens/inapp_webview_page.dart';
-import 'package:luciq_flutter_example/src/screens/web_view_page.dart';
 import 'package:luciq_flutter_example/src/screens/webview_google_fullscreen_page.dart';
 import 'package:luciq_flutter_example/src/utils/widget_ext.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_button.dart';
@@ -61,11 +59,6 @@ Future<void> main() async {
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',
       );
-      Luciq.setReproStepsConfig(
-        bug: ReproStepsMode.enabled,
-      );
-      NetworkLogger.setNetworkAutoMaskingEnabled(true);
-      NetworkLogger.setNetworkLogBodyEnabled(false);
       await Luciq.setWebViewMonitoringEnabled(true);
       await Luciq.setWebViewUserInteractionsTrackingEnabled(true);
       await Luciq.setWebViewNetworkTrackingEnabled(true);

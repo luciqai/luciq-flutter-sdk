@@ -325,7 +325,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     @Override
     public void reportScreenLoadingCP(@NonNull Long startTimeStampMicro, @NonNull Long durationMicro, @NonNull Long uiTraceId) {
         try {
-            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId, new HashMap<>());
+            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId);
         } catch (Exception e) {
             e.printStackTrace();
         }

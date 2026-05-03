@@ -23,9 +23,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  grpc: ^4.0.0
   http: ^1.1.0
   luciq_flutter:
     path: ../
+  luciq_grpc_interceptor:
+    path: ../../luciq_grpc_interceptor
   luciq_http_client:
     path: ../../luciq_http_client
   file_picker: <10.0.0

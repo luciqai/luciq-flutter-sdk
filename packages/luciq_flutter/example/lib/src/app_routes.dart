@@ -24,4 +24,5 @@ final appRoutes = {
       const ScreenLoadingPage(),
   ScreenCapturePrematureExtensionPage.screenName: (BuildContext context) =>
       const ScreenCapturePrematureExtensionPage(),
+  GrpcPage.screenName: (BuildContext context) => const GrpcPage(),
 };

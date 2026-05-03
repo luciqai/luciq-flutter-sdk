@@ -22,6 +22,18 @@ class _ApmPageState extends State<ApmPage> {
     );
   }
 
+  void _navigateToGrpc() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GrpcPage(),
+        settings: const RouteSettings(
+          name: GrpcPage.screenName,
+        ),
+      ),
+    );
+  }
+
   _endAppLaunch() => APM.endAppLaunch();
 
   @override
@@ -37,6 +49,11 @@ class _ApmPageState extends State<ApmPage> {
         ),
         const SectionTitle('Network'),
         const NetworkContent(),
+        LuciqButton(
+          text: 'gRPC',
+          onPressed: _navigateToGrpc,
+          symanticLabel: 'open_grpc_page',
+        ),
         const SectionTitle('Flows'),
         const FlowsContent(),
         const SectionTitle('Custom UI Traces'),

@@ -19,4 +19,3 @@ Pod::Spec.new do |s|
   s.dependency 'Flutter'
   s.dependency 'Luciq', '19.5.0'
 end
-

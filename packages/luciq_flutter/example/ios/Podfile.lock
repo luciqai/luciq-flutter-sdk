@@ -36,7 +36,7 @@ PODS:
     - Flutter
   - Flutter (1.0.0)
   - Luciq (19.6.1)
-  - luciq_flutter (19.3.0):
+  - luciq_flutter (19.4.0):
     - Flutter
     - Luciq
   - OCMock (3.6)
@@ -97,7 +97,7 @@ SPEC CHECKSUMS:
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   Luciq: 09df84e6c709d045062b83bcd8687d58f96d2520
-  luciq_flutter: d95532a8636d737527e6c3a04d4da4923df2bfe4
+  luciq_flutter: a112d4f43d3c21d6119722c116ca568745db3be0
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
   patrol: 51b76cc7c11a2933ee3e72482d930c75b9d4ec73
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf

@@ -49,7 +49,6 @@ dependency_overrides:
   http: ^1.1.0
   luciq_flutter:
     path: ../
-  webview_flutter_android: 4.10.9
 patrol:
   app_name: Luciq example
   android:

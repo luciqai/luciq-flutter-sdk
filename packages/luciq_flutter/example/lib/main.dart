@@ -47,9 +47,9 @@ part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
 part 'src/screens/custom_spans_page.dart';
 
-Future<void> main() async {
-  await runZonedGuarded(
-    () async {
+void main() {
+  runZonedGuarded(
+    () {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
@@ -58,11 +58,11 @@ Future<void> main() async {
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',
       );
-      await Luciq.setWebViewMonitoringEnabled(true);
-      await Luciq.setWebViewUserInteractionsTrackingEnabled(true);
-      await Luciq.setWebViewNetworkTrackingEnabled(true);
-      Luciq.setValueForStringWithKey('text you want',
-          CustomTextPlaceHolderKey.commentFieldHintForBugReport);
+      Luciq.setAutoMaskScreenshotTypes([AutoMasking.webViews]);
+
+      Luciq.setWebViewMonitoringEnabled(true);
+      Luciq.setWebViewUserInteractionsTrackingEnabled(true);
+      Luciq.setWebViewNetworkTrackingEnabled(true);
 
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
@@ -79,16 +79,12 @@ Future<void> main() async {
       // APM.setScreenRenderingEnabled(true);
       // APM.setAutoUITraceEnabled(false);
       Luciq.setWelcomeMessageMode(WelcomeMessageMode.disabled);
-
       FlutterError.onError = (FlutterErrorDetails details) {
         Zone.current.handleUncaughtError(details.exception, details.stack!);
       };
 
       runApp(
         // LuciqWidget is required to register the private-view screenshot
-        // masking pipeline (LuciqPrivateView rects and AutoMasking of Flutter
-        // widgets). Without it, Luciq.setAutoMaskScreenshotTypes has no effect
-        // on Flutter-rendered content (including WebView platform views).
         LuciqWidget(
           child: ChangeNotifierProvider(
             create: (_) => CallbackHandlersProvider(),

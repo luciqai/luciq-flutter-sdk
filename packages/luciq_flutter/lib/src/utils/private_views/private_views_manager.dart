@@ -18,7 +18,7 @@ extension ValidationMethod on AutoMasking {
       case AutoMasking.media:
         return isMedia;
       case AutoMasking.webViews:
-        return (_) => false;
+        return isWebViewWidget;
       case AutoMasking.none:
         return (_) => false;
     }

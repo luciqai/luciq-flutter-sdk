@@ -125,6 +125,16 @@ bool isMedia(Widget widget) {
   return isImageWidget(widget) || isVideoPlayerWidget(widget);
 }
 
+bool isWebViewWidget(Widget widget) {
+  const webViewTypes = {
+    'WebViewWidget',
+    'WebView',
+    'InAppWebView',
+  };
+
+  return webViewTypes.contains(widget.runtimeType.toString());
+}
+
 /// Checks if a widget is toggleable (e.g., switch, checkbox, etc.).
 bool isToggleableWidget(Widget widget) {
   return widget is Checkbox ||

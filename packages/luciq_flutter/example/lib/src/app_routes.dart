@@ -25,4 +25,5 @@ final appRoutes = {
   ScreenCapturePrematureExtensionPage.screenName: (BuildContext context) =>
       const ScreenCapturePrematureExtensionPage(),
   GrpcPage.screenName: (BuildContext context) => const GrpcPage(),
+  GraphQLPage.screenName: (BuildContext context) => const GraphQLPage(),
 };

@@ -18,6 +18,7 @@ class NetworkData {
     required this.startTime,
     this.errorCode = 0,
     this.errorDomain = '',
+    this.gqlQueryName,
     W3CHeader? w3cHeader,
   }) {
     _w3cHeader = w3cHeader;
@@ -39,6 +40,7 @@ class NetworkData {
   final DateTime startTime;
   final int errorCode;
   final String errorDomain;
+  final String? gqlQueryName;
   W3CHeader? _w3cHeader;
 
   @override
@@ -62,6 +64,7 @@ class NetworkData {
           startTime == other.startTime &&
           errorCode == other.errorCode &&
           errorDomain == other.errorDomain &&
+          gqlQueryName == other.gqlQueryName &&
           _w3cHeader == other._w3cHeader;
 
   @override
@@ -82,6 +85,7 @@ class NetworkData {
       startTime.hashCode ^
       errorCode.hashCode ^
       errorDomain.hashCode ^
+      gqlQueryName.hashCode ^
       _w3cHeader.hashCode;
 
   NetworkData copyWith({
@@ -101,6 +105,7 @@ class NetworkData {
     DateTime? startTime,
     int? errorCode,
     String? errorDomain,
+    String? gqlQueryName,
     W3CHeader? w3cHeader,
   }) {
     return NetworkData(
@@ -120,6 +125,7 @@ class NetworkData {
       startTime: startTime ?? this.startTime,
       errorCode: errorCode ?? this.errorCode,
       errorDomain: errorDomain ?? this.errorDomain,
+      gqlQueryName: gqlQueryName ?? this.gqlQueryName,
       w3cHeader: w3cHeader ?? _w3cHeader,
     );
   }
@@ -143,6 +149,7 @@ class NetworkData {
       'responseBodySize': responseBodySize,
       'errorDomain': errorDomain,
       'errorCode': errorCode,
+      'gqlQueryName': gqlQueryName,
       "isW3cHeaderFound": _w3cHeader?.isW3cHeaderFound,
       "partialId": _w3cHeader?.partialId,
       "networkStartTimeInSeconds": _w3cHeader?.networkStartTimeInSeconds,

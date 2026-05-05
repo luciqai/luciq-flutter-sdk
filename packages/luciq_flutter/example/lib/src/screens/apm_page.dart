@@ -34,6 +34,18 @@ class _ApmPageState extends State<ApmPage> {
     );
   }
 
+  void _navigateToGraphQL() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const GraphQLPage(),
+        settings: const RouteSettings(
+          name: GraphQLPage.screenName,
+        ),
+      ),
+    );
+  }
+
   _endAppLaunch() => APM.endAppLaunch();
 
   @override
@@ -53,6 +65,11 @@ class _ApmPageState extends State<ApmPage> {
           text: 'gRPC',
           onPressed: _navigateToGrpc,
           symanticLabel: 'open_grpc_page',
+        ),
+        LuciqButton(
+          text: 'GraphQL',
+          onPressed: _navigateToGraphQL,
+          symanticLabel: 'open_graphql_page',
         ),
         const SectionTitle('Flows'),
         const FlowsContent(),

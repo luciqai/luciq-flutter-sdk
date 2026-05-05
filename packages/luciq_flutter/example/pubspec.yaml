@@ -31,6 +31,13 @@ dependencies:
     path: ../../luciq_grpc_interceptor
   luciq_http_client:
     path: ../../luciq_http_client
+  luciq_gql_link:
+    path: ../../luciq_gql_link
+  graphql_flutter: ^5.1.2
+  gql: ">=0.13.0 <2.0.0"
+  gql_exec: ">=0.4.0 <2.0.0"
+  gql_link: ">=0.4.0 <2.0.0"
+  gql_http_link: ">=0.4.0 <2.0.0"
   file_picker: <10.0.0
   provider:
   video_player:

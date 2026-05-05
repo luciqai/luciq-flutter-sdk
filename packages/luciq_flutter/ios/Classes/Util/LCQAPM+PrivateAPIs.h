@@ -42,4 +42,6 @@
 
 + (double)screenRenderingThreshold;
 
++ (BOOL)customSpansEnabled;
+
 @end

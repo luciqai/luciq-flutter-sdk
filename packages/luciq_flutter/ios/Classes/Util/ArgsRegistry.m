@@ -154,6 +154,22 @@
     };
 }
 
++ (ArgsDictionary *)screenshotCapturingModes {
+    return @{
+        @"ScreenshotCapturingMode.navigation" : @(LCQScreenshotCapturingModeNavigation),
+        @"ScreenshotCapturingMode.interaction" : @(LCQScreenshotCapturingModeInteraction),
+        @"ScreenshotCapturingMode.frequency" : @(LCQScreenshotCapturingModeFrequency),
+    };
+}
+
++ (ArgsDictionary *)screenshotQualityModes {
+    return @{
+        @"ScreenshotQualityMode.normal" : @(LCQScreenshotQualityModeNormal),
+        @"ScreenshotQualityMode.high" : @(LCQScreenshotQualityModeHigh),
+        @"ScreenshotQualityMode.greyScale" : @(LCQScreenshotQualityModeGreyScale),
+    };
+}
+
 + (NSDictionary<NSString *, NSString *> *)placeholders {
     return @{
         @"CustomTextPlaceHolderKey.shakeHint" : kLCQShakeStartAlertTextStringName,

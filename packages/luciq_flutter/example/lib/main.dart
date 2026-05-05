@@ -46,6 +46,7 @@ part 'src/screens/screen_loading/screen_loading_tab_page.dart';
 part 'src/screens/screen_loading/screen_loading_delayed_page.dart';
 part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
+part 'src/screens/custom_spans_page.dart';
 
 void main() {
   runZonedGuarded(

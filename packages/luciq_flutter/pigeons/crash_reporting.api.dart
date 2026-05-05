@@ -4,8 +4,10 @@ import 'package:pigeon/pigeon.dart';
 abstract class CrashReportingHostApi {
   void setEnabled(bool isEnabled);
 
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void send(String jsonCrash, bool isHandled);
 
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   void sendNonFatalError(
     String jsonCrash,
     Map<String, String>? userAttributes,

@@ -244,7 +244,7 @@ public class ApmApiTest {
 
         api.reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId);
 
-        mInternalApmStatic.verify(() -> InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId));
+        mInternalApmStatic.verify(() -> InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId, null));
         mInternalApmStatic.verifyNoMoreInteractions();
     }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
@@ -399,5 +400,10 @@ void main() {
         ),
       ).called(1);
     });
+  });
+
+  test('[setEnabled] swallows host PlatformException', () async {
+    when(mHost.setEnabled(any)).thenThrow(PlatformException(code: 'X'));
+    await expectLater(APM.setEnabled(true), completes);
   });
 }

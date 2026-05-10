@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:luciq_flutter/src/generated/surveys.api.g.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 import 'package:meta/meta.dart';
 
 typedef OnShowSurveyCallback = void Function();
@@ -33,14 +34,18 @@ class Surveys implements SurveysFlutterApi {
   @internal
   @override
   void onShowSurvey() {
-    _onShowCallback?.call();
+    runCatching('SurveysFlutterApi.onShowSurvey', () {
+      _onShowCallback?.call();
+    });
   }
 
   /// @nodoc
   @internal
   @override
   void onDismissSurvey() {
-    _onDismissCallback?.call();
+    runCatching('SurveysFlutterApi.onDismissSurvey', () {
+      _onDismissCallback?.call();
+    });
   }
 
   /// @summary Sets whether surveys are enabled or not.
@@ -50,24 +55,33 @@ class Surveys implements SurveysFlutterApi {
   /// To manually display any available surveys, call `Luciq.showSurveyIfAvailable()`.
   /// Defaults to `true`.
   /// [isEnabled] A boolean to set whether Luciq Surveys is enabled or disabled.
-  static Future<void> setEnabled(bool isEnabled) async {
-    return _host.setEnabled(isEnabled);
+  static Future<void> setEnabled(bool isEnabled) {
+    return runCatchingAsync('Surveys.setEnabled', () async {
+      await _host.setEnabled(isEnabled);
+    });
   }
 
   ///Sets whether auto surveys showing are enabled or not.
   /// [isEnabled] A boolean to indicate whether the
   /// surveys auto showing are enabled or not.
-  static Future<void> setAutoShowingEnabled(bool isEnabled) async {
-    return _host.setAutoShowingEnabled(isEnabled);
+  static Future<void> setAutoShowingEnabled(bool isEnabled) {
+    return runCatchingAsync('Surveys.setAutoShowingEnabled', () async {
+      await _host.setAutoShowingEnabled(isEnabled);
+    });
   }
 
   /// Returns an array containing the available surveys.
   /// [callback] availableSurveysCallback callback with
   /// argument available surveys
-  static Future<List<String>> getAvailableSurveys() async {
-    final titles = await _host.getAvailableSurveys();
-
-    return titles.cast<String>();
+  static Future<List<String>> getAvailableSurveys() {
+    return runCatchingReturn<List<String>>(
+      'Surveys.getAvailableSurveys',
+      () async {
+        final titles = await _host.getAvailableSurveys();
+        return titles.cast<String>();
+      },
+      fallback: const <String>[],
+    );
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
@@ -76,9 +90,11 @@ class Surveys implements SurveysFlutterApi {
   /// [callback]  A callback that gets executed before presenting the survey's UI.
   static Future<void> setOnShowCallback(
     OnShowSurveyCallback callback,
-  ) async {
-    _onShowCallback = callback;
-    return _host.bindOnShowSurveyCallback();
+  ) {
+    return runCatchingAsync('Surveys.setOnShowCallback', () async {
+      _onShowCallback = callback;
+      await _host.bindOnShowSurveyCallback();
+    });
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
@@ -87,52 +103,64 @@ class Surveys implements SurveysFlutterApi {
   /// [callback]  A callback that gets executed after the survey's UI is dismissed.
   static Future<void> setOnDismissCallback(
     OnDismissSurveyCallback callback,
-  ) async {
-    _onDismissCallback = callback;
-    return _host.bindOnDismissSurveyCallback();
+  ) {
+    return runCatchingAsync('Surveys.setOnDismissCallback', () async {
+      _onDismissCallback = callback;
+      await _host.bindOnDismissSurveyCallback();
+    });
   }
 
   /// Setting an option for all the surveys to show a welcome screen before
   /// [shouldShowWelcomeScreen] A boolean for setting whether the  welcome screen should show.
   static Future<void> setShouldShowWelcomeScreen(
     bool shouldShowWelcomeScreen,
-  ) async {
-    return _host.setShouldShowWelcomeScreen(shouldShowWelcomeScreen);
+  ) {
+    return runCatchingAsync('Surveys.setShouldShowWelcomeScreen', () async {
+      await _host.setShouldShowWelcomeScreen(shouldShowWelcomeScreen);
+    });
   }
 
   ///  Shows one of the surveys that were not shown before, that also have conditions
   /// that match the current device/user.
   /// Does nothing if there are no available surveys or if a survey has already been shown
   /// in the current session.
-  static Future<void> showSurveyIfAvailable() async {
-    return _host.showSurveyIfAvailable();
+  static Future<void> showSurveyIfAvailable() {
+    return runCatchingAsync('Surveys.showSurveyIfAvailable', () async {
+      await _host.showSurveyIfAvailable();
+    });
   }
 
   /// Shows survey with a specific token.
   /// Does nothing if there are no available surveys with that specific token.
   /// Answered and cancelled surveys won't show up again.
   /// [surveyToken] - A String with a survey token.
-  static Future<void> showSurvey(String surveyToken) async {
-    return _host.showSurvey(surveyToken);
+  static Future<void> showSurvey(String surveyToken) {
+    return runCatchingAsync('Surveys.showSurvey', () async {
+      await _host.showSurvey(surveyToken);
+    });
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
   /// This block is executed on the UI thread. Could be used for performing any
   /// UI changes  after the survey's UI is dismissed.
   /// [callback]  A callback that gets executed after the survey's UI is dismissed.
-  static Future<bool> hasRespondedToSurvey(String surveyToken) async {
-    final hasResponded = await _host.hasRespondedToSurvey(surveyToken);
-
-    return hasResponded;
+  static Future<bool> hasRespondedToSurvey(String surveyToken) {
+    return runCatchingReturn<bool>(
+      'Surveys.hasRespondedToSurvey',
+      () => _host.hasRespondedToSurvey(surveyToken),
+      fallback: false,
+    );
   }
 
   /// iOS Only
   /// Sets url for the published iOS app on AppStore, You can redirect
   /// NPS Surveys or AppRating Surveys to AppStore to let users rate your app on AppStore itself.
   /// [appStoreURL] A String url for the published iOS app on AppStore
-  static Future<void> setAppStoreURL(String appStoreURL) async {
-    if (LCQBuildInfo.instance.isIOS) {
-      return _host.setAppStoreURL(appStoreURL);
-    }
+  static Future<void> setAppStoreURL(String appStoreURL) {
+    return runCatchingAsync('Surveys.setAppStoreURL', () async {
+      if (LCQBuildInfo.instance.isIOS) {
+        await _host.setAppStoreURL(appStoreURL);
+      }
+    });
   }
 }

@@ -9,6 +9,7 @@ import ai.luciq.bug.BugReporting;
 import ai.luciq.bug.ProactiveReportingConfigs;
 import ai.luciq.flutter.generated.BugReportingPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.RunCatching;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.Feature;
 import ai.luciq.library.OnSdkDismissCallback;
@@ -37,76 +38,88 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        if (isEnabled) {
-            BugReporting.setState(Feature.State.ENABLED);
-        } else {
-            BugReporting.setState(Feature.State.DISABLED);
-        }
+        RunCatching.runCatching("BugReportingApi.setEnabled", () -> {
+            if (isEnabled) {
+                BugReporting.setState(Feature.State.ENABLED);
+            } else {
+                BugReporting.setState(Feature.State.DISABLED);
+            }
+        });
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void show(@NonNull String reportType, @Nullable List<String> invocationOptions) {
-        int[] options = new int[invocationOptions.size()];
-        for (int i = 0; i < invocationOptions.size(); i++) {
-            options[i] = ArgsRegistry.invocationOptions.get(invocationOptions.get(i));
-        }
-        int reportTypeInt = ArgsRegistry.reportTypes.get(reportType);
-        BugReporting.show(reportTypeInt, options);
+        RunCatching.runCatching("BugReportingApi.show", () -> {
+            int[] options = new int[invocationOptions.size()];
+            for (int i = 0; i < invocationOptions.size(); i++) {
+                options[i] = ArgsRegistry.invocationOptions.get(invocationOptions.get(i));
+            }
+            int reportTypeInt = ArgsRegistry.reportTypes.get(reportType);
+            BugReporting.show(reportTypeInt, options);
+        });
     }
 
     @Override
     public void setInvocationEvents(@NonNull List<String> events) {
-        LuciqInvocationEvent[] invocationEventsArray = new LuciqInvocationEvent[events.size()];
-
-        for (int i = 0; i < events.size(); i++) {
-            String key = events.get(i);
-            invocationEventsArray[i] = ArgsRegistry.invocationEvents.get(key);
-        }
-
-        BugReporting.setInvocationEvents(invocationEventsArray);
+        RunCatching.runCatching("BugReportingApi.setInvocationEvents", () -> {
+            LuciqInvocationEvent[] invocationEventsArray = new LuciqInvocationEvent[events.size()];
+            for (int i = 0; i < events.size(); i++) {
+                String key = events.get(i);
+                invocationEventsArray[i] = ArgsRegistry.invocationEvents.get(key);
+            }
+            BugReporting.setInvocationEvents(invocationEventsArray);
+        });
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setReportTypes(@NonNull List<String> types) {
-        int[] reportTypesArray = new int[types.size()];
-
-        for (int i = 0; i < types.size(); i++) {
-            String key = types.get(i);
-            reportTypesArray[i] = ArgsRegistry.reportTypes.get(key);
-        }
-
-        BugReporting.setReportTypes(reportTypesArray);
+        RunCatching.runCatching("BugReportingApi.setReportTypes", () -> {
+            int[] reportTypesArray = new int[types.size()];
+            for (int i = 0; i < types.size(); i++) {
+                String key = types.get(i);
+                reportTypesArray[i] = ArgsRegistry.reportTypes.get(key);
+            }
+            BugReporting.setReportTypes(reportTypesArray);
+        });
     }
 
     @Override
     public void setExtendedBugReportMode(@NonNull String mode) {
-        final ExtendedBugReport.State resolvedMode = ArgsRegistry.extendedBugReportStates.get(mode);
-        BugReporting.setExtendedBugReportState(resolvedMode);
+        RunCatching.runCatching("BugReportingApi.setExtendedBugReportMode", () -> {
+            final ExtendedBugReport.State resolvedMode = ArgsRegistry.extendedBugReportStates.get(mode);
+            BugReporting.setExtendedBugReportState(resolvedMode);
+        });
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setInvocationOptions(@NonNull List<String> options) {
-        int[] resolvedOptions = new int[options.size()];
-        for (int i = 0; i < options.size(); i++) {
-            resolvedOptions[i] = ArgsRegistry.invocationOptions.get(options.get(i));
-        }
-        BugReporting.setOptions(resolvedOptions);
+        RunCatching.runCatching("BugReportingApi.setInvocationOptions", () -> {
+            int[] resolvedOptions = new int[options.size()];
+            for (int i = 0; i < options.size(); i++) {
+                resolvedOptions[i] = ArgsRegistry.invocationOptions.get(options.get(i));
+            }
+            BugReporting.setOptions(resolvedOptions);
+        });
     }
 
     @Override
     public void setFloatingButtonEdge(@NonNull String edge, @NonNull Long offset) {
-        final LuciqFloatingButtonEdge resolvedEdge = ArgsRegistry.floatingButtonEdges.get(edge);
-        BugReporting.setFloatingButtonEdge(resolvedEdge);
-        BugReporting.setFloatingButtonOffset(offset.intValue());
+        RunCatching.runCatching("BugReportingApi.setFloatingButtonEdge", () -> {
+            final LuciqFloatingButtonEdge resolvedEdge = ArgsRegistry.floatingButtonEdges.get(edge);
+            BugReporting.setFloatingButtonEdge(resolvedEdge);
+            BugReporting.setFloatingButtonOffset(offset.intValue());
+        });
     }
 
     @Override
     public void setVideoRecordingFloatingButtonPosition(@NonNull String position) {
-        final LuciqVideoRecordingButtonPosition resolvedPosition = ArgsRegistry.recordButtonPositions.get(position);
-        BugReporting.setVideoRecordingFloatingButtonPosition(resolvedPosition);
+        RunCatching.runCatching("BugReportingApi.setVideoRecordingFloatingButtonPosition", () -> {
+            final LuciqVideoRecordingButtonPosition resolvedPosition = ArgsRegistry.recordButtonPositions.get(position);
+            BugReporting.setVideoRecordingFloatingButtonPosition(resolvedPosition);
+        });
     }
 
     @Override
@@ -121,108 +134,118 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setShakingThresholdForAndroid(@NonNull Long threshold) {
-        BugReporting.setShakingThreshold(threshold.intValue());
+        RunCatching.runCatching("BugReportingApi.setShakingThresholdForAndroid",
+                () -> BugReporting.setShakingThreshold(threshold.intValue()));
     }
 
     @Override
     public void setEnabledAttachmentTypes(@NonNull Boolean screenshot, @NonNull Boolean extraScreenshot, @NonNull Boolean galleryImage, @NonNull Boolean screenRecording) {
-        BugReporting.setAttachmentTypesEnabled(screenshot, extraScreenshot, galleryImage, screenRecording);
+        RunCatching.runCatching("BugReportingApi.setEnabledAttachmentTypes",
+                () -> BugReporting.setAttachmentTypesEnabled(screenshot, extraScreenshot, galleryImage, screenRecording));
     }
 
     @Override
     public void bindOnInvokeCallback() {
-        BugReporting.setOnInvokeCallback(new OnInvokeCallback() {
-            @Override
-            public void onInvoke() {
-                // The on invoke callback for Flutter needs to be run on the
-                // main thread, otherwise, it won't work and will break the
-                // Luciq.show API
-                ThreadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterApi.onSdkInvoke(new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
-                            @Override
-                            public void reply(Void reply) {
-                            }
-                        });
-                    }
-                });
-            }
+        RunCatching.runCatching("BugReportingApi.bindOnInvokeCallback", () -> {
+            BugReporting.setOnInvokeCallback(new OnInvokeCallback() {
+                @Override
+                public void onInvoke() {
+                    // The on invoke callback for Flutter needs to be run on the
+                    // main thread, otherwise, it won't work and will break the
+                    // Luciq.show API
+                    ThreadManager.runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            flutterApi.onSdkInvoke(new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
+                                @Override
+                                public void reply(Void reply) {
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         });
     }
 
     @Override
     public void bindOnDismissCallback() {
-        BugReporting.setOnDismissCallback(new OnSdkDismissCallback() {
-            @Override
-            public void call(DismissType dismissType, ReportType reportType) {
-                ThreadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        flutterApi.onSdkDismiss(dismissType.toString(), reportType.toString(), new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
-                            @Override
-                            public void reply(Void reply) {
-                            }
-                        });
-                    }
-                });
-            }
+        RunCatching.runCatching("BugReportingApi.bindOnDismissCallback", () -> {
+            BugReporting.setOnDismissCallback(new OnSdkDismissCallback() {
+                @Override
+                public void call(DismissType dismissType, ReportType reportType) {
+                    ThreadManager.runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            flutterApi.onSdkDismiss(dismissType.toString(), reportType.toString(), new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
+                                @Override
+                                public void reply(Void reply) {
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         });
     }
 
     @Override
     public void setDisclaimerText(@NonNull String text) {
-        BugReporting.setDisclaimerText(text);
+        RunCatching.runCatching("BugReportingApi.setDisclaimerText",
+                () -> BugReporting.setDisclaimerText(text));
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setCommentMinimumCharacterCount(@NonNull Long limit, @Nullable List<String> reportTypes) {
-        int[] reportTypesArray = reportTypes == null ? new int[0] : new int[reportTypes.size()];
-        if(reportTypes != null){
-        for (int i = 0; i < reportTypes.size(); i++) {
-            String key = reportTypes.get(i);
-            reportTypesArray[i] = ArgsRegistry.reportTypes.get(key);
-        }
-    }
-        BugReporting.setCommentMinimumCharacterCountForBugReportType(limit.intValue(), reportTypesArray);
+        RunCatching.runCatching("BugReportingApi.setCommentMinimumCharacterCount", () -> {
+            int[] reportTypesArray = reportTypes == null ? new int[0] : new int[reportTypes.size()];
+            if (reportTypes != null) {
+                for (int i = 0; i < reportTypes.size(); i++) {
+                    String key = reportTypes.get(i);
+                    reportTypesArray[i] = ArgsRegistry.reportTypes.get(key);
+                }
+            }
+            BugReporting.setCommentMinimumCharacterCountForBugReportType(limit.intValue(), reportTypesArray);
+        });
     }
 
     @Override
-public void addUserConsents(String key, String description, Boolean mandatory, Boolean checked, String actionType) {
-        ThreadManager.runOnMainThread(new Runnable() {
-        @Override
-        public void run() {
-            String mappedActionType;
-            try {
-                if (actionType==null) {
-                    mappedActionType = null;
+    public void addUserConsents(String key, String description, Boolean mandatory, Boolean checked, String actionType) {
+        RunCatching.runCatching("BugReportingApi.addUserConsents", () -> {
+            ThreadManager.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    String mappedActionType;
+                    try {
+                        if (actionType == null) {
+                            mappedActionType = null;
+                        } else {
+                            mappedActionType = ArgsRegistry.userConsentActionType.get(actionType);
+                        }
+                        BugReporting.addUserConsent(key, description, mandatory, checked, mappedActionType);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-                else {
-                    mappedActionType = ArgsRegistry.userConsentActionType.get(actionType);
-                }
+            });
+        });
+    }
 
-                BugReporting.addUserConsent(key, description, mandatory, checked, mappedActionType);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    });
-}
     @Override
     public void setProactiveReportingConfigurations(@NonNull Boolean enabled, @NonNull Long gapBetweenModals, @NonNull Long modalDelayAfterDetection) {
-        ThreadManager.runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                ProactiveReportingConfigs configs = new ProactiveReportingConfigs.Builder()
-                        .setGapBetweenModals(gapBetweenModals) // Time in seconds
-                        .setModalDelayAfterDetection(modalDelayAfterDetection) // Time in seconds
-                        .isEnabled(enabled) //Enable/disable
-                        .build();
-                BugReporting.setProactiveReportingConfigurations(configs);
-
-
-            }
+        RunCatching.runCatching("BugReportingApi.setProactiveReportingConfigurations", () -> {
+            ThreadManager.runOnMainThread(new Runnable() {
+                @Override
+                public void run() {
+                    ProactiveReportingConfigs configs = new ProactiveReportingConfigs.Builder()
+                            .setGapBetweenModals(gapBetweenModals) // Time in seconds
+                            .setModalDelayAfterDetection(modalDelayAfterDetection) // Time in seconds
+                            .isEnabled(enabled) //Enable/disable
+                            .build();
+                    BugReporting.setProactiveReportingConfigurations(configs);
+                }
+            });
         });
     }
 }

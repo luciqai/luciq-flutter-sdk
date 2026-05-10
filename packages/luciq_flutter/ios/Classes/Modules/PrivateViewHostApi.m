@@ -7,6 +7,7 @@
 
 #import "PrivateViewHostApi.h"
 #import "luciq_flutter/LuciqApi.h"
+#import "../Util/LCQRunCatching.h"
 
 extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger, PrivateViewApi * _Nonnull privateViewApi) {
     PrivateViewHostApi *api = [[PrivateViewHostApi alloc] init];
@@ -18,16 +19,17 @@ extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger
 
 
 - (void)initWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqApi setScreenshotMaskingHandler:^(UIImage * _Nonnull screenshot, void (^ _Nonnull completion)(UIImage * _Nullable)) {
-        
-        
-
-           [self.privateViewApi mask:screenshot completion:^(UIImage * _Nonnull maskedImage) {
-             if (maskedImage != nil) {
-                 completion(maskedImage);
-                }
-           }];
-       }];
+    LCQRunCatching(@"PrivateViewHostApi.init", ^{
+        [LuciqApi setScreenshotMaskingHandler:^(UIImage * _Nonnull screenshot, void (^ _Nonnull completion)(UIImage * _Nullable)) {
+            LCQRunCatching(@"PrivateViewHostApi.maskingHandler", ^{
+                [self.privateViewApi mask:screenshot completion:^(UIImage * _Nonnull maskedImage) {
+                    if (maskedImage != nil) {
+                        completion(maskedImage);
+                    }
+                }];
+            });
+        }];
+    });
 }
 
 @end

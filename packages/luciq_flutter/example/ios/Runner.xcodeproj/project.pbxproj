@@ -10,6 +10,9 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		2001D1442B8F501000885261 /* LuciqExampleMethodCallHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2001D1432B8F501000885261 /* LuciqExampleMethodCallHandler.m */; };
 		206286ED2ABD0A1F00925509 /* SessionReplayApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 206286EC2ABD0A1F00925509 /* SessionReplayApiTests.m */; };
+		207389962FA0CF71006B6673 /* LCQRunCatchingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 207389932FA0CF71006B6673 /* LCQRunCatchingTests.m */; };
+		207389972FA0CF71006B6673 /* PrivateViewApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 207389942FA0CF71006B6673 /* PrivateViewApiTests.m */; };
+		207389982FA0CF71006B6673 /* PrivateViewHostApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 207389952FA0CF71006B6673 /* PrivateViewHostApiTests.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		65C88E6E8EAE049E32FF2F52 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 853739F5879F6E4272829F47 /* Pods_Runner.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
@@ -66,6 +69,9 @@
 		2001D1432B8F501000885261 /* LuciqExampleMethodCallHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LuciqExampleMethodCallHandler.m; sourceTree = "<group>"; };
 		2001D1452B8F504C00885261 /* LuciqExampleMethodCallHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LuciqExampleMethodCallHandler.h; sourceTree = "<group>"; };
 		206286EC2ABD0A1F00925509 /* SessionReplayApiTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SessionReplayApiTests.m; sourceTree = "<group>"; };
+		207389932FA0CF71006B6673 /* LCQRunCatchingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LCQRunCatchingTests.m; sourceTree = "<group>"; };
+		207389942FA0CF71006B6673 /* PrivateViewApiTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrivateViewApiTests.m; sourceTree = "<group>"; };
+		207389952FA0CF71006B6673 /* PrivateViewHostApiTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrivateViewHostApiTests.m; sourceTree = "<group>"; };
 		243EF14638ECA64074771B11 /* Pods-LuciqTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LuciqTests.release.xcconfig"; path = "Target Support Files/Pods-LuciqTests/Pods-LuciqTests.release.xcconfig"; sourceTree = "<group>"; };
 		354EA318B622513FE3FD25E4 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
@@ -238,6 +244,9 @@
 		C090017A25D9A031006F3DAE /* LuciqTests */ = {
 			isa = PBXGroup;
 			children = (
+				207389932FA0CF71006B6673 /* LCQRunCatchingTests.m */,
+				207389942FA0CF71006B6673 /* PrivateViewApiTests.m */,
+				207389952FA0CF71006B6673 /* PrivateViewHostApiTests.m */,
 				CC198C60293E1A21007077C8 /* SurveysApiTests.m */,
 				CC78720A2938D1C5008CB2A5 /* Util */,
 				CC080E102937B7DB0041170A /* LuciqApiTests.m */,
@@ -618,6 +627,9 @@
 			files = (
 				CC359DB92937720C0067A924 /* ApmApiTests.m in Sources */,
 				CC3D69E7293F47FC000DCE54 /* ArgsRegistryTests.m in Sources */,
+				207389962FA0CF71006B6673 /* LCQRunCatchingTests.m in Sources */,
+				207389972FA0CF71006B6673 /* PrivateViewApiTests.m in Sources */,
+				207389982FA0CF71006B6673 /* PrivateViewHostApiTests.m in Sources */,
 				CC080E112937B7DB0041170A /* LuciqApiTests.m in Sources */,
 				CC198C61293E1A21007077C8 /* SurveysApiTests.m in Sources */,
 				CCADBDD8293CFED300AE5EB8 /* BugReportingApiTests.m in Sources */,

@@ -11,6 +11,7 @@ import 'package:luciq_flutter/src/utils/iterable_ext.dart';
 import 'package:luciq_flutter/src/utils/luciq_constants.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/network_manager.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 import 'package:luciq_flutter/src/utils/w3c_header_utils.dart';
 import 'package:meta/meta.dart';
 
@@ -48,7 +49,9 @@ class NetworkLogger {
   /// });
   /// ```
   static void obfuscateLog(ObfuscateLogCallback callback) {
-    _manager.setObfuscateLogCallback(callback);
+    runCatching('NetworkLogger.obfuscateLog', () {
+      _manager.setObfuscateLogCallback(callback);
+    });
   }
 
   /// Registers a callback to selectively omit network log data.
@@ -70,7 +73,9 @@ class NetworkLogger {
   /// });
   /// ```
   static void omitLog(OmitLogCallback callback) {
-    _manager.setOmitLogCallback(callback);
+    runCatching('NetworkLogger.omitLog', () {
+      _manager.setOmitLogCallback(callback);
+    });
   }
 
   Future<void> networkLog(NetworkData data) async {
@@ -161,13 +166,20 @@ class NetworkLogger {
 
   /// Enables or disables network body logs capturing.
   /// [boolean] isEnabled
-  static Future<void> setNetworkLogBodyEnabled(bool isEnabled) async {
-    return _host.setNetworkLogBodyEnabled(isEnabled);
+  static Future<void> setNetworkLogBodyEnabled(bool isEnabled) {
+    return runCatchingAsync('NetworkLogger.setNetworkLogBodyEnabled', () async {
+      await _host.setNetworkLogBodyEnabled(isEnabled);
+    });
   }
 
   /// Enables or disables network logs sensitive information auto masking.
   /// [boolean] isEnabled
-  static Future<void> setNetworkAutoMaskingEnabled(bool isEnabled) async {
-    return _host.setNetworkAutoMaskingEnabled(isEnabled);
+  static Future<void> setNetworkAutoMaskingEnabled(bool isEnabled) {
+    return runCatchingAsync(
+      'NetworkLogger.setNetworkAutoMaskingEnabled',
+      () async {
+        await _host.setNetworkAutoMaskingEnabled(isEnabled);
+      },
+    );
   }
 }

@@ -6,6 +6,7 @@
 #import "LuciqApi.h"
 #import "ArgsRegistry.h"
 #import "../Util/LCQAPM+PrivateAPIs.h"
+#import "../Util/LCQRunCatching.h"
 
 #import "../Util/Luciq+CP.h"
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
@@ -20,154 +21,175 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
-    Luciq.enabled = [isEnabled boolValue];
+    LCQRunCatching(@"LuciqApi.setEnabled", ^{
+        Luciq.enabled = [isEnabled boolValue];
+    });
 }
 
 - (nullable NSNumber *)isBuiltWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     return @(YES);
 }
 
-
 - (nullable NSNumber *)isEnabledWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    return @(Luciq.enabled);
+    return (NSNumber *)LCQRunCatchingReturn(@"LuciqApi.isEnabled", @(NO), ^id{
+        return @(Luciq.enabled);
+    });
 }
 
 - (void)initToken:(nonnull NSString *)token invocationEvents:(nonnull NSArray<NSString *> *)invocationEvents debugLogsLevel:(nonnull NSString *)debugLogsLevel appVariant:(nullable NSString *)appVariant error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    LCQRunCatching(@"LuciqApi.init", ^{
+        if (appVariant != nil) {
+            Luciq.appVariant = appVariant;
+        }
 
-    if(appVariant != nil){
-        Luciq.appVariant = appVariant;
-    }
+        SEL setPrivateApiSEL = NSSelectorFromString(@"setCurrentPlatform:");
+        if ([[Luciq class] respondsToSelector:setPrivateApiSEL]) {
+            NSInteger *platformID = LCQPlatformFlutter;
+            NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[[Luciq class] methodSignatureForSelector:setPrivateApiSEL]];
+            [inv setSelector:setPrivateApiSEL];
+            [inv setTarget:[Luciq class]];
+            [inv setArgument:&(platformID) atIndex:2];
+            [inv invoke];
+        }
 
+        // Disable automatic capturing of native iOS network logs to avoid duplicate
+        // logs of the same request when using a native network client like cupertino_http
+        [LCQNetworkLogger disableAutomaticCapturingOfNetworkLogs];
 
-    SEL setPrivateApiSEL = NSSelectorFromString(@"setCurrentPlatform:");
-    if ([[Luciq class] respondsToSelector:setPrivateApiSEL]) {
-        NSInteger *platformID = LCQPlatformFlutter;
-        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[[Luciq class] methodSignatureForSelector:setPrivateApiSEL]];
-        [inv setSelector:setPrivateApiSEL];
-        [inv setTarget:[Luciq class]];
-        [inv setArgument:&(platformID) atIndex:2];
-        [inv invoke];
-    }
-    
-    // Disable automatic capturing of native iOS network logs to avoid duplicate
-    // logs of the same request when using a native network client like cupertino_http
-    [LCQNetworkLogger disableAutomaticCapturingOfNetworkLogs];
+        LCQInvocationEvent resolvedEvents = 0;
+        for (NSString *event in invocationEvents) {
+            resolvedEvents |= (ArgsRegistry.invocationEvents[event]).integerValue;
+        }
 
-    LCQInvocationEvent resolvedEvents = 0;
+        LCQSDKDebugLogsLevel resolvedLogLevel = (ArgsRegistry.sdkLogLevels[debugLogsLevel]).integerValue;
 
-
-    for (NSString *event in invocationEvents) {
-        resolvedEvents |= (ArgsRegistry.invocationEvents[event]).integerValue;
-    }
-
-    LCQSDKDebugLogsLevel resolvedLogLevel = (ArgsRegistry.sdkLogLevels[debugLogsLevel]).integerValue;
-
-    [Luciq setSdkDebugLogsLevel:resolvedLogLevel];
-    [Luciq startWithToken:token invocationEvents:resolvedEvents];
-    Luciq.sendEventsSwizzling = false;
+        [Luciq setSdkDebugLogsLevel:resolvedLogLevel];
+        [Luciq startWithToken:token invocationEvents:resolvedEvents];
+        Luciq.sendEventsSwizzling = false;
+    });
 }
 
 - (void)showWithError:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq show];
+    LCQRunCatching(@"LuciqApi.show", ^{ [Luciq show]; });
 }
 
 - (void)showWelcomeMessageWithModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQWelcomeMessageMode resolvedMode = (ArgsRegistry.welcomeMessageStates[mode]).integerValue;
-    [Luciq showWelcomeMessageWithMode:resolvedMode];
+    LCQRunCatching(@"LuciqApi.showWelcomeMessageWithMode", ^{
+        LCQWelcomeMessageMode resolvedMode = (ArgsRegistry.welcomeMessageStates[mode]).integerValue;
+        [Luciq showWelcomeMessageWithMode:resolvedMode];
+    });
 }
 
 - (void)identifyUserEmail:(NSString *)email name:(nullable NSString *)name userId:(nullable NSString *)userId error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq identifyUserWithID:userId email:email name:name];
+    LCQRunCatching(@"LuciqApi.identifyUser", ^{
+        [Luciq identifyUserWithID:userId email:email name:name];
+    });
 }
 
 - (void)setUserDataData:(NSString *)data error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq setUserData:data];
+    LCQRunCatching(@"LuciqApi.setUserData", ^{ [Luciq setUserData:data]; });
 }
 
 - (void)logUserEventName:(NSString *)name error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq logUserEventWithName:name];
+    LCQRunCatching(@"LuciqApi.logUserEvent", ^{ [Luciq logUserEventWithName:name]; });
 }
 
 - (void)logOutWithError:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq logOut];
+    LCQRunCatching(@"LuciqApi.logOut", ^{ [Luciq logOut]; });
 }
 
 - (void)setLocaleLocale:(NSString *)locale error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQLocale resolvedLocale = (ArgsRegistry.locales[locale]).integerValue;
-    [Luciq setLocale:resolvedLocale];
+    LCQRunCatching(@"LuciqApi.setLocale", ^{
+        LCQLocale resolvedLocale = (ArgsRegistry.locales[locale]).integerValue;
+        [Luciq setLocale:resolvedLocale];
+    });
 }
 
 - (void)setColorThemeTheme:(NSString *)theme error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQColorTheme resolvedTheme = (ArgsRegistry.colorThemes[theme]).integerValue;
-    [Luciq setColorTheme:resolvedTheme];
+    LCQRunCatching(@"LuciqApi.setColorTheme", ^{
+        LCQColorTheme resolvedTheme = (ArgsRegistry.colorThemes[theme]).integerValue;
+        [Luciq setColorTheme:resolvedTheme];
+    });
 }
 
 - (void)setWelcomeMessageModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQWelcomeMessageMode resolvedMode = (ArgsRegistry.welcomeMessageStates[mode]).integerValue;
-    [Luciq setWelcomeMessageMode:resolvedMode];
+    LCQRunCatching(@"LuciqApi.setWelcomeMessageMode", ^{
+        LCQWelcomeMessageMode resolvedMode = (ArgsRegistry.welcomeMessageStates[mode]).integerValue;
+        [Luciq setWelcomeMessageMode:resolvedMode];
+    });
 }
 
-
 - (void)setSessionProfilerEnabledEnabled:(NSNumber *)enabled error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq setSessionProfilerEnabled:[enabled boolValue]];
+    LCQRunCatching(@"LuciqApi.setSessionProfilerEnabled", ^{
+        [Luciq setSessionProfilerEnabled:[enabled boolValue]];
+    });
 }
 
 - (void)setValueForStringWithKeyValue:(NSString *)value key:(NSString *)key error:(FlutterError *_Nullable *_Nonnull)error {
-    if ([ArgsRegistry.placeholders objectForKey:key]) {
-        NSString *resolvedKey = ArgsRegistry.placeholders[key];
-        [Luciq setValue:value forStringWithKey:resolvedKey];
-    }
-    else {
-        NSString *logMessage = [NSString stringWithFormat: @"%@%@%@", @"Luciq: ", key,  @" is only relevant to Android."];
-        NSLog(@"%@", logMessage);
-    }
+    LCQRunCatching(@"LuciqApi.setValueForStringWithKey", ^{
+        if ([ArgsRegistry.placeholders objectForKey:key]) {
+            NSString *resolvedKey = ArgsRegistry.placeholders[key];
+            [Luciq setValue:value forStringWithKey:resolvedKey];
+        } else {
+            NSString *logMessage = [NSString stringWithFormat: @"%@%@%@", @"Luciq: ", key,  @" is only relevant to Android."];
+            NSLog(@"%@", logMessage);
+        }
+    });
 }
 
 - (void)appendTagsTags:(NSArray<NSString *> *)tags error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq appendTags:tags];
+    LCQRunCatching(@"LuciqApi.appendTags", ^{ [Luciq appendTags:tags]; });
 }
 
 - (void)resetTagsWithError:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq resetTags];
+    LCQRunCatching(@"LuciqApi.resetTags", ^{ [Luciq resetTags]; });
 }
 
 - (void)getTagsWithCompletion:(nonnull void (^)(NSArray<NSString *> * _Nullable, FlutterError * _Nullable))completion {
-    completion([Luciq getTags], nil);
+    LCQRunCatching(@"LuciqApi.getTags", ^{
+        completion([Luciq getTags], nil);
+    });
 }
 
-
-
 - (void)setUserAttributeValue:(NSString *)value key:(NSString *)key error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq setUserAttribute:value withKey:key];
+    LCQRunCatching(@"LuciqApi.setUserAttribute", ^{
+        [Luciq setUserAttribute:value withKey:key];
+    });
 }
 
 - (void)removeUserAttributeKey:(NSString *)key error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq removeUserAttributeForKey:key];
+    LCQRunCatching(@"LuciqApi.removeUserAttribute", ^{
+        [Luciq removeUserAttributeForKey:key];
+    });
 }
 
 - (void)getUserAttributeForKeyKey:(nonnull NSString *)key completion:(nonnull void (^)(NSString * _Nullable, FlutterError * _Nullable))completion {
-    completion([Luciq userAttributeForKey:key], nil);
+    LCQRunCatching(@"LuciqApi.getUserAttributeForKey", ^{
+        completion([Luciq userAttributeForKey:key], nil);
+    });
 }
 
 - (void)getUserAttributesWithCompletion:(nonnull void (^)(NSDictionary<NSString *,NSString *> * _Nullable, FlutterError * _Nullable))completion {
-    completion(Luciq.userAttributes, nil);
+    LCQRunCatching(@"LuciqApi.getUserAttributes", ^{
+        completion(Luciq.userAttributes, nil);
+    });
 }
 
 - (void)setReproStepsConfigBugMode:(nullable NSString *)bugMode crashMode:(nullable NSString *)crashMode sessionReplayMode:(nullable NSString *)sessionReplayMode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    if (bugMode != nil) {
-        LCQUserStepsMode resolvedBugMode = ArgsRegistry.reproModes[bugMode].integerValue;
-        [Luciq setReproStepsFor:LCQIssueTypeBug withMode:resolvedBugMode];
-    }
-    
-    if (crashMode != nil) {
-        LCQUserStepsMode resolvedCrashMode = ArgsRegistry.reproModes[crashMode].integerValue;
-        [Luciq setReproStepsFor:LCQIssueTypeAllCrashes withMode:resolvedCrashMode];
-    }
-    
-    if (sessionReplayMode != nil) {
-        LCQUserStepsMode resolvedSessionReplayMode = ArgsRegistry.reproModes[sessionReplayMode].integerValue;
-        [Luciq setReproStepsFor:LCQIssueTypeSessionReplay withMode:resolvedSessionReplayMode];
-    }
+    LCQRunCatching(@"LuciqApi.setReproStepsConfig", ^{
+        if (bugMode != nil) {
+            LCQUserStepsMode resolvedBugMode = ArgsRegistry.reproModes[bugMode].integerValue;
+            [Luciq setReproStepsFor:LCQIssueTypeBug withMode:resolvedBugMode];
+        }
+        if (crashMode != nil) {
+            LCQUserStepsMode resolvedCrashMode = ArgsRegistry.reproModes[crashMode].integerValue;
+            [Luciq setReproStepsFor:LCQIssueTypeAllCrashes withMode:resolvedCrashMode];
+        }
+        if (sessionReplayMode != nil) {
+            LCQUserStepsMode resolvedSessionReplayMode = ArgsRegistry.reproModes[sessionReplayMode].integerValue;
+            [Luciq setReproStepsFor:LCQIssueTypeSessionReplay withMode:resolvedSessionReplayMode];
+        }
+    });
 }
 
 - (UIImage *)getImageForAsset:(NSString *)assetName {
@@ -178,42 +200,36 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setCustomBrandingImageLight:(NSString *)light dark:(NSString *)dark error:(FlutterError * _Nullable __autoreleasing *)error {
-    UIImage *lightImage = [self getImageForAsset:light];
-    UIImage *darkImage = [self getImageForAsset:dark];
+    LCQRunCatching(@"LuciqApi.setCustomBrandingImage", ^{
+        UIImage *lightImage = [self getImageForAsset:light];
+        UIImage *darkImage = [self getImageForAsset:dark];
 
-    if (!lightImage) {
-        lightImage = darkImage;
-    }
-    if (!darkImage) {
-        darkImage = lightImage;
-    }
+        UIImage *resolvedLight = lightImage ?: darkImage;
+        UIImage *resolvedDark = darkImage ?: lightImage;
 
-    if (@available(iOS 12.0, *)) {
-        UIImageAsset *imageAsset = [[UIImageAsset alloc] init];
-
-        [imageAsset registerImage:lightImage withTraitCollection:[UITraitCollection traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleLight]];
-        [imageAsset registerImage:darkImage withTraitCollection:[UITraitCollection traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleDark]];
-
-        Luciq.customBrandingImage = imageAsset;
-    } else {
-        UIImage *defaultImage = lightImage;
-        if (!lightImage) {
-            defaultImage = darkImage;
+        if (@available(iOS 12.0, *)) {
+            UIImageAsset *imageAsset = [[UIImageAsset alloc] init];
+            [imageAsset registerImage:resolvedLight withTraitCollection:[UITraitCollection traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleLight]];
+            [imageAsset registerImage:resolvedDark withTraitCollection:[UITraitCollection traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleDark]];
+            Luciq.customBrandingImage = imageAsset;
+        } else {
+            UIImage *defaultImage = resolvedLight ?: resolvedDark;
+            Luciq.customBrandingImage = defaultImage.imageAsset;
         }
-
-        Luciq.customBrandingImage = defaultImage.imageAsset;
-    }
+    });
 }
 
 - (void)reportScreenChangeScreenName:(NSString *)screenName error:(FlutterError *_Nullable *_Nonnull)error {
-    SEL setPrivateApiSEL = NSSelectorFromString(@"logViewDidAppearEvent:");
-    if ([[Luciq class] respondsToSelector:setPrivateApiSEL]) {
-        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[[Luciq class] methodSignatureForSelector:setPrivateApiSEL]];
-        [inv setSelector:setPrivateApiSEL];
-        [inv setTarget:[Luciq class]];
-        [inv setArgument:&(screenName) atIndex:2];
-        [inv invoke];
-    }
+    LCQRunCatching(@"LuciqApi.reportScreenChange", ^{
+        SEL setPrivateApiSEL = NSSelectorFromString(@"logViewDidAppearEvent:");
+        if ([[Luciq class] respondsToSelector:setPrivateApiSEL]) {
+            NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[[Luciq class] methodSignatureForSelector:setPrivateApiSEL]];
+            [inv setSelector:setPrivateApiSEL];
+            [inv setTarget:[Luciq class]];
+            [inv setArgument:&(screenName) atIndex:2];
+            [inv invoke];
+        }
+    });
 }
 
 - (UIFont *)getFontForAsset:(NSString *)assetName  error:(FlutterError *_Nullable *_Nonnull)error {
@@ -241,238 +257,229 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setFontFont:(NSString *)fontAsset error:(FlutterError *_Nullable *_Nonnull)error {
-    UIFont *font = [self getFontForAsset:fontAsset error:error];
-    Luciq.font = font;
+    LCQRunCatching(@"LuciqApi.setFont", ^{
+        UIFont *font = [self getFontForAsset:fontAsset error:error];
+        Luciq.font = font;
+    });
 }
 
 - (void)addFileAttachmentWithURLFilePath:(NSString *)filePath fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq addFileAttachmentWithURL:[NSURL URLWithString:filePath]];
+    LCQRunCatching(@"LuciqApi.addFileAttachmentWithURL", ^{
+        [Luciq addFileAttachmentWithURL:[NSURL URLWithString:filePath]];
+    });
 }
 
 - (void)addFileAttachmentWithDataData:(FlutterStandardTypedData *)data fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq addFileAttachmentWithData:[data data]];
+    LCQRunCatching(@"LuciqApi.addFileAttachmentWithData", ^{
+        [Luciq addFileAttachmentWithData:[data data]];
+    });
 }
 
 - (void)clearFileAttachmentsWithError:(FlutterError *_Nullable *_Nonnull)error {
-    [Luciq clearFileAttachments];
+    LCQRunCatching(@"LuciqApi.clearFileAttachments", ^{ [Luciq clearFileAttachments]; });
 }
 
 - (void)networkLogData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error {
-    NSString *url = data[@"url"];
-    NSString *method = data[@"method"];
-    NSString *requestBody = data[@"requestBody"];
-    NSString *responseBody = data[@"responseBody"];
-    int32_t responseCode = (int32_t) [data[@"responseCode"] integerValue];
-    int64_t requestBodySize = [data[@"requestBodySize"] integerValue];
-    int64_t responseBodySize = [data[@"responseBodySize"] integerValue];
-    int32_t errorCode = (int32_t) [data[@"errorCode"] integerValue];
-    NSString *errorDomain = data[@"errorDomain"];
-    NSDictionary *requestHeaders = data[@"requestHeaders"];
-    if ([requestHeaders count] == 0) {
-        requestHeaders = @{};
-    }
-    NSDictionary *responseHeaders = data[@"responseHeaders"];
-    NSString *contentType = data[@"responseContentType"];
-    int64_t duration = [data[@"duration"] integerValue];
-    int64_t startTime = [data[@"startTime"] integerValue] * 1000;
+    LCQRunCatching(@"LuciqApi.networkLog", ^{
+        NSString *url = data[@"url"];
+        NSString *method = data[@"method"];
+        NSString *requestBody = data[@"requestBody"];
+        NSString *responseBody = data[@"responseBody"];
+        int32_t responseCode = (int32_t) [data[@"responseCode"] integerValue];
+        int64_t requestBodySize = [data[@"requestBodySize"] integerValue];
+        int64_t responseBodySize = [data[@"responseBodySize"] integerValue];
+        int32_t errorCode = (int32_t) [data[@"errorCode"] integerValue];
+        NSString *errorDomain = data[@"errorDomain"];
+        NSDictionary *requestHeaders = data[@"requestHeaders"];
+        if ([requestHeaders count] == 0) {
+            requestHeaders = @{};
+        }
+        NSDictionary *responseHeaders = data[@"responseHeaders"];
+        NSString *contentType = data[@"responseContentType"];
+        int64_t duration = [data[@"duration"] integerValue];
+        int64_t startTime = [data[@"startTime"] integerValue] * 1000;
 
-    NSString *gqlQueryName = nil;
-    NSString *serverErrorMessage = nil;
-    NSNumber *isW3cHeaderFound = nil;
-    NSNumber *partialId = nil;
-    NSNumber *networkStartTimeInSeconds = nil;
-    NSString *w3CGeneratedHeader = nil;
-    NSString *w3CCaughtHeader = nil;
+        NSString *gqlQueryName = nil;
+        NSString *serverErrorMessage = nil;
+        NSNumber *isW3cHeaderFound = nil;
+        NSNumber *partialId = nil;
+        NSNumber *networkStartTimeInSeconds = nil;
+        NSString *w3CGeneratedHeader = nil;
+        NSString *w3CCaughtHeader = nil;
 
-    if (data[@"gqlQueryName"] != [NSNull null]) {
-        gqlQueryName = data[@"gqlQueryName"];
-    }
-    if (data[@"serverErrorMessage"] != [NSNull null]) {
-        serverErrorMessage = data[@"serverErrorMessage"];
-    }
-    if (data[@"partialId"] != [NSNull null]) {
-        partialId = data[@"partialId"];
-    }
+        if (data[@"gqlQueryName"] != [NSNull null]) {
+            gqlQueryName = data[@"gqlQueryName"];
+        }
+        if (data[@"serverErrorMessage"] != [NSNull null]) {
+            serverErrorMessage = data[@"serverErrorMessage"];
+        }
+        if (data[@"partialId"] != [NSNull null]) {
+            partialId = data[@"partialId"];
+        }
+        if (data[@"isW3cHeaderFound"] != [NSNull null]) {
+            isW3cHeaderFound = data[@"isW3cHeaderFound"];
+        }
+        if (data[@"networkStartTimeInSeconds"] != [NSNull null]) {
+            networkStartTimeInSeconds = data[@"networkStartTimeInSeconds"];
+        }
+        if (data[@"w3CGeneratedHeader"] != [NSNull null]) {
+            w3CGeneratedHeader = data[@"w3CGeneratedHeader"];
+        }
+        if (data[@"w3CCaughtHeader"] != [NSNull null]) {
+            w3CCaughtHeader = data[@"w3CCaughtHeader"];
+        }
 
-    if (data[@"isW3cHeaderFound"] != [NSNull null]) {
-        isW3cHeaderFound = data[@"isW3cHeaderFound"];
-    }
-
-    if (data[@"networkStartTimeInSeconds"] != [NSNull null]) {
-        networkStartTimeInSeconds = data[@"networkStartTimeInSeconds"];
-    }
-
-    if (data[@"w3CGeneratedHeader"] != [NSNull null]) {
-        w3CGeneratedHeader = data[@"w3CGeneratedHeader"];
-    }
-
-    if (data[@"w3CCaughtHeader"] != [NSNull null]) {
-        w3CCaughtHeader = data[@"w3CCaughtHeader"];
-    }
-
-
-
-    [LCQNetworkLogger addNetworkLogWithUrl:url
-                                    method:method
-                               requestBody:requestBody
-                           requestBodySize:requestBodySize
-                              responseBody:responseBody
-                          responseBodySize:responseBodySize
-                              responseCode:responseCode
-                            requestHeaders:requestHeaders
-                           responseHeaders:responseHeaders
-                               contentType:contentType
-                               errorDomain:errorDomain
-                                 errorCode:errorCode
-                                 startTime:startTime
-                                  duration:duration
-                              gqlQueryName:gqlQueryName
-                        serverErrorMessage:serverErrorMessage
-                             isW3cCaughted:isW3cHeaderFound
-                                 partialID:partialId
-                                 timestamp:networkStartTimeInSeconds
-                   generatedW3CTraceparent:w3CGeneratedHeader
-                    caughtedW3CTraceparent:w3CCaughtHeader];
+        [LCQNetworkLogger addNetworkLogWithUrl:url
+                                        method:method
+                                   requestBody:requestBody
+                               requestBodySize:requestBodySize
+                                  responseBody:responseBody
+                              responseBodySize:responseBodySize
+                                  responseCode:responseCode
+                                requestHeaders:requestHeaders
+                               responseHeaders:responseHeaders
+                                   contentType:contentType
+                                   errorDomain:errorDomain
+                                     errorCode:errorCode
+                                     startTime:startTime
+                                      duration:duration
+                                  gqlQueryName:gqlQueryName
+                            serverErrorMessage:serverErrorMessage
+                                 isW3cCaughted:isW3cHeaderFound
+                                     partialID:partialId
+                                     timestamp:networkStartTimeInSeconds
+                       generatedW3CTraceparent:w3CGeneratedHeader
+                        caughtedW3CTraceparent:w3CCaughtHeader];
+    });
 }
 
 - (void)willRedirectToStoreWithError:(FlutterError * _Nullable __autoreleasing *)error {
-    [Luciq willRedirectToAppStore];
+    LCQRunCatching(@"LuciqApi.willRedirectToStore", ^{ [Luciq willRedirectToAppStore]; });
 }
 
 - (void)addFeatureFlagsFeatureFlagsMap:(nonnull NSDictionary<NSString *,NSString *> *)featureFlagsMap error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    NSMutableArray<LCQFeatureFlag *> *featureFlags = [NSMutableArray array];
-    for(id key in featureFlagsMap){
-        NSString* variant =((NSString * )[featureFlagsMap objectForKey:key]);
-        if ([variant length]==0) {
-            [featureFlags addObject:[[LCQFeatureFlag alloc] initWithName:key]];
+    LCQRunCatching(@"LuciqApi.addFeatureFlags", ^{
+        NSMutableArray<LCQFeatureFlag *> *featureFlags = [NSMutableArray array];
+        for (id key in featureFlagsMap) {
+            NSString* variant = ((NSString *)[featureFlagsMap objectForKey:key]);
+            if ([variant length] == 0) {
+                [featureFlags addObject:[[LCQFeatureFlag alloc] initWithName:key]];
+            } else {
+                [featureFlags addObject:[[LCQFeatureFlag alloc] initWithName:key variant:variant]];
+            }
         }
-        else{
-            [featureFlags addObject:[[LCQFeatureFlag alloc] initWithName:key variant:variant]];
-
-        }
-    }
-    [Luciq addFeatureFlags:featureFlags];
+        [Luciq addFeatureFlags:featureFlags];
+    });
 }
-
 
 - (void)removeAllFeatureFlagsWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [Luciq removeAllFeatureFlags];
-
+    LCQRunCatching(@"LuciqApi.removeAllFeatureFlags", ^{ [Luciq removeAllFeatureFlags]; });
 }
-
 
 - (void)removeFeatureFlagsFeatureFlags:(nonnull NSArray<NSString *> *)featureFlags error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-
-    NSMutableArray<LCQFeatureFlag *> *features = [NSMutableArray array];
-       for(id item in featureFlags){
-               [features addObject:[[LCQFeatureFlag alloc] initWithName:item]];
-           }
-    @try {
+    LCQRunCatching(@"LuciqApi.removeFeatureFlags", ^{
+        NSMutableArray<LCQFeatureFlag *> *features = [NSMutableArray array];
+        for (id item in featureFlags) {
+            [features addObject:[[LCQFeatureFlag alloc] initWithName:item]];
+        }
         [Luciq removeFeatureFlags:features];
-    } @catch (NSException *exception) {
-        NSLog(@"%@", exception);
-
-    }
+    });
 }
+
 - (void)registerFeatureFlagChangeListenerWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     // Android only. We still need this method to exist to match the Pigeon-generated protocol.
-
 }
 
-
 - (nullable NSDictionary<NSString *,NSNumber *> *)isW3CFeatureFlagsEnabledWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    NSDictionary<NSString * , NSNumber *> *result= @{
-        @"isW3cExternalTraceIDEnabled":[NSNumber numberWithBool:LCQNetworkLogger.w3ExternalTraceIDEnabled] ,
-        @"isW3cExternalGeneratedHeaderEnabled":[NSNumber numberWithBool:LCQNetworkLogger.w3ExternalGeneratedHeaderEnabled] ,
-        @"isW3cCaughtHeaderEnabled":[NSNumber numberWithBool:LCQNetworkLogger.w3CaughtHeaderEnabled] ,
-
-    };
-    return  result;
+    return (NSDictionary<NSString *,NSNumber *> *)LCQRunCatchingReturn(@"LuciqApi.isW3CFeatureFlagsEnabled", @{}, ^id{
+        return @{
+            @"isW3cExternalTraceIDEnabled": [NSNumber numberWithBool:LCQNetworkLogger.w3ExternalTraceIDEnabled],
+            @"isW3cExternalGeneratedHeaderEnabled": [NSNumber numberWithBool:LCQNetworkLogger.w3ExternalGeneratedHeaderEnabled],
+            @"isW3cCaughtHeaderEnabled": [NSNumber numberWithBool:LCQNetworkLogger.w3CaughtHeaderEnabled],
+        };
+    });
 }
 
 - (void)logUserStepsGestureType:(NSString *)gestureType message:(NSString *)message viewName:(NSString *)viewName error:(FlutterError * _Nullable __autoreleasing *)error
 {
-    @try {
-
+    LCQRunCatching(@"LuciqApi.logUserSteps", ^{
         LCQUIEventType event = ArgsRegistry.userStepsGesture[gestureType].integerValue;
         LCQUserStep *userStep = [[LCQUserStep alloc] initWithEvent:event automatic: YES];
-
         userStep = [userStep setMessage: message];
-        userStep =  [userStep setViewTypeName:viewName];
+        userStep = [userStep setViewTypeName:viewName];
         [userStep logUserStep];
-    }
-    @catch (NSException *exception) {
-        NSLog(@"%@", exception);
-
-    }
+    });
 }
 
-
 - (void)setEnableUserStepsIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    Luciq.trackUserSteps = isEnabled.boolValue;
+    LCQRunCatching(@"LuciqApi.setEnableUserSteps", ^{
+        Luciq.trackUserSteps = isEnabled.boolValue;
+    });
 }
 
 - (void)enableAutoMaskingAutoMasking:(nonnull NSArray<NSString *> *)autoMasking error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    LCQAutoMaskScreenshotOption resolvedEvents = 0;
-
-    for (NSString *event in autoMasking) {
-        resolvedEvents |= (ArgsRegistry.autoMasking[event]).integerValue;
-    }
-
-    [Luciq setAutoMaskScreenshots: resolvedEvents];
-
+    LCQRunCatching(@"LuciqApi.enableAutoMasking", ^{
+        LCQAutoMaskScreenshotOption resolvedEvents = 0;
+        for (NSString *event in autoMasking) {
+            resolvedEvents |= (ArgsRegistry.autoMasking[event]).integerValue;
+        }
+        [Luciq setAutoMaskScreenshots: resolvedEvents];
+    });
 }
+
 + (void)setScreenshotMaskingHandler:(nullable void (^)(UIImage * _Nonnull __strong, void (^ _Nonnull __strong)(UIImage * _Nonnull __strong)))maskingHandler {
     [Luciq setScreenshotMaskingHandler:maskingHandler];
 }
 
 - (void)setNetworkLogBodyEnabledIsEnabled:(NSNumber *)isEnabled
                           error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQNetworkLogger.logBodyEnabled = [isEnabled boolValue];
+    LCQRunCatching(@"LuciqApi.setNetworkLogBodyEnabled", ^{
+        LCQNetworkLogger.logBodyEnabled = [isEnabled boolValue];
+    });
 }
-
 
 - (void)setAppVariantAppVariant:(nonnull NSString *)appVariant error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-
-    Luciq.appVariant = appVariant;
-
+    LCQRunCatching(@"LuciqApi.setAppVariant", ^{
+        Luciq.appVariant = appVariant;
+    });
 }
 
-
 - (void)setThemeThemeConfig:(NSDictionary<NSString *, id> *)themeConfig error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQTheme *theme = [[LCQTheme alloc] init];
+    LCQRunCatching(@"LuciqApi.setTheme", ^{
+        LCQTheme *theme = [[LCQTheme alloc] init];
 
-    NSDictionary *colorMapping = @{
-        @"primaryColor": ^(UIColor *color) { theme.primaryColor = color; },
-        @"backgroundColor": ^(UIColor *color) { theme.backgroundColor = color; },
-        @"titleTextColor": ^(UIColor *color) { theme.titleTextColor = color; },
-        @"subtitleTextColor": ^(UIColor *color) { theme.subtitleTextColor = color; },
-        @"primaryTextColor": ^(UIColor *color) { theme.primaryTextColor = color; },
-        @"secondaryTextColor": ^(UIColor *color) { theme.secondaryTextColor = color; },
-        @"callToActionTextColor": ^(UIColor *color) { theme.callToActionTextColor = color; },
-        @"headerBackgroundColor": ^(UIColor *color) { theme.headerBackgroundColor = color; },
-        @"footerBackgroundColor": ^(UIColor *color) { theme.footerBackgroundColor = color; },
-        @"rowBackgroundColor": ^(UIColor *color) { theme.rowBackgroundColor = color; },
-        @"selectedRowBackgroundColor": ^(UIColor *color) { theme.selectedRowBackgroundColor = color; },
-        @"rowSeparatorColor": ^(UIColor *color) { theme.rowSeparatorColor = color; }
-    };
+        NSDictionary *colorMapping = @{
+            @"primaryColor": ^(UIColor *color) { theme.primaryColor = color; },
+            @"backgroundColor": ^(UIColor *color) { theme.backgroundColor = color; },
+            @"titleTextColor": ^(UIColor *color) { theme.titleTextColor = color; },
+            @"subtitleTextColor": ^(UIColor *color) { theme.subtitleTextColor = color; },
+            @"primaryTextColor": ^(UIColor *color) { theme.primaryTextColor = color; },
+            @"secondaryTextColor": ^(UIColor *color) { theme.secondaryTextColor = color; },
+            @"callToActionTextColor": ^(UIColor *color) { theme.callToActionTextColor = color; },
+            @"headerBackgroundColor": ^(UIColor *color) { theme.headerBackgroundColor = color; },
+            @"footerBackgroundColor": ^(UIColor *color) { theme.footerBackgroundColor = color; },
+            @"rowBackgroundColor": ^(UIColor *color) { theme.rowBackgroundColor = color; },
+            @"selectedRowBackgroundColor": ^(UIColor *color) { theme.selectedRowBackgroundColor = color; },
+            @"rowSeparatorColor": ^(UIColor *color) { theme.rowSeparatorColor = color; }
+        };
 
-    for (NSString *key in colorMapping) {
-        if (themeConfig[key]) {
-            NSString *colorString = themeConfig[key];
-            UIColor *color = [self colorFromHexString:colorString];
-            if (color) {
-                void (^setter)(UIColor *) = colorMapping[key];
-                setter(color);
+        for (NSString *key in colorMapping) {
+            if (themeConfig[key]) {
+                NSString *colorString = themeConfig[key];
+                UIColor *color = [self colorFromHexString:colorString];
+                if (color) {
+                    void (^setter)(UIColor *) = colorMapping[key];
+                    setter(color);
+                }
             }
         }
-    }
 
-    [self setFontIfPresent:themeConfig[@"primaryFontPath"] ?: themeConfig[@"primaryFontAsset"] forTheme:theme type:@"primary"];
-    [self setFontIfPresent:themeConfig[@"secondaryFontPath"] ?: themeConfig[@"secondaryFontAsset"] forTheme:theme type:@"secondary"];
-    [self setFontIfPresent:themeConfig[@"ctaFontPath"] ?: themeConfig[@"ctaFontAsset"] forTheme:theme type:@"cta"];
+        [self setFontIfPresent:themeConfig[@"primaryFontPath"] ?: themeConfig[@"primaryFontAsset"] forTheme:theme type:@"primary"];
+        [self setFontIfPresent:themeConfig[@"secondaryFontPath"] ?: themeConfig[@"secondaryFontAsset"] forTheme:theme type:@"secondary"];
+        [self setFontIfPresent:themeConfig[@"ctaFontPath"] ?: themeConfig[@"ctaFontAsset"] forTheme:theme type:@"cta"];
 
-    Luciq.theme = theme;
+        Luciq.theme = theme;
+    });
 }
 
 - (void)setFontIfPresent:(NSString *)fontPath forTheme:(LCQTheme *)theme type:(NSString *)type {
@@ -610,11 +617,15 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)getNetworkBodyMaxSizeWithCompletion:(nonnull void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion {
-    completion(@(LCQNetworkLogger.getNetworkBodyMaxSize), nil);
+    LCQRunCatching(@"LuciqApi.getNetworkBodyMaxSize", ^{
+        completion(@(LCQNetworkLogger.getNetworkBodyMaxSize), nil);
+    });
 }
 
 - (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
-    LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
+    LCQRunCatching(@"LuciqApi.setNetworkAutoMaskingEnabled", ^{
+        LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
+    });
 }
 
 @end

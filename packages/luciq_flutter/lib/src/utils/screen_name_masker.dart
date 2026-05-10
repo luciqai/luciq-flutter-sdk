@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/src/utils/repro_steps_constants.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 
 typedef ScreenNameMaskingCallback = String Function(String screen);
 
@@ -33,7 +34,10 @@ class ScreenNameMasker {
       return screen;
     }
 
-    final maskedScreen = _screenNameMaskingCallback!(screen).trim();
+    var maskedScreen = screen;
+    runCatching('ScreenNameMasker.mask.callback', () {
+      maskedScreen = _screenNameMaskingCallback!(screen).trim();
+    });
 
     if (maskedScreen.isEmpty) {
       return ReproStepsConstants.emptyScreenFallback;

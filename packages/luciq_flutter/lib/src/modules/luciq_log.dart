@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:luciq_flutter/src/generated/luciq_log.api.g.dart';
+import 'package:luciq_flutter/src/utils/run_catching.dart';
 import 'package:meta/meta.dart';
 
 class LuciqLog {
@@ -19,44 +20,56 @@ class LuciqLog {
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logVerbose(String message) async {
-    return _host.logVerbose(message);
+  static Future<void> logVerbose(String message) {
+    return runCatchingAsync('LuciqLog.logVerbose', () async {
+      await _host.logVerbose(message);
+    });
   }
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logDebug(String message) async {
-    return _host.logDebug(message);
+  static Future<void> logDebug(String message) {
+    return runCatchingAsync('LuciqLog.logDebug', () async {
+      await _host.logDebug(message);
+    });
   }
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logInfo(String message) async {
-    return _host.logInfo(message);
+  static Future<void> logInfo(String message) {
+    return runCatchingAsync('LuciqLog.logInfo', () async {
+      await _host.logInfo(message);
+    });
   }
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logWarn(String message) async {
-    return _host.logWarn(message);
+  static Future<void> logWarn(String message) {
+    return runCatchingAsync('LuciqLog.logWarn', () async {
+      await _host.logWarn(message);
+    });
   }
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logError(String message) async {
-    return _host.logError(message);
+  static Future<void> logError(String message) {
+    return runCatchingAsync('LuciqLog.logError', () async {
+      await _host.logError(message);
+    });
   }
 
   /// Clears Luciq internal log
-  static Future<void> clearAllLogs() async {
-    return _host.clearAllLogs();
+  static Future<void> clearAllLogs() {
+    return runCatchingAsync('LuciqLog.clearAllLogs', () async {
+      await _host.clearAllLogs();
+    });
   }
 }

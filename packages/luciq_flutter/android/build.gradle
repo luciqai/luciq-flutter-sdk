@@ -1,5 +1,5 @@
 group 'ai.luciq.flutter'
-version '19.4.0'
+version '19.6.0'
 apply from: './upload_symbols.gradle'
 
 buildscript {

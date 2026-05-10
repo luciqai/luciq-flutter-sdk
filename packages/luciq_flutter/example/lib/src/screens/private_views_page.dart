@@ -212,8 +212,8 @@ class _PrivateViewsPageState extends State<PrivateViewsPage> {
             ...List.generate(
               _filler,
               (i) => Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 child: Container(
                   height: 40,
                   alignment: Alignment.centerLeft,

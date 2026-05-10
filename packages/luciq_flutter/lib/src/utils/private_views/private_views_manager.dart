@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
-import 'package:meta/meta.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq_private_view.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
+import 'package:meta/meta.dart';
 
 enum AutoMasking { labels, textInputs, media, none }
 

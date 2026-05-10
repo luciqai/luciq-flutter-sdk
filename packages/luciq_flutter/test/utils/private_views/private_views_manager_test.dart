@@ -161,17 +161,16 @@ void main() {
       expect(manager.getRectsOfPrivateViews(), isEmpty);
     });
 
-    testWidgets(
-        'getRectsOfPrivateViews drops rects of unmounted private views',
+    testWidgets('getRectsOfPrivateViews drops rects of unmounted private views',
         (tester) async {
       manager.addAutoMasking(const [AutoMasking.none]);
 
       await tester.pumpWidget(
-        LuciqWidget(
+        const LuciqWidget(
           child: MaterialApp(
             home: Scaffold(
               body: LuciqPrivateView(
-                child: Container(width: 100, height: 100),
+                child: SizedBox(width: 100, height: 100),
               ),
             ),
           ),
@@ -182,10 +181,10 @@ void main() {
 
       // Replace the tree so the previous LuciqPrivateView is disposed.
       await tester.pumpWidget(
-        LuciqWidget(
+        const LuciqWidget(
           child: MaterialApp(
             home: Scaffold(
-              body: Container(width: 100, height: 100),
+              body: SizedBox(width: 100, height: 100),
             ),
           ),
         ),

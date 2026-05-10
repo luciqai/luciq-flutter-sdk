@@ -178,6 +178,16 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void _navigateToPrivateViews() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PrivateViewsPage(),
+        settings: const RouteSettings(name: PrivateViewsPage.screenName),
+      ),
+    );
+  }
+
   final _formUserAttributeKey = GlobalKey<FormState>();
 
   @override
@@ -337,10 +347,12 @@ class _MyHomePageState extends State<MyHomePage> {
           text: 'Show Feature Requests',
           symanticLabel: 'show_feature_requests',
         ),
-        LuciqButton(
-          onPressed: _navigateToCrashes,
-          text: 'Crashes',
-          symanticLabel: 'open_crash_page',
+        LuciqPrivateView(
+          child: LuciqButton(
+            onPressed: _navigateToCrashes,
+            text: 'Crashes',
+            symanticLabel: 'open_crash_page',
+          ),
         ),
         LuciqButton(
           onPressed: _navigateToApm,
@@ -356,6 +368,11 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: _navigateToSessionReplay,
           text: 'Session Replay',
           symanticLabel: 'open_session_replay_page',
+        ),
+        LuciqButton(
+          onPressed: _navigateToPrivateViews,
+          text: 'Private Views',
+          symanticLabel: 'open_private_views_page',
         ),
         const SectionTitle('Sessions Replay'),
         LuciqButton(

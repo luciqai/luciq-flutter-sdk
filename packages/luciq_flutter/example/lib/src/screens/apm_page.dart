@@ -42,10 +42,12 @@ class _ApmPageState extends State<ApmPage> {
       title: 'APM',
       children: [
         const APMSwitch(),
-        LuciqButton(
-          text: 'End App Launch',
-          symanticLabel: 'end_app_launch',
-          onPressed: _endAppLaunch,
+        LuciqPrivateView(
+          child: LuciqButton(
+            text: 'End App Launch',
+            symanticLabel: 'end_app_launch',
+            onPressed: _endAppLaunch,
+          ),
         ),
         const SectionTitle('Network'),
         const NetworkContent(),

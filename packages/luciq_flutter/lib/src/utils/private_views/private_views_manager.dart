@@ -155,7 +155,10 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
     // the registry instead of walking the entire widget tree on every call.
     if (!_autoMaskingEnabled) {
       for (final element in _registeredPrivateElements) {
-        if (!element.mounted) continue;
+        // owner is cleared when the element is unmounted; portable
+        // equivalent of `element.mounted` (which only exists from
+        // Flutter 3.7+, but the package supports older versions).
+        if (element.owner == null) continue;
         final renderObject = element.findRenderObject();
         if ((renderObject is RenderBox || renderObject is RenderSliver) &&
             renderObject?.attached == true) {

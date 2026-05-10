@@ -5,6 +5,7 @@ import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq_private_view.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
+import 'package:meta/meta.dart';
 
 enum AutoMasking { labels, textInputs, media, none }
 
@@ -52,12 +53,31 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
   }
 
   late List<bool Function(Widget)> _viewChecks;
+  bool _autoMaskingEnabled = false;
+
+  // Registry of mounted LuciqPrivateView / LuciqSliverPrivateView elements.
+  // Lets us skip the full widget-tree walk when auto-masking is off.
+  final Set<Element> _registeredPrivateElements = <Element>{};
+
+  @internal
+  void registerPrivateElement(Element element) {
+    _registeredPrivateElements.add(element);
+  }
+
+  @internal
+  void unregisterPrivateElement(Element element) {
+    _registeredPrivateElements.remove(element);
+  }
 
   void addAutoMasking(List<AutoMasking> masking) {
     _viewChecks = List.of([isPrivateWidget]);
-    if (!(masking.contains(AutoMasking.none) && masking.length == 1)) {
+    final hasMasking =
+        !(masking.contains(AutoMasking.none) && masking.length == 1) &&
+            masking.isNotEmpty;
+    if (hasMasking) {
       _viewChecks.addAll(masking.map((e) => e.hides()).toList());
     }
+    _autoMaskingEnabled = hasMasking;
     _host.enableAutoMasking(masking.mapToString());
   }
 
@@ -130,6 +150,29 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
 
     final rects = <Rect>[];
 
+    // Fast path: when auto-masking is off, only the explicitly-mounted
+    // LuciqPrivateView / LuciqSliverPrivateView elements can mask. Iterate
+    // the registry instead of walking the entire widget tree on every call.
+    if (!_autoMaskingEnabled) {
+      for (final element in _registeredPrivateElements) {
+        // owner is cleared when the element is unmounted; portable
+        // equivalent of `element.mounted` (which only exists from
+        // Flutter 3.7+, but the package supports older versions).
+        if (element.owner == null) continue;
+        final renderObject = element.findRenderObject();
+        if ((renderObject is RenderBox || renderObject is RenderSliver) &&
+            renderObject?.attached == true) {
+          final rect = getLayoutRectInfoFromRenderObject(renderObject);
+          if (rect != null &&
+              rect.overlaps(bounds) &&
+              isElementInCurrentRoute(element)) {
+            rects.add(rect);
+          }
+        }
+      }
+      return rects;
+    }
+
     void findPrivateViews(Element element) {
       final widget = element.widget;
       final isPrivate = _viewChecks.any((e) => e.call(widget));
@@ -150,7 +193,6 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
       }
     }
 
-    rects.clear();
     context.visitChildElements(findPrivateViews);
 
     return rects;

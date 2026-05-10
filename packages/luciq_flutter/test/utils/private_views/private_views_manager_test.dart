@@ -136,6 +136,63 @@ void main() {
       expect(rects.length, 1);
     });
 
+    testWidgets(
+        'getRectsOfPrivateViews returns empty when no private views are mounted and auto-masking is off',
+        (tester) async {
+      // Reset auto-masking to AutoMasking.none to take the fast path.
+      manager.addAutoMasking(const [AutoMasking.none]);
+
+      await tester.pumpWidget(
+        LuciqWidget(
+          child: MaterialApp(
+            home: Scaffold(
+              body: ListView(
+                children: const [
+                  SizedBox(width: 100, height: 100),
+                  Text('Plain text'),
+                  TextField(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(manager.getRectsOfPrivateViews(), isEmpty);
+    });
+
+    testWidgets('getRectsOfPrivateViews drops rects of unmounted private views',
+        (tester) async {
+      manager.addAutoMasking(const [AutoMasking.none]);
+
+      await tester.pumpWidget(
+        const LuciqWidget(
+          child: MaterialApp(
+            home: Scaffold(
+              body: LuciqPrivateView(
+                child: SizedBox(width: 100, height: 100),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(manager.getRectsOfPrivateViews().length, 1);
+
+      // Replace the tree so the previous LuciqPrivateView is disposed.
+      await tester.pumpWidget(
+        const LuciqWidget(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(width: 100, height: 100),
+            ),
+          ),
+        ),
+      );
+
+      expect(manager.getRectsOfPrivateViews(), isEmpty);
+    });
+
     testWidgets('getRectsOfPrivateViews detects masked textInputs',
         (tester) async {
       await tester.pumpWidget(

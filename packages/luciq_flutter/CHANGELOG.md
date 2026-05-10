@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Resolve main-thread blocking in private views: `getRectsOfPrivateViews()` no longer walks the entire Flutter widget tree on every interaction when no `LuciqPrivateView` is mounted and auto-masking is off. Mounted `LuciqPrivateView` / `LuciqSliverPrivateView` widgets now register themselves via lifecycle and the manager reads rects from a registry — `O(registered)` instead of `O(tree)`. ([#59](https://github.com/luciqai/luciq-flutter-sdk/pull/59))
+
 ## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
 
 ### Added

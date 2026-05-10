@@ -140,7 +140,7 @@ NSMutableDictionary *traces;
     [LCQAPM reportScreenLoadingCPWithStartTimestampMUS:startTimeStampMicroMUS durationMUS:durationMUS];
 }
 
-// This method i/Users/ahmedalaa-Luciq/projects/Luciq-Flutter/packages/luciq_flutter/ios/Classes/Modules/ApmApi.ms responsible for extend the end time if the screen loading custom
+// This method is responsible for extend the end time if the screen loading custom
 // trace. It takes two parameters:
 // 1. `timeStampMicro`: A number representing the timestamp in microseconds when the screen loading
 // custom trace is ending.

@@ -468,7 +468,7 @@ public class LuciqApiTest {
 
         api.reportScreenChange(screenName);
 
-        reflected.verify(() -> MockReflected.reportScreenChange(null, screenName));
+        reflected.verify(() -> MockReflected.reportScreenChange(null, screenName, null));
         reflected.verify(() -> MockReflected.reportCurrentViewChange(screenName));
     }
 

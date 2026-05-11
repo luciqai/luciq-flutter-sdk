@@ -1,5 +1,19 @@
 # Changelog
 
+
+## [19.6.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.6.0...19.4.0)
+
+### Added
+
+- Add support for Screen Loading with react-navigation integration and manual reporting API.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.6.1 ([#60](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.6.1).
+
+- Bump Luciq Android SDK to v19.6.0 ([#60](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.6.0).
+
+
 ## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
 
 ### Added

@@ -20,7 +20,7 @@ public class MockReflected {
     /**
      * Luciq.reportScreenChange
      */
-    public static void reportScreenChange(Bitmap screenshot, String name) {}
+    public static void reportScreenChange(Bitmap screenshot, String name, Long timestamp) {}
 
     /**
      * Luciq.reportCurrentViewChange

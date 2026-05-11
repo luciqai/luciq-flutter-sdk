@@ -10,11 +10,14 @@ Pod::Spec.new do |s|
   s.license           = { :file => '../LICENSE' }
 
   s.source              = { :path => '.' }
-  s.source_files        = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
+  s.source_files        = 'luciq_flutter/Sources/luciq_flutter/**/*.{h,m}'
+  s.public_header_files = 'luciq_flutter/Sources/luciq_flutter/include/luciq_flutter/**/*.h'
 
-  s.ios.deployment_target = '10.0'
-  s.pod_target_xcconfig   = { 'OTHER_LDFLAGS' => '-framework "Flutter" -framework "LuciqSDK"'}
+  s.ios.deployment_target = '15.4'
+  s.pod_target_xcconfig   = {
+    'OTHER_LDFLAGS' => '-framework "Flutter" -framework "LuciqSDK"',
+    'HEADER_SEARCH_PATHS' => '"$(PODS_TARGET_SRCROOT)/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter"'
+  }
 
   s.dependency 'Flutter'
   s.dependency 'Luciq', '19.5.1'

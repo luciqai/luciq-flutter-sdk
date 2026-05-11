@@ -1,5 +1,5 @@
 #import "PrivateViewApi.h"
-#import "../Util/FlutterPluginRegistrar+FlutterEngine.h"
+#import "FlutterPluginRegistrar+FlutterEngine.h"
 
 extern PrivateViewApi* InitPrivateViewApi(
     id<FlutterBinaryMessenger> messenger,

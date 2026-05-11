@@ -1,6 +1,6 @@
 #import "LuciqSDK/LuciqSDK.h"
 #import "CrashReportingApi.h"
-#import "../Util/LCQCrashReporting+CP.h"
+#import "LCQCrashReporting+CP.h"
 #import "ArgsRegistry.h"
 
 extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {

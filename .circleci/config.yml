@@ -48,6 +48,20 @@ commands:
           name: Install Pods
           working_directory: packages/luciq_flutter/example/ios
           command: pod install --repo-update
+  setup_ios_spm:
+    steps:
+      - ios/install-rosetta
+      - setup_flutter
+      - run:
+          name: Enable Swift Package Manager
+          command: flutter config --enable-swift-package-manager
+      - run:
+          name: Resolve plugins (SPM)
+          working_directory: packages/luciq_flutter/example
+          command: |
+            rm -rf ios/Pods ios/Podfile.lock ios/Runner.xcworkspace
+            flutter clean
+            flutter pub get
   setup_patrol:
     steps:
       - run:
@@ -299,6 +313,33 @@ jobs:
                 -skip-testing:RunnerUITests \
                 test | xcpretty
 
+  test_ios_spm:
+    macos:
+      xcode: 16.4.0
+    resource_class: m4pro.medium
+    environment:
+      luciq_SOURCEMAPS_UPLOAD_DISABLE: true
+    steps:
+      - advanced-checkout/shallow-checkout
+      - setup_ios_spm
+      - run:
+          name: Build for simulator (SPM mode)
+          working_directory: ~/project/packages/luciq_flutter/example
+          command: |
+            flutter build ios --simulator --no-codesign
+      - run:
+          name: Run iOS unit tests (SPM mode)
+          working_directory: ~/project/packages/luciq_flutter/example/ios
+          command: |
+            xcodebuild -allowProvisioningUpdates \
+                -project Runner.xcodeproj \
+                -scheme Runner \
+                -resultBundlePath coverage/result-spm.xcresult \
+                -sdk iphonesimulator \
+                -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.5' \
+                -skip-testing:RunnerUITests \
+                test | xcpretty
+
   e2e_ios_patrol:
     macos:
       xcode: 16.4.0
@@ -534,6 +575,7 @@ workflows:
           app-dir: "~/project/packages/luciq_flutter/"
       - e2e_android_patrol
       - test_ios
+      - test_ios_spm
       - e2e_ios_patrol
       - format_flutter
       - lint_flutter:

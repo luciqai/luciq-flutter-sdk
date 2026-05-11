@@ -1,12 +1,14 @@
 #!/bin/bash
 
 DIR_DART="lib/src/generated"
-DIR_IOS="ios/Classes/Generated"
+DIR_IOS_SRC="ios/luciq_flutter/Sources/luciq_flutter/Generated"
+DIR_IOS_HDR="ios/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter/Generated"
 DIR_ANDROID="android/src/main/java/ai/luciq/flutter/generated"
 PKG_ANDROID="ai.luciq.flutter.generated"
 
 mkdir -p $DIR_DART
-mkdir -p $DIR_IOS
+mkdir -p $DIR_IOS_SRC
+mkdir -p $DIR_IOS_HDR
 mkdir -p $DIR_ANDROID
 
 generate_pigeon() {
@@ -17,8 +19,8 @@ generate_pigeon() {
   dart run pigeon \
       --input "pigeons/$name_snake.api.dart" \
       --dart_out "$DIR_DART/$name_snake.api.g.dart" \
-      --objc_header_out "$DIR_IOS/${name_pascal}Pigeon.h" \
-      --objc_source_out "$DIR_IOS/${name_pascal}Pigeon.m" \
+      --objc_header_out "$DIR_IOS_HDR/${name_pascal}Pigeon.h" \
+      --objc_source_out "$DIR_IOS_SRC/${name_pascal}Pigeon.m" \
       --java_out "$DIR_ANDROID/${name_pascal}Pigeon.java" \
       --java_package $PKG_ANDROID || exit 1;
 

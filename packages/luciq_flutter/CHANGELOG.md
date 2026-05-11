@@ -1,5 +1,19 @@
 # Changelog
 
+
+## [19.6.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.6.0...19.4.0)
+
+### Added
+
+- Add support for Screen Loading with react-navigation integration and manual reporting API.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.6.1 ([#60](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.6.1).
+
+- Bump Luciq Android SDK to v19.6.0 ([#60](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.6.0).
+
+
 ## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
 
 ### Added
@@ -82,7 +96,6 @@
 
 ## [19.1.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
 
-
 ### Changed
 
 - Bump Luciq iOS SDK to v19.3.0 ([#33](https://github.com/luciqai/luciq-flutter-sdk/pull/33)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/19.3.0).
@@ -102,13 +115,13 @@
 - Bump Luciq Android SDK to v19.0.0 ([#22](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.0.0).
 
 
-## [18.2.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v18.2.1...18.2.0) (November 26, 2025)
+## [18.2.1](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.2.1...18.2.0) (November 26, 2025)
 
 ### Fixed
 
 - Guard LuciqNavigatorObserver pending-step removal to eliminate the race that could crash apps or produce incorrect screenshots during rapid route transitions. ([#23](https://github.com/luciqai/luciq-flutter-sdk/pull/23))
 
-## [18.2.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v18.2.0...18.0.1) (November 12, 2025)
+## [18.2.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.2.0...18.0.1) (November 12, 2025)
 
 ### Added
 
@@ -121,7 +134,7 @@
 - Bump Luciq Android SDK to v18.2.0 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v18.2.0).
 
 
-## [18.0.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.1...18.0.0) (October 27, 2025)
+## [18.0.1](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.1...18.0.0) (October 27, 2025)
 
 ### Added
 
@@ -136,7 +149,6 @@
 - Bump Luciq iOS SDK to v18.0.1 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/18.0.1).
 
 - Bump Luciq Android SDK to v18.0.1 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v18.0.1).
-
 
 ## [18.0.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.0...dev) (September 24, 2025)
 

@@ -322,12 +322,21 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
     @Override
     public void reportScreenLoadingCP(@NonNull Long startTimeStampMicro, @NonNull Long durationMicro, @NonNull Long uiTraceId) {
         try {
-            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId);
+            InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+
+    @Override
+    public void reportManualScreenLoadingCP(@NonNull String screenName, @NonNull Long startTimeStampMicro, @NonNull Long durationMicro) {
+        try {
+            InternalAPM._reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * This method is responsible for extend the end time if the screen loading custom

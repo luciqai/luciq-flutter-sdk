@@ -3,6 +3,8 @@ import 'package:pigeon/pigeon.dart';
 @FlutterApi()
 abstract class LuciqFlutterApi {
   void dispose();
+  @async
+  Map<String, Object?>? onReportSubmit(Map<String, Object?> snapshot);
 }
 
 @FlutterApi()
@@ -122,4 +124,6 @@ abstract class LuciqHostApi {
   void setTheme(Map<String, Object> themeConfig);
   void setFullscreen(bool isEnabled);
   void setNetworkAutoMaskingEnabled(bool isEnabled);
+
+  void bindOnReportSubmitHandler();
 }

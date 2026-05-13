@@ -11,12 +11,21 @@
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
 
 extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
-    LuciqApi *api = [[LuciqApi alloc] init];
+    LuciqFlutterApi *flutterApi = [[LuciqFlutterApi alloc] initWithBinaryMessenger:messenger];
+    LuciqApi *api = [[LuciqApi alloc] initWithFlutterApi:flutterApi];
     LuciqHostApiSetup(messenger, api);
 }
 
 @implementation LuciqApi {
     NSMutableSet<NSString *> *_registeredFonts;
+}
+
+- (instancetype)initWithFlutterApi:(LuciqFlutterApi *)api {
+    self = [super init];
+    if (self) {
+        _flutterApi = api;
+    }
+    return self;
 }
 
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
@@ -615,6 +624,144 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
 - (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
+}
+
+#pragma mark - Pre-sending handler
+
+- (NSDictionary *)serializeReport:(LCQReport *)report {
+    NSMutableArray<NSDictionary *> *fileAttachments = [NSMutableArray array];
+    for (id location in (report.fileLocations ?: @[])) {
+        NSString *path = nil;
+        if ([location isKindOfClass:[NSURL class]]) {
+            path = [(NSURL *)location absoluteString];
+        } else if ([location isKindOfClass:[NSString class]]) {
+            path = location;
+        }
+        if (path) {
+            [fileAttachments addObject:@{@"file": path, @"type": @"url"}];
+        }
+    }
+
+    return @{
+        @"tagsArray": report.tags ?: @[],
+        @"consoleLogs": report.consoleLogs ?: @[],
+        // Match Android: skip the read-only luciqLogs snapshot (LCQLog/LogMessage
+        // fields are package-private on Android, so neither platform exposes them).
+        @"luciqLogs": @[],
+        @"userAttributes": report.userAttributes ?: @{},
+        @"fileAttachments": fileAttachments,
+    };
+}
+
+- (void)bindOnReportSubmitHandlerWithError:(FlutterError *_Nullable *_Nonnull)error {
+    __weak __typeof(self) weakSelf = self;
+    Luciq.willSendReportHandler = ^LCQReport *(LCQReport *report) {
+        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return report;
+        }
+        NSDictionary *snapshot = [strongSelf serializeReport:report];
+
+        dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+        __block NSDictionary *mutations = nil;
+
+        void (^sendCall)(void) = ^{
+            [strongSelf.flutterApi onReportSubmitSnapshot:snapshot
+                                              completion:^(NSDictionary *_Nullable result,
+                                                           FlutterError *_Nullable _){
+                mutations = result;
+                dispatch_semaphore_signal(sema);
+            }];
+        };
+        BOOL onMain = [NSThread isMainThread];
+        if (onMain) {
+            sendCall();
+        } else {
+            dispatch_async(dispatch_get_main_queue(), sendCall);
+        }
+
+        NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:10];
+        if (onMain) {
+            // Why: the Flutter reply for `onReportSubmit` is delivered as a
+            // main-queue dispatch. If we block main with a plain semaphore_wait
+            // the queued reply never runs and we deadlock until the timeout.
+            // Spin the run loop in short slices so the reply can land while we
+            // wait, mirroring how Pigeon-style sync calls bridge async replies.
+            while (dispatch_semaphore_wait(sema, DISPATCH_TIME_NOW) != 0) {
+                if ([deadline timeIntervalSinceNow] <= 0) break;
+                [[NSRunLoop currentRunLoop]
+                    runMode:NSDefaultRunLoopMode
+                 beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+            }
+        } else {
+            dispatch_semaphore_wait(sema,
+                                    dispatch_time(DISPATCH_TIME_NOW,
+                                                  (int64_t)(10 * NSEC_PER_SEC)));
+        }
+
+        [strongSelf applyMutations:mutations toReport:report];
+        return report;
+    };
+}
+
+- (void)applyMutations:(NSDictionary *)mutations toReport:(LCQReport *)report {
+    if (!mutations || ![mutations isKindOfClass:[NSDictionary class]]) return;
+
+    NSArray *tags = mutations[@"tags"];
+    if ([tags isKindOfClass:[NSArray class]]) {
+        for (NSString *tag in tags) {
+            if ([tag isKindOfClass:[NSString class]]) [report appendTag:tag];
+        }
+    }
+
+    NSArray *consoleLogs = mutations[@"consoleLogs"];
+    if ([consoleLogs isKindOfClass:[NSArray class]]) {
+        for (NSString *log in consoleLogs) {
+            if ([log isKindOfClass:[NSString class]]) [report appendToConsoleLogs:log];
+        }
+    }
+
+    NSDictionary *userAttributes = mutations[@"userAttributes"];
+    if ([userAttributes isKindOfClass:[NSDictionary class]]) {
+        [userAttributes enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+            if ([key isKindOfClass:[NSString class]] && [value isKindOfClass:[NSString class]]) {
+                [report setUserAttribute:value withKey:key];
+            }
+        }];
+    }
+
+    NSArray *logs = mutations[@"logs"];
+    if ([logs isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *entry in logs) {
+            if (![entry isKindOfClass:[NSDictionary class]]) continue;
+            NSString *log = entry[@"log"];
+            NSString *type = entry[@"type"];
+            if (![log isKindOfClass:[NSString class]]) continue;
+            if ([type isEqualToString:@"verbose"]) [report logVerbose:log];
+            else if ([type isEqualToString:@"debug"]) [report logDebug:log];
+            else if ([type isEqualToString:@"info"]) [report logInfo:log];
+            else if ([type isEqualToString:@"warn"]) [report logWarn:log];
+            else if ([type isEqualToString:@"error"]) [report logError:log];
+        }
+    }
+
+    NSArray *dataAttachments = mutations[@"dataAttachments"];
+    if ([dataAttachments isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *entry in dataAttachments) {
+            if (![entry isKindOfClass:[NSDictionary class]]) continue;
+            id rawData = entry[@"data"];
+            NSString *fileName = entry[@"fileName"];
+            NSData *data = nil;
+            if ([rawData isKindOfClass:[FlutterStandardTypedData class]]) {
+                data = ((FlutterStandardTypedData *)rawData).data;
+            } else if ([rawData isKindOfClass:[NSData class]]) {
+                data = rawData;
+            }
+            if (data && [fileName isKindOfClass:[NSString class]]) {
+                [report addFileAttachmentWithData:data andName:fileName];
+            }
+        }
+    }
 }
 
 @end

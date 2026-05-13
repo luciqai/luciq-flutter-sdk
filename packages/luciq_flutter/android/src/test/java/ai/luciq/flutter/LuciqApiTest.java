@@ -108,6 +108,7 @@ public class LuciqApiTest {
     private MockedStatic<BugReporting> mBugReporting;
     private MockedConstruction<LuciqCustomTextPlaceHolder> mCustomTextPlaceHolder;
     private MockedStatic<LuciqPigeon.LuciqHostApi> mHostApi;
+    private MockedStatic<ai.luciq.library.logging.LuciqLog> mLuciqLog;
     private InternalCore internalCore;
     @Before
     public void setUp() throws NoSuchMethodException {
@@ -120,6 +121,7 @@ public class LuciqApiTest {
         mLuciq = mockStatic(Luciq.class);
         mBugReporting = mockStatic(BugReporting.class);
         mHostApi = mockStatic(LuciqPigeon.LuciqHostApi.class);
+        mLuciqLog = mockStatic(ai.luciq.library.logging.LuciqLog.class);
         GlobalMocks.setUp();
     }
 
@@ -129,6 +131,7 @@ public class LuciqApiTest {
         mLuciq.close();
         mBugReporting.close();
         mHostApi.close();
+        mLuciqLog.close();
         GlobalMocks.close();
 
     }
@@ -803,5 +806,20 @@ public class LuciqApiTest {
 
         api.setNetworkAutoMaskingEnabled(isEnabled);
         mLuciq.verify(() -> Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED));
+    }
+
+    @Test
+    public void testSetLCQLogPrintsToConsoleIsNoOpOnAndroid() {
+        api.setLCQLogPrintsToConsole(true);
+
+        mLuciq.verifyNoInteractions();
+        mLuciqLog.verifyNoInteractions();
+    }
+
+    @Test
+    public void testClearLogs() {
+        api.clearLogs();
+
+        mLuciqLog.verify(ai.luciq.library.logging.LuciqLog::clearLogs);
     }
 }

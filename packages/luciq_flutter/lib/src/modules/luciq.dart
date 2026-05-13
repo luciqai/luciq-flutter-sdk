@@ -295,9 +295,19 @@ class Luciq {
     return _host.addFeatureFlags(map);
   }
 
+  /// Adds a single feature flag to the next report.
+  static Future<void> addFeatureFlag(FeatureFlag featureFlag) async {
+    return addFeatureFlags([featureFlag]);
+  }
+
   /// Removes certain feature flags from the next report.
   static Future<void> removeFeatureFlags(List<String> featureFlags) async {
     return _host.removeFeatureFlags(featureFlags);
+  }
+
+  /// Removes a single feature flag by [name] from the next report.
+  static Future<void> removeFeatureFlag(String name) async {
+    return removeFeatureFlags([name]);
   }
 
   /// Clears all feature flags from the next report.
@@ -551,5 +561,19 @@ class Luciq {
     String? viewName,
   ) async {
     return _host.logUserSteps(gestureType.toString(), message, viewName);
+  }
+
+  /// Sets whether `LCQLog` messages are also printed to Xcode's console on iOS.
+  /// iOS-only; no-op on Android.
+  /// [printsToConsole] Whether logs print to the console.
+  static Future<void> setLCQLogPrintsToConsole(bool printsToConsole) async {
+    if (LCQBuildInfo.instance.isIOS) {
+      return _host.setLCQLogPrintsToConsole(printsToConsole);
+    }
+  }
+
+  /// Clears all Luciq logs, console logs, network logs and user steps.
+  static Future<void> clearLogs() async {
+    return _host.clearLogs();
   }
 }

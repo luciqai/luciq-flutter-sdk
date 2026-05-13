@@ -617,4 +617,12 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
 }
 
+- (void)setLCQLogPrintsToConsolePrintsToConsole:(NSNumber *)printsToConsole error:(FlutterError *_Nullable *_Nonnull)error {
+    LCQLog.printsToConsole = [printsToConsole boolValue];
+}
+
+- (void)clearLogsWithError:(FlutterError *_Nullable *_Nonnull)error {
+    [LCQLog clearAllLogs];
+}
+
 @end

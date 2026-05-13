@@ -60,6 +60,11 @@ void main() {
         appVariant: 'variant 1',
       );
 
+      BugReporting.setDidSelectPromptOptionIOSHandler((promptOption) {
+
+        print('promptOption: $promptOption');
+
+      },);
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
 

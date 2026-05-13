@@ -4,6 +4,7 @@ import 'package:pigeon/pigeon.dart';
 abstract class BugReportingFlutterApi {
   void onSdkInvoke();
   void onSdkDismiss(String dismissType, String reportType);
+  void onDidSelectPromptOption(String promptOption);
 }
 
 @HostApi()
@@ -27,6 +28,7 @@ abstract class BugReportingHostApi {
   );
   void bindOnInvokeCallback();
   void bindOnDismissCallback();
+  void bindOnDidSelectPromptOptionCallback();
   void setDisclaimerText(String text);
   void setCommentMinimumCharacterCount(
     int limit,

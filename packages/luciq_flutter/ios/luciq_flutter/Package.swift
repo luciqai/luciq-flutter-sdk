@@ -22,20 +22,18 @@ let package = Package(
         .library(name: "luciq-flutter", targets: ["luciq_flutter"])
     ],
     dependencies: [
-        // TODO(ios-sdk): replace with the canonical Luciq native SPM repo URL.
-        .package(url: "https://github.com/Instabug/Instabug-SP", exact: "19.5.1")
+        .package(url: "https://github.com/luciqai/luciq-ios-sdk", exact: "19.6.1")
     ],
     targets: [
         .target(
             name: "luciq_flutter",
             dependencies: [
                 // TODO(ios-sdk): confirm product name exposed by the Luciq native package.
-                .product(name: "Instabug", package: "Instabug-SP")
+                .product(name: "Luciq", package: "luciq-ios-sdk")
             ],
             publicHeadersPath: "include/luciq_flutter",
             cSettings: [
-                .headerSearchPath("include/luciq_flutter"),
-                .headerSearchPath("include/luciq_flutter/Generated")
+                .headerSearchPath("include/luciq_flutter")
             ]
         )
     ]

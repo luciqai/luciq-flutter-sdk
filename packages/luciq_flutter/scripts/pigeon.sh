@@ -2,7 +2,7 @@
 
 DIR_DART="lib/src/generated"
 DIR_IOS_SRC="ios/luciq_flutter/Sources/luciq_flutter/Generated"
-DIR_IOS_HDR="ios/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter/Generated"
+DIR_IOS_HDR="ios/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter"
 DIR_ANDROID="android/src/main/java/ai/luciq/flutter/generated"
 PKG_ANDROID="ai.luciq.flutter.generated"
 

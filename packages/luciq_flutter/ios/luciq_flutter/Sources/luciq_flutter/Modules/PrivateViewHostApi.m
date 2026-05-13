@@ -6,7 +6,7 @@
 //
 
 #import "PrivateViewHostApi.h"
-#import "luciq_flutter/LuciqApi.h"
+#import "LuciqApi.h"
 
 extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger, PrivateViewApi * _Nonnull privateViewApi) {
     PrivateViewHostApi *api = [[PrivateViewHostApi alloc] init];

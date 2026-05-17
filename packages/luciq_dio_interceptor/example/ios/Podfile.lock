@@ -20,7 +20,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/luciq_flutter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   Luciq: 361be18eb534f77063a4df4b64e73a8ff31a60ad
   luciq_flutter: f5428c8b2cec44ced001719990b4097d066832e4
 

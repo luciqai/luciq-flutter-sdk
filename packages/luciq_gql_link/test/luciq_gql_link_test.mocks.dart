@@ -6,7 +6,9 @@
 import 'dart:async' as _i3;
 import 'dart:typed_data' as _i4;
 
+import 'package:luciq_flutter/luciq_flutter.dart' as _i6;
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart' as _i2;
+import 'package:luciq_flutter/src/utils/luciq_logger.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -413,4 +415,44 @@ class MockLuciqHostApi extends _i1.Mock implements _i2.LuciqHostApi {
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+}
+
+/// A class which mocks [LuciqLogger].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockLuciqLogger extends _i1.Mock implements _i5.LuciqLogger {
+  MockLuciqLogger() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  set logLevel(_i6.LogLevel? level) => super.noSuchMethod(
+        Invocation.setter(#logLevel, level),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void log(String? message, {required _i6.LogLevel? level, String? tag = ''}) =>
+      super.noSuchMethod(
+        Invocation.method(#log, [message], {#level: level, #tag: tag}),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void e(String? message, {String? tag = ''}) => super.noSuchMethod(
+        Invocation.method(#e, [message], {#tag: tag}),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void d(String? message, {String? tag = ''}) => super.noSuchMethod(
+        Invocation.method(#d, [message], {#tag: tag}),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void v(String? message, {String? tag = ''}) => super.noSuchMethod(
+        Invocation.method(#v, [message], {#tag: tag}),
+        returnValueForMissingStub: null,
+      );
 }

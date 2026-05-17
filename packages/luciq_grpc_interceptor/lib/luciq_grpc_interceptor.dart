@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:grpc/grpc.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+// ignore: invalid_use_of_internal_member
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_grpc_interceptor/src/grpc_body_codec.dart';
 import 'package:luciq_grpc_interceptor/src/grpc_status_mapper.dart';
 import 'package:luciq_grpc_interceptor/src/tapped_response_stream.dart';
@@ -9,6 +11,7 @@ import 'package:luciq_grpc_interceptor/src/tapped_response_stream.dart';
 export 'src/grpc_status_mapper.dart' show grpcStatusToHttpStatus;
 
 const int _kStreamBufferCapBytes = 64 * 1024;
+const String _logTag = 'LuciqGrpcInterceptor';
 
 class LuciqGrpcInterceptor extends ClientInterceptor {
   final NetworkLogger _networkLogger = NetworkLogger();
@@ -23,6 +26,11 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
     final startTime = DateTime.now();
     final ctx = _CallContext();
 
+    LuciqLogger.I.d(
+      'unary start: method=${method.path}',
+      tag: _logTag,
+    );
+
     final modifiedOptions = _withW3CProvider(options, startTime, ctx);
     final response = invoker(method, request, modifiedOptions);
 
@@ -32,13 +40,29 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         var trailers = const <String, String>{};
         try {
           headers = await response.headers;
-        } catch (_) {}
+        } catch (e) {
+          LuciqLogger.I.v(
+            'unary headers fetch failed: $e method=${method.path}',
+            tag: _logTag,
+          );
+        }
         try {
           trailers = await response.trailers;
-        } catch (_) {}
+        } catch (e) {
+          LuciqLogger.I.v(
+            'unary trailers fetch failed: $e method=${method.path}',
+            tag: _logTag,
+          );
+        }
 
         final grpcStatus = _readGrpcStatus(trailers);
         if (grpcStatus != null && grpcStatus != StatusCode.ok) {
+          LuciqLogger.I.d(
+            'unary trailer-status non-OK: '
+            'method=${method.path} code=$grpcStatus '
+            'message="${trailers['grpc-message'] ?? ''}"',
+            tag: _logTag,
+          );
           await _logFailure(
             method: method,
             request: request,
@@ -64,6 +88,12 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         );
       },
       onError: (Object error) async {
+        LuciqLogger.I.e(
+          'unary error: method=${method.path} '
+          'type=${error.runtimeType} '
+          'code=${error is GrpcError ? error.code : 'n/a'}',
+          tag: _logTag,
+        );
         await _logFailure(
           method: method,
           request: request,
@@ -88,6 +118,12 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
     final ctx = _CallContext();
     final reqCapture = _StreamCapture();
     final resCapture = _StreamCapture();
+    final terminal = _TerminalGuard();
+
+    LuciqLogger.I.d(
+      'stream start: method=${method.path}',
+      tag: _logTag,
+    );
 
     final modifiedOptions = _withW3CProvider(options, startTime, ctx);
 
@@ -104,10 +140,24 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
 
     stream.trailers.then(
       (trailers) async {
+        if (!terminal.claim()) return;
         var headers = const <String, String>{};
         try {
           headers = await stream.headers;
-        } catch (_) {}
+        } catch (e) {
+          LuciqLogger.I.v(
+            'stream headers fetch failed: $e method=${method.path}',
+            tag: _logTag,
+          );
+        }
+        LuciqLogger.I.d(
+          'stream complete: method=${method.path} '
+          'grpc-status=${trailers['grpc-status']} '
+          'messages=${resCapture.messageCount} '
+          'reqBytes=${reqCapture.byteCount} '
+          'resBytes=${resCapture.byteCount}',
+          tag: _logTag,
+        );
         await _logStreamComplete(
           method: method,
           headers: headers,
@@ -119,6 +169,23 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         );
       },
       onError: (Object error) async {
+        if (!terminal.claim()) return;
+        var headers = const <String, String>{};
+        try {
+          headers = await stream.headers;
+        } catch (e) {
+          LuciqLogger.I.v(
+            'stream headers fetch failed (onError): $e method=${method.path}',
+            tag: _logTag,
+          );
+        }
+        LuciqLogger.I.e(
+          'stream error: method=${method.path} '
+          'type=${error.runtimeType} '
+          'code=${error is GrpcError ? error.code : 'n/a'} '
+          'messages=${resCapture.messageCount}',
+          tag: _logTag,
+        );
         await _logFailure(
           method: method,
           error: error,
@@ -126,11 +193,34 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           ctx: ctx,
           reqCapture: reqCapture,
           resCapture: resCapture,
+          extraResponseHeaders:
+              headers.isEmpty ? null : _mergeHeadersAndTrailers(headers, {}),
         );
       },
     ).ignore();
 
-    return TappedResponseStream<R>(stream, tappedResponses);
+    return TappedResponseStream<R>(
+      stream,
+      tappedResponses,
+      onCancel: () {
+        if (!terminal.claim()) return;
+        LuciqLogger.I.d(
+          'stream cancelled by consumer: method=${method.path} '
+          'messages=${resCapture.messageCount}',
+          tag: _logTag,
+        );
+        unawaited(
+          _logFailure(
+            method: method,
+            error: const GrpcError.cancelled('client cancelled'),
+            startTime: startTime,
+            ctx: ctx,
+            reqCapture: reqCapture,
+            resCapture: resCapture,
+          ),
+        );
+      },
+    );
   }
 
   CallOptions _withW3CProvider(
@@ -152,12 +242,22 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
                   header?.w3CGeneratedHeader != null) {
                 metadata['traceparent'] = header!.w3CGeneratedHeader!;
               }
+              LuciqLogger.I.v(
+                'w3c: authority=$uri '
+                'generated=${header?.w3CGeneratedHeader != null} '
+                'inboundFound=${header?.isW3cHeaderFound == true}',
+                tag: _logTag,
+              );
               ctx.completeProvider(
                 w3cHeader: header,
                 authority: uri,
                 metadata: Map<String, String>.from(metadata),
               );
-            } catch (_) {
+            } catch (e) {
+              LuciqLogger.I.e(
+                'w3c provider failed: $e authority=$uri',
+                tag: _logTag,
+              );
               ctx.completeProvider(
                 w3cHeader: null,
                 authority: uri,
@@ -203,7 +303,17 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           w3cHeader: ctx.w3cHeader,
         ),
       );
-    } catch (_) {}
+      LuciqLogger.I.d(
+        'unary logged: method=${method.path} status=200 '
+        'duration=${endTime.difference(startTime).inMicroseconds}us',
+        tag: _logTag,
+      );
+    } catch (e) {
+      LuciqLogger.I.e(
+        'unary log failed: $e method=${method.path}',
+        tag: _logTag,
+      );
+    }
   }
 
   Future<void> _logStreamComplete<Q, R>({
@@ -248,7 +358,19 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           w3cHeader: ctx.w3cHeader,
         ),
       );
-    } catch (_) {}
+      LuciqLogger.I.d(
+        'stream logged: method=${method.path} '
+        'grpc=$grpcStatus http=${grpcStatusToHttpStatus(grpcStatus)} '
+        'messages=${resCapture.messageCount} '
+        'duration=${endTime.difference(startTime).inMicroseconds}us',
+        tag: _logTag,
+      );
+    } catch (e) {
+      LuciqLogger.I.e(
+        'stream log failed: $e method=${method.path}',
+        tag: _logTag,
+      );
+    }
   }
 
   Future<void> _logFailure<Q, R>({
@@ -268,12 +390,16 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
       var errorDomain = 'transport';
       var errorCode = 0;
       var errorMessage = error.toString();
+      String errorName;
 
       if (error is GrpcError) {
         status = grpcStatusToHttpStatus(error.code);
         errorDomain = 'grpc';
         errorCode = error.code;
         errorMessage = error.message ?? error.codeName;
+        errorName = error.codeName;
+      } else {
+        errorName = error.runtimeType.toString();
       }
 
       final requestBody =
@@ -302,6 +428,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           status: status,
           errorCode: errorCode,
           errorDomain: errorDomain,
+          errorName: errorName,
           requestContentType: 'application/grpc',
           responseContentType: 'application/grpc',
           endTime: endTime,
@@ -309,7 +436,18 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           w3cHeader: ctx.w3cHeader,
         ),
       );
-    } catch (_) {}
+      LuciqLogger.I.d(
+        'failure logged: method=${method.path} '
+        'status=$status domain=$errorDomain code=$errorCode '
+        'duration=${endTime.difference(startTime).inMicroseconds}us',
+        tag: _logTag,
+      );
+    } catch (e) {
+      LuciqLogger.I.e(
+        'failure log failed: $e method=${method.path}',
+        tag: _logTag,
+      );
+    }
   }
 
   String _buildUrl<Q, R>(ClientMethod<Q, R> method, String? authority) {
@@ -405,4 +543,16 @@ class _StreamCapture {
   }
 
   String body() => _buffer.toString();
+}
+
+/// Single-shot guard that ensures only one terminal log (complete / failure /
+/// cancelled) is emitted per streaming call.
+class _TerminalGuard {
+  bool _claimed = false;
+
+  bool claim() {
+    if (_claimed) return false;
+    _claimed = true;
+    return true;
+  }
 }

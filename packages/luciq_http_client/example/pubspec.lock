@@ -129,7 +129,7 @@ packages:
       path: "../../luciq_flutter"
       relative: true
     source: path
-    version: "19.3.0"
+    version: "19.6.0"
   luciq_http_client:
     dependency: "direct main"
     description:

@@ -46,11 +46,27 @@ For every RPC the dashboard receives:
 - **Request metadata** (auth tokens, custom keys, the injected W3C `traceparent`).
 - **Initial headers and trailers** (trailers prefixed with `trailer-` to disambiguate).
 - **Status**: gRPC status codes are mapped to HTTP-equivalent codes via `grpcStatusToHttpStatus`.
-  Non-OK statuses surface `errorDomain: 'grpc'` and the original gRPC code in `errorCode`.
+  Non-OK statuses surface `errorDomain: 'grpc'`, the original gRPC code in `errorCode`, and the
+  status name (e.g. `NOT_FOUND`, `UNAVAILABLE`, `CANCELLED`) in `errorName` for dashboard grouping.
+- **Cancellation**: streams cancelled by the consumer before trailers arrive are logged as
+  `CANCELLED` (HTTP 499, gRPC code 1) with whatever request/response messages were captured up to
+  the cancellation point.
 - **Stream metrics**: `x-luciq-stream-message-count`, `x-luciq-stream-first-byte-ms`, and
   `x-luciq-stream-last-byte-ms` are added to the response headers map for streaming calls.
 - **Distributed tracing**: a W3C `traceparent` is generated and attached to outbound metadata when
   the SDK's W3C feature flag is enabled.
+
+## Debug logging
+
+The interceptor emits structured logs via the SDK's internal `LuciqLogger` under the tag
+`LuciqGrpcInterceptor`. Logs are gated by the SDK's log level (set via `Luciq.setSdkLogLevel`):
+
+- `debug`: call lifecycle (start, success, failure, cancellation, trailer-status non-OK).
+- `error`: callback failures, W3C provider failures, and any internal logging failure.
+- `verbose`: per-call W3C details and best-effort header/trailer fetch failures.
+
+Raising the log level to `debug` is the recommended way to diagnose missing or misshapen dashboard
+records in production builds.
 
 ## Limits
 

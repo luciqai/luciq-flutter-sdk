@@ -8,8 +8,10 @@ import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_http_link/gql_http_link.dart';
 import 'package:gql_link/gql_link.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' as http_testing;
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_gql_link/luciq_gql_link.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -18,16 +20,19 @@ import 'luciq_gql_link_test.mocks.dart';
 
 @GenerateMocks(<Type>[
   LuciqHostApi,
+  LuciqLogger,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
 
   final mHost = MockLuciqHostApi();
+  final mLogger = MockLuciqLogger();
 
   setUpAll(() {
     Luciq.$setHostApi(mHost);
     NetworkLogger.$setHostApi(mHost);
+    LuciqLogger.setInstance(mLogger);
     when(mHost.isW3CFeatureFlagsEnabled()).thenAnswer(
       (_) => Future<Map<String, bool>>.value(<String, bool>{
         'isW3cCaughtHeaderEnabled': true,
@@ -270,6 +275,132 @@ void main() {
       expect(responseBody, contains('errors'));
     });
 
+    test('surfaces first GraphQL error message as errorName', () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+
+      final forward = mockForwardWith([
+        const Response(
+          errors: [
+            GraphQLError(message: 'User not found'),
+            GraphQLError(message: 'Secondary error ignored'),
+          ],
+          response: {},
+        ),
+      ]);
+
+      await link.request(request, forward).first;
+      final captured = await completer.future;
+      expect(captured['errorName'], 'User not found');
+    });
+
+    test('errorName is null on a successful response with no errors', () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+
+      final forward = mockForwardWith([
+        const Response(data: {'user': null}, response: {}),
+      ]);
+
+      await link.request(request, forward).first;
+      final captured = await completer.future;
+      expect(captured['errorName'], isNull);
+    });
+
+    test('errorName extracts message from HttpLinkServerException JSON body',
+        () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+
+      final exception = HttpLinkServerException(
+        response: http.Response(
+          jsonEncode({
+            'errors': [
+              {'message': 'Unauthorized'},
+            ],
+          }),
+          401,
+          headers: const {'content-type': 'application/json'},
+        ),
+        parsedResponse: const Response(response: {}),
+      );
+
+      try {
+        await link.request(request, mockForwardWithError(exception)).first;
+      } catch (_) {
+        // expected
+      }
+
+      final captured = await completer.future;
+      expect(captured['errorName'], 'Unauthorized');
+    });
+
+    test('errorName falls back to runtime type when no parseable body',
+        () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+
+      try {
+        await link
+            .request(request, mockForwardWithError(Exception('boom')))
+            .first;
+      } catch (_) {
+        // expected
+      }
+
+      final captured = await completer.future;
+      // Exception('boom').runtimeType is '_Exception'.
+      expect(captured['errorName'], '_Exception');
+    });
+
     test('logs transport errors with error domain', () async {
       final completer = Completer<Map<String, dynamic>>();
       when(mHost.networkLog(any)).thenAnswer((invocation) {
@@ -350,6 +481,108 @@ void main() {
       for (final log in allLogs) {
         expect(log['url'], 'graphql (OnMessageAdded)');
         expect(log['responseCode'], 200);
+      }
+    });
+  });
+
+  group('LuciqGqlLink - subscription lifecycle', () {
+    test(
+        'logs N successful events then logs error when stream errors midflight',
+        () async {
+      final captured = <Map<String, dynamic>>[];
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        captured.add(invocation.positionalArguments[0] as Map<String, dynamic>);
+        return Future<void>.value();
+      });
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: subscriptionDocument,
+          operationName: 'OnMessageAdded',
+        ),
+        variables: const {'channelId': 'ch'},
+      );
+
+      Stream<Response> midFlightError() async* {
+        yield const Response(
+          data: {
+            'messageAdded': {'id': '1', 'content': 'a'},
+          },
+          response: {},
+        );
+        yield const Response(
+          data: {
+            'messageAdded': {'id': '2', 'content': 'b'},
+          },
+          response: {},
+        );
+        throw Exception('socket closed');
+      }
+
+      try {
+        await link.request(request, (_) => midFlightError()).toList();
+      } catch (_) {
+        // expected rethrow after the third (error) event is logged.
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(captured.length, 3);
+      for (final entry in captured) {
+        expect(entry['gqlQueryName'], 'OnMessageAdded');
+      }
+      expect(captured.last['errorDomain'], 'graphql');
+      expect(captured.last['responseBody'], contains('socket closed'));
+      // The first two events are normal records, no errorDomain.
+      expect(captured[0]['errorDomain'], '');
+      expect(captured[1]['errorDomain'], '');
+    });
+
+    test('logs subscription events with null status on non-HTTP transport',
+        () async {
+      final captured = <Map<String, dynamic>>[];
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        captured.add(invocation.positionalArguments[0] as Map<String, dynamic>);
+        return Future<void>.value();
+      });
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: subscriptionDocument,
+          operationName: 'OnMessageAdded',
+        ),
+        variables: const {'channelId': 'ch'},
+      );
+
+      // mockForwardRaw bypasses the default-200 HttpLinkResponseContext, so
+      // every emission lacks HTTP framing — modelling a websocket transport.
+      final forward = mockForwardRaw([
+        const Response(
+          data: {
+            'messageAdded': {'id': '1', 'content': 'a'},
+          },
+          response: {},
+        ),
+        const Response(
+          data: {
+            'messageAdded': {'id': '2', 'content': 'b'},
+          },
+          response: {},
+        ),
+        const Response(
+          data: {
+            'messageAdded': {'id': '3', 'content': 'c'},
+          },
+          response: {},
+        ),
+      ]);
+
+      await link.request(request, forward).toList();
+      expect(captured.length, 3);
+      for (final entry in captured) {
+        expect(entry['responseCode'], isNull);
+        expect(entry['gqlQueryName'], 'OnMessageAdded');
       }
     });
   });
@@ -482,6 +715,44 @@ void main() {
 
       expect(captured['responseCode'], isNull);
       expect(captured['responseContentType'], 'application/json');
+    });
+
+    test('falls back to exception toString when error response body is empty',
+        () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+
+      final exception = HttpLinkServerException(
+        response: http.Response('', 504, headers: const {}),
+        parsedResponse: const Response(response: {}),
+      );
+
+      try {
+        await link.request(request, mockForwardWithError(exception)).first;
+      } catch (_) {
+        // expected
+      }
+
+      final captured = await completer.future;
+      expect(captured['responseCode'], 504);
+      expect(captured['errorDomain'], 'graphql');
+      final responseBody = captured['responseBody'] as String;
+      expect(responseBody.isNotEmpty, true);
+      // HttpLinkServerException.toString() renders as
+      // 'ServerException(originalException: ..., parsedResponse: ...)'.
+      expect(responseBody, contains('ServerException'));
     });
 
     test('extracts status, headers, and body from HttpLinkServerException',
@@ -829,6 +1100,329 @@ void main() {
       // should NOT re-invoke it via networkLog -> getW3CHeader because we
       // call networkLogInternal directly.
       verify(mHost.isW3CFeatureFlagsEnabled()).called(1);
+    });
+  });
+
+  group('LuciqGqlLink - debug logging', () {
+    setUp(() => clearInteractions(mLogger));
+
+    test('logs error when forward is null', () async {
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+
+      try {
+        await link.request(request).first;
+      } catch (_) {
+        // expected
+      }
+
+      verify(
+        mLogger.e(
+          argThat(contains('forward is null')),
+          tag: 'LuciqGqlLink',
+        ),
+      ).called(1);
+    });
+
+    test('logs request entry and response on successful query', () async {
+      when(mHost.networkLog(any)).thenAnswer((_) => Future<void>.value());
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+        variables: const {'id': '1'},
+      );
+      final forward = mockForwardWith([
+        const Response(data: {'user': null}, response: {}),
+      ]);
+
+      await link.request(request, forward).first;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      verify(
+        mLogger.d(
+          argThat(allOf(
+            contains('request:'),
+            contains('type=query'),
+            contains('name=GetUser'),
+          )),
+          tag: 'LuciqGqlLink',
+        ),
+      ).called(1);
+      verify(
+        mLogger.d(
+          argThat(allOf(
+            contains('response:'),
+            contains('status=200'),
+            contains('gqlErrors=0'),
+          )),
+          tag: 'LuciqGqlLink',
+        ),
+      ).called(1);
+    });
+
+    test('logs error on HttpLinkServerException with status', () async {
+      when(mHost.networkLog(any)).thenAnswer((_) => Future<void>.value());
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+      final exception = HttpLinkServerException(
+        response: http.Response(
+          'down',
+          502,
+          headers: const {'content-type': 'text/plain'},
+        ),
+        parsedResponse: const Response(response: {}),
+      );
+
+      try {
+        await link.request(request, mockForwardWithError(exception)).first;
+      } catch (_) {
+        // expected
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      verify(
+        mLogger.e(
+          argThat(allOf(
+            contains('error:'),
+            contains('status=502'),
+            contains('name=GetUser'),
+          )),
+          tag: 'LuciqGqlLink',
+        ),
+      ).called(1);
+    });
+
+    test('logs error when request body encoding falls back', () async {
+      when(mHost.networkLog(any)).thenAnswer((_) => Future<void>.value());
+
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+        variables: {'oops': _NotEncodable()},
+      );
+      final forward = mockForwardWith([
+        const Response(data: {'user': null}, response: {}),
+      ]);
+
+      await link.request(request, forward).first;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      verify(
+        mLogger.e(
+          argThat(contains('request body encode failed')),
+          tag: 'LuciqGqlLink',
+        ),
+      ).called(1);
+    });
+  });
+
+  group('LuciqGqlLink - integration with HttpLink', () {
+    test(
+        'routes a real HttpLink response through LuciqGqlLink with status and headers',
+        () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      http.Request? sentRequest;
+      final mockClient = http_testing.MockClient((request) async {
+        sentRequest = request;
+        return http.Response(
+          jsonEncode({
+            'data': {
+              'user': {'id': '1', 'name': 'Ada'},
+            },
+          }),
+          200,
+          headers: {
+            'content-type': 'application/json',
+            'x-server': 'mock-1',
+          },
+        );
+      });
+
+      final link = Link.from([
+        LuciqGqlLink(endpoint: 'http://x/graphql'),
+        HttpLink('http://x/graphql', httpClient: mockClient),
+      ]);
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+        variables: const {'id': '1'},
+      );
+
+      await link.request(request).first;
+      final captured = await completer.future;
+
+      expect(captured['responseCode'], 200);
+      expect(captured['gqlQueryName'], 'GetUser');
+      final responseHeaders =
+          captured['responseHeaders'] as Map<String, dynamic>;
+      expect(responseHeaders['x-server'], 'mock-1');
+      // The generated traceparent should reach the wire request.
+      expect(sentRequest!.headers['traceparent'], isNotNull);
+    });
+
+    test('captures HTTP 500 from real HttpLink with errorDomain=graphql',
+        () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final mockClient = http_testing.MockClient((_) async {
+        return http.Response(
+          'internal error',
+          500,
+          headers: const {'content-type': 'text/plain'},
+        );
+      });
+
+      final link = Link.from([
+        LuciqGqlLink(endpoint: 'http://x/graphql'),
+        HttpLink('http://x/graphql', httpClient: mockClient),
+      ]);
+      final request = Request(
+        operation: Operation(
+          document: queryDocument,
+          operationName: 'GetUser',
+        ),
+      );
+
+      try {
+        await link.request(request).first;
+      } catch (_) {
+        // expected — HttpLink raises HttpLinkServerException on >=400.
+      }
+
+      final captured = await completer.future;
+      expect(captured['responseCode'], 500);
+      expect(captured['errorDomain'], 'graphql');
+      expect(captured['responseBody'], 'internal error');
+    });
+  });
+
+  group('LuciqGqlLink - multipart uploads', () {
+    test('replaces MultipartFile in variables with a JSON-friendly placeholder',
+        () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final upload = http.MultipartFile.fromString(
+        'avatar',
+        'hello-bytes',
+        filename: 'a.txt',
+      );
+      final uploadMutation = gql.parseString('''
+        mutation Upload(\$file: Upload!) {
+          uploadAvatar(file: \$file) { id }
+        }
+      ''');
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: uploadMutation,
+          operationName: 'Upload',
+        ),
+        variables: {'file': upload},
+      );
+
+      final forward = mockForwardWith([
+        const Response(
+          data: {
+            'uploadAvatar': {'id': '7'},
+          },
+          response: {},
+        ),
+      ]);
+
+      await link.request(request, forward).first;
+      final captured = await completer.future;
+      final raw = captured['requestBody'] as String;
+      final parsed = jsonDecode(raw) as Map<String, dynamic>;
+
+      expect(parsed['operationName'], 'Upload');
+      final variables = parsed['variables'] as Map<String, dynamic>;
+      final fileEntry = variables['file'] as Map<String, dynamic>;
+      expect(fileEntry['__luciq_multipart'], true);
+      expect(fileEntry['filename'], 'a.txt');
+      expect(fileEntry['field'], 'avatar');
+      expect(fileEntry['length'], isA<int>());
+    });
+
+    test('walks nested maps and lists to sanitize multipart entries', () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final file1 = http.MultipartFile.fromString('a', '1', filename: '1.txt');
+      final file2 = http.MultipartFile.fromString('b', '2', filename: '2.txt');
+      final uploadMutation = gql.parseString('''
+        mutation UploadMany(\$payload: PayloadInput!) {
+          uploadMany(payload: \$payload) { id }
+        }
+      ''');
+      final link = LuciqGqlLink();
+      final request = Request(
+        operation: Operation(
+          document: uploadMutation,
+          operationName: 'UploadMany',
+        ),
+        variables: {
+          'payload': <String, dynamic>{
+            'files': [file1, file2],
+          },
+        },
+      );
+
+      final forward = mockForwardWith([
+        const Response(
+          data: {'uploadMany': null},
+          response: {},
+        ),
+      ]);
+
+      await link.request(request, forward).first;
+      final captured = await completer.future;
+      final parsed =
+          jsonDecode(captured['requestBody'] as String) as Map<String, dynamic>;
+      final files = ((parsed['variables'] as Map<String, dynamic>)['payload']
+          as Map<String, dynamic>)['files'] as List<dynamic>;
+      expect(files.length, 2);
+      expect((files[0] as Map<String, dynamic>)['filename'], '1.txt');
+      expect((files[1] as Map<String, dynamic>)['filename'], '2.txt');
     });
   });
 

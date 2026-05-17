@@ -37,7 +37,7 @@ middleware abstraction. That covers the majority of Flutter GraphQL apps:
 | `artemis`                                            | Yes                                             |
 | Custom `Link.from([...])` chains                     | Yes                                             |
 | `gql_websocket_link` (subscriptions)                 | Yes — each emission is logged as its own record |
-| `gql_dio_link` (multipart uploads)                   | Yes                                             |
+| `gql_dio_link` (multipart uploads)                   | Yes — files are logged as metadata placeholders |
 | `hasura_connect` and other non-`gql` clients         | **No**                                          |
 | Hand-rolled `http`/`dio` calls to a GraphQL endpoint | **No**                                          |
 
@@ -52,3 +52,67 @@ addition):
 The two layers are complementary: `LuciqGqlLink` provides GraphQL semantics (operation name, type,
 parsed errors), while the HTTP-level interceptors provide transport coverage for traffic that
 bypasses `gql_link`.
+
+## What gets captured
+
+For every operation that flows through `LuciqGqlLink`, the dashboard sees:
+
+- Operation name, operation type (`query` / `mutation` / `subscription`), and full request body
+  (query document, `operationName`, sanitized variables).
+- HTTP transport details when the terminating link is HTTP: status code, response headers,
+  response body, content-type, and request/response byte sizes.
+- A first-class `errorName` field populated from the first GraphQL error message (e.g.
+  `"User not found"`) when the response carries `errors`, or from the Dart runtime type of the
+  thrown exception on transport failure. This makes dashboard grouping by error work even when
+  the HTTP status is `200`.
+- `errorDomain = 'graphql'` on transport errors, plus the original response body / headers
+  extracted from `HttpLinkServerException` and `HttpLinkParserException`.
+- W3C `traceparent` correlation: the link injects a generated `traceparent` into the outgoing
+  request, or preserves a caller-supplied one. The same value is recorded on the dashboard.
+- Each subscription event is captured as its own record; the record `startTime` advances to the
+  previous event's end, so the `duration` field reflects the inter-event gap.
+
+### Multipart uploads
+
+Variables that include `http.MultipartFile` (the shape used by `gql_http_link` and `gql_dio_link`
+for `multipart/form-data` GraphQL uploads) are not consumed for logging — the terminating link
+still gets the original file stream. In the captured request body, each `MultipartFile` is
+replaced with a JSON-friendly placeholder so the operation can still be encoded:
+
+```json
+{
+  "__luciq_multipart": true,
+  "field": "avatar",
+  "filename": "a.txt",
+  "contentType": "text/plain; charset=utf-8",
+  "length": 11
+}
+```
+
+The walk is recursive: maps and lists nested inside `variables` are traversed.
+
+## Diagnostic logging
+
+`LuciqGqlLink` writes diagnostics through the same `dart:developer` logger the rest of the SDK
+uses, gated by the level you pass to `Luciq.init`:
+
+```dart
+await
+Luciq.init
+(
+token: '<APP_TOKEN>',
+invocationEvents: [InvocationEvent.shake],
+debugLogsLevel: LogLevel.debug, // or LogLevel.verbose for the full trace
+);
+```
+
+What you'll see, by level (tag: `LuciqGqlLink`):
+
+- `error` — `forward` placement mistakes, transport errors (with `runtimeType` and resolved HTTP
+  status), request- or response-body encoding fallbacks.
+- `debug` — per-operation entry (type, name, url) and per-response summary (HTTP status, number
+  of GraphQL errors, microsecond duration). Subscriptions log once per emitted event.
+- `verbose` — `endpoint` set at construction, W3C trace decisions (generated vs. inbound),
+  body-size encoding fallbacks.
+
+Production default is `LogLevel.error`, so only the actionable lines surface unless you opt in.

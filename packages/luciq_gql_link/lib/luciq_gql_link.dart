@@ -6,10 +6,14 @@ import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_http_link/gql_http_link.dart'
     show HttpLinkParserException, HttpLinkServerException;
 import 'package:gql_link/gql_link.dart';
+import 'package:http/http.dart' show MultipartFile;
 import 'package:luciq_flutter/luciq_flutter.dart';
+// ignore: invalid_use_of_internal_member
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
 const _operationTypeHeader = 'x-luciq-graphql-operation-type';
 const _defaultContentType = 'application/json';
+const _logTag = 'LuciqGqlLink';
 
 /// A `gql_link` middleware that forwards GraphQL operations to the next link
 /// while reporting them to the Luciq dashboard via [NetworkLogger].
@@ -17,7 +21,9 @@ const _defaultContentType = 'application/json';
 /// Place this link before the terminating link in your chain, e.g.
 /// `Link.from([LuciqGqlLink(endpoint: url), HttpLink(url)])`.
 class LuciqGqlLink extends Link {
-  LuciqGqlLink({this.endpoint = 'graphql'});
+  LuciqGqlLink({this.endpoint = 'graphql'}) {
+    LuciqLogger.I.v('init: endpoint="$endpoint"', tag: _logTag);
+  }
 
   /// Display label shown in the Luciq dashboard for operations going through
   /// this link. This is **not** the transport URL — the actual network call is
@@ -32,6 +38,10 @@ class LuciqGqlLink extends Link {
     NextLink? forward,
   ]) {
     if (forward == null) {
+      LuciqLogger.I.e(
+        'forward is null; LuciqGqlLink must be placed before a terminating link',
+        tag: _logTag,
+      );
       return Stream.error(
         StateError(
           'LuciqGqlLink is not a terminating link and requires a forward function.',
@@ -44,6 +54,12 @@ class LuciqGqlLink extends Link {
     final operationType = _getOperationType(request.operation);
     final requestBody = _buildRequestBody(request);
     final url = operationName != null ? '$endpoint ($operationName)' : endpoint;
+
+    LuciqLogger.I.d(
+      'request: type=$operationType '
+      'name=${operationName ?? '<anonymous>'} url=$url',
+      tag: _logTag,
+    );
 
     final inboundLinkHeaders =
         request.context.entry<HttpLinkHeaders>()?.headers ??
@@ -60,6 +76,12 @@ class LuciqGqlLink extends Link {
       final generatedTrace = (w3Header?.isW3cHeaderFound == false)
           ? w3Header?.w3CGeneratedHeader
           : null;
+
+      LuciqLogger.I.v(
+        'w3c: generated=${generatedTrace != null} '
+        'inboundFound=${w3Header?.isW3cHeaderFound == true}',
+        tag: _logTag,
+      );
 
       if (generatedTrace != null) {
         mergedHeaders['traceparent'] = generatedTrace;
@@ -88,6 +110,7 @@ class LuciqGqlLink extends Link {
 
       return forward(outgoingRequest).map((response) {
         final endTime = DateTime.now();
+        final eventStart = lastEventStart;
         _logResponse(
           operationName: operationType,
           gqlQueryName: operationName,
@@ -96,9 +119,17 @@ class LuciqGqlLink extends Link {
           requestHeaders: logRequestHeaders,
           requestContentType: requestContentType,
           response: response,
-          startTime: lastEventStart,
+          startTime: eventStart,
           endTime: endTime,
           w3cHeader: w3Header,
+        );
+        LuciqLogger.I.d(
+          'response: '
+          'status=${response.context.entry<HttpLinkResponseContext>()?.statusCode} '
+          'gqlErrors=${response.errors?.length ?? 0} '
+          'duration=${endTime.difference(eventStart).inMicroseconds}us '
+          'name=${operationName ?? '<anonymous>'}',
+          tag: _logTag,
         );
         lastEventStart = endTime;
         return response;
@@ -142,11 +173,17 @@ class LuciqGqlLink extends Link {
     final status = httpCtx?.statusCode;
     final requestBodySize = _calculateBodySize(requestBody);
     final responseBodySize = _calculateBodySize(responseBody);
+    final errors = response.errors;
+    // Surface the first GraphQL error so the dashboard can group on it even
+    // when the HTTP transport returned 200.
+    final errorName = (errors != null && errors.isNotEmpty)
+        ? _truncate(errors.first.message)
+        : null;
 
     final data = NetworkData(
       startTime: startTime,
       url: url,
-      method: operationName,
+      method: 'POST',
       requestBody: requestBody,
       requestHeaders: requestHeaders,
       requestBodySize: requestBodySize,
@@ -158,6 +195,7 @@ class LuciqGqlLink extends Link {
       status: status,
       endTime: endTime,
       duration: endTime.difference(startTime).inMicroseconds,
+      errorName: errorName,
       gqlQueryName: gqlQueryName,
       w3cHeader: w3cHeader,
     );
@@ -202,8 +240,15 @@ class LuciqGqlLink extends Link {
       responseBody = errorBody;
     }
 
+    LuciqLogger.I.e(
+      'error: type=${error.runtimeType} status=$status '
+      'name=${gqlQueryName ?? '<anonymous>'}',
+      tag: _logTag,
+    );
+
     final requestBodySize = _calculateBodySize(requestBody);
     final responseBodySize = _calculateBodySize(responseBody);
+    final errorName = _extractErrorName(error, errorBody);
 
     final data = NetworkData(
       startTime: startTime,
@@ -221,6 +266,7 @@ class LuciqGqlLink extends Link {
       endTime: endTime,
       duration: endTime.difference(startTime).inMicroseconds,
       errorDomain: 'graphql',
+      errorName: errorName,
       gqlQueryName: gqlQueryName,
       w3cHeader: w3cHeader,
     );
@@ -245,19 +291,54 @@ class LuciqGqlLink extends Link {
 
   String _buildRequestBody(Request request) {
     try {
+      final sanitizedVariables = _sanitizeVariablesForLog(request.variables);
       final body = <String, dynamic>{
         'query': printNode(request.operation.document),
         if (request.operation.operationName != null)
           'operationName': request.operation.operationName,
-        if (request.variables.isNotEmpty) 'variables': request.variables,
+        if (sanitizedVariables.isNotEmpty) 'variables': sanitizedVariables,
       };
       return jsonEncode(body);
     } catch (e) {
+      LuciqLogger.I.e('request body encode failed: $e', tag: _logTag);
       return jsonEncode(<String, String>{
         '_luciq_encode_error': e.toString(),
         'fallback': request.toString(),
       });
     }
+  }
+
+  /// Recursively walks [variables] and replaces any [MultipartFile] with a
+  /// JSON-friendly placeholder so the variables can be encoded for logging
+  /// without consuming the file stream. The caller's map is not mutated; the
+  /// terminating link still sees the original [MultipartFile] entries.
+  Map<String, dynamic> _sanitizeVariablesForLog(
+    Map<String, dynamic> variables,
+  ) {
+    final out = <String, dynamic>{};
+    variables.forEach((key, value) {
+      out[key] = _sanitizeValueForLog(value);
+    });
+    return out;
+  }
+
+  dynamic _sanitizeValueForLog(dynamic value) {
+    if (value is MultipartFile) {
+      return <String, dynamic>{
+        '__luciq_multipart': true,
+        'field': value.field,
+        'filename': value.filename,
+        'contentType': value.contentType.toString(),
+        'length': value.length,
+      };
+    }
+    if (value is Map<String, dynamic>) {
+      return _sanitizeVariablesForLog(value);
+    }
+    if (value is List) {
+      return value.map(_sanitizeValueForLog).toList();
+    }
+    return value;
   }
 
   String _buildResponseBody(Response response) {
@@ -281,12 +362,42 @@ class LuciqGqlLink extends Link {
       };
       return jsonEncode(body);
     } catch (e) {
+      LuciqLogger.I.e('response body encode failed: $e', tag: _logTag);
       return jsonEncode(<String, String>{
         '_luciq_encode_error': e.toString(),
         'fallback': response.toString(),
       });
     }
   }
+
+  /// Returns a short label suitable for the [NetworkData.errorName] field.
+  ///
+  /// Prefers the first GraphQL error message embedded in the transport
+  /// response (when the server returned a structured `errors` array), then
+  /// falls back to the Dart runtime type of the thrown exception.
+  String? _extractErrorName(Object error, String? errorBody) {
+    if (errorBody != null && errorBody.isNotEmpty) {
+      try {
+        final parsed = jsonDecode(errorBody);
+        if (parsed is Map<String, dynamic>) {
+          final errors = parsed['errors'];
+          if (errors is List && errors.isNotEmpty) {
+            final first = errors.first;
+            if (first is Map && first['message'] is String) {
+              return _truncate(first['message'] as String);
+            }
+          }
+        }
+      } catch (_) {
+        // Body wasn't JSON or didn't carry a GraphQL error envelope. Fall
+        // through to the runtime-type fallback.
+      }
+    }
+    return error.runtimeType.toString();
+  }
+
+  String _truncate(String value, {int max = 256}) =>
+      value.length <= max ? value : value.substring(0, max);
 
   int _calculateBodySize(dynamic data) {
     if (data == null) return 0;
@@ -298,6 +409,7 @@ class LuciqGqlLink extends Link {
       final jsonString = jsonEncode(data);
       return utf8.encode(jsonString).length;
     } catch (e) {
+      LuciqLogger.I.v('body size fallback (toString): $e', tag: _logTag);
       return utf8.encode(data.toString()).length;
     }
   }

@@ -241,6 +241,7 @@ void main() {
       expect(capturedData['method'], 'POST');
       expect(capturedData['responseCode'], 404);
       expect(capturedData['errorDomain'], 'grpc');
+      expect(capturedData['errorName'], 'NOT_FOUND');
     });
 
     test('logs grpc://authority/path when providers run', () async {
@@ -504,6 +505,146 @@ void main() {
       expect(capturedData['url'], '/test.Service/GetData');
       expect(capturedData['responseCode'], 503);
       expect(capturedData['errorDomain'], 'grpc');
+      expect(capturedData['errorName'], 'UNAVAILABLE');
+    });
+
+    test('logs CANCELLED when consumer cancels before trailers', () async {
+      final logs = <Map<String, dynamic>>[];
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        logs.add(
+          invocation.positionalArguments[0] as Map<String, dynamic>,
+        );
+        return Future<void>.value();
+      });
+
+      final interceptor = LuciqGrpcInterceptor();
+      final mockCall = MockClientCall();
+      final trailersCompleter = Completer<Map<String, String>>();
+      final responseController = StreamController<String>();
+      when(mockCall.response).thenAnswer((_) => responseController.stream);
+      when(mockCall.headers)
+          .thenAnswer((_) => Future.value(<String, String>{}));
+      when(mockCall.trailers).thenAnswer((_) => trailersCompleter.future);
+      when(mockCall.cancel()).thenAnswer((_) async {
+        if (!trailersCompleter.isCompleted) {
+          trailersCompleter
+              .completeError(const GrpcError.cancelled('client cancelled'));
+        }
+        await responseController.close();
+      });
+
+      final stream = interceptor.interceptStreaming<String, String>(
+        method,
+        Stream.value('seed'),
+        CallOptions(),
+        (m, req, opts) => ResponseStream<String>(mockCall),
+      );
+
+      final received = <String>[];
+      final sub = stream.listen(received.add);
+      responseController.add('first');
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      await sub.cancel();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(received, ['first']);
+      expect(logs, hasLength(1));
+      expect(logs.single['responseCode'], 499);
+      expect(logs.single['errorDomain'], 'grpc');
+      expect(logs.single['errorCode'], StatusCode.cancelled);
+      expect(logs.single['errorName'], 'CANCELLED');
+    });
+
+    test('streaming onError surfaces headers in responseHeaders', () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final interceptor = LuciqGrpcInterceptor();
+      final mockCall = MockClientCall();
+      when(mockCall.response).thenAnswer(
+        (_) => Stream<String>.error(
+          const GrpcError.unavailable('boom'),
+        ),
+      );
+      when(mockCall.headers).thenAnswer(
+        (_) => Future.value(<String, String>{'x-server': 'edge-1'}),
+      );
+      when(mockCall.trailers).thenAnswer(
+        (_) => Future.error(const GrpcError.unavailable('boom')),
+      );
+      when(mockCall.cancel()).thenAnswer((_) => Future.value());
+
+      interceptor.interceptStreaming<String, String>(
+        method,
+        Stream.value('seed'),
+        CallOptions(),
+        (m, req, opts) => ResponseStream<String>(mockCall),
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final captured = await completer.future;
+      expect(captured['responseCode'], 503);
+      expect(
+        captured['responseHeaders'],
+        containsPair('x-server', 'edge-1'),
+      );
+    });
+
+    test('captures client-streaming request body and size', () async {
+      final completer = Completer<Map<String, dynamic>>();
+      when(mHost.networkLog(any)).thenAnswer((invocation) {
+        final data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        if (!completer.isCompleted) completer.complete(data);
+        return Future<void>.value();
+      });
+
+      final interceptor = LuciqGrpcInterceptor();
+      final mockCall = MockClientCall();
+      final requestsDrained = Completer<void>();
+      when(mockCall.response).thenAnswer(
+        (_) => Stream<String>.value('ack'),
+      );
+      when(mockCall.headers)
+          .thenAnswer((_) => Future.value(<String, String>{}));
+      // Real gRPC: trailers resolve only after both request and response
+      // streams have drained.
+      when(mockCall.trailers).thenAnswer((_) async {
+        await requestsDrained.future;
+        return <String, String>{'grpc-status': '0'};
+      });
+      when(mockCall.cancel()).thenAnswer((_) => Future.value());
+
+      final requestStream = Stream<String>.fromIterable(['m1', 'm2', 'm3']);
+
+      final stream = interceptor.interceptStreaming<String, String>(
+        method,
+        requestStream,
+        CallOptions(),
+        (m, req, opts) {
+          // Drain the request stream so reqCapture sees all elements,
+          // then signal completion so trailers can resolve.
+          req.listen(
+            (_) {},
+            onDone: requestsDrained.complete,
+          );
+          return ResponseStream<String>(mockCall);
+        },
+      );
+      await stream.toList();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final captured = await completer.future;
+      expect(captured['responseCode'], 200);
+      expect(captured['requestBody'], contains('m1'));
+      expect(captured['requestBody'], contains('m2'));
+      expect(captured['requestBody'], contains('m3'));
+      // 3 messages, each 2 bytes utf-8.
+      expect(captured['requestBodySize'], 6);
     });
   });
 }

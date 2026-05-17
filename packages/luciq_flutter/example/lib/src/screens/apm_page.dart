@@ -22,6 +22,18 @@ class _ApmPageState extends State<ApmPage> {
     );
   }
 
+  void _navigateToCustomSpans() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CustomSpansPage(),
+        settings: const RouteSettings(
+          name: CustomSpansPage.screenName,
+        ),
+      ),
+    );
+  }
+
   void _navigateToGrpc() {
     Navigator.push(
       context,
@@ -75,6 +87,15 @@ class _ApmPageState extends State<ApmPage> {
         const FlowsContent(),
         const SectionTitle('Custom UI Traces'),
         const UITracesContent(),
+        const SectionTitle('Custom Spans'),
+        SizedBox.fromSize(
+          size: const Size.fromHeight(12),
+        ),
+        LuciqButton(
+          text: 'Custom Spans',
+          onPressed: _navigateToCustomSpans,
+          symanticLabel: 'custom_spans',
+        ),
         const SectionTitle('Screen Loading'),
         SizedBox.fromSize(
           size: const Size.fromHeight(12),

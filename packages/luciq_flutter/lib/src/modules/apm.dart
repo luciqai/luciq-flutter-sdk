@@ -4,8 +4,10 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
+import 'package:luciq_flutter/src/models/custom_span.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/models/network_data.dart';
+import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
@@ -22,7 +24,58 @@ class APM {
   // ignore: use_setters_to_change_properties
   static void $setHostApi(ApmHostApi host) {
     _host = host;
+    // Also set the host for CustomSpanManager
+    CustomSpanManager.I.$setHostApi(host);
   }
+
+  // ============================================================
+  // Custom Spans - Public API (delegates to CustomSpanManager)
+  // ============================================================
+
+  /// Starts a custom span with the given [name] for performance tracking.
+  ///
+  /// The [name] must not be empty and will be trimmed to 150 characters if longer.
+  /// Multiple spans can be active concurrently with the same or different names.
+  ///
+  /// Returns a [CustomSpan] object that must be ended by calling its `end()` method,
+  /// or null if the feature is disabled or the name is invalid.
+  ///
+  /// Example:
+  /// ```dart
+  /// final span = await APM.startCustomSpan('Database Query');
+  /// // ... perform operation ...
+  /// await span?.end();
+  /// ```
+  static Future<CustomSpan?> startCustomSpan(String name) {
+    return CustomSpanManager.I.startCustomSpan(name);
+  }
+
+  /// Records a custom span that has already completed with specific start and end times.
+  ///
+  /// Use this API when you need to record a span retrospectively or when tracking
+  /// operations that occurred before SDK initialization.
+  ///
+  /// The [name] must not be empty and will be trimmed to 150 characters if longer.
+  /// The [startDate] must be before [endDate].
+  ///
+  /// Example:
+  /// ```dart
+  /// final start = DateTime.now();
+  /// // ... perform operation ...
+  /// final end = DateTime.now();
+  /// await APM.addCompletedCustomSpan('Cache Lookup', start, end);
+  /// ```
+  static Future<void> addCompletedCustomSpan(
+    String name,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    return CustomSpanManager.I.addCompletedCustomSpan(name, startDate, endDate);
+  }
+
+  // ============================================================
+  // APM Core Methods
+  // ============================================================
 
   /// Enables or disables APM feature.
   /// [boolean] isEnabled
@@ -73,6 +126,10 @@ class APM {
     return _host.setColdAppLaunchEnabled(isEnabled);
   }
 
+  // ============================================================
+  // App Flows
+  // ============================================================
+
   /// Starts an AppFlow with the given [name].
   ///
   /// The [name] must not be an empty string. It should be unique and not exceed 150 characters,
@@ -115,6 +172,10 @@ class APM {
   static Future<void> endFlow(String name) async {
     return _host.endFlow(name);
   }
+
+  // ============================================================
+  // UI Traces
+  // ============================================================
 
   /// Sets whether auto UI trace is enabled or not.
   ///
@@ -178,6 +239,10 @@ class APM {
     return _host.endUITrace();
   }
 
+  // ============================================================
+  // App Launch
+  // ============================================================
+
   /// Defines when an app launch is complete,
   /// such as when it's intractable, use the end app launch API.
   /// You can then view this data with the automatic cold and hot app launches.
@@ -187,6 +252,10 @@ class APM {
   static Future<void> endAppLaunch() async {
     return _host.endAppLaunch();
   }
+
+  // ============================================================
+  // Network Logging
+  // ============================================================
 
   /// Logs network data for Luciq Android SDK if the app is running on an
   /// Android platform.
@@ -202,6 +271,10 @@ class APM {
       return _host.networkLogAndroid(data.toJson());
     }
   }
+
+  // ============================================================
+  // Internal CP (Cross-Platform) UI Trace Methods
+  // ============================================================
 
   /// Logs a message and then starts a UI trace with the provided screen
   /// name, start time, and trace ID.
@@ -232,6 +305,10 @@ class APM {
     return _host.startCpUiTrace(screenName, startTimeInMicroseconds, traceId);
   }
 
+  // ============================================================
+  // Screen Loading Methods
+  // ============================================================
+
   /// Reports screen loading trace with specific details.
   ///
   /// Args:
@@ -261,6 +338,38 @@ class APM {
       startTimeInMicroseconds,
       durationInMicroseconds,
       uiTraceId,
+    );
+  }
+
+  /// Reports manual screen loading trace with specific details.
+  ///
+  /// Args:
+  ///   screenName (String): The [screenName] parameter represents the identifier of the screen or
+  /// page where the manual screen loading is being reported. It helps in identifying and tracking the performance of
+  /// that specific screen within the application.
+  ///   startTimeInMicroseconds (int): The [startTimeInMicroseconds] parameter represents the time when
+  /// the manual screen loading operation started, measured in microseconds.
+  ///   durationInMicroseconds (int): The [durationInMicroseconds] parameter represents the duration of
+  /// the manual screen loading process in microseconds. It indicates the time taken for the screen to load
+  /// completely from the start time specified by [startTimeInMicroseconds]. This parameter helps in
+  /// measuring and analyzing the performance of the manual screen loading operation.
+  ///
+  /// Returns:
+  ///   The method is returning a `Future<void>`.
+  @internal
+  static Future<void> reportManualScreenLoadingCP(
+    String screenName,
+    int startTimeInMicroseconds,
+    int durationInMicroseconds,
+  ) {
+    LuciqLogger.I.d(
+      'Reporting manual screen loading trace — screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
+      tag: APM.tag,
+    );
+    return _host.reportManualScreenLoadingCP(
+      screenName,
+      startTimeInMicroseconds,
+      durationInMicroseconds,
     );
   }
 
@@ -335,6 +444,10 @@ class APM {
     return _host.isAutoUiTraceEnabled();
   }
 
+  // ============================================================
+  // Screen Rendering Methods
+  // ============================================================
+
   /// Returns a Future<bool> indicating whether the screen
   /// render is enabled.
   ///
@@ -343,6 +456,16 @@ class APM {
   @internal
   static Future<bool> isScreenRenderEnabled() async {
     return _host.isScreenRenderEnabled();
+  }
+
+  /// Returns a Future<bool> indicating whether the custom
+  /// span is enabled.
+  ///
+  /// Returns:
+  ///   A Future<bool> is being returned.
+  @internal
+  static Future<bool> isCustomSpanEnabled() async {
+    return _host.isCustomSpanEnabled();
   }
 
   /// Retrieve the device refresh rate from native side .

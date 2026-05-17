@@ -140,7 +140,13 @@ NSMutableDictionary *traces;
     [LCQAPM reportScreenLoadingCPWithStartTimestampMUS:startTimeStampMicroMUS durationMUS:durationMUS];
 }
 
-// This method i/Users/ahmedalaa-Luciq/projects/Luciq-Flutter/packages/luciq_flutter/ios/Classes/Modules/ApmApi.ms responsible for extend the end time if the screen loading custom
+- (void)reportManualScreenLoadingCPScreenName:(nonnull NSString *)screenName startTimeStampMicro:(nonnull NSNumber *)startTimeStampMicro durationMicro:(nonnull NSNumber *)durationMicro error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    NSTimeInterval startTimeStampMicroMUS = [startTimeStampMicro doubleValue];
+    NSTimeInterval durationMUS = [durationMicro doubleValue];
+    [LCQAPM reportScreenLoadingCPUITraceWithName:screenName screenLoadingStartMUS:startTimeStampMicroMUS screenLoadingDurationMUS:durationMUS stages:nil];
+}
+
+// This method is responsible for extend the end time if the screen loading custom
 // trace. It takes two parameters:
 // 1. `timeStampMicro`: A number representing the timestamp in microseconds when the screen loading
 // custom trace is ending.
@@ -162,6 +168,13 @@ NSMutableDictionary *traces;
 - (void)isScreenRenderEnabledWithCompletion:(void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion{
     BOOL isScreenRenderEnabled = LCQAPM.isScreenRenderingOperational;
     NSNumber *isEnabledNumber = @(isScreenRenderEnabled);
+    completion(isEnabledNumber, nil);
+}
+
+
+- (void)isCustomSpanEnabledWithCompletion:(void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion{
+    BOOL isCustomSpanEnabled = LCQAPM.customSpansEnabled;
+    NSNumber *isEnabledNumber = @(isCustomSpanEnabled);
     completion(isEnabledNumber, nil);
 }
 
@@ -222,6 +235,32 @@ NSMutableDictionary *traces;
     BOOL isAutoUiTraceIsEnabled = LCQAPM.autoUITraceEnabled && LCQAPM.enabled;
     NSNumber *isEnabledNumber = @(isAutoUiTraceIsEnabled);
     completion(isEnabledNumber, nil);
+}
+
+- (void)syncCustomSpanName:(NSString *)name
+           startTimestamp:(NSNumber *)startTimestamp
+             endTimestamp:(NSNumber *)endTimestamp
+                    error:(FlutterError *_Nullable *_Nonnull)error
+{
+    @try {
+      
+
+        // Convert NSNumber (μs) → NSTimeInterval (seconds)
+        NSTimeInterval startSeconds = startTimestamp.doubleValue / 1e6;
+        NSTimeInterval endSeconds   = endTimestamp.doubleValue / 1e6;
+
+
+        NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:startSeconds];
+        NSDate *endDate   = [NSDate dateWithTimeIntervalSince1970:endSeconds];
+
+        // Send span to native APM SDK
+        [LCQAPM addCompletedCustomSpanWithName:name
+                                     startDate:startDate
+                                       endDate:endDate];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"[CustomSpan] Error checking APM enabled: %@", exception);
+    }
 }
 
 

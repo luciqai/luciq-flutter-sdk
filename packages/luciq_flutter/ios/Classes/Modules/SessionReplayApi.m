@@ -1,5 +1,6 @@
-#import "LuciqSDK/LuciqSDK.h"
-#import "LuciqSDK/LCQSessionReplay.h"
+#import <Flutter/Flutter.h>
+#import <LuciqSDK/LuciqSDK.h>
+#import <LuciqSDK/LCQSessionReplay.h>
 #import "SessionReplayApi.h"
 #import "ArgsRegistry.h"
 
@@ -9,7 +10,6 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 @implementation SessionReplayApi
-
 
 - (void)setEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     LCQSessionReplay.enabled = [isEnabled boolValue];
@@ -28,10 +28,28 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)getSessionReplayLinkWithCompletion:(void (^)(NSString *, FlutterError *))completion {
-   NSString * link= LCQSessionReplay.sessionReplayLink;
-   completion(link,nil);
-
+    NSString *link = LCQSessionReplay.sessionReplayLink;
+    completion(link, nil);
 }
 
+- (void)setScreenshotCapturingModeMode:(NSString *)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    LCQScreenshotCapturingMode nativeMode = (ArgsRegistry.screenshotCapturingModes[mode]).integerValue;
+    LCQSessionReplay.screenshotCapturingMode = nativeMode;
+}
+
+- (void)setScreenshotCaptureIntervalIntervalMs:(nonnull NSNumber *)intervalMs error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    if ([intervalMs integerValue] < 500) {
+        *error = [FlutterError errorWithCode:@"INVALID_CAPTURE_INTERVAL"
+                                     message:@"intervalMs must be >= 500 on iOS"
+                                     details:intervalMs];
+        return;
+    }
+    LCQSessionReplay.screenshotCaptureInterval = [intervalMs integerValue];
+}
+
+- (void)setScreenshotQualityModeMode:(NSString *)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    LCQScreenshotQualityMode nativeMode = (ArgsRegistry.screenshotQualityModes[mode]).integerValue;
+    LCQSessionReplay.screenshotQualityMode = nativeMode;
+}
 
 @end

@@ -140,6 +140,20 @@ commands:
                       name: Build Pigeons
                       command: dart run build_runner build --delete-conflicting-outputs
 
+  generate_luciq_github_app_token:
+    parameters:
+      script-path:
+        type: string
+        default: scripts/get-github-app-token.sh
+    steps:
+      - run:
+          name: Generate Luciq GitHub App Token
+          command: |
+            TOKEN=$(bash << parameters.script-path >> LUCIQ_APP_ID LUCIQ_PRIVATE_KEY LUCIQ_INSTALLATION_ID)
+            echo "export GH_TOKEN='$TOKEN'" >> "$BASH_ENV"
+            echo "export DANGER_GITHUB_API_TOKEN='$TOKEN'" >> "$BASH_ENV"
+            echo "export RELEASE_GITHUB_TOKEN='$TOKEN'" >> "$BASH_ENV"
+
   notify_slack_with_release:
     parameters:
       channel:
@@ -187,6 +201,7 @@ jobs:
           override-ci-command: yarn install --frozen-lockfile --network-concurrency 1
       - attach_workspace:
           at: ~/project
+      - generate_luciq_github_app_token
       - run:
           name: Run Danger
           command: yarn danger ci
@@ -485,6 +500,7 @@ jobs:
           command: |
             swift build -c release
             cp -f .build/release/Escape /usr/local/bin/escape
+      - generate_luciq_github_app_token
       - run:
           name: Publish Package
           working_directory: packages/luciq_flutter

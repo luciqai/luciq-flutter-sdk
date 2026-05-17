@@ -23,6 +23,15 @@
 + (void)reportScreenLoadingCPWithStartTimestampMUS:(LCQMicroSecondsTimeInterval)startTimestampMUS
                                        durationMUS:(LCQMicroSecondsTimeInterval)durationMUS;
 
++ (void)reportManualScreenLoadingCPWithScreenName:(NSString *)screenName
+                                 startTimestampMUS:(LCQMicroSecondsTimeInterval)startTimestampMUS
+                                       durationMUS:(LCQMicroSecondsTimeInterval)durationMUS;
+
++ (void)reportScreenLoadingCPUITraceWithName:(NSString *)name
+                       screenLoadingStartMUS:(LCQMicroSecondsTimeInterval)screenLoadingStartMUS
+                    screenLoadingDurationMUS:(LCQMicroSecondsTimeInterval)screenLoadingDurationMUS
+                                      stages:(nullable NSDictionary<NSString *, NSNumber *> *)stages;
+
 + (void)endScreenLoadingCPWithEndTimestampMUS:(LCQMicroSecondsTimeInterval)endTimestampMUS;
 
 + (BOOL)isScreenRenderingOperational;
@@ -32,5 +41,7 @@
 + (void)endCustomUITraceCPWithFrames:(nullable NSArray<LCQFrameInfo *> *)frames;
 
 + (double)screenRenderingThreshold;
+
++ (BOOL)customSpansEnabled;
 
 @end

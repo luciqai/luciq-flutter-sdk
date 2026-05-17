@@ -61,7 +61,6 @@ android/gradlew.bat
 **/ios/**/DerivedData/
 **/ios/**/Icon?
 **/ios/**/Pods/
-**/ios/**/Pods/
 
 **/ios/**/.symlinks/
 **/ios/**/profile
@@ -73,10 +72,16 @@ android/gradlew.bat
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
+**/ios/Flutter/ephemeral/
 **/ios/Flutter/flutter_assets/
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+
+# Swift Package Manager (Flutter plugin SPM mirror + build artifacts)
+packages/luciq_flutter/ios/luciq_flutter/
+**/.build/
+**/.swiftpm/
 
 # Project specific
 /PRDs/

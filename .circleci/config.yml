@@ -22,6 +22,9 @@ commands:
       use_melos:
         type: boolean
         default: true
+      install_pub:
+        type: boolean
+        default: true
       working_dir:
         type: string
         default: "~/project"
@@ -31,6 +34,7 @@ commands:
       - install_flutter_and_dart_packages:
           generate_pigeons: true
           use_melos: <<parameters.use_melos>>
+          install_pub: <<parameters.install_pub>>
           working_dir: <<parameters.working_dir>>
   setup_ios:
     steps:
@@ -65,11 +69,17 @@ commands:
       use_melos:
         type: boolean
         default: true
+      install_pub:
+        type: boolean
+        default: true
       working_dir:
         type: string
     steps:
-      - flutter/install_pub:
-          app-dir: <<parameters.working_dir>>
+      - when:
+          condition: <<parameters.install_pub>>
+          steps:
+            - flutter/install_pub:
+                app-dir: <<parameters.working_dir>>
       - when:
           condition:
             equal:
@@ -223,6 +233,7 @@ jobs:
       - setup_flutter:
           version: <<parameters.version>>
           use_melos: false
+          install_pub: false
           working_dir: <<parameters.app-dir>>
       - run: flutter test
 

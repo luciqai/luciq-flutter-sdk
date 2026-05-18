@@ -27,4 +27,8 @@ final appRoutes = {
       const ScreenCapturePrematureExtensionPage(),
   WebViewGoogleFullscreenPage.screenName: (BuildContext context) =>
       const WebViewGoogleFullscreenPage(),
+  ScreenLoadingTabPage.screenName: (BuildContext context) =>
+      const ScreenLoadingTabPage(),
+  ScreenLoadingDelayedPage.screenName: (BuildContext context) =>
+      const ScreenLoadingDelayedPage(),
 };

@@ -411,9 +411,9 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     public void reportScreenChange(@NonNull String screenName) {
         try {
             Method method = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportScreenChange",
-                    Bitmap.class, String.class);
+                    Bitmap.class, String.class, Long.class);
             if (method != null) {
-                method.invoke(null, null, screenName);
+                method.invoke(null, null, screenName, null);
             }
             Method reportView = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportCurrentViewChange",
                     String.class);

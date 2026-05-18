@@ -50,11 +50,11 @@ public class GlobalMocks {
         // Reflection mock
         reflection = mockStatic(Reflection.class);
         reflected = mockStatic(MockReflected.class);
-        Method mReportScreenChange = MockReflected.class.getDeclaredMethod("reportScreenChange", Bitmap.class, String.class);
+        Method mReportScreenChange = MockReflected.class.getDeclaredMethod("reportScreenChange", Bitmap.class, String.class, Long.class);
         mReportScreenChange.setAccessible(true);
         reflection
                 .when(() -> Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportScreenChange",
-                        Bitmap.class, String.class))
+                        Bitmap.class, String.class, Long.class))
                 .thenReturn(mReportScreenChange);
 
         Method mReportCurrentViewChange= MockReflected.class.getDeclaredMethod("reportCurrentViewChange", String.class);

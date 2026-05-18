@@ -14,17 +14,6 @@ class WebViewGoogleFullscreenPage extends StatefulWidget {
 
 class _WebViewGoogleFullscreenPageState
     extends State<WebViewGoogleFullscreenPage> {
-  late final WebViewController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
-      ..loadRequest(Uri.parse('https://www.google.com'));
-  }
-
   void _showSnack(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -123,9 +112,10 @@ class _WebViewGoogleFullscreenPageState
           ),
         ],
       ),
-      body: WebViewWidget(
+      body: const WebView(
         key: const ValueKey('luciq_webview_google_fullscreen'),
-        controller: _controller,
+        initialUrl: 'https://www.google.com',
+        javascriptMode: JavascriptMode.unrestricted,
       ),
     );
   }

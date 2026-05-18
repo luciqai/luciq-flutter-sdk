@@ -137,7 +137,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
         final Callable<Bitmap> screenshotProvider = new Callable<Bitmap>() {
             @Override
             public Bitmap call() {
-                return takeScreenshot(renderer, windowPixelCopyCaptureManager);
+                return takeScreenshot(renderer);
             }
         };
 
@@ -164,14 +164,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
     }
 
     @Nullable
-    private static Bitmap takeScreenshot(FlutterRenderer renderer, WindowPixelCopyCaptureManager windowCaptureManager) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Bitmap windowBitmap = windowCaptureManager.captureSync(activity);
-            if (windowBitmap != null && !WindowPixelCopyCaptureManager.isMostlyBlack(windowBitmap)) {
-                return windowBitmap;
-            }
-        }
-
+    private static Bitmap takeScreenshot(FlutterRenderer renderer) {
         try {
             final View view = activity.getWindow().getDecorView().getRootView();
 

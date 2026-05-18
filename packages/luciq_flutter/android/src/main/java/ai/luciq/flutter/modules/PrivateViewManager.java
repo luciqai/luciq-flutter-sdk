@@ -13,7 +13,6 @@ import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.model.ScreenshotResult;
 import ai.luciq.flutter.modules.capturing.CaptureManager;
 import ai.luciq.flutter.modules.capturing.ScreenshotResultCallback;
-import ai.luciq.flutter.modules.capturing.WindowPixelCopyCaptureManager;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
 
@@ -105,12 +104,7 @@ public class PrivateViewManager {
                     windowPixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
                         @Override
                         public void onScreenshotResult(ScreenshotResult result) {
-                            if (WindowPixelCopyCaptureManager.isMostlyBlack(result.getScreenshot())) {
-                                pixelCopyScreenshotCaptor.capture(activity, pixelCopyScreenshotResult);
-                                return;
-                            }
                             processScreenshot(result, privateViews, latch, capturingCallback);
-
                         }
 
                         @Override

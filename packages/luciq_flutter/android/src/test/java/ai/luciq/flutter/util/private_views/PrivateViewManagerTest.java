@@ -150,22 +150,6 @@ public class PrivateViewManagerTest {
     }
 
     @Test
-    public void testMaskShouldFallbackToFlutterSurfacePixelCopyWhenWindowPixelCopyIsBlack() {
-        ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback capturingCallbackMock = mock(ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback.class);
-        mockSuccessfulCapture(
-                windowPixelCopyScreenCaptor,
-                Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888)
-        );
-
-        privateViewManager.mask(capturingCallbackMock);
-        shadowOf(Looper.getMainLooper()).idle();
-
-        verify(windowPixelCopyScreenCaptor).capture(any(), any());
-        verify(pixelCopyScreenCaptor).capture(any(), any());
-        verify(boundryScreenCaptor, never()).capture(any(), any());
-    }
-
-    @Test
     public void testMaskShouldFallbackToBoundryCaptureWhenPixelCopyFails() {
         ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback capturingCallbackMock = mock(ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback.class);
         mockFailedCapture(windowPixelCopyScreenCaptor);

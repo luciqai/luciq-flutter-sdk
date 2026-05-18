@@ -1,7 +1,5 @@
 package ai.luciq.flutter.util.private_views;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -10,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.os.Looper;
 import android.view.View;
 
@@ -37,7 +34,7 @@ public class WindowPixelCopyCaptureManagerTest {
     @Before
     public void setUp() {
         activity = Robolectric.buildActivity(Activity.class).setup().create().start().resume().get();
-        captureManager = new WindowPixelCopyCaptureManager(false);
+        captureManager = new WindowPixelCopyCaptureManager();
     }
 
     @Test
@@ -61,7 +58,7 @@ public class WindowPixelCopyCaptureManagerTest {
     }
 
     @Test
-    public void testCaptureWithWindowPixelCopy() {
+    public void testCaptureRejectsMostlyBlackWindowCopy() {
         try (MockedStatic<MemoryUtils> mockedStatic = mockStatic(MemoryUtils.class)) {
             mockedStatic.when(() -> MemoryUtils.getFreeMemory(any())).thenReturn(Long.MAX_VALUE);
             ScreenshotResultCallback mockScreenshotResultCallback = mock(ScreenshotResultCallback.class);
@@ -71,27 +68,7 @@ public class WindowPixelCopyCaptureManagerTest {
             captureManager.capture(activity, mockScreenshotResultCallback);
             shadowOf(Looper.getMainLooper()).idle();
 
-            verify(mockScreenshotResultCallback, timeout(1000)).onScreenshotResult(any(ScreenshotResult.class));
-        }
-    }
-
-    @Test
-    public void testCaptureSyncWithWindowPixelCopyGivenEmptyActivity() {
-        Bitmap bitmap = ((WindowPixelCopyCaptureManager) captureManager).captureSync(null);
-
-        assertNull(bitmap);
-    }
-
-    @Test
-    public void testCaptureSyncWithWindowPixelCopy() {
-        try (MockedStatic<MemoryUtils> mockedStatic = mockStatic(MemoryUtils.class)) {
-            mockedStatic.when(() -> MemoryUtils.getFreeMemory(any())).thenReturn(Long.MAX_VALUE);
-            View rootView = activity.getWindow().getDecorView().getRootView();
-            rootView.layout(0, 0, 100, 100);
-
-            Bitmap bitmap = ((WindowPixelCopyCaptureManager) captureManager).captureSync(activity);
-
-            assertNotNull(bitmap);
+            verify(mockScreenshotResultCallback, timeout(1000)).onError();
         }
     }
 }

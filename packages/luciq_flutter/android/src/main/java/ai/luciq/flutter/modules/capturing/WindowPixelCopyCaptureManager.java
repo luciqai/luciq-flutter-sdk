@@ -4,85 +4,25 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.PixelCopy;
 import android.view.View;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import ai.luciq.flutter.model.ScreenshotResult;
-import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.util.memory.MemoryUtils;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterView;
 
 public class WindowPixelCopyCaptureManager implements CaptureManager {
-    private static final String THREAD_NAME = "LCQ-Window-PixelCopy";
-    private static final long CAPTURE_TIMEOUT_MS = 1000;
-    private final boolean rejectMostlyBlackCaptures;
-
-    public WindowPixelCopyCaptureManager() {
-        this(true);
-    }
-
-    public WindowPixelCopyCaptureManager(boolean rejectMostlyBlackCaptures) {
-        this.rejectMostlyBlackCaptures = rejectMostlyBlackCaptures;
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void capture(Activity activity, ScreenshotResultCallback screenshotResultCallback) {
         requestWindowCopy(activity, new Handler(Looper.getMainLooper()), screenshotResultCallback);
-    }
-
-    @Nullable
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public Bitmap captureSync(Activity activity) {
-        HandlerThread handlerThread = new HandlerThread(THREAD_NAME);
-        handlerThread.start();
-
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<Bitmap> bitmap = new AtomicReference<>();
-        Handler callbackHandler = new Handler(handlerThread.getLooper());
-
-        Runnable captureRequest = () -> requestWindowCopy(activity, callbackHandler, new ScreenshotResultCallback() {
-            @Override
-            public void onScreenshotResult(ScreenshotResult screenshotResult) {
-                bitmap.set(screenshotResult.getScreenshot());
-                latch.countDown();
-            }
-
-            @Override
-            public void onError() {
-                latch.countDown();
-            }
-        });
-
-        try {
-            if (Looper.myLooper() == Looper.getMainLooper()) {
-                captureRequest.run();
-            } else {
-                ThreadManager.runOnMainThread(captureRequest);
-            }
-
-            latch.await(CAPTURE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            Bitmap result = bitmap.get();
-            return rejectMostlyBlackCaptures && isMostlyBlack(result) ? null : result;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-        } finally {
-            handlerThread.quitSafely();
-        }
     }
 
     private void requestWindowCopy(Activity activity, Handler callbackHandler, ScreenshotResultCallback screenshotResultCallback) {
@@ -101,7 +41,7 @@ public class WindowPixelCopyCaptureManager implements CaptureManager {
 
             PixelCopy.request(activity.getWindow(), null, bitmap, copyResult -> {
                 if (copyResult == PixelCopy.SUCCESS) {
-                    if (rejectMostlyBlackCaptures && isMostlyBlack(bitmap)) {
+                    if (isMostlyBlack(bitmap)) {
                         screenshotResultCallback.onError();
                         return;
                     }
@@ -158,7 +98,7 @@ public class WindowPixelCopyCaptureManager implements CaptureManager {
         return flutterViewInActivity != null ? flutterViewInActivity : flutterViewInFragment;
     }
 
-    public static boolean isMostlyBlack(Bitmap bitmap) {
+    private static boolean isMostlyBlack(Bitmap bitmap) {
         if (bitmap == null || bitmap.getWidth() <= 0 || bitmap.getHeight() <= 0) {
             return true;
         }

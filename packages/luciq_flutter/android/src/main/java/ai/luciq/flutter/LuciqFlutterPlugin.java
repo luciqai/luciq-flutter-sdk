@@ -30,6 +30,7 @@ import ai.luciq.flutter.modules.SessionReplayApi;
 import ai.luciq.flutter.modules.SurveysApi;
 import ai.luciq.flutter.modules.capturing.BoundryCaptureManager;
 import ai.luciq.flutter.modules.capturing.PixelCopyCaptureManager;
+import ai.luciq.flutter.modules.capturing.WindowPixelCopyCaptureManager;
 
 import java.util.concurrent.Callable;
 
@@ -50,6 +51,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
     private Lifecycle lifecycle;
 
     private static PrivateViewManager privateViewManager;
+    private static final WindowPixelCopyCaptureManager windowPixelCopyCaptureManager = new WindowPixelCopyCaptureManager();
 
 
 
@@ -135,11 +137,11 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
         final Callable<Bitmap> screenshotProvider = new Callable<Bitmap>() {
             @Override
             public Bitmap call() {
-                return takeScreenshot(renderer);
+                return takeScreenshot(renderer, windowPixelCopyCaptureManager);
             }
         };
 
-        privateViewManager = new PrivateViewManager(new LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi(messenger), new PixelCopyCaptureManager(), new BoundryCaptureManager(renderer));
+        privateViewManager = new PrivateViewManager(new LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi(messenger), windowPixelCopyCaptureManager, new PixelCopyCaptureManager(), new BoundryCaptureManager(renderer));
         LuciqPrivateView.init(messenger, privateViewManager);
 
         Callable<Float> refreshRateProvider = new Callable<Float>() {
@@ -162,7 +164,14 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
     }
 
     @Nullable
-    private static Bitmap takeScreenshot(FlutterRenderer renderer) {
+    private static Bitmap takeScreenshot(FlutterRenderer renderer, WindowPixelCopyCaptureManager windowCaptureManager) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Bitmap windowBitmap = windowCaptureManager.captureSync(activity);
+            if (windowBitmap != null && !WindowPixelCopyCaptureManager.isMostlyBlack(windowBitmap)) {
+                return windowBitmap;
+            }
+        }
+
         try {
             final View view = activity.getWindow().getDecorView().getRootView();
 

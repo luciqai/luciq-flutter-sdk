@@ -12,7 +12,6 @@ import 'package:luciq_flutter_example/src/app_routes.dart';
 import 'package:luciq_flutter_example/src/native/luciq_flutter_example_method_channel.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_handler_provider.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';
-import 'package:luciq_flutter_example/src/screens/webview_google_fullscreen_page.dart';
 import 'package:luciq_flutter_example/src/utils/widget_ext.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_button.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_clipboard_input.dart';

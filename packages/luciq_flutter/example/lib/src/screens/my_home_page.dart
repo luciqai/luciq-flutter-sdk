@@ -176,10 +176,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _navigateToWebViewGoogleFullscreen() {
-    Navigator.pushNamed(context, WebViewGoogleFullscreenPage.screenName);
-  }
-
   final _formUserAttributeKey = GlobalKey<FormState>();
 
   @override
@@ -358,11 +354,6 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: _navigateToSessionReplay,
           text: 'Session Replay',
           symanticLabel: 'open_session_replay_page',
-        ),
-        LuciqButton(
-          onPressed: _navigateToWebViewGoogleFullscreen,
-          text: 'WebView (Google, full-screen)',
-          symanticLabel: 'open_webview_google_fullscreen_page',
         ),
         const SectionTitle('Sessions Replay'),
         LuciqButton(

@@ -58,7 +58,7 @@ public class WindowPixelCopyCaptureManagerTest {
     }
 
     @Test
-    public void testCaptureRejectsMostlyBlackWindowCopy() {
+    public void testCaptureRejectsInvalidWindowCopy() {
         try (MockedStatic<MemoryUtils> mockedStatic = mockStatic(MemoryUtils.class)) {
             mockedStatic.when(() -> MemoryUtils.getFreeMemory(any())).thenReturn(Long.MAX_VALUE);
             ScreenshotResultCallback mockScreenshotResultCallback = mock(ScreenshotResultCallback.class);

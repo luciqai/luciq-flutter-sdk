@@ -22,26 +22,23 @@ public class WindowPixelCopyCaptureManager implements CaptureManager {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void capture(Activity activity, ScreenshotResultCallback screenshotResultCallback) {
-        requestWindowCopy(activity, new Handler(Looper.getMainLooper()), screenshotResultCallback);
-    }
+        if (activity == null || activity.getWindow() == null) {
+            screenshotResultCallback.onError();
+            return;
+        }
 
-    private void requestWindowCopy(Activity activity, Handler callbackHandler, ScreenshotResultCallback screenshotResultCallback) {
+        View rootView = activity.getWindow().getDecorView().getRootView();
+        Bitmap bitmap = createBitmapFromWindow(rootView);
+
+        if (bitmap == null) {
+            screenshotResultCallback.onError();
+            return;
+        }
+
         try {
-            if (activity == null || activity.getWindow() == null) {
-                screenshotResultCallback.onError();
-                return;
-            }
-
-            View rootView = activity.getWindow().getDecorView().getRootView();
-            Bitmap bitmap = createBitmapFromView(rootView);
-            if (bitmap == null) {
-                screenshotResultCallback.onError();
-                return;
-            }
-
             PixelCopy.request(activity.getWindow(), null, bitmap, copyResult -> {
                 if (copyResult == PixelCopy.SUCCESS) {
-                    if (isMostlyBlack(bitmap)) {
+                    if (isInvalidWindowCapture(bitmap)) {
                         screenshotResultCallback.onError();
                         return;
                     }
@@ -51,13 +48,13 @@ public class WindowPixelCopyCaptureManager implements CaptureManager {
                 } else {
                     screenshotResultCallback.onError();
                 }
-            }, callbackHandler);
+            }, new Handler(Looper.getMainLooper()));
         } catch (Exception e) {
             screenshotResultCallback.onError();
         }
     }
 
-    private Bitmap createBitmapFromView(View view) {
+    private Bitmap createBitmapFromWindow(View view) {
         int width = view.getWidth();
         int height = view.getHeight();
 
@@ -65,14 +62,20 @@ public class WindowPixelCopyCaptureManager implements CaptureManager {
             return null;
         }
 
+        Bitmap bitmap;
         try {
             if (((long) width * height * 4) < MemoryUtils.getFreeMemory(view.getContext())) {
-                return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                // ARGB_8888 stores each pixel in 4 bytes
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            } else {
+                // RGB_565 stores each pixel in 2 bytes
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
             }
-            return Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
         } catch (IllegalArgumentException | OutOfMemoryError e) {
-            return Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
         }
+
+        return bitmap;
     }
 
     private float[] getFlutterViewOffset(Activity activity, View rootView, float pixelRatio) {
@@ -98,30 +101,36 @@ public class WindowPixelCopyCaptureManager implements CaptureManager {
         return flutterViewInActivity != null ? flutterViewInActivity : flutterViewInFragment;
     }
 
-    private static boolean isMostlyBlack(Bitmap bitmap) {
+    private static boolean isInvalidWindowCapture(Bitmap bitmap) {
         if (bitmap == null || bitmap.getWidth() <= 0 || bitmap.getHeight() <= 0) {
             return true;
         }
 
+        return hasInsufficientPixelData(bitmap);
+    }
+
+    private static boolean hasInsufficientPixelData(Bitmap bitmap) {
         int samples = 0;
-        int blackSamples = 0;
-        int stepX = Math.max(1, bitmap.getWidth() / 10);
-        int stepY = Math.max(1, bitmap.getHeight() / 10);
+        int emptySamples = 0;
+        int sampleStepX = Math.max(1, bitmap.getWidth() / 10);
+        int sampleStepY = Math.max(1, bitmap.getHeight() / 10);
 
-        for (int y = 0; y < bitmap.getHeight(); y += stepY) {
-            for (int x = 0; x < bitmap.getWidth(); x += stepX) {
-                int pixel = bitmap.getPixel(x, y);
-                int red = (pixel >> 16) & 0xff;
-                int green = (pixel >> 8) & 0xff;
-                int blue = pixel & 0xff;
-
-                samples++;
-                if (red <= 8 && green <= 8 && blue <= 8) {
-                    blackSamples++;
+        for (int y = 0; y < bitmap.getHeight(); y += sampleStepY) {
+            for (int x = 0; x < bitmap.getWidth(); x += sampleStepX) {
+                if (isEmptyPixel(bitmap.getPixel(x, y))) {
+                    emptySamples++;
                 }
+                samples++;
             }
         }
 
-        return samples > 0 && blackSamples >= samples * 0.98f;
+        return samples > 0 && emptySamples >= samples * 0.98f;
+    }
+
+    private static boolean isEmptyPixel(int pixel) {
+        int red = (pixel >> 16) & 0xff;
+        int green = (pixel >> 8) & 0xff;
+        int blue = pixel & 0xff;
+        return red <= 8 && green <= 8 && blue <= 8;
     }
 }

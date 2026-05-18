@@ -22,9 +22,6 @@ commands:
       use_melos:
         type: boolean
         default: true
-      remove_patrol:
-        type: boolean
-        default: false
       working_dir:
         type: string
         default: "~/project"
@@ -34,7 +31,6 @@ commands:
       - install_flutter_and_dart_packages:
           generate_pigeons: true
           use_melos: <<parameters.use_melos>>
-          remove_patrol: <<parameters.remove_patrol>>
           working_dir: <<parameters.working_dir>>
   setup_ios:
     steps:
@@ -66,24 +62,12 @@ commands:
     parameters:
       generate_pigeons:
         type: boolean
-      remove_patrol:
-        type: boolean
-        default: false
       use_melos:
         type: boolean
         default: true
       working_dir:
         type: string
     steps:
-      - when:
-          condition:
-            equal:
-              - <<parameters.remove_patrol>>
-              - true
-          steps:
-            - run:
-                name: remove Patrol
-                command: cd example && dart pub remove patrol
       - flutter/install_pub:
           app-dir: <<parameters.working_dir>>
       - when:
@@ -239,7 +223,6 @@ jobs:
       - setup_flutter:
           version: <<parameters.version>>
           use_melos: false
-          remove_patrol: true
           working_dir: <<parameters.app-dir>>
       - run: flutter test
 

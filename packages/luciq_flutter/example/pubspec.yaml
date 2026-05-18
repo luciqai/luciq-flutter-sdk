@@ -31,7 +31,7 @@ dependencies:
   file_picker: <10.0.0
   provider:
   video_player:
-  webview_flutter: 3.0.4
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_driver:

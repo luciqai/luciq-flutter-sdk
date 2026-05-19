@@ -6,15 +6,11 @@ import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:grpc/grpc.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter_example/src/app_routes.dart';
 import 'package:luciq_flutter_example/src/native/luciq_flutter_example_method_channel.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_handler_provider.dart';
 import 'package:luciq_flutter_example/src/screens/callback/callback_page.dart';
-import 'package:luciq_flutter_example/src/screens/grpc/echo_client.dart';
-import 'package:luciq_flutter_example/src/screens/grpc/echo_server.dart';
 import 'package:luciq_flutter_example/src/utils/show_messages.dart';
 import 'package:luciq_flutter_example/src/utils/widget_ext.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_button.dart';
@@ -22,8 +18,6 @@ import 'package:luciq_flutter_example/src/widget/luciq_clipboard_input.dart';
 import 'package:luciq_flutter_example/src/widget/luciq_text_field.dart';
 import 'package:luciq_flutter_example/src/widget/nested_view.dart';
 import 'package:luciq_flutter_example/src/widget/section_title.dart';
-import 'package:luciq_gql_link/luciq_gql_link.dart';
-import 'package:luciq_grpc_interceptor/luciq_grpc_interceptor.dart';
 import 'package:luciq_http_client/luciq_http_client.dart';
 import 'package:provider/provider.dart';
 
@@ -43,16 +37,14 @@ part 'src/screens/bug_reporting.dart';
 part 'src/screens/complex_page.dart';
 part 'src/screens/core_page.dart';
 part 'src/screens/crashes_page.dart';
-part 'src/screens/graphql_page.dart';
-part 'src/screens/grpc_page.dart';
+part 'src/screens/custom_spans_page.dart';
 part 'src/screens/my_home_page.dart';
 part 'src/screens/screen_capture_premature_extension_page.dart';
+part 'src/screens/screen_loading/screen_loading_delayed_page.dart';
 part 'src/screens/screen_loading/screen_loading_page.dart';
 part 'src/screens/screen_loading/screen_loading_tab_page.dart';
-part 'src/screens/screen_loading/screen_loading_delayed_page.dart';
-part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
-part 'src/screens/custom_spans_page.dart';
+part 'src/screens/session_replay_page.dart';
 
 void main() {
   runZonedGuarded(

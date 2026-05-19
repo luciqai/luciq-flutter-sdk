@@ -28,6 +28,4 @@ final appRoutes = {
       const ScreenLoadingTabPage(),
   ScreenLoadingDelayedPage.screenName: (BuildContext context) =>
       const ScreenLoadingDelayedPage(),
-  GrpcPage.screenName: (BuildContext context) => const GrpcPage(),
-  GraphQLPage.screenName: (BuildContext context) => const GraphQLPage(),
 };

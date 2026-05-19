@@ -34,30 +34,6 @@ class _ApmPageState extends State<ApmPage> {
     );
   }
 
-  void _navigateToGrpc() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const GrpcPage(),
-        settings: const RouteSettings(
-          name: GrpcPage.screenName,
-        ),
-      ),
-    );
-  }
-
-  void _navigateToGraphQL() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const GraphQLPage(),
-        settings: const RouteSettings(
-          name: GraphQLPage.screenName,
-        ),
-      ),
-    );
-  }
-
   _endAppLaunch() => APM.endAppLaunch();
 
   @override
@@ -73,16 +49,6 @@ class _ApmPageState extends State<ApmPage> {
         ),
         const SectionTitle('Network'),
         const NetworkContent(),
-        LuciqButton(
-          text: 'gRPC',
-          onPressed: _navigateToGrpc,
-          symanticLabel: 'open_grpc_page',
-        ),
-        LuciqButton(
-          text: 'GraphQL',
-          onPressed: _navigateToGraphQL,
-          symanticLabel: 'open_graphql_page',
-        ),
         const SectionTitle('Flows'),
         const FlowsContent(),
         const SectionTitle('Custom UI Traces'),

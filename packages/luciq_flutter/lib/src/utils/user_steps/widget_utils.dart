@@ -126,13 +126,22 @@ bool isMedia(Widget widget) {
 }
 
 bool isWebViewWidget(Widget widget) {
-  const webViewTypes = {
-    'WebViewWidget',
-    'WebView',
-    'InAppWebView',
+  const webViewPlatformViewTypes = {
+    'plugins.flutter.io/webview',
+    'com.pichillilorenzo/flutter_inappwebview',
   };
 
-  return webViewTypes.contains(widget.runtimeType.toString());
+  if (widget is AndroidView) {
+    return webViewPlatformViewTypes.contains(widget.viewType);
+  }
+  if (widget is UiKitView) {
+    return webViewPlatformViewTypes.contains(widget.viewType);
+  }
+  if (widget is PlatformViewLink) {
+    return webViewPlatformViewTypes.contains(widget.viewType);
+  }
+
+  return false;
 }
 
 /// Checks if a widget is toggleable (e.g., switch, checkbox, etc.).

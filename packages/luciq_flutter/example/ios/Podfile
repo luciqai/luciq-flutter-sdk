@@ -27,7 +27,6 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
-pod 'Luciq', :podspec => 'https://ios-releases.luciq.ai/custom/fix-cp_repro_steps_screenshots/19.6.1/Luciq.podspec'
 target 'Runner' do
 
   use_frameworks!

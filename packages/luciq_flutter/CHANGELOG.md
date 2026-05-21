@@ -1,6 +1,34 @@
 # Changelog
 
 
+## [Unreleased]
+
+### Added
+
+- **WebView Support:** New APIs to monitor WebViews in your app, including page navigations, user interactions, and network requests issued from inside the WebView. Screenshots and session replays now capture WebView content alongside the rest of the UI.
+
+  Enable WebView monitoring after `Luciq.init`:
+
+  ```dart
+  // Enable WebView monitoring (required for the APIs below).
+  Luciq.setWebViewMonitoringEnabled(true);
+
+  // Track taps and other user interactions inside WebViews.
+  Luciq.setWebViewUserInteractionsTrackingEnabled(true);
+
+  // Log network requests issued from WebViews.
+  Luciq.setWebViewNetworkTrackingEnabled(true);
+  ```
+
+  All three APIs default to disabled. `setWebViewMonitoringEnabled` must be on for the user-interactions and network-tracking APIs to take effect.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.7.0 ([#57](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.7.0).
+
+- Bump Luciq Android SDK to v19.7.0 ([#57](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.7.0).
+
+
 ## [19.6.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.6.0...19.4.0)
 
 ### Added

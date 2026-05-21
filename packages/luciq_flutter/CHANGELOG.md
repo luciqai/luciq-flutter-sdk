@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [Unreleased]
+## [19.7.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.7.0...19.6.0)
 
 ### Added
 

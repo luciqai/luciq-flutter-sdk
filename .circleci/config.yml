@@ -18,7 +18,7 @@ commands:
     parameters:
       version:
         type: string
-        default: 3.27.4
+        default: 3.24.3
       use_melos:
         type: boolean
         default: true
@@ -210,7 +210,7 @@ jobs:
     parameters:
       version:
         type: string
-        default: "3.27.4"
+        default: "3.24.3"
     executor: flutter-executor
     steps:
       - advanced-checkout/shallow-checkout

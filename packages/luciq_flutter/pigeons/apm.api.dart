@@ -42,9 +42,11 @@ abstract class ApmHostApi {
   bool isAutoUiTraceEnabled();
 
   @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   bool isScreenRenderEnabled();
 
   @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   bool isCustomSpanEnabled();
 
   @async

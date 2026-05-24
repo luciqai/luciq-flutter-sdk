@@ -49,9 +49,8 @@
         @"AutoMasking.labels" : @(LCQAutoMaskScreenshotOptionLabels),
         @"AutoMasking.textInputs" : @(LCQAutoMaskScreenshotOptionTextInputs),
         @"AutoMasking.media" : @(LCQAutoMaskScreenshotOptionMedia),
-        @"AutoMasking.none" : @(LCQAutoMaskScreenshotOptionMaskNothing
-),
-
+        @"AutoMasking.webViews" : @(LCQAutoMaskScreenshotOptionWebViews),
+        @"AutoMasking.none" : @(LCQAutoMaskScreenshotOptionMaskNothing),
     };
 }
 

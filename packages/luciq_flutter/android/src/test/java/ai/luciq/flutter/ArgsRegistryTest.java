@@ -1,5 +1,6 @@
 package ai.luciq.flutter;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import ai.luciq.library.LogLevel;
@@ -9,6 +10,7 @@ import ai.luciq.featuresrequest.ActionType;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.library.LuciqColorTheme;
 import ai.luciq.library.LuciqCustomTextPlaceHolder.Key;
+import ai.luciq.library.MaskingType;
 import ai.luciq.library.OnSdkDismissCallback.DismissType;
 import ai.luciq.library.ReproMode;
 import ai.luciq.library.extendedbugreport.ExtendedBugReport;
@@ -164,6 +166,29 @@ public class ArgsRegistryTest {
         for (ExtendedBugReport.State value : values) {
             assertTrue(ArgsRegistry.extendedBugReportStates.containsValue(value));
         }
+    }
+
+    @Test
+    public void testAutoMasking() {
+        Integer[] values = {
+                MaskingType.LABELS,
+                MaskingType.TEXT_INPUTS,
+                MaskingType.MEDIA,
+                MaskingType.WEB_VIEWS,
+                MaskingType.MASK_NOTHING,
+        };
+
+        for (Integer value : values) {
+            assertTrue(ArgsRegistry.autoMasking.containsValue(value));
+        }
+    }
+
+    @Test
+    public void testAutoMaskingWebViewsKey() {
+        assertEquals(
+                Integer.valueOf(MaskingType.WEB_VIEWS),
+                ArgsRegistry.autoMasking.get("AutoMasking.webViews")
+        );
     }
 
     @Test

@@ -9,21 +9,18 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
-import android.view.SurfaceView;
 
 import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.model.ScreenshotResult;
 import ai.luciq.flutter.modules.PrivateViewManager;
-import ai.luciq.flutter.modules.capturing.BoundryCaptureManager;
 import ai.luciq.flutter.modules.capturing.CaptureManager;
-import ai.luciq.flutter.modules.capturing.PixelCopyCaptureManager;
+import ai.luciq.flutter.modules.capturing.ScreenshotResultCallback;
 import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
 
 import org.junit.Before;
@@ -37,10 +34,6 @@ import org.robolectric.annotation.Config;
 import java.util.Arrays;
 import java.util.List;
 
-import io.flutter.embedding.android.FlutterActivity;
-import io.flutter.embedding.android.FlutterView;
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
-
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = {28}, manifest = Config.NONE)
 public class PrivateViewManagerTest {
@@ -49,18 +42,21 @@ public class PrivateViewManagerTest {
     private LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi LuciqPrivateViewFlutterApiMock;
     private Activity activityMock;
     private Bitmap bitmap;
-    private CaptureManager pixelCopyScreenCaptor, boundryScreenCaptor;
+    private CaptureManager windowPixelCopyScreenCaptor, pixelCopyScreenCaptor, boundryScreenCaptor;
 
     @Before
     public void setUp() {
         LuciqPrivateViewFlutterApiMock = mock(LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi.class);
-        FlutterRenderer rendererMock = mock(FlutterRenderer.class);
         activityMock = spy(Robolectric.buildActivity(Activity.class).setup().create().start().resume().get());
         bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
-        when(rendererMock.getBitmap()).thenReturn(bitmap);
-        pixelCopyScreenCaptor = spy(new PixelCopyCaptureManager());
-        boundryScreenCaptor = spy(new BoundryCaptureManager(rendererMock));
-        privateViewManager = spy(new PrivateViewManager(LuciqPrivateViewFlutterApiMock, pixelCopyScreenCaptor, boundryScreenCaptor));
+        bitmap.eraseColor(0xFFFFFFFF);
+        windowPixelCopyScreenCaptor = mock(CaptureManager.class);
+        pixelCopyScreenCaptor = mock(CaptureManager.class);
+        boundryScreenCaptor = mock(CaptureManager.class);
+        mockSuccessfulCapture(windowPixelCopyScreenCaptor);
+        mockSuccessfulCapture(pixelCopyScreenCaptor);
+        mockSuccessfulCapture(boundryScreenCaptor);
+        privateViewManager = spy(new PrivateViewManager(LuciqPrivateViewFlutterApiMock, windowPixelCopyScreenCaptor, pixelCopyScreenCaptor, boundryScreenCaptor));
         privateViewManager.setActivity(activityMock);
 
     }
@@ -96,29 +92,25 @@ public class PrivateViewManagerTest {
     }
 
 
-    private void mockFlutterViewInPixelCopy() {
-        SurfaceView mockSurfaceView = mock(SurfaceView.class);
-        FlutterView flutterView = mock(FlutterView.class);
-        when(flutterView.getChildAt(0)).thenReturn(mockSurfaceView);
-        when(flutterView.getChildCount()).thenReturn(1);
-
-        when(activityMock.findViewById(FlutterActivity.FLUTTER_VIEW_ID)).thenReturn(flutterView);
-        when(mockSurfaceView.getWidth()).thenReturn(100);
-        when(mockSurfaceView.getHeight()).thenReturn(100);
-    }
-
-
     @Test
     public void testMaskPrivateViews() {
-        ScreenshotResult mockResult = mock(ScreenshotResult.class);
-        when(mockResult.getScreenshot()).thenReturn(Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888));
-        when(mockResult.getPixelRatio()).thenReturn(2.0f);
+        ScreenshotResult mockResult = new ScreenshotResult(2.0f, Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888));
 
         List<Double> privateViews = Arrays.asList(10.0, 20.0, 100.0, 200.0);
 
         privateViewManager.maskPrivateViews(mockResult, privateViews);
 
         assertNotNull(mockResult.getScreenshot());
+    }
+
+    @Test
+    public void testMaskPrivateViewsAppliesScreenshotOffsets() {
+        Bitmap screenshot = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+        ScreenshotResult result = new ScreenshotResult(2.0f, screenshot, 5.0f, 10.0f);
+
+        privateViewManager.maskPrivateViews(result, Arrays.asList(10.0, 20.0, 20.0, 30.0));
+
+        assertEquals(0xFF000000, screenshot.getPixel(30, 60));
     }
 
     @Test
@@ -133,14 +125,61 @@ public class PrivateViewManagerTest {
     }
 
     @Test
-    public void testMaskShouldCallPixelCopyWhenAPIVersionMoreThan28() {
+    public void testMaskShouldCallWindowPixelCopyWhenAPIVersionMoreThan28() {
         ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback capturingCallbackMock = mock(ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback.class);
-        mockFlutterViewInPixelCopy();
         privateViewManager.mask(capturingCallbackMock);
         shadowOf(Looper.getMainLooper()).idle();
         verify(boundryScreenCaptor, never()).capture(any(), any());
+        verify(pixelCopyScreenCaptor, never()).capture(any(), any());
+        verify(windowPixelCopyScreenCaptor).capture(any(), any());
+
+
+    }
+
+    @Test
+    public void testMaskShouldFallbackToFlutterSurfacePixelCopyWhenWindowPixelCopyFails() {
+        ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback capturingCallbackMock = mock(ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback.class);
+        mockFailedCapture(windowPixelCopyScreenCaptor);
+
+        privateViewManager.mask(capturingCallbackMock);
+        shadowOf(Looper.getMainLooper()).idle();
+
+        verify(windowPixelCopyScreenCaptor).capture(any(), any());
         verify(pixelCopyScreenCaptor).capture(any(), any());
+        verify(boundryScreenCaptor, never()).capture(any(), any());
+    }
 
+    @Test
+    public void testMaskShouldFallbackToBoundryCaptureWhenPixelCopyFails() {
+        ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback capturingCallbackMock = mock(ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback.class);
+        mockFailedCapture(windowPixelCopyScreenCaptor);
+        mockFailedCapture(pixelCopyScreenCaptor);
 
+        privateViewManager.mask(capturingCallbackMock);
+        shadowOf(Looper.getMainLooper()).idle();
+
+        verify(windowPixelCopyScreenCaptor).capture(any(), any());
+        verify(pixelCopyScreenCaptor).capture(any(), any());
+        verify(boundryScreenCaptor).capture(any(), any());
+    }
+
+    private void mockSuccessfulCapture(CaptureManager captureManager) {
+        mockSuccessfulCapture(captureManager, bitmap);
+    }
+
+    private void mockSuccessfulCapture(CaptureManager captureManager, Bitmap screenshot) {
+        doAnswer(invocation -> {
+            ScreenshotResultCallback callback = invocation.getArgument(1);
+            callback.onScreenshotResult(new ScreenshotResult(1.0f, screenshot));
+            return null;
+        }).when(captureManager).capture(any(), any());
+    }
+
+    private void mockFailedCapture(CaptureManager captureManager) {
+        doAnswer(invocation -> {
+            ScreenshotResultCallback callback = invocation.getArgument(1);
+            callback.onError();
+            return null;
+        }).when(captureManager).capture(any(), any());
     }
 }

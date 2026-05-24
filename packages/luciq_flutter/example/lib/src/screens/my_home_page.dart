@@ -213,10 +213,12 @@ class _MyHomePageState extends State<MyHomePage> {
           text: 'Bug Reporting',
           symanticLabel: 'open_bug_reporting',
         ),
-        LuciqButton(
-          onPressed: _navigateToCore,
-          text: 'Core',
-          symanticLabel: 'open_core',
+        LuciqPrivateView(
+          child: LuciqButton(
+            onPressed: _navigateToCore,
+            text: 'Core',
+            symanticLabel: 'open_core',
+          ),
         ),
         const SectionTitle('Primary Color'),
         LuciqTextField(

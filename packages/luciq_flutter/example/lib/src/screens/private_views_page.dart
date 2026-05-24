@@ -50,6 +50,56 @@ class _PrivateViewsPageState extends State<PrivateViewsPage> {
     );
   }
 
+  void _showOverlayDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Dialog over private view'),
+        content: const Text(
+          'The page behind is still visible — its LuciqPrivateView rect '
+          'must still be reported. Tap "Inspect rects" after closing.',
+        ),
+        actions: [
+          TextButton(
+            key: const ValueKey('private_views_dialog_inspect'),
+            onPressed: () {
+              _inspectRects();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Inspect & close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOverlayBottomSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Bottom sheet over private view — the page behind stays '
+              'visible. Its rect must remain in the list.',
+            ),
+            const SizedBox(height: 12),
+            LuciqButton(
+              symanticLabel: 'private_views_bottom_sheet_inspect',
+              text: 'Inspect & close',
+              onPressed: () {
+                _inspectRects();
+                Navigator.of(sheetContext).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -286,8 +336,29 @@ class _PrivateViewsPageState extends State<PrivateViewsPage> {
               text: 'Open sub-route',
             ),
 
-            // ── Scenario 8: heavy tree, no private views ────────────────
-            const SectionTitle('8. Heavy tree, no private views (fast path)'),
+            // ── Scenario 8: non-fullscreen overlay (dialog / sheet) ─────
+            const SectionTitle(
+              '8. Non-fullscreen overlay (dialog / bottom sheet)',
+            ),
+            const _ScenarioNote(
+              'A dialog or bottom sheet leaves the page behind visible — its '
+              'private rects must still be reported so they get masked in '
+              'screenshots / replays. Open one of the overlays and tap '
+              '"Inspect & close" to confirm.',
+            ),
+            LuciqButton(
+              symanticLabel: 'private_views_open_dialog',
+              onPressed: _showOverlayDialog,
+              text: 'Show dialog over private view',
+            ),
+            LuciqButton(
+              symanticLabel: 'private_views_open_bottom_sheet',
+              onPressed: _showOverlayBottomSheet,
+              text: 'Show bottom sheet over private view',
+            ),
+
+            // ── Scenario 9: heavy tree, no private views ────────────────
+            const SectionTitle('9. Heavy tree, no private views (fast path)'),
             const _ScenarioNote(
               'With auto-masking off, this many widgets cost ~O(1) because '
               'the registry-based fast path skips traversal.',

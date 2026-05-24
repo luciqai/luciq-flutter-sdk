@@ -200,7 +200,16 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
 
   bool isElementInCurrentRoute(Element element) {
     final modalRoute = ModalRoute.of(element);
-    return modalRoute?.isCurrent ?? false;
+    // root tree below MaterialApp
+    if (modalRoute == null) return true;
+    if (modalRoute.isCurrent) return true;
+    if (!modalRoute.isActive) return false;
+    // Not current, but still active — only visible if the observer confirms
+    // that nothing opaque sits above this route. This preserves the original
+    // guarantee that page A's rects do not leak onto page B after an opaque
+    // MaterialPageRoute push, while still masking the background behind
+    // non-opaque overlays (dialogs, bottom sheets, popups).
+    return LuciqNavigatorObserver.isRouteVisible(modalRoute) == true;
   }
 
   @override

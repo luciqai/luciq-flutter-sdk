@@ -214,5 +214,215 @@ void main() {
       final rects = manager.getRectsOfPrivateViews();
       expect(rects.length, 1);
     });
+
+    group('background visibility under overlays', () {
+      tearDown(LuciqNavigatorObserver.debugResetInstances);
+
+      testWidgets(
+          'reports background LuciqPrivateView when a non-opaque overlay '
+          '(dialog / popup) is pushed on top',
+          (tester) async {
+        LuciqNavigatorObserver.debugResetInstances();
+        manager.addAutoMasking(const [AutoMasking.none]);
+        final navigatorKey = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          LuciqWidget(
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              navigatorObservers: [LuciqNavigatorObserver()],
+              home: const Scaffold(
+                body: LuciqPrivateView(
+                  child: SizedBox(width: 100, height: 100),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(manager.getRectsOfPrivateViews().length, 1);
+
+        // A non-opaque route mirrors DialogRoute / ModalBottomSheetRoute /
+        // PopupRoute behaviour (all opaque = false). Using PageRouteBuilder
+        // avoids `showDialog`'s never-completing future, which hangs
+        // pumpAndSettle.
+        // ignore: unawaited_futures
+        navigatorKey.currentState!.push<void>(
+          PageRouteBuilder<void>(
+            opaque: false,
+            pageBuilder: (_, __, ___) =>
+                const Center(child: Text('overlay')),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(manager.getRectsOfPrivateViews().length, 1);
+      });
+
+      testWidgets(
+          'reports background LuciqPrivateView when a bottom sheet is shown on top',
+          (tester) async {
+        LuciqNavigatorObserver.debugResetInstances();
+        manager.addAutoMasking(const [AutoMasking.none]);
+        final navigatorKey = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          LuciqWidget(
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              navigatorObservers: [LuciqNavigatorObserver()],
+              home: const Scaffold(
+                body: LuciqPrivateView(
+                  child: SizedBox(width: 100, height: 100),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(manager.getRectsOfPrivateViews().length, 1);
+
+        // ignore: unawaited_futures
+        showModalBottomSheet<void>(
+          context: navigatorKey.currentContext!,
+          builder: (_) => const SizedBox(height: 100, child: Text('sheet')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(manager.getRectsOfPrivateViews().length, 1);
+      });
+
+      testWidgets(
+          'reports background auto-masked labels when a dialog is shown on top',
+          (tester) async {
+        LuciqNavigatorObserver.debugResetInstances();
+        final navigatorKey = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          LuciqWidget(
+            automasking: const [AutoMasking.labels],
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              navigatorObservers: [LuciqNavigatorObserver()],
+              home: const Scaffold(
+                body: Column(
+                  children: [
+                    Text('Background label 1'),
+                    Text('Background label 2'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(manager.getRectsOfPrivateViews().length, 2);
+
+        // Non-opaque overlay simulates a dialog / popup; no never-completing
+        // future to hang pumpAndSettle.
+        // ignore: unawaited_futures
+        navigatorKey.currentState!.push<void>(
+          PageRouteBuilder<void>(
+            opaque: false,
+            pageBuilder: (_, __, ___) =>
+                const Center(child: Text('overlay label')),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Two background labels must still be reported. The overlay adds its
+        // own label rect, so length grows but stays >= 2.
+        expect(
+          manager.getRectsOfPrivateViews().length,
+          greaterThanOrEqualTo(2),
+        );
+      });
+
+      testWidgets(
+          'drops rects from previous route after an opaque MaterialPageRoute push '
+          '(regression guard for the original isElementInCurrentRoute fix)',
+          (tester) async {
+        LuciqNavigatorObserver.debugResetInstances();
+        manager.addAutoMasking(const [AutoMasking.none]);
+        final navigatorKey = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          LuciqWidget(
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              navigatorObservers: [LuciqNavigatorObserver()],
+              home: const Scaffold(
+                body: LuciqPrivateView(
+                  child: SizedBox(width: 100, height: 100),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(manager.getRectsOfPrivateViews().length, 1);
+
+        // ignore: unawaited_futures
+        navigatorKey.currentState!.push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => const Scaffold(body: Text('Page B')),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Page A's private rect must NOT bleed onto Page B.
+        expect(manager.getRectsOfPrivateViews(), isEmpty);
+      });
+
+      testWidgets(
+          'drops rects from previous route after pushNamed (example-app pattern, '
+          "mirrors the bug where Core-page screenshot showed MyHomePage's rect)",
+          (tester) async {
+        LuciqNavigatorObserver.debugResetInstances();
+        manager.addAutoMasking(const [AutoMasking.none]);
+        final navigatorKey = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          LuciqWidget(
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              navigatorObservers: [LuciqNavigatorObserver()],
+              routes: {
+                '/': (_) => const Scaffold(
+                      body: LuciqPrivateView(
+                        child: SizedBox(width: 100, height: 100),
+                      ),
+                    ),
+                '/page-b': (_) => const Scaffold(body: Text('Page B')),
+              },
+            ),
+          ),
+        );
+
+        expect(manager.getRectsOfPrivateViews().length, 1);
+
+        // ignore: unawaited_futures
+        navigatorKey.currentState!.pushNamed('/page-b');
+        await tester.pumpAndSettle();
+
+        expect(manager.getRectsOfPrivateViews(), isEmpty);
+      });
+
+      testWidgets(
+          'reports rect of a LuciqPrivateView with no enclosing ModalRoute',
+          (tester) async {
+        LuciqNavigatorObserver.debugResetInstances();
+        manager.addAutoMasking(const [AutoMasking.none]);
+        // Widget tree without MaterialApp / Navigator — element has no
+        // ModalRoute ancestor. Previously the `?? false` filtered it out.
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: LuciqWidget(
+              child: LuciqPrivateView(
+                child: SizedBox(width: 100, height: 100),
+              ),
+            ),
+          ),
+        );
+
+        expect(manager.getRectsOfPrivateViews().length, 1);
+      });
+    });
   });
 }

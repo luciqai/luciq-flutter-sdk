@@ -142,6 +142,27 @@
     }
 }
 
+- (void)testAutoMasking {
+    NSArray *values = @[
+        @(LCQAutoMaskScreenshotOptionLabels),
+        @(LCQAutoMaskScreenshotOptionTextInputs),
+        @(LCQAutoMaskScreenshotOptionMedia),
+        @(LCQAutoMaskScreenshotOptionWebViews),
+        @(LCQAutoMaskScreenshotOptionMaskNothing),
+    ];
+
+    for (NSNumber *value in values) {
+        XCTAssertTrue([[ArgsRegistry.autoMasking allValues] containsObject:value]);
+    }
+}
+
+- (void)testAutoMaskingWebViewsKey {
+    XCTAssertEqualObjects(
+        ArgsRegistry.autoMasking[@"AutoMasking.webViews"],
+        @(LCQAutoMaskScreenshotOptionWebViews)
+    );
+}
+
 - (void)testReproModes {
     NSArray *values = @[
         @(LCQUserStepsModeEnable),

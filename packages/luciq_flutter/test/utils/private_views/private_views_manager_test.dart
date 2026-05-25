@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -250,7 +249,9 @@ void main() {
           LuciqWidget(
             child: MaterialApp(
               navigatorKey: navigatorKey,
-              navigatorObservers: [LuciqNavigatorObserver()],
+              navigatorObservers: [
+                LuciqNavigatorObserver(screenReportDelay: Duration.zero),
+              ],
               home: const Scaffold(
                 body: LuciqPrivateView(
                   child: SizedBox(width: 100, height: 100),
@@ -270,11 +271,14 @@ void main() {
         navigatorKey.currentState!.push<void>(
           PageRouteBuilder<void>(
             opaque: false,
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
             pageBuilder: (_, __, ___) =>
                 const Center(child: Text('overlay')),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
         expect(manager.getRectsOfPrivateViews().length, 1);
       });
@@ -289,7 +293,9 @@ void main() {
           LuciqWidget(
             child: MaterialApp(
               navigatorKey: navigatorKey,
-              navigatorObservers: [LuciqNavigatorObserver()],
+              navigatorObservers: [
+                LuciqNavigatorObserver(screenReportDelay: Duration.zero),
+              ],
               home: const Scaffold(
                 body: LuciqPrivateView(
                   child: SizedBox(width: 100, height: 100),
@@ -301,12 +307,18 @@ void main() {
 
         expect(manager.getRectsOfPrivateViews().length, 1);
 
+        final sheetController =
+            BottomSheet.createAnimationController(navigatorKey.currentState!)
+              ..duration = Duration.zero
+              ..reverseDuration = Duration.zero;
         // ignore: unawaited_futures
         showModalBottomSheet<void>(
           context: navigatorKey.currentContext!,
+          transitionAnimationController: sheetController,
           builder: (_) => const SizedBox(height: 100, child: Text('sheet')),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
         expect(manager.getRectsOfPrivateViews().length, 1);
       });
@@ -321,7 +333,9 @@ void main() {
             automasking: const [AutoMasking.labels],
             child: MaterialApp(
               navigatorKey: navigatorKey,
-              navigatorObservers: [LuciqNavigatorObserver()],
+              navigatorObservers: [
+                LuciqNavigatorObserver(screenReportDelay: Duration.zero),
+              ],
               // Column lacks a const constructor on the Flutter SDK paired
               // with Dart 2.10.5, so Scaffold/Column stay non-const here.
               // ignore: prefer_const_constructors
@@ -346,11 +360,14 @@ void main() {
         navigatorKey.currentState!.push<void>(
           PageRouteBuilder<void>(
             opaque: false,
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
             pageBuilder: (_, __, ___) =>
                 const Center(child: Text('overlay label')),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
         // Two background labels must still be reported. The overlay adds its
         // own label rect, so length grows but stays >= 2.
@@ -371,7 +388,9 @@ void main() {
           LuciqWidget(
             child: MaterialApp(
               navigatorKey: navigatorKey,
-              navigatorObservers: [LuciqNavigatorObserver()],
+              navigatorObservers: [
+                LuciqNavigatorObserver(screenReportDelay: Duration.zero),
+              ],
               home: const Scaffold(
                 body: LuciqPrivateView(
                   child: SizedBox(width: 100, height: 100),
@@ -385,11 +404,15 @@ void main() {
 
         // ignore: unawaited_futures
         navigatorKey.currentState!.push<void>(
-          MaterialPageRoute<void>(
-            builder: (_) => const Scaffold(body: Text('Page B')),
+          PageRouteBuilder<void>(
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+            pageBuilder: (_, __, ___) =>
+                const Scaffold(body: Text('Page B')),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
         // Page A's private rect must NOT bleed onto Page B.
         expect(manager.getRectsOfPrivateViews(), isEmpty);
@@ -402,19 +425,28 @@ void main() {
         LuciqNavigatorObserver.debugResetInstances();
         manager.addAutoMasking(const [AutoMasking.none]);
         final navigatorKey = GlobalKey<NavigatorState>();
+        final routeBuilders = <String, WidgetBuilder>{
+          '/': (_) => const Scaffold(
+                body: LuciqPrivateView(
+                  child: SizedBox(width: 100, height: 100),
+                ),
+              ),
+          '/page-b': (_) => const Scaffold(body: Text('Page B')),
+        };
         await tester.pumpWidget(
           LuciqWidget(
             child: MaterialApp(
               navigatorKey: navigatorKey,
-              navigatorObservers: [LuciqNavigatorObserver()],
-              routes: {
-                '/': (_) => const Scaffold(
-                      body: LuciqPrivateView(
-                        child: SizedBox(width: 100, height: 100),
-                      ),
-                    ),
-                '/page-b': (_) => const Scaffold(body: Text('Page B')),
-              },
+              navigatorObservers: [
+                LuciqNavigatorObserver(screenReportDelay: Duration.zero),
+              ],
+              onGenerateRoute: (settings) => PageRouteBuilder<void>(
+                settings: settings,
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+                pageBuilder: (ctx, __, ___) =>
+                    routeBuilders[settings.name]!(ctx),
+              ),
             ),
           ),
         );
@@ -423,7 +455,8 @@ void main() {
 
         // ignore: unawaited_futures
         navigatorKey.currentState!.pushNamed('/page-b');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
 
         expect(manager.getRectsOfPrivateViews(), isEmpty);
       });

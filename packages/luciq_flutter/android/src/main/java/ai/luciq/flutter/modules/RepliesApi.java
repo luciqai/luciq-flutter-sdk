@@ -7,6 +7,8 @@ import ai.luciq.flutter.generated.RepliesPigeon;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.Feature;
 
+import java.util.Map;
+
 import io.flutter.plugin.common.BinaryMessenger;
 
 public class RepliesApi implements RepliesPigeon.RepliesHostApi {
@@ -99,6 +101,68 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
                         });
                     }
                 });
+            }
+        });
+    }
+
+    @Override
+    public void setPushNotificationsEnabled(@NonNull Boolean isEnabled) {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Replies.setPushNotificationState(isEnabled ? Feature.State.ENABLED : Feature.State.DISABLED);
+            }
+        });
+    }
+
+    @Override
+    public void setPushNotificationRegistrationTokenAndroid(@NonNull String token) {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Replies.setPushNotificationRegistrationToken(token);
+            }
+        });
+    }
+
+    @Override
+    public void showNotificationAndroid(@NonNull Map<String, String> data) {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Replies.isLuciqNotification(data)) {
+                    Replies.showNotification(data);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setNotificationIconAndroid(@NonNull Long resourceId) {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Replies.setNotificationIcon(resourceId.intValue());
+            }
+        });
+    }
+
+    @Override
+    public void setPushNotificationChannelIdAndroid(@NonNull String id) {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Replies.setPushNotificationChannelId(id);
+            }
+        });
+    }
+
+    @Override
+    public void setSystemReplyNotificationSoundEnabledAndroid(@NonNull Boolean isEnabled) {
+        ThreadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                Replies.setSystemReplyNotificationSoundEnabled(isEnabled);
             }
         });
     }

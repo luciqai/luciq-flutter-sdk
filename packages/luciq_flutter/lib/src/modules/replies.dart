@@ -87,4 +87,59 @@ class Replies implements RepliesFlutterApi {
       return _host.setInAppNotificationSound(isEnabled);
     }
   }
+
+  /// Enables/disables the use of push notifications in the SDK. Defaults to true.
+  /// [isEnabled] A boolean to indicate whether push notifications are enabled.
+  static Future<void> setPushNotificationsEnabled(bool isEnabled) async {
+    return _host.setPushNotificationsEnabled(isEnabled);
+  }
+
+  /// Sets the GCM/FCM registration [token] used for Luciq push notifications.
+  /// @android ONLY
+  static Future<void> setPushNotificationRegistrationTokenAndroid(
+    String token,
+  ) async {
+    if (LCQBuildInfo.instance.isAndroid) {
+      return _host.setPushNotificationRegistrationTokenAndroid(token);
+    }
+  }
+
+  /// Shows in-app messaging notification from the given data bundle.
+  /// Only displayed if the payload is recognized as a Luciq notification.
+  /// @android ONLY
+  static Future<void> showNotificationAndroid(
+    Map<String, String> data,
+  ) async {
+    if (LCQBuildInfo.instance.isAndroid) {
+      return _host.showNotificationAndroid(data);
+    }
+  }
+
+  /// Sets the notification icon shown with Luciq notifications.
+  /// [resourceId] The notification icon resource ID.
+  /// @android ONLY
+  static Future<void> setNotificationIconAndroid(int resourceId) async {
+    if (LCQBuildInfo.instance.isAndroid) {
+      return _host.setNotificationIconAndroid(resourceId);
+    }
+  }
+
+  /// Sets the Android notification channel [id] that Luciq notifications will be posted to.
+  /// @android ONLY
+  static Future<void> setPushNotificationChannelIdAndroid(String id) async {
+    if (LCQBuildInfo.instance.isAndroid) {
+      return _host.setPushNotificationChannelIdAndroid(id);
+    }
+  }
+
+  /// Sets whether new system notifications should play the default sound from
+  /// RingtoneManager. Default is false.
+  /// @android ONLY
+  static Future<void> setSystemReplyNotificationSoundEnabledAndroid(
+    bool isEnabled,
+  ) async {
+    if (LCQBuildInfo.instance.isAndroid) {
+      return _host.setSystemReplyNotificationSoundEnabledAndroid(isEnabled);
+    }
+  }
 }

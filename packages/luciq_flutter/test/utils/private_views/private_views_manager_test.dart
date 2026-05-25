@@ -301,9 +301,13 @@ void main() {
             child: MaterialApp(
               navigatorKey: navigatorKey,
               navigatorObservers: [LuciqNavigatorObserver()],
-              home: const Scaffold(
+              // Column lacks a const constructor on the Flutter SDK paired
+              // with Dart 2.10.5, so Scaffold/Column stay non-const here.
+              // ignore: prefer_const_constructors
+              home: Scaffold(
+                // ignore: prefer_const_constructors
                 body: Column(
-                  children: [
+                  children: const [
                     Text('Background label 1'),
                     Text('Background label 2'),
                   ],

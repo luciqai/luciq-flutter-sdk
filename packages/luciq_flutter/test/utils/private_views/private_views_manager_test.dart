@@ -6,6 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart';
+import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
+import 'package:mockito/mockito.dart';
+
+import '../luciq_navigator_observer_test.mocks.dart';
 
 Future<Uint8List> createTestImage() async {
   // Create an empty 1x1 image
@@ -23,11 +27,28 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
 
+  // LuciqNavigatorObserver fires screenChanged on every push, which on
+  // Flutter stable awaits a pigeon channel.send that never resolves in
+  // test mode and hangs pump()/pumpAndSettle. Stubbing the host APIs and
+  // singletons short-circuits the channel calls so the tests can settle.
+  final mockHost = MockLuciqHostApi();
+  final mockApmHost = MockApmHostApi();
+  final mockScreenLoadingManager = MockScreenLoadingManager();
+  final mockScreenRenderManager = MockLuciqScreenRenderManager();
+
+  setUpAll(() {
+    Luciq.$setHostApi(mockHost);
+    APM.$setHostApi(mockApmHost);
+    ScreenLoadingManager.setInstance(mockScreenLoadingManager);
+    LuciqScreenRenderManager.setInstance(mockScreenRenderManager);
+  });
+
   group('PrivateViewsManager Tests', () {
     late PrivateViewsManager manager;
 
     setUp(() {
       manager = PrivateViewsManager.instance;
+      when(mockScreenLoadingManager.currentUiTrace).thenReturn(null);
     });
 
     test('isPrivateWidget detects LuciqPrivateView', () {

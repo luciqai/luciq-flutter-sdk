@@ -9,14 +9,49 @@ import 'package:luciq_flutter/src/utils/repro_steps_constants.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
+import 'package:meta/meta.dart';
 
 class LuciqNavigatorObserver extends NavigatorObserver {
   LuciqNavigatorObserver({Duration? screenReportDelay})
       : _screenReportDelay =
-            screenReportDelay ?? const Duration(milliseconds: 100);
+            screenReportDelay ?? const Duration(milliseconds: 100) {
+    _instances.add(this);
+  }
+
+  static final Set<LuciqNavigatorObserver> _instances =
+      <LuciqNavigatorObserver>{};
 
   final Duration _screenReportDelay;
   final List<LuciqRoute> _steps = [];
+  final List<Route<dynamic>> _routeStack = <Route<dynamic>>[];
+
+  /// Returns whether [route] is currently visible, accounting for non-opaque
+  /// overlays (dialogs, bottom sheets, popups) that leave the route below
+  /// visible.
+  ///
+  /// Returns `null` when no live observer has seen the route — callers should
+  /// fall back to their own check in that case.
+  @internal
+  static bool? isRouteVisible(Route<dynamic> route) {
+    if (_instances.isEmpty) return null;
+    for (final observer in _instances) {
+      final index = observer._routeStack.indexOf(route);
+      if (index < 0) continue;
+      for (var i = index + 1; i < observer._routeStack.length; i++) {
+        final above = observer._routeStack[i];
+        if (above is ModalRoute && above.opaque) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return null;
+  }
+
+  @visibleForTesting
+  static void debugResetInstances() {
+    _instances.clear();
+  }
 
   void screenChanged(Route newRoute) {
     try {
@@ -84,6 +119,7 @@ class LuciqNavigatorObserver extends NavigatorObserver {
 
   @override
   void didPop(Route route, Route? previousRoute) {
+    _routeStack.remove(route);
     if (previousRoute != null) {
       screenChanged(previousRoute);
     }
@@ -91,7 +127,31 @@ class LuciqNavigatorObserver extends NavigatorObserver {
 
   @override
   void didPush(Route route, Route? previousRoute) {
+    _routeStack.add(route);
     screenChanged(route);
+  }
+
+  @override
+  void didRemove(Route route, Route? previousRoute) {
+    _routeStack.remove(route);
+  }
+
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    if (oldRoute == null) {
+      if (newRoute != null) _routeStack.add(newRoute);
+      return;
+    }
+    final index = _routeStack.indexOf(oldRoute);
+    if (index < 0) {
+      if (newRoute != null) _routeStack.add(newRoute);
+      return;
+    }
+    if (newRoute == null) {
+      _routeStack.removeAt(index);
+    } else {
+      _routeStack[index] = newRoute;
+    }
   }
 
   FutureOr<void> _startScreenRenderCollector(int? uiTraceId) async {

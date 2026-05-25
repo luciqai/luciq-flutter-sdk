@@ -250,7 +250,106 @@ void main() {
       );
     });
   });
+
+  group('isRouteVisible', () {
+    setUp(LuciqNavigatorObserver.debugResetInstances);
+    tearDown(LuciqNavigatorObserver.debugResetInstances);
+
+    test('returns null when no observer instance has seen the route', () {
+      // Reset and create a fresh observer that has never seen this route.
+      LuciqNavigatorObserver.debugResetInstances();
+      LuciqNavigatorObserver();
+      final unseen = MaterialPageRoute<void>(builder: (_) => Container());
+
+      expect(LuciqNavigatorObserver.isRouteVisible(unseen), isNull);
+    });
+
+    test('returns null when no observer instances are registered', () {
+      LuciqNavigatorObserver.debugResetInstances();
+      final route = MaterialPageRoute<void>(builder: (_) => Container());
+
+      expect(LuciqNavigatorObserver.isRouteVisible(route), isNull);
+    });
+
+    test('returns true for the only route on the stack', () {
+      final obs = LuciqNavigatorObserver();
+      final routeA = MaterialPageRoute<void>(builder: (_) => Container());
+      obs.didPush(routeA, null);
+
+      expect(LuciqNavigatorObserver.isRouteVisible(routeA), isTrue);
+    });
+
+    test('returns true for a route covered only by a non-opaque overlay', () {
+      final obs = LuciqNavigatorObserver();
+      final routeA = MaterialPageRoute<void>(builder: (_) => Container());
+      final overlay = PageRouteBuilder<void>(
+        opaque: false,
+        pageBuilder: (_, __, ___) => Container(),
+      );
+      obs.didPush(routeA, null);
+      obs.didPush(overlay, routeA);
+
+      expect(overlay.opaque, isFalse);
+      expect(LuciqNavigatorObserver.isRouteVisible(routeA), isTrue);
+      expect(LuciqNavigatorObserver.isRouteVisible(overlay), isTrue);
+    });
+
+    test(
+        'returns false for a route covered by an opaque MaterialPageRoute push',
+        () {
+      final obs = LuciqNavigatorObserver();
+      final routeA = MaterialPageRoute<void>(builder: (_) => Container());
+      final routeB = MaterialPageRoute<void>(builder: (_) => Container());
+      obs.didPush(routeA, null);
+      obs.didPush(routeB, routeA);
+
+      expect(routeB.opaque, isTrue);
+      expect(LuciqNavigatorObserver.isRouteVisible(routeA), isFalse);
+      expect(LuciqNavigatorObserver.isRouteVisible(routeB), isTrue);
+    });
+
+    test('updates the stack on didPop', () {
+      final obs = LuciqNavigatorObserver();
+      final routeA = MaterialPageRoute<void>(builder: (_) => Container());
+      final routeB = MaterialPageRoute<void>(builder: (_) => Container());
+      obs.didPush(routeA, null);
+      obs.didPush(routeB, routeA);
+      obs.didPop(routeB, routeA);
+
+      expect(LuciqNavigatorObserver.isRouteVisible(routeA), isTrue);
+      // routeB is no longer in the stack.
+      expect(LuciqNavigatorObserver.isRouteVisible(routeB), isNull);
+    });
+
+    test('updates the stack on didRemove', () {
+      final obs = LuciqNavigatorObserver();
+      final routeA = MaterialPageRoute<void>(builder: (_) => Container());
+      final routeB = MaterialPageRoute<void>(builder: (_) => Container());
+      obs.didPush(routeA, null);
+      obs.didPush(routeB, routeA);
+      obs.didRemove(routeB, routeA);
+
+      expect(LuciqNavigatorObserver.isRouteVisible(routeA), isTrue);
+      expect(LuciqNavigatorObserver.isRouteVisible(routeB), isNull);
+    });
+
+    test('replaces a route in place on didReplace', () {
+      final obs = LuciqNavigatorObserver();
+      final routeA = MaterialPageRoute<void>(builder: (_) => Container());
+      final routeB = MaterialPageRoute<void>(builder: (_) => Container());
+      final routeC = MaterialPageRoute<void>(builder: (_) => Container());
+      obs.didPush(routeA, null);
+      obs.didPush(routeB, routeA);
+      obs.didReplace(newRoute: routeC, oldRoute: routeB);
+
+      // routeC replaced routeB at the same index — it is on top, opaque.
+      expect(LuciqNavigatorObserver.isRouteVisible(routeC), isTrue);
+      expect(LuciqNavigatorObserver.isRouteVisible(routeA), isFalse);
+      expect(LuciqNavigatorObserver.isRouteVisible(routeB), isNull);
+    });
+  });
 }
+
 
 Route createRoute(String? name) {
   return MaterialPageRoute(

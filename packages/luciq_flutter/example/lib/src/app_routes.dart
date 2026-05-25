@@ -28,4 +28,6 @@ final appRoutes = {
       const ScreenLoadingTabPage(),
   ScreenLoadingDelayedPage.screenName: (BuildContext context) =>
       const ScreenLoadingDelayedPage(),
+  PrivateViewsPage.screenName: (BuildContext context) =>
+      const PrivateViewsPage(),
 };

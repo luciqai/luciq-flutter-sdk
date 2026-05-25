@@ -7,6 +7,8 @@ import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart'
+    show PrivateViewsManager;
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter_example/src/app_routes.dart';
 import 'package:luciq_flutter_example/src/native/luciq_flutter_example_method_channel.dart';
@@ -47,6 +49,7 @@ part 'src/screens/screen_loading/screen_loading_delayed_page.dart';
 part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
 part 'src/screens/custom_spans_page.dart';
+part 'src/screens/private_views_page.dart';
 
 void main() {
   runZonedGuarded(

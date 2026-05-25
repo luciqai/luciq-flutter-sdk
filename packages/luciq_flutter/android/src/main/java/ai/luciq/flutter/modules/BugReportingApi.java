@@ -152,6 +152,11 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
     }
 
     @Override
+    public void bindOnDidSelectPromptOptionCallback() {
+        // iOS Only
+    }
+
+    @Override
     public void bindOnDismissCallback() {
         BugReporting.setOnDismissCallback(new OnSdkDismissCallback() {
             @Override

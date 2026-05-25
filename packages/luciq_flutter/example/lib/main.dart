@@ -65,6 +65,11 @@ void main() {
       Luciq.setWebViewUserInteractionsTrackingEnabled(true);
       Luciq.setWebViewNetworkTrackingEnabled(true);
 
+      BugReporting.setDidSelectPromptOptionIOSHandler((promptOption) {
+
+        print('promptOption: $promptOption');
+
+      },);
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
 

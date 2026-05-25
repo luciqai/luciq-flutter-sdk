@@ -10,6 +10,7 @@ import ai.luciq.featuresrequest.FeatureRequests;
 import ai.luciq.flutter.generated.FeatureRequestsPigeon;
 import ai.luciq.flutter.modules.FeatureRequestsApi;
 import ai.luciq.flutter.util.GlobalMocks;
+import ai.luciq.library.Feature;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,5 +66,19 @@ public class FeatureRequestsApiTest {
         api.setEmailFieldRequired(isRequired, actionTypes);
 
         mFeatureRequests.verify(() -> FeatureRequests.setEmailFieldRequired(isRequired, ActionType.REQUEST_NEW_FEATURE, ActionType.ADD_COMMENT_TO_FEATURE));
+    }
+
+    @Test
+    public void testSetEnabledGivenTrue() {
+        api.setEnabled(true);
+
+        mFeatureRequests.verify(() -> FeatureRequests.setState(Feature.State.ENABLED));
+    }
+
+    @Test
+    public void testSetEnabledGivenFalse() {
+        api.setEnabled(false);
+
+        mFeatureRequests.verify(() -> FeatureRequests.setState(Feature.State.DISABLED));
     }
 }

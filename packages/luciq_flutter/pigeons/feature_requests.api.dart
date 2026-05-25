@@ -4,4 +4,5 @@ import 'package:pigeon/pigeon.dart';
 abstract class FeatureRequestsHostApi {
   void show();
   void setEmailFieldRequired(bool isRequired, List<String> actionTypes);
+  void setEnabled(bool isEnabled);
 }

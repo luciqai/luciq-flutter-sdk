@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import ai.luciq.featuresrequest.FeatureRequests;
 import ai.luciq.flutter.generated.FeatureRequestsPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.library.Feature;
 
 import java.util.List;
 
@@ -33,5 +34,10 @@ public class FeatureRequestsApi implements FeatureRequestsPigeon.FeatureRequests
         }
 
         FeatureRequests.setEmailFieldRequired(isRequired, actions);
+    }
+
+    @Override
+    public void setEnabled(@NonNull Boolean isEnabled) {
+        FeatureRequests.setState(isEnabled ? Feature.State.ENABLED : Feature.State.DISABLED);
     }
 }

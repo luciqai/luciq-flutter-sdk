@@ -35,10 +35,10 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Luciq (19.5.1)
-  - luciq_flutter (19.4.0):
+  - Luciq (19.7.0)
+  - luciq_flutter (19.7.0):
     - Flutter
-    - Luciq (= 19.5.1)
+    - Luciq (= 19.7.0)
   - OCMock (3.6)
   - patrol (0.0.1):
     - CocoaAsyncSocket (~> 7.6)
@@ -88,14 +88,14 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  Luciq: 475fc7108885e33d065eb3acb7f06d994e735464
-  luciq_flutter: e2f604d6ce58b9623bc2b9bb22b63b2da6f63127
+  Luciq: 5082fd7b37a733fdde58dd81caace189c9b14c89
+  luciq_flutter: 7891ba10e790e24e70aec8573858c2764961af2b
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
   patrol: 51b76cc7c11a2933ee3e72482d930c75b9d4ec73
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
+  video_player_avfoundation: 3453f792138786248960ca029747fcd9f318ef52
 
-PODFILE CHECKSUM: 2fac70ef5212a738d3e6dd688a655571d8ec3c6e
+PODFILE CHECKSUM: 949d33ca74b5890211570cf22ffd460549485511
 
 COCOAPODS: 1.16.2

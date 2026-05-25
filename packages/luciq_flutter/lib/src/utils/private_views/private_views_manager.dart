@@ -7,7 +7,7 @@ import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
 import 'package:meta/meta.dart';
 
-enum AutoMasking { labels, textInputs, media, none }
+enum AutoMasking { labels, textInputs, media, webViews, none }
 
 extension ValidationMethod on AutoMasking {
   bool Function(Widget) hides() {
@@ -18,6 +18,8 @@ extension ValidationMethod on AutoMasking {
         return isTextInputWidget;
       case AutoMasking.media:
         return isMedia;
+      case AutoMasking.webViews:
+        return isWebViewWidget;
       case AutoMasking.none:
         return (_) => false;
     }

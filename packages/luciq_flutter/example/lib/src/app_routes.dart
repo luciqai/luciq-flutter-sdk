@@ -24,6 +24,10 @@ final appRoutes = {
       const ScreenLoadingPage(),
   ScreenCapturePrematureExtensionPage.screenName: (BuildContext context) =>
       const ScreenCapturePrematureExtensionPage(),
+  ScreenLoadingTabPage.screenName: (BuildContext context) =>
+      const ScreenLoadingTabPage(),
+  ScreenLoadingDelayedPage.screenName: (BuildContext context) =>
+      const ScreenLoadingDelayedPage(),
   PrivateViewsPage.screenName: (BuildContext context) =>
       const PrivateViewsPage(),
 };

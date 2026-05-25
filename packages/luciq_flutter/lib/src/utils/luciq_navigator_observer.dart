@@ -54,58 +54,60 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   }
 
   void screenChanged(Route newRoute) {
-    //// ignore: invalid_null_aware_operator
-    SchedulerBinding.instance?.scheduleTask(
-      () async {
-        try {
-          final rawScreenName = newRoute.settings.name.toString().trim();
-          final screenName = rawScreenName.isEmpty
-              ? ReproStepsConstants.emptyScreenFallback
-              : rawScreenName;
-          final maskedScreenName = ScreenNameMasker.I.mask(screenName);
+    try {
+      final rawScreenName = newRoute.settings.name.toString().trim();
+      final screenName = rawScreenName.isEmpty
+          ? ReproStepsConstants.emptyScreenFallback
+          : rawScreenName;
+      final maskedScreenName = ScreenNameMasker.I.mask(screenName);
 
-          final route = LuciqRoute(
-            route: newRoute,
-            name: maskedScreenName,
-          );
+      final route = LuciqRoute(
+        route: newRoute,
+        name: maskedScreenName,
+      );
 
-          //Ends the last screen rendering collector if exists.
-          LuciqScreenRenderManager.I.endScreenRenderCollector();
+      // Must run synchronously — the new route's widget tree mounts on the
+      // very next frame and its initState calls startScreenLoadingTrace,
+      // which needs currentUiTrace to already reflect the new screen.
+      LuciqScreenRenderManager.I.endScreenRenderCollector();
+      ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
 
-          // Synchronously prepares the UI trace so the widget can find it immediately.
-          ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
-
-          // Start screen render collector after UI trace validation completes and the new screen is mounted.
-          final uiTrace = ScreenLoadingManager.I.currentUiTrace;
-          uiTrace?.whenValidated.then((isValid) {
-            if (isValid) {
-              _startScreenRenderCollector(uiTrace.traceId);
-            }
-          });
-
-          // If there is a step that hasn't been pushed yet
-          final pendingStep = _steps.isNotEmpty ? _steps.last : null;
-          if (pendingStep != null) {
-            await reportScreenChange(pendingStep.name);
-            // Remove the specific pending step regardless of current ordering
-            _steps.remove(pendingStep);
-          }
-
-          // Add the new step to the list
-          _steps.add(route);
-
-          // If this route is in the array, report it and remove it from the list
-          if (_steps.contains(route)) {
-            await reportScreenChange(route.name);
-            _steps.remove(route);
-          }
-        } catch (e) {
-          LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
-          LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
+      final uiTrace = ScreenLoadingManager.I.currentUiTrace;
+      uiTrace?.whenValidated.then((isValid) {
+        if (isValid) {
+          _startScreenRenderCollector(uiTrace.traceId);
         }
-      },
-      Priority.idle,
-    );
+      });
+
+      // Repro-steps reporting has its own animation delay, so defer it to
+      // avoid blocking the navigation frame.
+      //// ignore: invalid_null_aware_operator
+      SchedulerBinding.instance?.scheduleTask(
+        () async {
+          try {
+            final pendingStep = _steps.isNotEmpty ? _steps.last : null;
+            if (pendingStep != null) {
+              await reportScreenChange(pendingStep.name);
+              _steps.remove(pendingStep);
+            }
+
+            _steps.add(route);
+
+            if (_steps.contains(route)) {
+              await reportScreenChange(route.name);
+              _steps.remove(route);
+            }
+          } catch (e) {
+            LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
+            LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
+          }
+        },
+        Priority.idle,
+      );
+    } catch (e) {
+      LuciqLogger.I.e('Screen change handling failed:', tag: Luciq.tag);
+      LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
+    }
   }
 
   Future<void> reportScreenChange(String name) async {

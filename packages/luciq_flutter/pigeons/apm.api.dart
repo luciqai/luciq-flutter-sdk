@@ -27,6 +27,12 @@ abstract class ApmHostApi {
     int uiTraceId,
   );
 
+  void reportManualScreenLoadingCP(
+    String screenName,
+    int startTimeStampMicro,
+    int durationMicro,
+  );
+
   void endScreenLoadingCP(int timeStampMicro, int uiTraceId);
 
   @async

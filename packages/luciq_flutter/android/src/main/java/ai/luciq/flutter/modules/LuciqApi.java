@@ -411,9 +411,9 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     public void reportScreenChange(@NonNull String screenName) {
         try {
             Method method = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportScreenChange",
-                    Bitmap.class, String.class);
+                    Bitmap.class, String.class, Long.class);
             if (method != null) {
-                method.invoke(null, null, screenName);
+                method.invoke(null, null, screenName, null);
             }
             Method reportView = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportCurrentViewChange",
                     String.class);
@@ -775,6 +775,33 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED);
             else
                 Luciq.setNetworkAutoMaskingState(Feature.State.DISABLED);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setWebViewMonitoringEnabled(@NonNull Boolean isEnabled) {
+        try {
+            Luciq.setWebViewMonitoringEnabled(isEnabled);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setWebViewUserInteractionsTrackingEnabled(@NonNull Boolean isEnabled) {
+        try {
+            Luciq.setWebViewUserInteractionsTrackingEnabled(isEnabled);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setWebViewNetworkTrackingEnabled(@NonNull Boolean isEnabled) {
+        try {
+            Luciq.setWebViewNetworkTrackingEnabled(isEnabled);
         } catch (Exception e) {
             e.printStackTrace();
         }

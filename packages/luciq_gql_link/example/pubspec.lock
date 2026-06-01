@@ -145,7 +145,7 @@ packages:
     source: sdk
     version: "0.0.0"
   gql:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: gql
       sha256: "67c32325eb55c15f526f0f5e7d8b38a463dbff2ec3c2e046be4a1a95f0dc93d1"
@@ -169,7 +169,7 @@ packages:
     source: hosted
     version: "1.0.1"
   gql_exec:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: gql_exec
       sha256: "394944626fae900f1d34343ecf2d62e44eb984826189c8979d305f0ae5846e38"
@@ -177,7 +177,7 @@ packages:
     source: hosted
     version: "1.1.1-alpha+1699813812660"
   gql_http_link:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: gql_http_link
       sha256: "07635e85a4f313836904961904417fd27844fe8f68f77b410a4e6b81d8e9202e"
@@ -185,7 +185,7 @@ packages:
     source: hosted
     version: "1.2.0"
   gql_link:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: gql_link
       sha256: "0730276ce3a6a0ced073194ff923a8d99b3c78e442cbf096eb54fd0c3fa9f974"

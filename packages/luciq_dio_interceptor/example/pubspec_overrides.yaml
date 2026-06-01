@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: luciq_dio_interceptor,luciq_flutter
+dependency_overrides:
+  luciq_dio_interceptor:
+    path: ..
+  luciq_flutter:
+    path: ../../luciq_flutter

@@ -354,7 +354,7 @@ class APM {
     int traceId,
   ) {
     LuciqLogger.I.d(
-      'Starting Ui trace — traceId: $traceId, screenName: $screenName, microTimeStamp: $startTimeInMicroseconds',
+      'Starting Ui trace — traceId: $traceId, screenNameLength=${screenName.length}, microTimeStamp: $startTimeInMicroseconds',
       tag: APM.tag,
     );
     return _host.startCpUiTrace(screenName, startTimeInMicroseconds, traceId);
@@ -418,7 +418,7 @@ class APM {
     int durationInMicroseconds,
   ) {
     LuciqLogger.I.d(
-      'Reporting manual screen loading trace — screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
+      'Reporting manual screen loading trace — screenNameLength=${screenName.length}, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
       tag: APM.tag,
     );
     return _host.reportManualScreenLoadingCP(

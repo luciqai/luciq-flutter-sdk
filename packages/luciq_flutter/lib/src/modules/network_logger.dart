@@ -153,12 +153,12 @@ class NetworkLogger {
     try {
       await _host.networkLog(obfuscated.toJson());
       LuciqLogger.I.d(
-        'Bug Reporting log sent — ${obfuscated.url}',
+        'Bug Reporting log sent — ${redactUrlForLog(obfuscated.url)}',
         tag: LuciqConstants.networkLoggerTag,
       );
-    } catch (e, s) {
+    } catch (e) {
       LuciqLogger.I.e(
-        'Bug Reporting log FAILED — ${obfuscated.url} — $e\n$s',
+        'Bug Reporting log FAILED — ${redactUrlForLog(obfuscated.url)} — type=${e.runtimeType}',
         tag: LuciqConstants.networkLoggerTag,
       );
     }
@@ -166,12 +166,12 @@ class NetworkLogger {
     try {
       await APM.networkLogAndroid(obfuscated);
       LuciqLogger.I.d(
-        'APM/Session Replay log sent — ${obfuscated.url}',
+        'APM/Session Replay log sent — ${redactUrlForLog(obfuscated.url)}',
         tag: LuciqConstants.networkLoggerTag,
       );
-    } catch (e, s) {
+    } catch (e) {
       LuciqLogger.I.e(
-        'APM/Session Replay log FAILED — ${obfuscated.url} — $e\n$s',
+        'APM/Session Replay log FAILED — ${redactUrlForLog(obfuscated.url)} — type=${e.runtimeType}',
         tag: LuciqConstants.networkLoggerTag,
       );
     }

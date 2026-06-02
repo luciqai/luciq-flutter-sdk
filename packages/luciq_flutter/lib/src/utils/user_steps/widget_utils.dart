@@ -1,8 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
 /// Converts a [Key] into a string representation, supporting various key types.
 String? keyToStringValue(Key? key) {
+  LuciqLogger.I.d(
+    'keyToStringValue present=${key != null}',
+    tag: DebugTags.core,
+  );
   if (key == null) return null;
 
   if (key is ValueKey) {
@@ -165,6 +171,10 @@ bool isTextInputWidget(Widget widget) {
 
 /// Retrieves the label of a widget if available.
 String? getLabel(Widget widget) {
+  LuciqLogger.I.d(
+    'getLabel type=${widget.runtimeType}',
+    tag: DebugTags.core,
+  );
   if (widget is Text) return widget.data;
   if (widget is Semantics) return widget.properties.label;
   if (widget is Icon) return widget.semanticLabel;
@@ -175,6 +185,10 @@ String? getLabel(Widget widget) {
 
 /// Retrieves the value of a toggleable widget.
 String? getToggleValue(Widget widget) {
+  LuciqLogger.I.d(
+    'getToggleValue type=${widget.runtimeType}',
+    tag: DebugTags.core,
+  );
   bool? value;
   if (widget is Checkbox) value = widget.value;
   if (widget is Radio) return widget.groupValue.toString();
@@ -194,6 +208,10 @@ String? getToggleValue(Widget widget) {
 
 /// Retrieves the value entered in a text input field.
 String? getTextInputValue(Widget widget) {
+  LuciqLogger.I.d(
+    'getTextInputValue type=${widget.runtimeType}',
+    tag: DebugTags.core,
+  );
   if (widget is TextField && !widget.obscureText) {
     return widget.controller?.text;
   } else if (widget is CupertinoTextField && !widget.obscureText) {
@@ -207,6 +225,10 @@ String? getTextInputValue(Widget widget) {
 
 /// Retrieves the hint value of a text input widget.
 String? getTextHintValue(Widget widget) {
+  LuciqLogger.I.d(
+    'getTextHintValue type=${widget.runtimeType}',
+    tag: DebugTags.core,
+  );
   if (widget is TextField && !widget.obscureText) {
     return widget.decoration?.hintText ?? widget.decoration?.labelText;
   } else if (widget is CupertinoTextField && !widget.obscureText) {
@@ -218,6 +240,10 @@ String? getTextHintValue(Widget widget) {
 
 /// Retrieves the current value of a slider widget.
 String? getSliderValue(Widget widget) {
+  LuciqLogger.I.d(
+    'getSliderValue type=${widget.runtimeType}',
+    tag: DebugTags.core,
+  );
   if (widget is Slider) return widget.value.toString();
   if (widget is CupertinoSlider) return widget.value.toString();
   if (widget is RangeSlider) {
@@ -229,6 +255,7 @@ String? getSliderValue(Widget widget) {
 
 /// Recursively searches for a label within a widget hierarchy.
 String? getLabelRecursively(Element element) {
+  LuciqLogger.I.d('getLabelRecursively', tag: DebugTags.core);
   String? label;
 
   void visitor(Element e) {

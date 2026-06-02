@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
 
 enum GestureType { swipe, scroll, tap, pinch, longPress, doubleTap }
@@ -112,6 +114,10 @@ class UserStepDetails {
     GestureType? gestureType,
     String? gestureMetaData,
   }) {
+    LuciqLogger.I.d(
+      'copyWith gestureType=${gestureType?.name}',
+      tag: DebugTags.core,
+    );
     return UserStepDetails(
       element: element ?? this.element,
       isPrivate: isPrivate ?? this.isPrivate,

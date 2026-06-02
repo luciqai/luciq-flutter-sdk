@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 // ignore: unused_import
 import 'package:flutter/services.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
@@ -220,6 +221,22 @@ class Luciq {
       appVariant,
     );
     return FeatureFlagsManager().registerFeatureFlagsListener();
+  }
+
+  /// Changes the Dart-side debug log verbosity at runtime.
+  ///
+  /// Use this to capture a debug trace mid-session (e.g. a support flow
+  /// where the user reproduces an issue) without re-initializing the SDK.
+  /// Affects only the Dart [LuciqLogger]; the native SDK log level is set
+  /// at [init] time and is not changed by this call.
+  static void setDebugLogsLevel(LogLevel level) {
+    final previous = LuciqLogger.I.logLevel;
+    // Emit BEFORE mutating so the transition is visible even when lowering to none.
+    LuciqLogger.I.d(
+      'setDebugLogsLevel changed previous=$previous level=$level',
+      tag: DebugTags.core,
+    );
+    LuciqLogger.I.logLevel = level;
   }
 
   /// Sets a [callback] to be called wehenever a screen name is captured to mask

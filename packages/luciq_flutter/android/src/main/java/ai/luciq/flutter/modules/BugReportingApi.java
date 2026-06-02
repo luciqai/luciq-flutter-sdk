@@ -9,6 +9,8 @@ import ai.luciq.bug.BugReporting;
 import ai.luciq.bug.ProactiveReportingConfigs;
 import ai.luciq.flutter.generated.BugReportingPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.Feature;
 import ai.luciq.library.OnSdkDismissCallback;
@@ -37,6 +39,7 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setEnabled] isEnabled=" + isEnabled);
         if (isEnabled) {
             BugReporting.setState(Feature.State.ENABLED);
         } else {
@@ -47,6 +50,9 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
     @SuppressLint("WrongConstant")
     @Override
     public void show(@NonNull String reportType, @Nullable List<String> invocationOptions) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[show] reportType=" + reportType
+                        + ", invocationOptions=" + invocationOptions);
         int[] options = new int[invocationOptions.size()];
         for (int i = 0; i < invocationOptions.size(); i++) {
             options[i] = ArgsRegistry.invocationOptions.get(invocationOptions.get(i));
@@ -57,6 +63,7 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setInvocationEvents(@NonNull List<String> events) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setInvocationEvents] events=" + events);
         LuciqInvocationEvent[] invocationEventsArray = new LuciqInvocationEvent[events.size()];
 
         for (int i = 0; i < events.size(); i++) {
@@ -70,6 +77,7 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
     @SuppressLint("WrongConstant")
     @Override
     public void setReportTypes(@NonNull List<String> types) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setReportTypes] types=" + types);
         int[] reportTypesArray = new int[types.size()];
 
         for (int i = 0; i < types.size(); i++) {
@@ -82,6 +90,7 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setExtendedBugReportMode(@NonNull String mode) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setExtendedBugReportMode] mode=" + mode);
         final ExtendedBugReport.State resolvedMode = ArgsRegistry.extendedBugReportStates.get(mode);
         BugReporting.setExtendedBugReportState(resolvedMode);
     }
@@ -89,6 +98,7 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
     @SuppressLint("WrongConstant")
     @Override
     public void setInvocationOptions(@NonNull List<String> options) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setInvocationOptions] options=" + options);
         int[] resolvedOptions = new int[options.size()];
         for (int i = 0; i < options.size(); i++) {
             resolvedOptions[i] = ArgsRegistry.invocationOptions.get(options.get(i));
@@ -98,6 +108,8 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setFloatingButtonEdge(@NonNull String edge, @NonNull Long offset) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setFloatingButtonEdge] edge=" + edge + ", offset=" + offset);
         final LuciqFloatingButtonEdge resolvedEdge = ArgsRegistry.floatingButtonEdges.get(edge);
         BugReporting.setFloatingButtonEdge(resolvedEdge);
         BugReporting.setFloatingButtonOffset(offset.intValue());
@@ -105,32 +117,46 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setVideoRecordingFloatingButtonPosition(@NonNull String position) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setVideoRecordingFloatingButtonPosition] position=" + position);
         final LuciqVideoRecordingButtonPosition resolvedPosition = ArgsRegistry.recordButtonPositions.get(position);
         BugReporting.setVideoRecordingFloatingButtonPosition(resolvedPosition);
     }
 
     @Override
     public void setShakingThresholdForiPhone(@NonNull Double threshold) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setShakingThresholdForiPhone] threshold=" + threshold);
         // iOS Only
     }
 
     @Override
     public void setShakingThresholdForiPad(@NonNull Double threshold) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setShakingThresholdForiPad] threshold=" + threshold);
         // iOS Only
     }
 
     @Override
     public void setShakingThresholdForAndroid(@NonNull Long threshold) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setShakingThresholdForAndroid] threshold=" + threshold);
         BugReporting.setShakingThreshold(threshold.intValue());
     }
 
     @Override
     public void setEnabledAttachmentTypes(@NonNull Boolean screenshot, @NonNull Boolean extraScreenshot, @NonNull Boolean galleryImage, @NonNull Boolean screenRecording) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setEnabledAttachmentTypes] screenshot=" + screenshot
+                        + ", extraScreenshot=" + extraScreenshot
+                        + ", galleryImage=" + galleryImage
+                        + ", screenRecording=" + screenRecording);
         BugReporting.setAttachmentTypesEnabled(screenshot, extraScreenshot, galleryImage, screenRecording);
     }
 
     @Override
     public void bindOnInvokeCallback() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[bindOnInvokeCallback]");
         BugReporting.setOnInvokeCallback(new OnInvokeCallback() {
             @Override
             public void onInvoke() {
@@ -153,6 +179,7 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void bindOnDismissCallback() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[bindOnDismissCallback]");
         BugReporting.setOnDismissCallback(new OnSdkDismissCallback() {
             @Override
             public void call(DismissType dismissType, ReportType reportType) {
@@ -172,12 +199,17 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setDisclaimerText(@NonNull String text) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setDisclaimerText] length=" + text.length());
         BugReporting.setDisclaimerText(text);
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setCommentMinimumCharacterCount(@NonNull Long limit, @Nullable List<String> reportTypes) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setCommentMinimumCharacterCount] limit=" + limit
+                        + ", reportTypes=" + reportTypes);
         int[] reportTypesArray = reportTypes == null ? new int[0] : new int[reportTypes.size()];
         if(reportTypes != null){
         for (int i = 0; i < reportTypes.size(); i++) {
@@ -190,6 +222,12 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
 public void addUserConsents(String key, String description, Boolean mandatory, Boolean checked, String actionType) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[addUserConsents] keyLength=" + (key == null ? -1 : key.length())
+                        + ", descriptionLength=" + (description == null ? -1 : description.length())
+                        + ", mandatory=" + mandatory
+                        + ", checked=" + checked
+                        + ", actionType=" + actionType);
         ThreadManager.runOnMainThread(new Runnable() {
         @Override
         public void run() {
@@ -211,6 +249,10 @@ public void addUserConsents(String key, String description, Boolean mandatory, B
 }
     @Override
     public void setProactiveReportingConfigurations(@NonNull Boolean enabled, @NonNull Long gapBetweenModals, @NonNull Long modalDelayAfterDetection) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
+                "[setProactiveReportingConfigurations] enabled=" + enabled
+                        + ", gapBetweenModals=" + gapBetweenModals
+                        + ", modalDelayAfterDetection=" + modalDelayAfterDetection);
         ThreadManager.runOnMainThread(new Runnable() {
             @Override
             public void run() {

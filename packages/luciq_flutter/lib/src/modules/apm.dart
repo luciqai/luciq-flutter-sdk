@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart' show WidgetBuilder;
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/models/custom_span.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
@@ -10,6 +11,7 @@ import 'package:luciq_flutter/src/models/network_data.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
@@ -47,6 +49,10 @@ class APM {
   /// await span?.end();
   /// ```
   static Future<CustomSpan?> startCustomSpan(String name) {
+    LuciqLogger.I.d(
+      'startCustomSpan nameLength=${name.length}',
+      tag: DebugTags.apmCustomSpan,
+    );
     return CustomSpanManager.I.startCustomSpan(name);
   }
 
@@ -70,6 +76,10 @@ class APM {
     DateTime startDate,
     DateTime endDate,
   ) {
+    LuciqLogger.I.d(
+      'addCompletedCustomSpan nameLength=${name.length}',
+      tag: DebugTags.apmCustomSpan,
+    );
     return CustomSpanManager.I.addCompletedCustomSpan(name, startDate, endDate);
   }
 
@@ -80,6 +90,10 @@ class APM {
   /// Enables or disables APM feature.
   /// [boolean] isEnabled
   static Future<void> setEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setEnabled isEnabled=$isEnabled',
+      tag: DebugTags.apmAppLaunch,
+    );
     return _host.setEnabled(isEnabled);
   }
 
@@ -89,6 +103,7 @@ class APM {
   ///   A Future<bool> object is being returned.
   @internal
   static Future<bool> isEnabled() async {
+    LuciqLogger.I.d('isEnabled invoked', tag: DebugTags.apmAppLaunch);
     return _host.isEnabled();
   }
 
@@ -102,6 +117,10 @@ class APM {
   /// Returns:
   ///   A Future<void> is being returned.
   static Future<void> setScreenLoadingEnabled(bool isEnabled) {
+    LuciqLogger.I.d(
+      'setScreenLoadingEnabled isEnabled=$isEnabled',
+      tag: DebugTags.apmScreenLoading,
+    );
     return _host.setScreenLoadingEnabled(isEnabled);
   }
 
@@ -111,6 +130,10 @@ class APM {
   ///   A Future<bool> object is being returned.
   @internal
   static Future<bool> isScreenLoadingEnabled() async {
+    LuciqLogger.I.d(
+      'isScreenLoadingEnabled invoked',
+      tag: DebugTags.apmScreenLoading,
+    );
     return _host.isScreenLoadingEnabled();
   }
 
@@ -123,6 +146,10 @@ class APM {
   /// Returns:
   ///   The method is returning a `Future<void>`.
   static Future<void> setColdAppLaunchEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setColdAppLaunchEnabled isEnabled=$isEnabled',
+      tag: DebugTags.apmAppLaunch,
+    );
     return _host.setColdAppLaunchEnabled(isEnabled);
   }
 
@@ -141,6 +168,10 @@ class APM {
   /// The method will only execute if APM is enabled, the feature is
   /// active, and the SDK has been initialized.
   static Future<void> startFlow(String name) async {
+    LuciqLogger.I.d(
+      'startFlow nameLength=${name.length}',
+      tag: DebugTags.apmFlow,
+    );
     if (name.isNotEmpty) {
       return _host.startFlow(name.trim());
     }
@@ -158,6 +189,10 @@ class APM {
     String key,
     String? value,
   ) async {
+    LuciqLogger.I.d(
+      'setFlowAttribute nameLength=${name.length} keyLength=${key.length} valueLength=${value?.length ?? 0} valuePresent=${value != null}',
+      tag: DebugTags.apmFlow,
+    );
     return _host.setFlowAttribute(name, key, value);
   }
 
@@ -170,6 +205,10 @@ class APM {
   /// Returns:
   ///   The method is returning a `Future<void>`.
   static Future<void> endFlow(String name) async {
+    LuciqLogger.I.d(
+      'endFlow nameLength=${name.length}',
+      tag: DebugTags.apmFlow,
+    );
     return _host.endFlow(name);
   }
 
@@ -187,6 +226,10 @@ class APM {
   /// Returns:
   ///   The method returns a `Future<void>`.
   static Future<void> setAutoUITraceEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setAutoUITraceEnabled isEnabled=$isEnabled',
+      tag: DebugTags.apmUITrace,
+    );
     return _host.setAutoUITraceEnabled(isEnabled);
   }
 
@@ -199,6 +242,10 @@ class APM {
   /// Returns:
   ///   The method is returning a `Future<void>`.
   static Future<void> startUITrace(String name) async {
+    LuciqLogger.I.d(
+      'startUITrace nameLength=${name.length}',
+      tag: DebugTags.apmUITrace,
+    );
     final isScreenRenderingEnabled =
         await FlagsConfig.screenRendering.isEnabled();
     await LuciqScreenRenderManager.I
@@ -224,6 +271,7 @@ class APM {
   /// Returns:
   ///   The method is returning a `Future<void>`.
   static Future<void> endUITrace() async {
+    LuciqLogger.I.d('endUITrace invoked', tag: DebugTags.apmUITrace);
     // End screen render collector for custom ui trace if enabled.
     if (LuciqScreenRenderManager.I.screenRenderEnabled) {
       LuciqScreenRenderManager.I.endScreenRenderCollector(UiTraceType.custom);
@@ -250,6 +298,7 @@ class APM {
   /// Returns:
   ///   The method is returning a `Future<void>`.
   static Future<void> endAppLaunch() async {
+    LuciqLogger.I.d('endAppLaunch invoked', tag: DebugTags.apmAppLaunch);
     return _host.endAppLaunch();
   }
 
@@ -267,6 +316,12 @@ class APM {
   /// Returns:
   ///   The method is returning a `FutureOr<void>`.
   static FutureOr<void> networkLogAndroid(NetworkData data) {
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.d(
+        'networkLogAndroid method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration}',
+        tag: DebugTags.apmNetwork,
+      );
+    }
     if (LCQBuildInfo.instance.isAndroid) {
       return _host.networkLogAndroid(data.toJson());
     }
@@ -401,6 +456,7 @@ class APM {
   /// Returns:
   ///   A Future<void> is being returned.
   static Future<void> endScreenLoading() {
+    LuciqLogger.I.d('endScreenLoading invoked', tag: DebugTags.apmScreenLoading);
     return ScreenLoadingManager.I.endScreenLoading();
   }
 
@@ -411,6 +467,10 @@ class APM {
   ///   A Future<bool> is being returned.
   @internal
   static Future<bool> isEndScreenLoadingEnabled() async {
+    LuciqLogger.I.d(
+      'isEndScreenLoadingEnabled invoked',
+      tag: DebugTags.apmScreenLoading,
+    );
     return _host.isEndScreenLoadingEnabled();
   }
 
@@ -431,6 +491,10 @@ class APM {
     Map<String, WidgetBuilder> routes, {
     List<String> exclude = const [],
   }) {
+    LuciqLogger.I.d(
+      'wrapRoutes routeCount=${routes.length} excludeCount=${exclude.length}',
+      tag: DebugTags.apmScreenLoading,
+    );
     return ScreenLoadingManager.wrapRoutes(routes, exclude: exclude);
   }
 
@@ -441,6 +505,7 @@ class APM {
   ///   A Future<bool> is being returned.
   @internal
   static Future<bool> isAutoUiTraceEnabled() async {
+    LuciqLogger.I.d('isAutoUiTraceEnabled invoked', tag: DebugTags.apmUITrace);
     return _host.isAutoUiTraceEnabled();
   }
 
@@ -455,6 +520,10 @@ class APM {
   ///   A Future<bool> is being returned.
   @internal
   static Future<bool> isScreenRenderEnabled() async {
+    LuciqLogger.I.d(
+      'isScreenRenderEnabled invoked',
+      tag: DebugTags.apmScreenRendering,
+    );
     return _host.isScreenRenderEnabled();
   }
 
@@ -465,6 +534,10 @@ class APM {
   ///   A Future<bool> is being returned.
   @internal
   static Future<bool> isCustomSpanEnabled() async {
+    LuciqLogger.I.d(
+      'isCustomSpanEnabled invoked',
+      tag: DebugTags.apmCustomSpan,
+    );
     return _host.isCustomSpanEnabled();
   }
 
@@ -478,6 +551,10 @@ class APM {
   ///   A Future<List<double>> where the first element is the refresh rate and the second is the tolerance value.
   @internal
   static Future<List<double?>> getDeviceRefreshRateAndTolerance() {
+    LuciqLogger.I.d(
+      'getDeviceRefreshRateAndTolerance invoked',
+      tag: DebugTags.apmScreenRendering,
+    );
     return _host.getDeviceRefreshRateAndTolerance();
   }
 
@@ -491,6 +568,10 @@ class APM {
   /// Returns:
   ///   A Future<void> is being returned.
   static Future<void> setScreenRenderingEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setScreenRenderingEnabled isEnabled=$isEnabled',
+      tag: DebugTags.apmScreenRendering,
+    );
     return _host.setScreenRenderEnabled(isEnabled);
   }
 
@@ -508,6 +589,10 @@ class APM {
   static Future<void> endScreenRenderForAutoUiTrace(
     LuciqScreenRenderData data,
   ) {
+    LuciqLogger.I.d(
+      'endScreenRenderForAutoUiTrace invoked',
+      tag: DebugTags.apmScreenRendering,
+    );
     return _host.endScreenRenderForAutoUiTrace(data.toMap());
   }
 
@@ -525,6 +610,10 @@ class APM {
   static Future<void> endScreenRenderForCustomUiTrace(
     LuciqScreenRenderData data,
   ) {
+    LuciqLogger.I.d(
+      'endScreenRenderForCustomUiTrace invoked',
+      tag: DebugTags.apmScreenRendering,
+    );
     return _host.endScreenRenderForCustomUiTrace(data.toMap());
   }
 }

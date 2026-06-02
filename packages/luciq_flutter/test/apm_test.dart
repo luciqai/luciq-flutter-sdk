@@ -48,6 +48,10 @@ void main() {
     LuciqMonotonicClock.setInstance(mMonotonicClock);
   });
 
+  setUp(() {
+    when(mLuciqLogger.isDebugEnabled()).thenReturn(false);
+  });
+
   test('[setEnabled] should call host method', () async {
     const enabled = true;
 
@@ -367,6 +371,7 @@ void main() {
       reset(mLuciqHost);
       reset(mHost);
       reset(mLuciqLogger);
+      when(mLuciqLogger.isDebugEnabled()).thenReturn(false);
       // Clear active spans before each test
       CustomSpanManager.I.$clearActiveSpans();
     });

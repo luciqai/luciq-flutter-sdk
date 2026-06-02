@@ -2,6 +2,8 @@
 #import "LuciqSDK/LuciqSDK.h"
 #import "BugReportingApi.h"
 #import "ArgsRegistry.h"
+#import "../Util/LuciqFlutterLogger.h"
+#import "../Util/LuciqFlutterDebugTags.h"
 
 extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     BugReportingFlutterApi *flutterApi = [[BugReportingFlutterApi alloc] initWithBinaryMessenger:messenger];
@@ -18,10 +20,12 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
     LCQBugReporting.enabled = [isEnabled boolValue];
 }
 
 - (void)showReportType:(NSString *)reportType invocationOptions:(NSArray<NSString *> *)invocationOptions error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.show] reportType=%@ optionsCount=%lu", reportType, (unsigned long)invocationOptions.count];
     LCQBugReportingReportType resolvedType = (ArgsRegistry.reportTypes[reportType]).integerValue;
     LCQBugReportingOption resolvedOptions = 0;
 
@@ -33,6 +37,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setInvocationEventsEvents:(NSArray<NSString *> *)events error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setInvocationEvents] count=%lu", (unsigned long)events.count];
     LCQInvocationEvent resolvedEvents = 0;
 
     for (NSString *event in events) {
@@ -43,6 +48,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setReportTypesTypes:(NSArray<NSString *> *)types error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setReportTypes] count=%lu", (unsigned long)types.count];
     LCQBugReportingReportType resolvedTypes = 0;
 
     for (NSString *type in types) {
@@ -54,10 +60,12 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 
 - (void)setExtendedBugReportModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error {
     LCQExtendedBugReportMode resolvedMode = (ArgsRegistry.extendedBugReportStates[mode]).integerValue;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setExtendedBugReportMode] mode=%ld", (long)resolvedMode];
     LCQBugReporting.extendedBugReportMode = resolvedMode;
 }
 
 - (void)setInvocationOptionsOptions:(NSArray<NSString *> *)options error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setInvocationOptions] count=%lu", (unsigned long)options.count];
     LCQBugReportingOption resolvedOptions = 0;
 
     for (NSString *option in options) {
@@ -68,29 +76,35 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setFloatingButtonEdgeEdge:(NSString *)edge offset:(NSNumber *)offset error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setFloatingButtonEdge] edge=%@ offset=%@", edge, offset];
     CGRectEdge resolvedEdge = (ArgsRegistry.floatingButtonEdges[edge]).doubleValue;
     LCQBugReporting.floatingButtonEdge = resolvedEdge;
     LCQBugReporting.floatingButtonTopOffset = [offset doubleValue];
 }
 
 - (void)setVideoRecordingFloatingButtonPositionPosition:(NSString *)position error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setVideoRecordingFloatingButtonPosition] position=%@", position];
     LCQPosition resolvedPosition = (ArgsRegistry.recordButtonPositions[position]).integerValue;
     LCQBugReporting.videoRecordingFloatingButtonPosition = resolvedPosition;
 }
 
 - (void)setShakingThresholdForiPhoneThreshold:(NSNumber *)threshold error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setShakingThresholdForiPhone] threshold=%@", threshold];
     LCQBugReporting.shakingThresholdForiPhone = [threshold doubleValue];
 }
 
 - (void)setShakingThresholdForiPadThreshold:(NSNumber *)threshold error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setShakingThresholdForiPad] threshold=%@", threshold];
     LCQBugReporting.shakingThresholdForiPad = [threshold doubleValue];
 }
 
 - (void)setShakingThresholdForAndroidThreshold:(NSNumber *)threshold error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setShakingThresholdForAndroid] iOS noop"];
     // Android Only
 }
 
 - (void)setEnabledAttachmentTypesScreenshot:(NSNumber *)screenshot extraScreenshot:(NSNumber *)extraScreenshot galleryImage:(NSNumber *)galleryImage screenRecording:(NSNumber *)screenRecording error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setEnabledAttachmentTypes] screenshot=%@ extraScreenshot=%@ galleryImage=%@ screenRecording=%@", ([screenshot boolValue] ? @"YES" : @"NO"), ([extraScreenshot boolValue] ? @"YES" : @"NO"), ([galleryImage boolValue] ? @"YES" : @"NO"), ([screenRecording boolValue] ? @"YES" : @"NO")];
 
     LCQAttachmentType resolvedTypes = 0;
 
@@ -111,6 +125,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)bindOnInvokeCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.bindOnInvokeCallback]"];
     LCQBugReporting.willInvokeHandler = ^{
       [self->_flutterApi onSdkInvokeWithCompletion:^(FlutterError *_Nullable _){
       }];
@@ -118,6 +133,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)bindOnDismissCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.bindOnDismissCallback]"];
     LCQBugReporting.didDismissHandler = ^(LCQDismissType dismissType, LCQReportCategory reportType) {
       // Parse dismiss type enum
       NSString *dismissTypeString;
@@ -147,10 +163,12 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setDisclaimerTextText:(NSString *)text error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setDisclaimerText] length=%lu", (unsigned long)text.length];
     [LCQBugReporting setDisclaimerText:text];
 }
 
 - (void)setCommentMinimumCharacterCountLimit:(NSNumber *)limit reportTypes:(nullable NSArray<NSString *> *)reportTypes error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setCommentMinimumCharacterCount] limit=%@ reportTypesCount=%lu", limit, (unsigned long)reportTypes.count];
     LCQBugReportingType resolvedTypes = 0;
     if (![reportTypes count]) {
         resolvedTypes = (ArgsRegistry.reportTypes[@"ReportType.bug"]).integerValue | (ArgsRegistry.reportTypes[@"ReportType.feedback"]).integerValue | (ArgsRegistry.reportTypes[@"ReportType.question"]).integerValue;
@@ -170,7 +188,8 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
                      checked:(NSNumber *)checked
                   actionType:(nullable NSString *)actionType
                        error:(FlutterError *_Nullable *_Nonnull)error {
-   
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.addUserConsents] keyLength=%lu descLength=%lu mandatory=%@ checked=%@ actionTypePresent=%@", (unsigned long)key.length, (unsigned long)description.length, ([mandatory boolValue] ? @"YES" : @"NO"), ([checked boolValue] ? @"YES" : @"NO"), (actionType != nil ? @"YES" : @"NO")];
+
     LCQConsentAction mappedActionType =  (ArgsRegistry.userConsentActionTypes[actionType]).integerValue;
 
     [LCQBugReporting addUserConsentWithKey:key
@@ -181,6 +200,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setProactiveReportingConfigurationsEnabled:(nonnull NSNumber *)enabled gapBetweenModals:(nonnull NSNumber *)gapBetweenModals modalDelayAfterDetection:(nonnull NSNumber *)modalDelayAfterDetection error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setProactiveReportingConfigurations] enabled=%@ gapBetweenModals=%@ modalDelayAfterDetection=%@", ([enabled boolValue] ? @"YES" : @"NO"), gapBetweenModals, modalDelayAfterDetection];
     LCQProactiveReportingConfigurations *configurations = [[LCQProactiveReportingConfigurations alloc] init];
     configurations.enabled = [enabled boolValue]; //Enable/disable
     configurations.gapBetweenModals = gapBetweenModals; // Time in seconds

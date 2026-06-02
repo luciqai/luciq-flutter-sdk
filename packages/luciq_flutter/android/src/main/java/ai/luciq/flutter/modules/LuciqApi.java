@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.graphics.Typeface;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -87,7 +86,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
             if (method != null) {
                 method.invoke(null, Platform.FLUTTER);
             } else {
-                Log.e(TAG, "setCurrentPlatform was not found by reflection");
+                LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE, "setCurrentPlatform was not found by reflection");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -96,6 +95,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setEnabled] isEnabled=" + isEnabled);
         try {
             if (isEnabled)
                 Luciq.enable();
@@ -109,12 +109,14 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     @NotNull
     @Override
     public Boolean isEnabled() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[isEnabled]");
         return Luciq.isEnabled();
     }
 
     @NotNull
     @Override
     public Boolean isBuilt() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[isBuilt]");
         return Luciq.isBuilt();
     }
 
@@ -160,6 +162,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void enableAutoMasking(@NonNull List<String> autoMasking) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[enableAutoMasking] autoMasking=" + autoMasking);
         int[] autoMaskingArray = new int[autoMasking.size()];
         for (int i = 0; i < autoMasking.size(); i++) {
             String key = autoMasking.get(i);
@@ -171,27 +174,35 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void show() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[show]");
         Luciq.show();
     }
 
     @Override
     public void showWelcomeMessageWithMode(@NonNull String mode) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[showWelcomeMessageWithMode] mode=" + mode);
         WelcomeMessage.State resolvedMode = ArgsRegistry.welcomeMessageStates.get(mode);
         Luciq.showWelcomeMessage(resolvedMode);
     }
 
     @Override
     public void identifyUser(@Nullable String email, @Nullable String name, @Nullable String userId) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[identifyUser] emailPresent=" + (email != null && !email.isEmpty())
+                        + ", namePresent=" + (name != null && !name.isEmpty())
+                        + ", userIdPresent=" + (userId != null && !userId.isEmpty()));
         Luciq.identifyUser(name, email, userId);
     }
 
     @Override
     public void setUserData(@NonNull String data) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setUserData] length=" + data.length());
         Luciq.setUserData(data);
     }
 
     @Override
     public void setAppVariant(@NonNull String appVariant) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setAppVariant] length=" + appVariant.length());
         try {
             Luciq.setAppVariant(appVariant);
 
@@ -203,22 +214,29 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void logUserEvent(@NonNull String name) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[logUserEvent] length=" + name.length());
         Luciq.logUserEvent(name);
     }
 
     @Override
     public void logOut() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[logOut]");
         Luciq.logoutUser();
     }
 
     @Override
     public void setEnableUserSteps(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setEnableUserSteps] isEnabled=" + isEnabled);
         Luciq.setTrackingUserStepsState(isEnabled ? Feature.State.ENABLED : Feature.State.DISABLED);
     }
 
     @Override
 
     public void logUserSteps(@NonNull String gestureType, @NonNull String message, @Nullable String viewName) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[logUserSteps] gestureType=" + gestureType
+                        + ", messageLength=" + message.length()
+                        + ", viewNamePresent=" + (viewName != null));
         try {
             final String stepType = ArgsRegistry.gestureStepType.get(gestureType);
             final long timeStamp = System.currentTimeMillis();
@@ -240,18 +258,21 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setLocale(@NonNull String locale) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setLocale] locale=" + locale);
         final LuciqLocale resolvedLocale = ArgsRegistry.locales.get(locale);
         Luciq.setLocale(new Locale(resolvedLocale.getCode(), resolvedLocale.getCountry()));
     }
 
     @Override
     public void setColorTheme(@NonNull String theme) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setColorTheme] theme=" + theme);
         LuciqColorTheme resolvedTheme = ArgsRegistry.colorThemes.get(theme);
         Luciq.setColorTheme(resolvedTheme);
     }
 
     @Override
     public void setWelcomeMessageMode(@NonNull String mode) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setWelcomeMessageMode] mode=" + mode);
         WelcomeMessage.State resolvedMode = ArgsRegistry.welcomeMessageStates.get(mode);
         Luciq.setWelcomeMessageState(resolvedMode);
     }
@@ -259,6 +280,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setSessionProfilerEnabled(@NonNull Boolean enabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setSessionProfilerEnabled] enabled=" + enabled);
         if (enabled) {
             Luciq.setSessionProfilerState(Feature.State.ENABLED);
         } else {
@@ -268,27 +290,32 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setValueForStringWithKey(@NonNull String value, @NonNull String key) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[setValueForStringWithKey] key=" + key + ", valueLength=" + value.length());
         if (ArgsRegistry.placeholders.containsKey(key)) {
             LuciqCustomTextPlaceHolder.Key resolvedKey = ArgsRegistry.placeholders.get(key);
             placeHolder.set(resolvedKey, value);
             Luciq.setCustomTextPlaceHolders(placeHolder);
         } else {
-            Log.i(TAG, "Luciq: " + key + " is only relevant to iOS.");
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "Luciq: " + key + " is only relevant to iOS.");
         }
     }
 
     @Override
     public void appendTags(@NonNull List<String> tags) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[appendTags] count=" + tags.size());
         Luciq.addTags(tags.toArray(new String[0]));
     }
 
     @Override
     public void resetTags() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[resetTags]");
         Luciq.resetTags();
     }
 
     @Override
     public void getTags(LuciqPigeon.Result<List<String>> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[getTags]");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -310,6 +337,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void addFeatureFlags(@NonNull Map<String, String> featureFlags) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[addFeatureFlags] count=" + featureFlags.size());
         try {
             List<LuciqFeatureFlag> features = new ArrayList<>();
             for (Map.Entry<String, String> entry : featureFlags.entrySet()) {
@@ -323,6 +351,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void removeFeatureFlags(@NonNull List<String> featureFlags) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[removeFeatureFlags] count=" + featureFlags.size());
         try {
             Luciq.removeFeatureFlag(featureFlags);
         } catch (Exception e) {
@@ -332,6 +361,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void removeAllFeatureFlags() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[removeAllFeatureFlags]");
         try {
             Luciq.removeAllFeatureFlags();
         } catch (Exception e) {
@@ -341,17 +371,21 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setUserAttribute(@NonNull String value, @NonNull String key) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[setUserAttribute] key=" + key + ", valueLength=" + value.length());
         Luciq.setUserAttribute(key, value);
     }
 
     @Override
     public void removeUserAttribute(@NonNull String key) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[removeUserAttribute] key=" + key);
         Luciq.removeUserAttribute(key);
     }
 
 
     @Override
     public void getUserAttributeForKey(@NonNull String key, LuciqPigeon.Result<String> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[getUserAttributeForKey] key=" + key);
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -371,6 +405,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void getUserAttributes(LuciqPigeon.Result<Map<String, String>> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[getUserAttributes]");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -390,6 +425,10 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setReproStepsConfig(@Nullable String bugMode, @Nullable String crashMode, @Nullable String sessionReplayMode) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[setReproStepsConfig] bugMode=" + bugMode
+                        + ", crashMode=" + crashMode
+                        + ", sessionReplayMode=" + sessionReplayMode);
         try {
             final ReproConfigurations.Builder builder = new ReproConfigurations.Builder();
 
@@ -418,6 +457,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void reportScreenChange(@NonNull String screenName) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SCREEN_TRACKING,
+                "[reportScreenChange] screenNameLength=" + screenName.length());
         try {
             Method method = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportScreenChange",
                     Bitmap.class, String.class, Long.class);
@@ -449,6 +490,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setCustomBrandingImage(@NonNull String light, @NonNull String dark) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[setCustomBrandingImage] lightLength=" + light.length() + ", darkLength=" + dark.length());
         try {
             Bitmap lightLogoVariant = getBitmapForAsset(light);
             Bitmap darkLogoVariant = getBitmapForAsset(dark);
@@ -475,11 +518,15 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setFont(@NonNull String font) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setFont] fontLength=" + font.length());
         // iOS Only
     }
 
     @Override
     public void addFileAttachmentWithURL(@NonNull String filePath, @NonNull String fileName) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[addFileAttachmentWithURL] filePathLength=" + filePath.length()
+                        + ", fileNameLength=" + fileName.length());
         final File file = new File(filePath);
         if (file.exists()) {
             Luciq.addFileAttachment(Uri.fromFile(file), fileName);
@@ -488,16 +535,24 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void addFileAttachmentWithData(@NonNull byte[] data, @NonNull String fileName) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[addFileAttachmentWithData] dataLength=" + data.length
+                        + ", fileNameLength=" + fileName.length());
         Luciq.addFileAttachment(data, fileName);
     }
 
     @Override
     public void clearFileAttachments() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[clearFileAttachments]");
         Luciq.clearFileAttachment();
     }
 
     @Override
     public void networkLog(@NonNull Map<String, Object> data) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.NETWORK,
+                "[networkLog] url=" + LuciqFlutterLogger.redactUrl((String) data.get("url"))
+                        + ", method=" + data.get("method")
+                        + ", responseCode=" + data.get("responseCode"));
         try {
             NetworkLog networkLog = new NetworkLog();
             String date = System.currentTimeMillis() + "";
@@ -514,13 +569,13 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
             networkLog.insert();
         } catch (Exception e) {
-            Log.e(TAG, "Network logging failed");
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.NETWORK, "Network logging failed");
         }
     }
 
     @Override
     public void registerFeatureFlagChangeListener() {
-
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[registerFeatureFlagChangeListener]");
         try {
             InternalCore.INSTANCE._setFeaturesStateListener(new FeaturesStateListener() {
                 @Override
@@ -556,6 +611,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     @NonNull
     @Override
     public Map<String, Boolean> isW3CFeatureFlagsEnabled() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[isW3CFeatureFlagsEnabled]");
         Map<String, Boolean> params = new HashMap<String, Boolean>();
         params.put("isW3cExternalTraceIDEnabled", InternalCore.INSTANCE._isFeatureEnabled(CoreFeature.W3C_EXTERNAL_TRACE_ID));
         params.put("isW3cExternalGeneratedHeaderEnabled", InternalCore.INSTANCE._isFeatureEnabled(CoreFeature.W3C_ATTACHING_GENERATED_HEADER));
@@ -567,6 +623,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void willRedirectToStore() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[willRedirectToStore]");
         Luciq.willRedirectToStore();
     }
 
@@ -591,6 +648,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setNetworkLogBodyEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.NETWORK, "[setNetworkLogBodyEnabled] isEnabled=" + isEnabled);
         try {
             Luciq.setNetworkLogBodyEnabled(isEnabled);
         } catch (Exception e) {
@@ -600,8 +658,9 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setTheme(@NonNull Map<String, Object> themeConfig) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setTheme] keyCount=" + themeConfig.size());
         try {
-            Log.d(TAG, "setTheme called with config: " + themeConfig.toString());
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "setTheme called with keyCount=" + themeConfig.size());
 
             ai.luciq.library.model.LuciqTheme.Builder builder = new ai.luciq.library.model.LuciqTheme.Builder();
 
@@ -637,10 +696,10 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
             ai.luciq.library.model.LuciqTheme theme = builder.build();
             Luciq.setTheme(theme);
-            Log.d(TAG, "Theme applied successfully");
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "Theme applied successfully");
 
         } catch (Exception e) {
-            Log.e(TAG, "Error in setTheme: " + e.getMessage());
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE, "Error in setTheme", e);
             e.printStackTrace();
         }
     }
@@ -754,6 +813,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
      */
     @Override
     public void setFullscreen(@NonNull final Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setFullscreen] isEnabled=" + isEnabled);
         try {
             Luciq.setFullscreen(isEnabled);
         } catch (Exception e) {
@@ -763,6 +823,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void getNetworkBodyMaxSize(@NonNull LuciqPigeon.Result<Double> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.NETWORK, "[getNetworkBodyMaxSize]");
         ThreadManager.runOnMainThread(
             new Runnable() {
                 @Override
@@ -779,6 +840,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     }
     @Override
     public void setNetworkAutoMaskingEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.NETWORK, "[setNetworkAutoMaskingEnabled] isEnabled=" + isEnabled);
         try {
             if (isEnabled)
                 Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED);
@@ -791,6 +853,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setWebViewMonitoringEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setWebViewMonitoringEnabled] isEnabled=" + isEnabled);
         try {
             Luciq.setWebViewMonitoringEnabled(isEnabled);
         } catch (Exception e) {
@@ -800,6 +863,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setWebViewUserInteractionsTrackingEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[setWebViewUserInteractionsTrackingEnabled] isEnabled=" + isEnabled);
         try {
             Luciq.setWebViewUserInteractionsTrackingEnabled(isEnabled);
         } catch (Exception e) {
@@ -809,6 +874,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void setWebViewNetworkTrackingEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[setWebViewNetworkTrackingEnabled] isEnabled=" + isEnabled);
         try {
             Luciq.setWebViewNetworkTrackingEnabled(isEnabled);
         } catch (Exception e) {

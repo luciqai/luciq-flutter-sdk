@@ -16,10 +16,7 @@ class LuciqLogger implements Logger {
   LuciqLogger._();
 
   static LuciqLogger _instance = LuciqLogger._();
-
   static LuciqLogger get instance => _instance;
-
-  /// Shorthand for [instance]
   static LuciqLogger get I => instance;
 
   @visibleForTesting
@@ -30,10 +27,19 @@ class LuciqLogger implements Logger {
 
   LogLevel _logLevel = LogLevel.error;
 
-  // ignore: avoid_setters_without_getters
+  LogLevel get logLevel => _logLevel;
+
   set logLevel(LogLevel level) {
     _logLevel = level;
   }
+
+  /// Returns true when the current level is at debug or verbose. Use to gate
+  /// expensive payload construction:
+  ///
+  ///   if (LuciqLogger.I.isDebugEnabled()) {
+  ///     LuciqLogger.I.d('big payload: ' + buildPayload(), tag: DebugTags.network);
+  ///   }
+  bool isDebugEnabled() => _logLevel.getValue() <= LogLevel.debug.getValue();
 
   @override
   void log(
@@ -51,33 +57,24 @@ class LuciqLogger implements Logger {
     }
   }
 
-  void e(
-    String message, {
-    String tag = '',
-  }) {
-    log(message, tag: tag, level: LogLevel.error);
-  }
+  void e(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.error);
 
-  void d(
-    String message, {
-    String tag = '',
-  }) {
-    log(message, tag: tag, level: LogLevel.debug);
-  }
+  void d(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.debug);
 
-  void v(
-    String message, {
-    String tag = '',
-  }) {
-    log(message, tag: tag, level: LogLevel.verbose);
-  }
+  void v(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.verbose);
+
+  /// Warning log. Mirrors RN's `Logger.warn`, gated at the debug threshold
+  /// (warnings only surface when debug logs are on).
+  void w(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.debug);
 }
 
 extension LogLevelExtension on LogLevel {
-  /// Returns the severity level to be used in the `developer.log` function.
-  ///
-  /// The severity level is a value between 0 and 2000.
-  /// The values used here are based on the `package:logging` `Level` class.
+  /// Severity level used by `developer.log`. Larger = more severe.
+  /// Based on the `package:logging` `Level` class.
   int getValue() {
     switch (this) {
       case LogLevel.none:

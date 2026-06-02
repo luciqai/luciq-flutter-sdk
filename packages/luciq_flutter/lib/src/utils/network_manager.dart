@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/luciq_constants.dart';
@@ -63,20 +64,22 @@ class NetworkManager {
 
       final requestExceeds = data.requestBodySize > limit;
       if (requestExceeds) {
-        LuciqLogger.I.d(
-          LuciqConstants.getNetworkBodyLimitExceededMessage(
-            type: 'request',
-            bodySize: data.requestBodySize,
-          ),
-          tag: LuciqConstants.networkManagerTag,
-        );
+        if (LuciqLogger.I.isDebugEnabled()) {
+          LuciqLogger.I.d(
+            LuciqConstants.getNetworkBodyLimitExceededMessage(
+              type: 'request',
+              bodySize: data.requestBodySize,
+            ),
+            tag: DebugTags.network,
+          );
+        }
       }
 
       return requestExceeds;
     } catch (error) {
       LuciqLogger.I.e(
-        'Error checking network request body size limit: $error',
-        tag: LuciqConstants.networkManagerTag,
+        'Error checking network request body size limit type=${error.runtimeType}',
+        tag: DebugTags.network,
       );
       return false; // Don't block logging on error
     }
@@ -94,20 +97,22 @@ class NetworkManager {
 
       final responseExceeds = data.responseBodySize > limit;
       if (responseExceeds) {
-        LuciqLogger.I.d(
-          LuciqConstants.getNetworkBodyLimitExceededMessage(
-            type: 'response',
-            bodySize: data.responseBodySize,
-          ),
-          tag: LuciqConstants.networkManagerTag,
-        );
+        if (LuciqLogger.I.isDebugEnabled()) {
+          LuciqLogger.I.d(
+            LuciqConstants.getNetworkBodyLimitExceededMessage(
+              type: 'response',
+              bodySize: data.responseBodySize,
+            ),
+            tag: DebugTags.network,
+          );
+        }
       }
 
       return responseExceeds;
     } catch (error) {
       LuciqLogger.I.e(
-        'Error checking network response body size limit: $error',
-        tag: LuciqConstants.networkManagerTag,
+        'Error checking network response body size limit type=${error.runtimeType}',
+        tag: DebugTags.network,
       );
       return false; // Don't block logging on error
     }
@@ -132,10 +137,10 @@ class NetworkManager {
       return limit?.toInt();
     } catch (error) {
       LuciqLogger.I.e(
-        'Failed to get network body max size from native API: $error'
+        'Failed to get network body max size from native API type=${error.runtimeType}'
         '\n'
         'Setting it to the default value of $_defaultNetworkBodyMaxSize bytes = ${_defaultNetworkBodyMaxSize / 1024} KB',
-        tag: LuciqConstants.networkManagerTag,
+        tag: DebugTags.network,
       );
       _cachedNetworkBodyMaxSize = _defaultNetworkBodyMaxSize;
       return _defaultNetworkBodyMaxSize;

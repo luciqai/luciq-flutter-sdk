@@ -2,6 +2,8 @@
 #import "CrashReportingApi.h"
 #import "../Util/LCQCrashReporting+CP.h"
 #import "ArgsRegistry.h"
+#import "../Util/LuciqFlutterLogger.h"
+#import "../Util/LuciqFlutterDebugTags.h"
 
 extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
     CrashReportingApi *api = [[CrashReportingApi alloc] init];
@@ -11,11 +13,13 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
 @implementation CrashReportingApi
 
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags crashReporting] format:@"[CR.setEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
     BOOL boolValue = [isEnabled boolValue];
     LCQCrashReporting.enabled = boolValue;
 }
 
 - (void)sendJsonCrash:(NSString *)jsonCrash isHandled:(NSNumber *)isHandled error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags crashReporting] format:@"[CR.sendJsonCrash] jsonCrashLength=%lu isHandled=%@", (unsigned long)jsonCrash.length, ([isHandled boolValue] ? @"YES" : @"NO")];
     NSError *jsonError;
     NSData *objectData = [jsonCrash dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *stackTrace = [NSJSONSerialization JSONObjectWithData:objectData
@@ -34,6 +38,7 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)sendNonFatalErrorJsonCrash:(nonnull NSString *)jsonCrash userAttributes:(nullable NSDictionary<NSString *,NSString *> *)userAttributes fingerprint:(nullable NSString *)fingerprint nonFatalExceptionLevel:(nonnull NSString *)nonFatalExceptionLevel error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags crashReporting] format:@"[CR.sendNonFatalError] jsonCrashLength=%lu userAttributesCount=%lu fingerprintPresent=%@ level=%@", (unsigned long)jsonCrash.length, (unsigned long)userAttributes.count, (fingerprint != nil ? @"YES" : @"NO"), nonFatalExceptionLevel];
     NSError *jsonError;
     NSData *objectData = [jsonCrash dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *stackTrace = [NSJSONSerialization JSONObjectWithData:objectData
@@ -48,6 +53,7 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setNDKEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags crashReporting] format:@"[CR.setNDKEnabled] iOS noop isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
 //    This is auto-generated with pigeon, there is no NDK crashes for iOS.
 }
 @end

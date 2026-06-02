@@ -1,6 +1,8 @@
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/models/w3c_feature_flags.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:meta/meta.dart';
 
 typedef OnW3CFeatureFlagChange = void Function(
@@ -34,12 +36,14 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
   // Setter for the host API
   // ignore: use_setters_to_change_properties
   void $setHostApi(LuciqHostApi host) {
+    LuciqLogger.I.d('\$setHostApi', tag: DebugTags.featureFlags);
     _host = host;
   }
 
   @visibleForTesting
   // Setter for the FeatureFlagsManager
   void setFeatureFlagsManager(FeatureFlagsManager featureFlagsManager) {
+    LuciqLogger.I.d('setFeatureFlagsManager', tag: DebugTags.featureFlags);
     // This can be used for testing, but should be avoided in production
     // since it breaks the singleton pattern
   }
@@ -49,6 +53,8 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
   set onNetworkBodyMaxSizeChangeCallback(
     OnNetworkBodyMaxSizeChangeCallback callback,
   ) {
+    LuciqLogger.I
+        .d('onNetworkBodyMaxSizeChangeCallback', tag: DebugTags.featureFlags);
     _onNetworkBodyMaxSizeChangeCallback = callback;
   }
 
@@ -61,6 +67,7 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
   int get networkBodyMaxSize => _networkBodyMaxSize;
 
   Future<W3cFeatureFlags> getW3CFeatureFlagsHeader() async {
+    LuciqLogger.I.d('getW3CFeatureFlagsHeader', tag: DebugTags.featureFlags);
     if (LCQBuildInfo.instance.isAndroid) {
       return Future.value(
         W3cFeatureFlags(
@@ -82,6 +89,8 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
   }
 
   Future<void> registerFeatureFlagsListener() async {
+    LuciqLogger.I
+        .d('registerFeatureFlagsListener', tag: DebugTags.featureFlags);
     FeatureFlagsFlutterApi.setup(this); // Use 'this' instead of _instance
 
     // W3C Feature Flags
@@ -107,6 +116,7 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
     bool isW3cExternalGeneratedHeaderEnabled,
     bool isW3cCaughtHeaderEnabled,
   ) {
+    LuciqLogger.I.d('onW3CFeatureFlagChange', tag: DebugTags.featureFlags);
     _isAndroidW3CCaughtHeader = isW3cCaughtHeaderEnabled;
     _isAndroidW3CExternalTraceID = isW3cExternalTraceIDEnabled;
     _isAndroidW3CExternalGeneratedHeader = isW3cExternalGeneratedHeaderEnabled;
@@ -114,6 +124,8 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
 
   @override
   void onNetworkLogBodyMaxSizeChange(int networkBodyMaxSize) {
+    LuciqLogger.I
+        .d('onNetworkLogBodyMaxSizeChange', tag: DebugTags.featureFlags);
     _networkBodyMaxSize = networkBodyMaxSize;
     _onNetworkBodyMaxSizeChangeCallback?.call();
   }

@@ -22,6 +22,7 @@ import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart'
@@ -184,18 +185,21 @@ class Luciq {
   /// @nodoc
   @internal
   static Future<bool> isEnabled() async {
+    LuciqLogger.I.d('isEnabled invoked', tag: DebugTags.core);
     return _host.isEnabled();
   }
 
   /// @nodoc
   @internal
   static Future<bool> isBuilt() async {
+    LuciqLogger.I.d('isBuilt invoked', tag: DebugTags.core);
     return _host.isBuilt();
   }
 
   /// Enables or disables Luciq functionality.
   /// [boolean] isEnabled
   static Future<void> setEnabled(bool isEnabled) async {
+    LuciqLogger.I.d('setEnabled isEnabled=$isEnabled', tag: DebugTags.core);
     return _host.setEnabled(isEnabled);
   }
 
@@ -213,6 +217,10 @@ class Luciq {
     String? appVariant,
   }) async {
     $setup();
+    LuciqLogger.I.d(
+      'init invoked tokenPresent=${token.isNotEmpty} invocationEvents=$invocationEvents debugLogsLevel=$debugLogsLevel appVariantPresent=${appVariant != null}',
+      tag: DebugTags.core,
+    );
     LuciqLogger.I.logLevel = debugLogsLevel;
     await _host.init(
       token,
@@ -220,6 +228,7 @@ class Luciq {
       debugLogsLevel.toString(),
       appVariant,
     );
+    LuciqLogger.I.d('init completed (Dart side setup); native init dispatched', tag: DebugTags.core);
     return FeatureFlagsManager().registerFeatureFlagsListener();
   }
 
@@ -244,6 +253,10 @@ class Luciq {
   static void setScreenNameMaskingCallback(
     ScreenNameMaskingCallback? callback,
   ) {
+    LuciqLogger.I.d(
+      'setScreenNameMaskingCallback callbackPresent=${callback != null}',
+      tag: DebugTags.core,
+    );
     ScreenNameMasker.I.setMaskingCallback(callback);
   }
 
@@ -252,6 +265,10 @@ class Luciq {
   static Future<void> showWelcomeMessageWithMode(
     WelcomeMessageMode welcomeMessageMode,
   ) async {
+    LuciqLogger.I.d(
+      'showWelcomeMessageWithMode mode=$welcomeMessageMode',
+      tag: DebugTags.core,
+    );
     return _host.showWelcomeMessageWithMode(welcomeMessageMode.toString());
   }
 
@@ -264,6 +281,10 @@ class Luciq {
     String? name,
     String? id,
   ]) async {
+    LuciqLogger.I.d(
+      'identifyUser emailPresent=${email != null} namePresent=${name != null} idPresent=${id != null}',
+      tag: DebugTags.core,
+    );
     return _host.identifyUser(email, name, id);
   }
 
@@ -271,6 +292,7 @@ class Luciq {
   /// from all reports
   /// It also reset the chats on device and removes user attributes, user data and completed surveys.
   static Future<void> logOut() async {
+    LuciqLogger.I.d('logOut invoked', tag: DebugTags.core);
     return _host.logOut();
   }
 
@@ -278,33 +300,42 @@ class Luciq {
   /// Use to change the SDK's UI to different language.
   /// Defaults to the device's current locale.
   static Future<void> setLocale(LCQLocale locale) async {
+    LuciqLogger.I.d('setLocale locale=$locale', tag: DebugTags.core);
     return _host.setLocale(locale.toString());
   }
 
   /// Sets the color theme of the SDK's whole UI to the [colorTheme] given.
   /// It should be of type [ColorTheme].
   static Future<void> setColorTheme(ColorTheme colorTheme) async {
+    LuciqLogger.I.d('setColorTheme colorTheme=$colorTheme', tag: DebugTags.core);
     return _host.setColorTheme(colorTheme.toString());
   }
 
   /// Appends a set of [tags] to previously added tags of reported feedback, bug or crash.
   static Future<void> appendTags(List<String> tags) async {
+    LuciqLogger.I.d('appendTags count=${tags.length}', tag: DebugTags.core);
     return _host.appendTags(tags);
   }
 
   /// Manually removes all tags of reported feedback, bug or crash.
   static Future<void> resetTags() async {
+    LuciqLogger.I.d('resetTags invoked', tag: DebugTags.core);
     return _host.resetTags();
   }
 
   /// Gets all tags of reported feedback, bug or crash. Returns the list of tags.
   static Future<List<String>?> getTags() async {
+    LuciqLogger.I.d('getTags invoked', tag: DebugTags.core);
     final tags = await _host.getTags();
     return tags?.cast<String>();
   }
 
   /// Adds feature flags to the next report.
   static Future<void> addFeatureFlags(List<FeatureFlag> featureFlags) async {
+    LuciqLogger.I.d(
+      'addFeatureFlags count=${featureFlags.length}',
+      tag: DebugTags.featureFlags,
+    );
     final map = <String, String>{};
     for (final value in featureFlags) {
       map[value.name] = value.variant ?? '';
@@ -315,32 +346,50 @@ class Luciq {
 
   /// Removes certain feature flags from the next report.
   static Future<void> removeFeatureFlags(List<String> featureFlags) async {
+    LuciqLogger.I.d(
+      'removeFeatureFlags count=${featureFlags.length}',
+      tag: DebugTags.featureFlags,
+    );
     return _host.removeFeatureFlags(featureFlags);
   }
 
   /// Clears all feature flags from the next report.
   static Future<void> clearAllFeatureFlags() async {
+    LuciqLogger.I.d('clearAllFeatureFlags invoked', tag: DebugTags.featureFlags);
     return _host.removeAllFeatureFlags();
   }
 
   /// Add custom user attribute [value] with a [key] that is going to be sent with each feedback, bug or crash.
   static Future<void> setUserAttribute(String value, String key) async {
+    LuciqLogger.I.d(
+      'setUserAttribute keyLength=${key.length} valueLength=${value.length}',
+      tag: DebugTags.core,
+    );
     return _host.setUserAttribute(value, key);
   }
 
   /// Removes a given [key] and its associated value from user attributes.
   /// Does nothing if a [key] does not exist.
   static Future<void> removeUserAttribute(String key) async {
+    LuciqLogger.I.d(
+      'removeUserAttribute keyLength=${key.length}',
+      tag: DebugTags.core,
+    );
     return _host.removeUserAttribute(key);
   }
 
   /// Returns the user attribute associated with a given [key].
   static Future<String?> getUserAttributeForKey(String key) {
+    LuciqLogger.I.d(
+      'getUserAttributeForKey keyLength=${key.length}',
+      tag: DebugTags.core,
+    );
     return _host.getUserAttributeForKey(key);
   }
 
   /// A new Map containing all the currently set user attributes, or an empty Map if no user attributes have been set.
   static Future<Map<String, String>> getUserAttributes() async {
+    LuciqLogger.I.d('getUserAttributes invoked', tag: DebugTags.core);
     final attributes = await _host.getUserAttributes();
     return attributes != null
         ? Map<String, String>.from(attributes)
@@ -349,12 +398,17 @@ class Luciq {
 
   /// invoke sdk manually
   static Future<void> show() async {
+    LuciqLogger.I.d('show invoked', tag: DebugTags.core);
     return _host.show();
   }
 
   /// Logs a user event with [name] that happens through the lifecycle of the application.
   /// Logged user events are going to be sent with each report, as well as at the end of a session.
   static Future<void> logUserEvent(String name) async {
+    LuciqLogger.I.d(
+      'logUserEvent nameLength=${name.length}',
+      tag: DebugTags.core,
+    );
     return _host.logUserEvent(name);
   }
 
@@ -364,6 +418,10 @@ class Luciq {
     String value,
     CustomTextPlaceHolderKey key,
   ) async {
+    LuciqLogger.I.d(
+      'setValueForStringWithKey key=$key valueLength=${value.length}',
+      tag: DebugTags.core,
+    );
     return _host.setValueForStringWithKey(value, key.toString());
   }
 
@@ -372,6 +430,10 @@ class Luciq {
   static Future<void> setSessionProfilerEnabled(
     bool sessionProfilerEnabled,
   ) async {
+    LuciqLogger.I.d(
+      'setSessionProfilerEnabled sessionProfilerEnabled=$sessionProfilerEnabled',
+      tag: DebugTags.core,
+    );
     return _host.setSessionProfilerEnabled(sessionProfilerEnabled);
   }
 
@@ -384,12 +446,14 @@ class Luciq {
     'This API is deprecated. Please use Luciq.setTheme instead.',
   )
   static Future<void> setPrimaryColor(Color color) async {
+    LuciqLogger.I.d('setPrimaryColor invoked', tag: DebugTags.core);
     await setTheme(ThemeConfig(primaryColor: color.toString()));
   }
 
   /// Adds specific user data that you need to be added to the reports
   /// [userData] data to be added
   static Future<void> setUserData(String userData) async {
+    LuciqLogger.I.d('setUserData length=${userData.length}', tag: DebugTags.core);
     return _host.setUserData(userData);
   }
 
@@ -400,6 +464,10 @@ class Luciq {
     String filePath,
     String fileName,
   ) async {
+    LuciqLogger.I.d(
+      'addFileAttachmentWithURL filePath=${redactUrlForLog(filePath)} fileNameLength=${fileName.length}',
+      tag: DebugTags.core,
+    );
     return _host.addFileAttachmentWithURL(filePath, fileName);
   }
 
@@ -410,12 +478,17 @@ class Luciq {
     Uint8List data,
     String fileName,
   ) async {
+    LuciqLogger.I.d(
+      'addFileAttachmentWithData dataLength=${data.length} fileNameLength=${fileName.length}',
+      tag: DebugTags.core,
+    );
     return _host.addFileAttachmentWithData(data, fileName);
   }
 
   /// Clears all Uris of the attached files.
   /// The URIs which added via {@link Luciq#addFileAttachment} API not the physical files.
   static Future<void> clearFileAttachments() async {
+    LuciqLogger.I.d('clearFileAttachments invoked', tag: DebugTags.core);
     return _host.clearFileAttachments();
   }
 
@@ -424,18 +497,30 @@ class Luciq {
   static Future<void> setWelcomeMessageMode(
     WelcomeMessageMode welcomeMessageMode,
   ) async {
+    LuciqLogger.I.d(
+      'setWelcomeMessageMode mode=$welcomeMessageMode',
+      tag: DebugTags.core,
+    );
     return _host.setWelcomeMessageMode(welcomeMessageMode.toString());
   }
 
   /// Reports that the screen has been changed (repro steps)
   /// [screenName] String containing the screen name
   static Future<void> reportScreenChange(String screenName) async {
+    LuciqLogger.I.d(
+      'reportScreenChange screenNameLength=${screenName.length}',
+      tag: DebugTags.screenTracking,
+    );
     return _host.reportScreenChange(screenName);
   }
 
   /// Changes the font of Luciq's UI.
   /// [font] The asset path to the font file (e.g. "fonts/Poppins.ttf").
   static Future<void> setFont(String font) async {
+    LuciqLogger.I.d(
+      'setFont fontLength=${font.length}',
+      tag: DebugTags.core,
+    );
     if (LCQBuildInfo.I.isIOS) {
       return _host.setFont(font);
     }
@@ -463,6 +548,10 @@ class Luciq {
     ReproStepsMode? sessionReplay,
     ReproStepsMode? all,
   }) async {
+    LuciqLogger.I.d(
+      'setReproStepsConfig bug=$bug crash=$crash sessionReplay=$sessionReplay all=$all',
+      tag: DebugTags.core,
+    );
     var bugMode = bug;
     var crashMode = crash;
     var sessionReplayMode = sessionReplay;
@@ -489,6 +578,10 @@ class Luciq {
     required AssetImage dark,
     BuildContext? context,
   }) async {
+    LuciqLogger.I.d(
+      'setCustomBrandingImage contextPresent=${context != null}',
+      tag: DebugTags.core,
+    );
     var configuration = ImageConfiguration.empty;
     if (context != null) {
       configuration = createLocalImageConfiguration(context);
@@ -505,6 +598,7 @@ class Luciq {
   /// once the user clicks on the Call to Action (CTA) that redirects them to the app store.
   /// Helps track session data for insights on user interactions during review submission.
   static Future<void> willRedirectToStore() async {
+    LuciqLogger.I.d('willRedirectToStore invoked', tag: DebugTags.core);
     return _host.willRedirectToStore();
   }
 
@@ -517,6 +611,7 @@ class Luciq {
   /// Luciq.setFullscreen(true);
   /// ```
   static Future<void> setFullscreen(bool isEnabled) async {
+    LuciqLogger.I.d('setFullscreen isEnabled=$isEnabled', tag: DebugTags.core);
     return _host.setFullscreen(isEnabled);
   }
 
@@ -524,6 +619,10 @@ class Luciq {
   ///  It should be set before calling [init] method.
   /// [appVariant] used to set current App variant name
   static Future<void> setAppVariant(String appVariant) async {
+    LuciqLogger.I.d(
+      'setAppVariant appVariantLength=${appVariant.length}',
+      tag: DebugTags.core,
+    );
     return _host.setAppVariant(appVariant);
   }
 
@@ -552,12 +651,14 @@ class Luciq {
   /// ));
   /// ```
   static Future<void> setTheme(ThemeConfig themeConfig) async {
+    LuciqLogger.I.d('setTheme invoked', tag: DebugTags.core);
     return _host.setTheme(themeConfig.toMap());
   }
 
   /// Enables and disables user interaction steps.
   /// [boolean] isEnabled
   static Future<void> enableUserSteps(bool isEnabled) async {
+    LuciqLogger.I.d('enableUserSteps isEnabled=$isEnabled', tag: DebugTags.core);
     return _host.setEnableUserSteps(isEnabled);
   }
 
@@ -575,6 +676,10 @@ class Luciq {
   /// `build.gradle`. Without this, no WebView tracking code is compiled
   /// into your app.
   static Future<void> setWebViewMonitoringEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setWebViewMonitoringEnabled isEnabled=$isEnabled',
+      tag: DebugTags.core,
+    );
     return _host.setWebViewMonitoringEnabled(isEnabled);
   }
 
@@ -587,6 +692,10 @@ class Luciq {
   static Future<void> setWebViewUserInteractionsTrackingEnabled(
     bool isEnabled,
   ) async {
+    LuciqLogger.I.d(
+      'setWebViewUserInteractionsTrackingEnabled isEnabled=$isEnabled',
+      tag: DebugTags.core,
+    );
     return _host.setWebViewUserInteractionsTrackingEnabled(isEnabled);
   }
 
@@ -597,6 +706,10 @@ class Luciq {
   /// Disabled by default. Requires the master switch
   /// [setWebViewMonitoringEnabled] to be enabled.
   static Future<void> setWebViewNetworkTrackingEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setWebViewNetworkTrackingEnabled isEnabled=$isEnabled',
+      tag: DebugTags.core,
+    );
     return _host.setWebViewNetworkTrackingEnabled(isEnabled);
   }
 
@@ -619,6 +732,12 @@ class Luciq {
   static Future<void> setAutoMaskScreenshotTypes(
     List<AutoMasking> types,
   ) async {
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.d(
+        'setAutoMaskScreenshotTypes count=${types.length} types=${types.map((t) => t.toString()).join(',')}',
+        tag: DebugTags.privateView,
+      );
+    }
     PrivateViewsManager.I.addAutoMasking(types);
   }
 
@@ -629,6 +748,10 @@ class Luciq {
     String message,
     String? viewName,
   ) async {
+    LuciqLogger.I.d(
+      'logUserSteps gestureType=$gestureType messageLength=${message.length} viewNamePresent=${viewName != null}',
+      tag: DebugTags.core,
+    );
     return _host.logUserSteps(gestureType.toString(), message, viewName);
   }
 }

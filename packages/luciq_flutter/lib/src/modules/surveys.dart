@@ -2,8 +2,11 @@
 
 import 'dart:async';
 
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/surveys.api.g.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:meta/meta.dart';
 
 typedef OnShowSurveyCallback = void Function();
@@ -51,6 +54,10 @@ class Surveys implements SurveysFlutterApi {
   /// Defaults to `true`.
   /// [isEnabled] A boolean to set whether Luciq Surveys is enabled or disabled.
   static Future<void> setEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setEnabled isEnabled=$isEnabled',
+      tag: DebugTags.surveys,
+    );
     return _host.setEnabled(isEnabled);
   }
 
@@ -58,6 +65,10 @@ class Surveys implements SurveysFlutterApi {
   /// [isEnabled] A boolean to indicate whether the
   /// surveys auto showing are enabled or not.
   static Future<void> setAutoShowingEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setAutoShowingEnabled isEnabled=$isEnabled',
+      tag: DebugTags.surveys,
+    );
     return _host.setAutoShowingEnabled(isEnabled);
   }
 
@@ -65,6 +76,7 @@ class Surveys implements SurveysFlutterApi {
   /// [callback] availableSurveysCallback callback with
   /// argument available surveys
   static Future<List<String>> getAvailableSurveys() async {
+    LuciqLogger.I.d('getAvailableSurveys invoked', tag: DebugTags.surveys);
     final titles = await _host.getAvailableSurveys();
 
     return titles.cast<String>();
@@ -77,6 +89,10 @@ class Surveys implements SurveysFlutterApi {
   static Future<void> setOnShowCallback(
     OnShowSurveyCallback callback,
   ) async {
+    LuciqLogger.I.d(
+      'setOnShowCallback callback registered',
+      tag: DebugTags.surveys,
+    );
     _onShowCallback = callback;
     return _host.bindOnShowSurveyCallback();
   }
@@ -88,6 +104,10 @@ class Surveys implements SurveysFlutterApi {
   static Future<void> setOnDismissCallback(
     OnDismissSurveyCallback callback,
   ) async {
+    LuciqLogger.I.d(
+      'setOnDismissCallback callback registered',
+      tag: DebugTags.surveys,
+    );
     _onDismissCallback = callback;
     return _host.bindOnDismissSurveyCallback();
   }
@@ -97,6 +117,10 @@ class Surveys implements SurveysFlutterApi {
   static Future<void> setShouldShowWelcomeScreen(
     bool shouldShowWelcomeScreen,
   ) async {
+    LuciqLogger.I.d(
+      'setShouldShowWelcomeScreen shouldShowWelcomeScreen=$shouldShowWelcomeScreen',
+      tag: DebugTags.surveys,
+    );
     return _host.setShouldShowWelcomeScreen(shouldShowWelcomeScreen);
   }
 
@@ -105,6 +129,7 @@ class Surveys implements SurveysFlutterApi {
   /// Does nothing if there are no available surveys or if a survey has already been shown
   /// in the current session.
   static Future<void> showSurveyIfAvailable() async {
+    LuciqLogger.I.d('showSurveyIfAvailable invoked', tag: DebugTags.surveys);
     return _host.showSurveyIfAvailable();
   }
 
@@ -113,6 +138,10 @@ class Surveys implements SurveysFlutterApi {
   /// Answered and cancelled surveys won't show up again.
   /// [surveyToken] - A String with a survey token.
   static Future<void> showSurvey(String surveyToken) async {
+    LuciqLogger.I.d(
+      'showSurvey surveyTokenLength=${surveyToken.length}',
+      tag: DebugTags.surveys,
+    );
     return _host.showSurvey(surveyToken);
   }
 
@@ -121,6 +150,10 @@ class Surveys implements SurveysFlutterApi {
   /// UI changes  after the survey's UI is dismissed.
   /// [callback]  A callback that gets executed after the survey's UI is dismissed.
   static Future<bool> hasRespondedToSurvey(String surveyToken) async {
+    LuciqLogger.I.d(
+      'hasRespondedToSurvey surveyTokenLength=${surveyToken.length}',
+      tag: DebugTags.surveys,
+    );
     final hasResponded = await _host.hasRespondedToSurvey(surveyToken);
 
     return hasResponded;
@@ -131,6 +164,10 @@ class Surveys implements SurveysFlutterApi {
   /// NPS Surveys or AppRating Surveys to AppStore to let users rate your app on AppStore itself.
   /// [appStoreURL] A String url for the published iOS app on AppStore
   static Future<void> setAppStoreURL(String appStoreURL) async {
+    LuciqLogger.I.d(
+      'setAppStoreURL url=${redactUrlForLog(appStoreURL)}',
+      tag: DebugTags.surveys,
+    );
     if (LCQBuildInfo.instance.isIOS) {
       return _host.setAppStoreURL(appStoreURL);
     }

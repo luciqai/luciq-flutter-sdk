@@ -1,3 +1,5 @@
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/route_matcher.dart';
 
 class UiTrace {
@@ -26,6 +28,7 @@ class UiTrace {
     String? matchingScreenName,
     int? traceId,
   }) {
+    LuciqLogger.I.d('copyWith', tag: DebugTags.apmUITrace);
     return UiTrace(
       screenName: screenName ?? this.screenName,
       matchingScreenName: matchingScreenName ?? _matchingScreenName,
@@ -34,6 +37,10 @@ class UiTrace {
   }
 
   bool matches(String routePath) {
+    LuciqLogger.I.d(
+      'matches routePathLength=${routePath.length}',
+      tag: DebugTags.apmUITrace,
+    );
     return RouteMatcher.I.match(
       routePath: routePath,
       actualPath: _matchingScreenName,

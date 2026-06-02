@@ -3,7 +3,9 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/session_replay.api.g.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
 enum ScreenshotCapturingMode {
   navigation,
@@ -37,6 +39,10 @@ class SessionReplay {
   /// await SessionReplay.setEnabled(true);
   /// ```
   static Future<void> setEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setEnabled isEnabled=$isEnabled',
+      tag: DebugTags.sessionReplay,
+    );
     return _host.setEnabled(isEnabled);
   }
 
@@ -49,6 +55,10 @@ class SessionReplay {
   /// await SessionReplay.setNetworkLogsEnabled(true);
   /// ```
   static Future<void> setNetworkLogsEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setNetworkLogsEnabled isEnabled=$isEnabled',
+      tag: DebugTags.sessionReplay,
+    );
     return _host.setNetworkLogsEnabled(isEnabled);
   }
 
@@ -61,6 +71,10 @@ class SessionReplay {
   /// await SessionReplay.setLuciqLogsEnabled(true);
   /// ```
   static Future<void> setLuciqLogsEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setLuciqLogsEnabled isEnabled=$isEnabled',
+      tag: DebugTags.sessionReplay,
+    );
     return _host.setLuciqLogsEnabled(isEnabled);
   }
 
@@ -73,6 +87,10 @@ class SessionReplay {
   /// await SessionReplay.setUserStepsEnabled(true);
   /// ```
   static Future<void> setUserStepsEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setUserStepsEnabled isEnabled=$isEnabled',
+      tag: DebugTags.sessionReplay,
+    );
     return _host.setUserStepsEnabled(isEnabled);
   }
 
@@ -84,6 +102,10 @@ class SessionReplay {
   /// await SessionReplay.getSessionReplayLink();
   /// ```
   static Future<String> getSessionReplayLink() async {
+    LuciqLogger.I.d(
+      'getSessionReplayLink invoked',
+      tag: DebugTags.sessionReplay,
+    );
     return _host.getSessionReplayLink();
   }
 
@@ -104,6 +126,10 @@ class SessionReplay {
   static Future<void> setScreenshotCapturingMode(
     ScreenshotCapturingMode mode,
   ) async {
+    LuciqLogger.I.d(
+      'setScreenshotCapturingMode mode=$mode',
+      tag: DebugTags.sessionReplay,
+    );
     return _host.setScreenshotCapturingMode(mode.toString());
   }
 
@@ -131,6 +157,10 @@ class SessionReplay {
   /// await SessionReplay.setScreenshotCaptureInterval(2000);
   /// ```
   static Future<void> setScreenshotCaptureInterval(int intervalMs) async {
+    LuciqLogger.I.d(
+      'setScreenshotCaptureInterval intervalMs=$intervalMs',
+      tag: DebugTags.sessionReplay,
+    );
     if (intervalMs < 500) {
       throw ArgumentError.value(
         intervalMs,
@@ -168,6 +198,10 @@ class SessionReplay {
   static Future<void> setScreenshotQualityMode(
     ScreenshotQualityMode mode,
   ) async {
+    LuciqLogger.I.d(
+      'setScreenshotQualityMode mode=$mode',
+      tag: DebugTags.sessionReplay,
+    );
     return _host.setScreenshotQualityMode(mode.toString());
   }
 }

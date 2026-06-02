@@ -9,6 +9,8 @@ import ai.luciq.crash.CrashReporting;
 import ai.luciq.crash.models.LuciqNonFatalException;
 import ai.luciq.flutter.generated.CrashReportingPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.Reflection;
 import ai.luciq.library.Feature;
 
@@ -29,6 +31,7 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING, "[setEnabled] isEnabled=" + isEnabled);
         if (isEnabled) {
             CrashReporting.setState(Feature.State.ENABLED);
         } else {
@@ -38,6 +41,8 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
 
     @Override
     public void send(@NonNull String jsonCrash, @NonNull Boolean isHandled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[send] jsonCrashLength=" + jsonCrash.length() + ", isHandled=" + isHandled);
         try {
             final JSONObject exceptionObject = new JSONObject(jsonCrash);
             Method method = Reflection.getMethod(Class.forName("ai.luciq.crash.CrashReporting"), "reportException",
@@ -52,6 +57,11 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
 
     @Override
     public void sendNonFatalError(@NonNull String jsonCrash, @Nullable Map<String, String> userAttributes, @Nullable String fingerprint, @NonNull String nonFatalExceptionLevel) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[sendNonFatalError] jsonCrashLength=" + jsonCrash.length()
+                        + ", userAttributesPresent=" + (userAttributes != null)
+                        + ", fingerprintPresent=" + (fingerprint != null)
+                        + ", nonFatalExceptionLevel=" + nonFatalExceptionLevel);
         try {
             Method method = Reflection.getMethod(Class.forName("ai.luciq.crash.CrashReporting"), "reportException", JSONObject.class, boolean.class,
                     Map.class, JSONObject.class, LuciqNonFatalException.Level.class);
@@ -72,6 +82,7 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
 
     @Override
     public void setNDKEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING, "[setNDKEnabled] isEnabled=" + isEnabled);
         if (isEnabled) {
             CrashReporting.setNDKCrashesState(Feature.State.ENABLED);
         } else {

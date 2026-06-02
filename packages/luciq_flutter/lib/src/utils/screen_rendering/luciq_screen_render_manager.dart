@@ -3,6 +3,7 @@ import 'dart:ui' show TimingsCallback, FrameTiming, FramePhase;
 
 import 'package:flutter/widgets.dart';
 import 'package:luciq_flutter/luciq_flutter.dart' show CrashReporting;
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
@@ -51,7 +52,7 @@ class LuciqScreenRenderManager {
   static LuciqScreenRenderManager get I => instance;
 
   /// Logging tag for debugging purposes.
-  static const tag = "ScreenRenderManager";
+  static const tag = DebugTags.apmScreenRendering;
 
   /// setup function for [LuciqScreenRenderManager]
   @internal
@@ -402,8 +403,7 @@ class LuciqScreenRenderManager {
   void _logExceptionErrorAndStackTrace(Object error, StackTrace stackTrace) {
     //Log the crash details to the user.
     LuciqLogger.I.e(
-      '[Error]:$error \n'
-      '[StackTrace]: $stackTrace',
+      'Exception caught type=${error.runtimeType}',
       tag: tag,
     );
 

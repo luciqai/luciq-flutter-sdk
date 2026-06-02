@@ -475,8 +475,8 @@ void main() {
         ),
       ).captured.single as String;
 
-      expect(capturedLog, contains('[Error]:$exception'));
-      expect(capturedLog, contains('[StackTrace]:'));
+      expect(capturedLog, contains('type=${exception.runtimeType}'));
+      // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called
       verify(
@@ -527,8 +527,8 @@ void main() {
         ),
       ).captured.single as String;
 
-      expect(capturedLog, contains('[Error]:$exception'));
-      expect(capturedLog, contains('[StackTrace]:'));
+      expect(capturedLog, contains('type=${exception.runtimeType}'));
+      // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called
       verify(
@@ -579,8 +579,8 @@ void main() {
         ),
       ).captured.single as String;
 
-      expect(capturedLog, contains('[Error]:$exception'));
-      expect(capturedLog, contains('[StackTrace]:'));
+      expect(capturedLog, contains('type=${exception.runtimeType}'));
+      // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called
       verify(

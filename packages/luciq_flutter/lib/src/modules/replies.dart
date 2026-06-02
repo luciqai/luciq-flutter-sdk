@@ -2,8 +2,10 @@
 
 import 'dart:async';
 
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/replies.api.g.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:meta/meta.dart';
 
 typedef OnNewReplyReceivedCallback = void Function();
@@ -37,17 +39,23 @@ class Replies implements RepliesFlutterApi {
   /// Enables and disables everything related to receiving replies.
   /// [boolean] isEnabled
   static Future<void> setEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setEnabled isEnabled=$isEnabled',
+      tag: DebugTags.replies,
+    );
     return _host.setEnabled(isEnabled);
   }
 
   /// Manual invocation for replies.
   static Future<void> show() async {
+    LuciqLogger.I.d('show invoked', tag: DebugTags.replies);
     return _host.show();
   }
 
   /// Tells whether the user has chats already or not.
   /// [callback] - callback that is invoked if chats exist
   static Future<bool> hasChats() async {
+    LuciqLogger.I.d('hasChats invoked', tag: DebugTags.replies);
     final hasChats = await _host.hasChats();
 
     return hasChats;
@@ -58,6 +66,10 @@ class Replies implements RepliesFlutterApi {
   static Future<void> setOnNewReplyReceivedCallback(
     OnNewReplyReceivedCallback callback,
   ) async {
+    LuciqLogger.I.d(
+      'setOnNewReplyReceivedCallback callback registered',
+      tag: DebugTags.replies,
+    );
     _onNewReplyReceivedCallback = callback;
     return _host.bindOnNewReplyCallback();
   }
@@ -68,6 +80,7 @@ class Replies implements RepliesFlutterApi {
   /// [function] callback with argument
   /// Notifications count, or -1 in case the SDK has not been initialized.
   static Future<int> getUnreadRepliesCount() async {
+    LuciqLogger.I.d('getUnreadRepliesCount invoked', tag: DebugTags.replies);
     final count = await _host.getUnreadRepliesCount();
 
     return count;
@@ -76,6 +89,10 @@ class Replies implements RepliesFlutterApi {
   /// Enables/disables showing in-app notifications when the user receives a new message.
   /// [isEnabled] A boolean to set whether notifications are enabled or disabled.
   static Future<void> setInAppNotificationsEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setInAppNotificationsEnabled isEnabled=$isEnabled',
+      tag: DebugTags.replies,
+    );
     return _host.setInAppNotificationsEnabled(isEnabled);
   }
 
@@ -83,6 +100,10 @@ class Replies implements RepliesFlutterApi {
   /// [isEnabled] A boolean to set whether notifications sound should be played.
   /// @android ONLY
   static Future<void> setInAppNotificationSound(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setInAppNotificationSound isEnabled=$isEnabled',
+      tag: DebugTags.replies,
+    );
     if (LCQBuildInfo.instance.isAndroid) {
       return _host.setInAppNotificationSound(isEnabled);
     }

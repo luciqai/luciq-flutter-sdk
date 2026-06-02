@@ -4,10 +4,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/crash_reporting.api.g.dart';
 import 'package:luciq_flutter/src/models/crash_data.dart';
 import 'package:luciq_flutter/src/models/exception_data.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 enum NonFatalExceptionLevel { error, critical, info, warning }
@@ -26,11 +28,19 @@ class CrashReporting {
   /// Enables and disables Enables and disables automatic crash reporting.
   /// [boolean] isEnabled
   static Future<void> setEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setEnabled isEnabled=$isEnabled',
+      tag: DebugTags.crashReporting,
+    );
     enabled = isEnabled;
     return _host.setEnabled(isEnabled);
   }
 
   static Future<void> reportCrash(Object exception, StackTrace stack) async {
+    LuciqLogger.I.d(
+      'reportCrash exceptionType=${exception.runtimeType}',
+      tag: DebugTags.crashReporting,
+    );
     if (LCQBuildInfo.instance.isReleaseMode && enabled) {
       await _reportUnhandledCrash(exception, stack);
     } else {
@@ -50,6 +60,10 @@ class CrashReporting {
     String? fingerprint,
     NonFatalExceptionLevel level = NonFatalExceptionLevel.error,
   }) async {
+    LuciqLogger.I.d(
+      'reportHandledCrash exceptionType=${exception.runtimeType} stackPresent=${stack != null} userAttributesCount=${userAttributes?.length ?? 0} fingerprintPresent=${fingerprint != null} level=$level',
+      tag: DebugTags.crashReporting,
+    );
     await _sendHandledCrash(
       exception,
       stack ?? StackTrace.current,
@@ -97,6 +111,10 @@ class CrashReporting {
     StackTrace stack,
     Object exception,
   ) {
+    LuciqLogger.I.d(
+      'getCrashDataFromException exceptionType=${exception.runtimeType}',
+      tag: DebugTags.crashReporting,
+    );
     final trace = Trace.from(stack);
     final frames = trace.frames
         .map(
@@ -124,6 +142,10 @@ class CrashReporting {
   ///
   /// This method is Android-only and has no effect on iOS.
   static Future<void> setNDKEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setNDKEnabled isEnabled=$isEnabled',
+      tag: DebugTags.crashReporting,
+    );
     return _host.setNDKEnabled(isEnabled);
   }
 }

@@ -3,9 +3,11 @@
 import 'dart:async';
 
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/bug_reporting.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:meta/meta.dart';
 
 enum InvocationOption {
@@ -102,6 +104,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// Enables and disables manual invocation and prompt options for bug and feedback.
   /// [boolean] isEnabled
   static Future<void> setEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setEnabled isEnabled=$isEnabled',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setEnabled(isEnabled);
   }
 
@@ -112,6 +118,10 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setOnInvokeCallback(
     OnSDKInvokeCallback callback,
   ) async {
+    LuciqLogger.I.d(
+      'setOnInvokeCallback callback registered',
+      tag: DebugTags.bugReporting,
+    );
     _onInvokeCallback = callback;
     return _host.bindOnInvokeCallback();
   }
@@ -123,6 +133,10 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setOnDismissCallback(
     OnSDKDismissCallback callback,
   ) async {
+    LuciqLogger.I.d(
+      'setOnDismissCallback callback registered',
+      tag: DebugTags.bugReporting,
+    );
     _onDismissCallback = callback;
     return _host.bindOnDismissCallback();
   }
@@ -133,6 +147,10 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setInvocationEvents(
     List<InvocationEvent>? invocationEvents,
   ) async {
+    LuciqLogger.I.d(
+      'setInvocationEvents count=${invocationEvents?.length ?? 0}',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setInvocationEvents(invocationEvents.mapToString());
   }
 
@@ -149,6 +167,10 @@ class BugReporting implements BugReportingFlutterApi {
     bool galleryImage,
     bool screenRecording,
   ) async {
+    LuciqLogger.I.d(
+      'setEnabledAttachmentTypes screenshot=$screenshot extraScreenshot=$extraScreenshot galleryImage=$galleryImage screenRecording=$screenRecording',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setEnabledAttachmentTypes(
       screenshot,
       extraScreenshot,
@@ -160,6 +182,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// Sets what type of reports, bug or feedback, should be invoked.
   /// [reportTypes] - List of reportTypes
   static Future<void> setReportTypes(List<ReportType>? reportTypes) async {
+    LuciqLogger.I.d(
+      'setReportTypes count=${reportTypes?.length ?? 0}',
+      tag: DebugTags.bugReporting,
+    );
     if (reportTypes != null) {
       final types = List.of(reportTypes);
       types.remove(ReportType.other); //removed from report types
@@ -174,6 +200,10 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setExtendedBugReportMode(
     ExtendedBugReportMode extendedBugReportMode,
   ) async {
+    LuciqLogger.I.d(
+      'setExtendedBugReportMode mode=$extendedBugReportMode',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setExtendedBugReportMode(extendedBugReportMode.toString());
   }
 
@@ -183,6 +213,10 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setInvocationOptions(
     List<InvocationOption>? invocationOptions,
   ) async {
+    LuciqLogger.I.d(
+      'setInvocationOptions count=${invocationOptions?.length ?? 0}',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setInvocationOptions(invocationOptions.mapToString());
   }
 
@@ -193,6 +227,10 @@ class BugReporting implements BugReportingFlutterApi {
     FloatingButtonEdge floatingButtonEdge,
     int offsetFromTop,
   ) async {
+    LuciqLogger.I.d(
+      'setFloatingButtonEdge edge=$floatingButtonEdge offsetFromTop=$offsetFromTop',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setFloatingButtonEdge(
       floatingButtonEdge.toString(),
       offsetFromTop,
@@ -204,6 +242,10 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setVideoRecordingFloatingButtonPosition(
     Position position,
   ) async {
+    LuciqLogger.I.d(
+      'setVideoRecordingFloatingButtonPosition position=$position',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setVideoRecordingFloatingButtonPosition(position.toString());
   }
 
@@ -214,6 +256,10 @@ class BugReporting implements BugReportingFlutterApi {
     ReportType reportType,
     List<InvocationOption>? invocationOptions,
   ) async {
+    LuciqLogger.I.d(
+      'show reportType=$reportType invocationOptionsCount=${invocationOptions?.length ?? 0}',
+      tag: DebugTags.bugReporting,
+    );
     return _host.show(reportType.toString(), invocationOptions.mapToString());
   }
 
@@ -221,6 +267,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// Default for iPhone is 2.5.
   /// [threshold] iPhoneShakingThreshold double
   static Future<void> setShakingThresholdForiPhone(double threshold) async {
+    LuciqLogger.I.d(
+      'setShakingThresholdForiPhone threshold=$threshold',
+      tag: DebugTags.bugReporting,
+    );
     if (LCQBuildInfo.instance.isIOS) {
       return _host.setShakingThresholdForiPhone(threshold);
     }
@@ -230,6 +280,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// Default for iPhone is 0.6.
   /// [threshold] iPhoneShakingThreshold double
   static Future<void> setShakingThresholdForiPad(double threshold) async {
+    LuciqLogger.I.d(
+      'setShakingThresholdForiPad threshold=$threshold',
+      tag: DebugTags.bugReporting,
+    );
     if (LCQBuildInfo.instance.isIOS) {
       return _host.setShakingThresholdForiPad(threshold);
     }
@@ -241,6 +295,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// increasing the `350` value and vice versa
   /// [threshold] iPhoneShakingThreshold int
   static Future<void> setShakingThresholdForAndroid(int threshold) async {
+    LuciqLogger.I.d(
+      'setShakingThresholdForAndroid threshold=$threshold',
+      tag: DebugTags.bugReporting,
+    );
     if (LCQBuildInfo.instance.isAndroid) {
       return _host.setShakingThresholdForAndroid(threshold);
     }
@@ -250,6 +308,10 @@ class BugReporting implements BugReportingFlutterApi {
   /// which can include hyperlinked text.
   /// [text] String text
   static Future<void> setDisclaimerText(String text) async {
+    LuciqLogger.I.d(
+      'setDisclaimerText textLength=${text.length}',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setDisclaimerText(text);
   }
 
@@ -262,6 +324,10 @@ class BugReporting implements BugReportingFlutterApi {
     int limit, [
     List<ReportType>? reportTypes,
   ]) async {
+    LuciqLogger.I.d(
+      'setCommentMinimumCharacterCount limit=$limit reportTypesCount=${reportTypes?.length ?? 0}',
+      tag: DebugTags.bugReporting,
+    );
     return _host.setCommentMinimumCharacterCount(
       limit,
       reportTypes.mapToString(),
@@ -281,6 +347,10 @@ class BugReporting implements BugReportingFlutterApi {
     required bool checked,
     UserConsentActionType? actionType,
   }) async {
+    LuciqLogger.I.d(
+      'addUserConsents keyLength=${key.length} descriptionLength=${description.length} mandatory=$mandatory checked=$checked actionType=$actionType',
+      tag: DebugTags.bugReporting,
+    );
     return _host.addUserConsents(
       key,
       description,
@@ -295,6 +365,10 @@ class BugReporting implements BugReportingFlutterApi {
   static Future<void> setProactiveReportingConfigurations(
     ProactiveReportingConfigs config,
   ) async {
+    LuciqLogger.I.d(
+      'setProactiveReportingConfigurations enabled=${config.enabled} gapBetweenModals=${config.gapBetweenModals} modalDelayAfterDetection=${config.modalDelayAfterDetection}',
+      tag: DebugTags.bugReporting,
+    );
     _host.setProactiveReportingConfigurations(
       config.enabled,
       config.gapBetweenModals,

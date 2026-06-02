@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/models/network_data.dart';
 import 'package:luciq_flutter/src/models/w3c_header.dart';
@@ -10,6 +11,7 @@ import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/iterable_ext.dart';
 import 'package:luciq_flutter/src/utils/luciq_constants.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/network_manager.dart';
 import 'package:luciq_flutter/src/utils/w3c_header_utils.dart';
 import 'package:meta/meta.dart';
@@ -48,6 +50,10 @@ class NetworkLogger {
   /// });
   /// ```
   static void obfuscateLog(ObfuscateLogCallback callback) {
+    LuciqLogger.I.d(
+      'obfuscateLog callback registered',
+      tag: DebugTags.network,
+    );
     _manager.setObfuscateLogCallback(callback);
   }
 
@@ -70,10 +76,20 @@ class NetworkLogger {
   /// });
   /// ```
   static void omitLog(OmitLogCallback callback) {
+    LuciqLogger.I.d(
+      'omitLog callback registered',
+      tag: DebugTags.network,
+    );
     _manager.setOmitLogCallback(callback);
   }
 
   Future<void> networkLog(NetworkData data) async {
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.d(
+        'networkLog method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration}',
+        tag: DebugTags.network,
+      );
+    }
     final w3Header = await getW3CHeader(
       data.requestHeaders,
       data.startTime.millisecondsSinceEpoch,
@@ -87,8 +103,22 @@ class NetworkLogger {
 
   @internal
   Future<void> networkLogInternal(NetworkData data) async {
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.d(
+        'networkLogInternal method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration}',
+        tag: DebugTags.network,
+      );
+    }
     final omit = await _manager.omitLog(data);
-    if (omit) return;
+    if (omit) {
+      if (LuciqLogger.I.isDebugEnabled()) {
+        LuciqLogger.I.d(
+          'networkLogInternal omitted url=${redactUrlForLog(data.url)}',
+          tag: DebugTags.network,
+        );
+      }
+      return;
+    }
 
     // Check size limits early to avoid processing large bodies
     final requestExceeds = await _manager.didRequestBodyExceedSizeLimit(data);
@@ -186,12 +216,20 @@ class NetworkLogger {
   /// Enables or disables network body logs capturing.
   /// [boolean] isEnabled
   static Future<void> setNetworkLogBodyEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setNetworkLogBodyEnabled isEnabled=$isEnabled',
+      tag: DebugTags.network,
+    );
     return _host.setNetworkLogBodyEnabled(isEnabled);
   }
 
   /// Enables or disables network logs sensitive information auto masking.
   /// [boolean] isEnabled
   static Future<void> setNetworkAutoMaskingEnabled(bool isEnabled) async {
+    LuciqLogger.I.d(
+      'setNetworkAutoMaskingEnabled isEnabled=$isEnabled',
+      tag: DebugTags.network,
+    );
     return _host.setNetworkAutoMaskingEnabled(isEnabled);
   }
 }

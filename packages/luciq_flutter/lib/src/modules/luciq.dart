@@ -22,7 +22,6 @@ import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
-import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart'
@@ -465,7 +464,7 @@ class Luciq {
     String fileName,
   ) async {
     LuciqLogger.I.d(
-      'addFileAttachmentWithURL filePath=${redactUrlForLog(filePath)} fileNameLength=${fileName.length}',
+      'addFileAttachmentWithURL filePathLength=${filePath.length} fileNameLength=${fileName.length}',
       tag: DebugTags.core,
     );
     return _host.addFileAttachmentWithURL(filePath, fileName);

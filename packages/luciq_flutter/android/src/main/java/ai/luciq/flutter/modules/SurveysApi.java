@@ -3,6 +3,8 @@ package ai.luciq.flutter.modules;
 import androidx.annotation.NonNull;
 
 import ai.luciq.flutter.generated.SurveysPigeon;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.Feature;
 import ai.luciq.survey.Survey;
@@ -30,6 +32,7 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS, "[setEnabled] isEnabled=" + isEnabled);
         if (isEnabled) {
             Surveys.setState(Feature.State.ENABLED);
         } else {
@@ -39,31 +42,41 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
 
     @Override
     public void showSurveyIfAvailable() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS, "[showSurveyIfAvailable]");
         Surveys.showSurveyIfAvailable();
     }
 
     @Override
     public void showSurvey(@NonNull String surveyToken) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS,
+                "[showSurvey] surveyTokenPresent=" + (surveyToken != null && !surveyToken.isEmpty()));
         Surveys.showSurvey(surveyToken);
     }
 
     @Override
     public void setAutoShowingEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS, "[setAutoShowingEnabled] isEnabled=" + isEnabled);
         Surveys.setAutoShowingEnabled(isEnabled);
     }
 
     @Override
     public void setShouldShowWelcomeScreen(@NonNull Boolean shouldShowWelcomeScreen) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS,
+                "[setShouldShowWelcomeScreen] shouldShowWelcomeScreen=" + shouldShowWelcomeScreen);
         Surveys.setShouldShowWelcomeScreen(shouldShowWelcomeScreen);
     }
 
     @Override
     public void setAppStoreURL(@NonNull String appStoreURL) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS,
+                "[setAppStoreURL] url=" + LuciqFlutterLogger.redactUrl(appStoreURL));
         // iOS Only
     }
 
     @Override
     public void hasRespondedToSurvey(@NonNull String surveyToken, SurveysPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS,
+                "[hasRespondedToSurvey] surveyTokenPresent=" + (surveyToken != null && !surveyToken.isEmpty()));
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -83,6 +96,7 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
 
     @Override
     public void getAvailableSurveys(SurveysPigeon.Result<List<String>> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS, "[getAvailableSurveys]");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -107,6 +121,7 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
 
     @Override
     public void bindOnShowSurveyCallback() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS, "[bindOnShowSurveyCallback]");
         Surveys.setOnShowCallback(new OnShowCallback() {
             @Override
             public void onShow() {
@@ -126,6 +141,7 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
 
     @Override
     public void bindOnDismissSurveyCallback() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS, "[bindOnDismissSurveyCallback]");
         Surveys.setOnDismissCallback(new OnDismissCallback() {
             @Override
             public void onDismiss() {

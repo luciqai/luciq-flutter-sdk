@@ -14,6 +14,8 @@ import androidx.annotation.VisibleForTesting;
 
 import ai.luciq.flutter.generated.LuciqPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.Reflection;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.ReproMode;
@@ -128,6 +130,12 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
         final Application application = (Application) context;
         final int parsedLogLevel = ArgsRegistry.sdkLogLevels.get(debugLogsLevel);
+        LuciqFlutterLogger.setLevel(parsedLogLevel);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[init] tokenPresent=" + (token != null && !token.isEmpty())
+                        + ", invocationEvents=" + invocationEvents
+                        + ", debugLogsLevel=" + debugLogsLevel
+                        + ", appVariantPresent=" + (appVariant != null));
         Luciq.Builder builder = new Luciq.Builder(application, token)
                 .setInvocationEvents(invocationEventsArray)
                 .setSdkDebugLogsLevel(parsedLogLevel);
@@ -147,6 +155,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[init] native init dispatched");
     }
 
     @Override

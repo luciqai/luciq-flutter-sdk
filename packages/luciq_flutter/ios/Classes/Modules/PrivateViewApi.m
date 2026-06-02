@@ -1,5 +1,7 @@
 #import "PrivateViewApi.h"
 #import "../Util/FlutterPluginRegistrar+FlutterEngine.h"
+#import "../Util/LuciqFlutterLogger.h"
+#import "../Util/LuciqFlutterDebugTags.h"
 
 extern PrivateViewApi* InitPrivateViewApi(
     id<FlutterBinaryMessenger> messenger,
@@ -76,7 +78,7 @@ static long long currentTimeMillis;
     long long timeDifference = currentTimeMillis2 - currentTimeMillis;
 
     completion(maskedScreenshot);
-    NSLog(@"Time Difference: %lld ms (Last: %lld, Current: %lld)", timeDifference, currentTimeMillis2, currentTimeMillis);
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"Time Difference: %lld ms (Last: %lld, Current: %lld)", timeDifference, currentTimeMillis2, currentTimeMillis];
 
 
 }
@@ -137,7 +139,7 @@ static long long currentTimeMillis;
 
 // Log error details
 - (void)logError:(FlutterError *)error {
-    NSLog(@"LCQ-Flutter: Error getting private views: %@", error.message);
+    [LuciqFlutterLogger e:[LuciqFlutterDebugTags privateView] format:@"getPrivateViews error code=%@", error.code];
 }
 
 

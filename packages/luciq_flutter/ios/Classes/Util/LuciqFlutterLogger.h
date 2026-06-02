@@ -15,7 +15,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <LuciqSDK/LCQTypes.h>
+#import <LuciqSDK/LuciqSDK.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

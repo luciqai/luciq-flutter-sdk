@@ -1,6 +1,4 @@
 import 'package:luciq_flutter/luciq_flutter.dart';
-import 'package:luciq_flutter/src/constants/debug_tags.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
 enum FlagsConfig {
   apm,
@@ -13,7 +11,6 @@ enum FlagsConfig {
 
 extension FeatureExtensions on FlagsConfig {
   Future<bool> isEnabled() async {
-    LuciqLogger.I.d('isEnabled flag=$name', tag: DebugTags.apmUITrace);
     switch (this) {
       case FlagsConfig.apm:
         return APM.isEnabled();

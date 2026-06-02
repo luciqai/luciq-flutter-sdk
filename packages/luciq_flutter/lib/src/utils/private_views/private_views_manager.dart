@@ -172,7 +172,9 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
 
   @override
   List<double?> getPrivateViews() {
-    LuciqLogger.I.d('getPrivateViews', tag: DebugTags.privateView);
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.d('getPrivateViews', tag: DebugTags.privateView);
+    }
     final rects = getRectsOfPrivateViews();
     final result = <double>[];
 

@@ -43,7 +43,6 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
   @visibleForTesting
   // Setter for the FeatureFlagsManager
   void setFeatureFlagsManager(FeatureFlagsManager featureFlagsManager) {
-    LuciqLogger.I.d('setFeatureFlagsManager', tag: DebugTags.featureFlags);
     // This can be used for testing, but should be avoided in production
     // since it breaks the singleton pattern
   }

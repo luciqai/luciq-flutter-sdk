@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 import ai.luciq.featuresrequest.FeatureRequests;
 import ai.luciq.flutter.generated.FeatureRequestsPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 
 import java.util.List;
 
@@ -21,12 +23,15 @@ public class FeatureRequestsApi implements FeatureRequestsPigeon.FeatureRequests
 
     @Override
     public void show() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_REQUESTS, "[show]");
         FeatureRequests.show();
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setEmailFieldRequired(@NonNull Boolean isRequired, @NonNull List<String> actionTypes) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_REQUESTS,
+                "[setEmailFieldRequired] isRequired=" + isRequired + ", actionTypes=" + actionTypes);
         int[] actions = new int[actionTypes.size()];
         for (int i = 0; i < actionTypes.size(); i++) {
             actions[i] = ArgsRegistry.actionTypes.get(actionTypes.get(i));

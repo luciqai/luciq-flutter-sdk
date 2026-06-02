@@ -1,7 +1,5 @@
 package ai.luciq.flutter.modules;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -25,6 +23,8 @@ import ai.luciq.apm.networkinterception.cp.APMCPNetworkLog;
 import ai.luciq.apm.screenrendering.models.cp.LuciqFrameData;
 import ai.luciq.apm.screenrendering.models.cp.LuciqScreenRenderingData;
 import ai.luciq.flutter.generated.ApmPigeon;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.Reflection;
 import io.flutter.plugin.common.BinaryMessenger;
 
@@ -52,6 +52,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_APP_LAUNCH, "[setEnabled] isEnabled=" + isEnabled);
         try {
             APM.setEnabled(isEnabled);
         } catch (Exception e) {
@@ -68,6 +69,8 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void setColdAppLaunchEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_APP_LAUNCH,
+                "[setColdAppLaunchEnabled] isEnabled=" + isEnabled);
         try {
             APM.setColdAppLaunchEnabled(isEnabled);
         } catch (Exception e) {
@@ -85,6 +88,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void setAutoUITraceEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_UI_TRACE, "[setAutoUITraceEnabled] isEnabled=" + isEnabled);
         try {
             APM.setAutoUITraceEnabled(isEnabled);
         } catch (Exception e) {
@@ -106,6 +110,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void startFlow(@NonNull String name) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_FLOW, "[startFlow] nameLength=" + name.length());
         try {
             APM.startFlow(name);
         } catch (Exception e) {
@@ -135,6 +140,10 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void setFlowAttribute(@NonNull String name, @NonNull String key, @Nullable String value) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_FLOW,
+                "[setFlowAttribute] nameLength=" + name.length()
+                        + ", keyLength=" + key.length()
+                        + ", valueLength=" + (value == null ? -1 : value.length()));
         try {
             APM.setFlowAttribute(name, key, value);
         } catch (Exception e) {
@@ -149,6 +158,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void endFlow(@NonNull String name) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_FLOW, "[endFlow] nameLength=" + name.length());
         try {
             APM.endFlow(name);
         } catch (Exception e) {
@@ -164,6 +174,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void startUITrace(@NonNull String name) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_UI_TRACE, "[startUITrace] nameLength=" + name.length());
         try {
             APM.startUITrace(name);
         } catch (Exception e) {
@@ -176,6 +187,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void endUITrace() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_UI_TRACE, "[endUITrace]");
         try {
             APM.endUITrace();
         } catch (Exception e) {
@@ -188,6 +200,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void endAppLaunch() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_APP_LAUNCH, "[endAppLaunch]");
         try {
             APM.endAppLaunch();
         } catch (Exception e) {
@@ -203,6 +216,10 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void networkLogAndroid(@NonNull Map<String, Object> data) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_NETWORK,
+                "[networkLogAndroid] url=" + LuciqFlutterLogger.redactUrl((String) data.get("url"))
+                        + ", method=" + data.get("method")
+                        + ", responseCode=" + data.get("responseCode"));
         try {
             APMNetworkLogger apmNetworkLogger = new APMNetworkLogger();
             final String requestUrl = (String) data.get("url");
@@ -281,7 +298,8 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             if (method != null) {
                 method.invoke(apmNetworkLogger, requestStartTime, requestDuration, requestHeaders, requestBody, requestBodySize, requestMethod, requestUrl, requestContentType, responseHeaders, responseBody, responseBodySize, statusCode, responseContentType, errorMessage, gqlQueryName, serverErrorMessage, w3cExternalTraceAttributes);
             } else {
-                Log.e(TAG, "APMNetworkLogger.log was not found by reflection");
+                LuciqFlutterLogger.e(LuciqFlutterDebugTags.APM_NETWORK,
+                        "APMNetworkLogger.log was not found by reflection");
             }
 
         } catch (Exception e) {
@@ -300,6 +318,10 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void startCpUiTrace(@NonNull String screenName, @NonNull Long microTimeStamp, @NonNull Long traceId) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_UI_TRACE,
+                "[startCpUiTrace] screenNameLength=" + screenName.length()
+                        + ", microTimeStamp=" + microTimeStamp
+                        + ", traceId=" + traceId);
         try {
             InternalAPM._startUiTraceCP(screenName, microTimeStamp, traceId);
         } catch (Exception e) {
@@ -321,6 +343,10 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void reportScreenLoadingCP(@NonNull Long startTimeStampMicro, @NonNull Long durationMicro, @NonNull Long uiTraceId) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_LOADING,
+                "[reportScreenLoadingCP] startTimeStampMicro=" + startTimeStampMicro
+                        + ", durationMicro=" + durationMicro
+                        + ", uiTraceId=" + uiTraceId);
         try {
             InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId, null);
         } catch (Exception e) {
@@ -331,6 +357,10 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void reportManualScreenLoadingCP(@NonNull String screenName, @NonNull Long startTimeStampMicro, @NonNull Long durationMicro) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_LOADING,
+                "[reportManualScreenLoadingCP] screenNameLength=" + screenName.length()
+                        + ", startTimeStampMicro=" + startTimeStampMicro
+                        + ", durationMicro=" + durationMicro);
         try {
             InternalAPM._reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro, null);
         } catch (Exception e) {
@@ -349,6 +379,8 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void endScreenLoadingCP(@NonNull Long timeStampMicro, @NonNull Long uiTraceId) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_LOADING,
+                "[endScreenLoadingCP] timeStampMicro=" + timeStampMicro + ", uiTraceId=" + uiTraceId);
         try {
             InternalAPM._endScreenLoadingCP(timeStampMicro, uiTraceId);
         } catch (Exception e) {
@@ -362,11 +394,13 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void isEndScreenLoadingEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_LOADING, "[isEndScreenLoadingEnabled]");
         isScreenLoadingEnabled(result);
     }
 
     @Override
     public void isAutoUiTraceEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_UI_TRACE, "[isAutoUiTraceEnabled]");
         try {
             InternalAPM._isFeatureEnabledCP(APMFeature.UI_TRACE, "LuciqCaptureScreenLoading", new FeatureAvailabilityCallback() {
                 @Override
@@ -381,6 +415,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void isEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_APP_LAUNCH, "[isEnabled]");
         try {
             InternalAPM._isFeatureEnabledCP(APMFeature.APM, "APM", new FeatureAvailabilityCallback() {
                 @Override
@@ -398,6 +433,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void isScreenLoadingEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_LOADING, "[isScreenLoadingEnabled]");
         try {
             InternalAPM._isFeatureEnabledCP(APMFeature.SCREEN_LOADING, "LuciqCaptureScreenLoading", new FeatureAvailabilityCallback() {
                 @Override
@@ -415,6 +451,8 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
      */
     @Override
     public void setScreenLoadingEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_LOADING,
+                "[setScreenLoadingEnabled] isEnabled=" + isEnabled);
         try {
             APM.setScreenLoadingEnabled(isEnabled);
         } catch (Exception e) {
@@ -424,6 +462,8 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void setScreenRenderEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_RENDERING,
+                "[setScreenRenderEnabled] isEnabled=" + isEnabled);
         try {
             APM.setScreenRenderingEnabled(isEnabled);
         } catch (Exception e) {
@@ -433,6 +473,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void isScreenRenderEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_RENDERING, "[isScreenRenderEnabled]");
         try {
             InternalAPM._isFeatureEnabledCP(APMFeature.SCREEN_RENDERING, "LuciqCaptureScreenRender", new FeatureAvailabilityCallback() {
                 @Override
@@ -447,6 +488,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void isCustomSpanEnabled(@NonNull ApmPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_CUSTOM_SPAN, "[isCustomSpanEnabled]");
         try {
             InternalAPM._isFeatureEnabledCP(APMFeature.CUSTOM_SPANS, "LuciqCustomSpan", new FeatureAvailabilityCallback() {
                 @Override
@@ -461,6 +503,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void getDeviceRefreshRateAndTolerance(@NonNull ApmPigeon.Result<List<Double>> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_RENDERING, "[getDeviceRefreshRateAndTolerance]");
         try {
             final double refreshRate = refreshRateCallback.call().doubleValue();
             InternalAPM._getToleranceValueForScreenRenderingCP(new ToleranceValueCallback() {
@@ -477,6 +520,8 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void endScreenRenderForAutoUiTrace(@NonNull Map<String, Object> data) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_RENDERING,
+                "[endScreenRenderForAutoUiTrace] traceId=" + data.get("traceId"));
         try {
             final long traceId = ((Number) data.get("traceId")).longValue();
             final long slowFramesTotalDuration = ((Number) data.get("slowFramesTotalDuration")).longValue();
@@ -506,6 +551,8 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void endScreenRenderForCustomUiTrace(@NonNull Map<String, Object> data) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_SCREEN_RENDERING,
+                "[endScreenRenderForCustomUiTrace] traceId=" + data.get("traceId"));
         try {
             final long traceId = ((Number) data.get("traceId")).longValue();
             final long slowFramesTotalDuration = ((Number) data.get("slowFramesTotalDuration")).longValue();
@@ -532,6 +579,10 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void syncCustomSpan(@NonNull String name, @NonNull Long startTimestamp, @NonNull Long endTimestamp) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_CUSTOM_SPAN,
+                "[syncCustomSpan] nameLength=" + name.length()
+                        + ", startTimestamp=" + startTimestamp
+                        + ", endTimestamp=" + endTimestamp);
         try {
             // Convert microseconds to milliseconds for Date objects
             Date startDate = new Date(startTimestamp / 1000);
@@ -540,7 +591,7 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
             APM.addCompletedCustomSpan(name, startDate, endDate);
 
         } catch (Exception e) {
-            Log.e("IB-CP-Bridge", "Error syncing span", e);
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.APM_CUSTOM_SPAN, "Error syncing span", e);
         }
     }
 

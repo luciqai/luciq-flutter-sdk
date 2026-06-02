@@ -7,6 +7,8 @@
 
 #import "PrivateViewHostApi.h"
 #import "luciq_flutter/LuciqApi.h"
+#import "../Util/LuciqFlutterLogger.h"
+#import "../Util/LuciqFlutterDebugTags.h"
 
 extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger, PrivateViewApi * _Nonnull privateViewApi) {
     PrivateViewHostApi *api = [[PrivateViewHostApi alloc] init];
@@ -18,6 +20,7 @@ extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger
 
 
 - (void)initWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"[PrivateViewHost.init]"];
     [LuciqApi setScreenshotMaskingHandler:^(UIImage * _Nonnull screenshot, void (^ _Nonnull completion)(UIImage * _Nullable)) {
         
         

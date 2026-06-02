@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 
 import ai.luciq.chat.Replies;
 import ai.luciq.flutter.generated.RepliesPigeon;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.library.Feature;
 
@@ -24,6 +26,7 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[setEnabled] isEnabled=" + isEnabled);
         if (isEnabled) {
             Replies.setState(Feature.State.ENABLED);
         } else {
@@ -33,21 +36,27 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
 
     @Override
     public void show() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[show]");
         Replies.show();
     }
 
     @Override
     public void setInAppNotificationsEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[setInAppNotificationsEnabled] isEnabled=" + isEnabled);
         Replies.setInAppNotificationEnabled(isEnabled);
     }
 
     @Override
     public void setInAppNotificationSound(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[setInAppNotificationSound] isEnabled=" + isEnabled);
         Replies.setInAppNotificationSound(isEnabled);
     }
 
     @Override
     public void getUnreadRepliesCount(RepliesPigeon.Result<Long> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[getUnreadRepliesCount]");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -67,6 +76,7 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
 
     @Override
     public void hasChats(RepliesPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[hasChats]");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -86,6 +96,7 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
 
     @Override
     public void bindOnNewReplyCallback() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[bindOnNewReplyCallback]");
         Replies.setOnNewReplyReceivedCallback(new Runnable() {
             @Override
             public void run() {

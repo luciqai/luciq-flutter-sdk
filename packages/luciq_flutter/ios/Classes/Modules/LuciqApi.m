@@ -8,6 +8,8 @@
 #import "../Util/LCQAPM+PrivateAPIs.h"
 
 #import "../Util/Luciq+CP.h"
+#import "../Util/LuciqFlutterLogger.h"
+#import "../Util/LuciqFlutterDebugTags.h"
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
 
 extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
@@ -62,8 +64,17 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
     LCQSDKDebugLogsLevel resolvedLogLevel = (ArgsRegistry.sdkLogLevels[debugLogsLevel]).integerValue;
 
+    [LuciqFlutterLogger setLevel:resolvedLogLevel];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
+                   format:@"[init] tokenPresent=%@ invocationEventsCount=%lu debugLogsLevel=%ld appVariantPresent=%@",
+        (token.length > 0 ? @"YES" : @"NO"),
+        (unsigned long)invocationEvents.count,
+        (long)resolvedLogLevel,
+        (appVariant != nil ? @"YES" : @"NO")];
+
     [Luciq setSdkDebugLogsLevel:resolvedLogLevel];
     [Luciq startWithToken:token invocationEvents:resolvedEvents];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[init] native init dispatched"];
     Luciq.sendEventsSwizzling = false;
 }
 

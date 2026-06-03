@@ -114,6 +114,20 @@ NSMutableDictionary *traces;
     });
 }
 
+- (void)reportManualScreenLoadingCPScreenName:(nonnull NSString *)screenName startTimeStampMicro:(nonnull NSNumber *)startTimeStampMicro durationMicro:(nonnull NSNumber *)durationMicro error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    LCQRunCatching(@"ApmApi.reportManualScreenLoadingCPScreenName", ^{
+        NSTimeInterval startTimeStampMicroMUS = [startTimeStampMicro doubleValue];
+    NSTimeInterval durationMUS = [durationMicro doubleValue];
+    [LCQAPM reportScreenLoadingCPUITraceWithName:screenName screenLoadingStartMUS:startTimeStampMicroMUS screenLoadingDurationMUS:durationMUS stages:nil];
+});
+}
+
+// This method is responsible for extend the end time if the screen loading custom
+// trace. It takes two parameters:
+// 1. `timeStampMicro`: A number representing the timestamp in microseconds when the screen loading
+// custom trace is ending.
+// 2. `uiTraceId`: A number representing the unique identifier for the UI trace associated with the
+// screen loading.
 - (void)endScreenLoadingCPTimeStampMicro:(nonnull NSNumber *)timeStampMicro uiTraceId:(nonnull NSNumber *)uiTraceId error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     LCQRunCatching(@"ApmApi.endScreenLoadingCP", ^{
         NSTimeInterval endScreenLoadingCPWithEndTimestampMUS = [timeStampMicro doubleValue];

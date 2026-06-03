@@ -1,10 +1,51 @@
 # Changelog
 
+
 ## Unreleased
 
 ### Added
 
 - Add a defensive `runCatching` wrapper across Dart, iOS, and Android module boundaries so unexpected throws in platform-channel calls and host-API implementations cannot crash the host app. ([MOB-22423](https://instabug.atlassian.net/browse/MOB-22423))
+
+## [19.7.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.7.0...19.6.0)
+
+### Added
+
+- **WebView Support:** New APIs to monitor WebViews in your app, including page navigations, user interactions, and network requests issued from inside the WebView. Screenshots and session replays now capture WebView content alongside the rest of the UI.
+
+  Enable WebView monitoring after `Luciq.init`:
+
+  ```dart
+  // Enable WebView monitoring (required for the APIs below).
+  Luciq.setWebViewMonitoringEnabled(true);
+
+  // Track taps and other user interactions inside WebViews.
+  Luciq.setWebViewUserInteractionsTrackingEnabled(true);
+
+  // Log network requests issued from WebViews.
+  Luciq.setWebViewNetworkTrackingEnabled(true);
+  ```
+
+  All three APIs default to disabled. `setWebViewMonitoringEnabled` must be on for the user-interactions and network-tracking APIs to take effect.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.7.0 ([#57](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.7.0).
+
+- Bump Luciq Android SDK to v19.7.0 ([#57](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.7.0).
+
+
+## [19.6.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.6.0...19.4.0)
+
+### Added
+
+- Add support for Screen Loading with react-navigation integration and manual reporting API.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.6.1 ([#60](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.6.1).
+
+- Bump Luciq Android SDK to v19.6.0 ([#60](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.6.0).
 
 
 ## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
@@ -88,7 +129,6 @@
 
 
 ## [19.1.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
-
 
 ### Changed
 

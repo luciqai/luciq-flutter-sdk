@@ -74,6 +74,35 @@ void main() {
     });
   });
 
+  group('isWebViewWidget', () {
+    test('detects webview_flutter platform views', () {
+      const androidView = AndroidView(viewType: 'plugins.flutter.io/webview');
+      const uiKitView = UiKitView(viewType: 'plugins.flutter.io/webview');
+
+      expect(isWebViewWidget(androidView), true);
+      expect(isWebViewWidget(uiKitView), true);
+    });
+
+    test('detects flutter_inappwebview platform views', () {
+      const androidView = AndroidView(
+        viewType: 'com.pichillilorenzo/flutter_inappwebview',
+      );
+      const uiKitView = UiKitView(
+        viewType: 'com.pichillilorenzo/flutter_inappwebview',
+      );
+
+      expect(isWebViewWidget(androidView), true);
+      expect(isWebViewWidget(uiKitView), true);
+    });
+
+    test('returns false for unrelated widgets and platform views', () {
+      const platformView = AndroidView(viewType: 'plugins.flutter.io/map');
+
+      expect(isWebViewWidget(const Text('Not a webview')), false);
+      expect(isWebViewWidget(platformView), false);
+    });
+  });
+
   group('getLabel', () {
     test('returns label from Text widget', () {
       const widget = Text('Label');

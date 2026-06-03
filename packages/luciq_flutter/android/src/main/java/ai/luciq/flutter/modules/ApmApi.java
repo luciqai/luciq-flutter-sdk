@@ -174,10 +174,28 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
 
     @Override
     public void reportScreenLoadingCP(@NonNull Long startTimeStampMicro, @NonNull Long durationMicro, @NonNull Long uiTraceId) {
-        RunCatching.runCatching("ApmApi.reportScreenLoadingCP",
-                () -> InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId));
+      RunCatching.runCatching("ApmApi.reportScreenLoadingCP",
+        () -> InternalAPM._reportScreenLoadingCP(startTimeStampMicro, durationMicro, uiTraceId, null));
+
     }
 
+
+    @Override
+    public void reportManualScreenLoadingCP(@NonNull String screenName, @NonNull Long startTimeStampMicro, @NonNull Long durationMicro) {
+      RunCatching.runCatching("ApmApi.reportScreenLoadingCP",
+        () ->InternalAPM._reportManualScreenLoadingCP(screenName, startTimeStampMicro, durationMicro, null));
+
+    }
+
+    /**
+     * This method is responsible for extend the end time if the screen loading custom
+     * trace. It takes two parameters:
+     *
+     * @param timeStampMicro: A number representing the timestamp in microseconds when the screen loading
+     *                        custom trace is ending.
+     * @param uiTraceId:      A number representing the unique identifier for the UI trace associated with the
+     *                        screen loading.
+     */
     @Override
     public void endScreenLoadingCP(@NonNull Long timeStampMicro, @NonNull Long uiTraceId) {
         RunCatching.runCatching("ApmApi.endScreenLoadingCP",

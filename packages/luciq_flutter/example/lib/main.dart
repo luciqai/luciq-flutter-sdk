@@ -41,7 +41,9 @@ part 'src/screens/core_page.dart';
 part 'src/screens/crashes_page.dart';
 part 'src/screens/my_home_page.dart';
 part 'src/screens/screen_capture_premature_extension_page.dart';
-part 'src/screens/screen_loading_page.dart';
+part 'src/screens/screen_loading/screen_loading_page.dart';
+part 'src/screens/screen_loading/screen_loading_tab_page.dart';
+part 'src/screens/screen_loading/screen_loading_delayed_page.dart';
 part 'src/screens/session_replay_page.dart';
 part 'src/screens/screen_render_page.dart';
 part 'src/screens/custom_spans_page.dart';
@@ -57,6 +59,11 @@ void main() {
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',
       );
+      Luciq.setAutoMaskScreenshotTypes([AutoMasking.webViews]);
+
+      Luciq.setWebViewMonitoringEnabled(true);
+      Luciq.setWebViewUserInteractionsTrackingEnabled(true);
+      Luciq.setWebViewNetworkTrackingEnabled(true);
 
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
@@ -78,9 +85,12 @@ void main() {
       };
 
       runApp(
-        ChangeNotifierProvider(
-          create: (_) => CallbackHandlersProvider(),
-          child: const MyApp(),
+        // LuciqWidget is required to register the private-view screenshot
+        LuciqWidget(
+          child: ChangeNotifierProvider(
+            create: (_) => CallbackHandlersProvider(),
+            child: const MyApp(),
+          ),
         ),
       );
     },

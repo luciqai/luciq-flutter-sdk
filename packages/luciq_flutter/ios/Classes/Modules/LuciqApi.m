@@ -628,4 +628,16 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     });
 }
 
+- (void)setWebViewMonitoringEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    Luciq.webViewMonitoringEnabled = [isEnabled boolValue];
+}
+
+- (void)setWebViewUserInteractionsTrackingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    Luciq.webViewUserInteractionsTrackingEnabled = [isEnabled boolValue];
+}
+
+- (void)setWebViewNetworkTrackingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    Luciq.webViewNetworkTrackingEnabled = [isEnabled boolValue];
+}
+
 @end

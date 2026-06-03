@@ -34,11 +34,17 @@ public class PrivateViewManager {
 
     private final LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi luciqPrivateViewApi;
     private Activity activity;
+    final CaptureManager windowPixelCopyScreenshotCaptor;
     final CaptureManager pixelCopyScreenshotCaptor;
     final CaptureManager boundryScreenshotCaptor;
 
     public PrivateViewManager(@NonNull LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi luciqPrivateViewApi, CaptureManager pixelCopyCaptureManager, CaptureManager boundryCaptureManager) {
+        this(luciqPrivateViewApi, pixelCopyCaptureManager, pixelCopyCaptureManager, boundryCaptureManager);
+    }
+
+    public PrivateViewManager(@NonNull LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi luciqPrivateViewApi, CaptureManager windowPixelCopyCaptureManager, CaptureManager pixelCopyCaptureManager, CaptureManager boundryCaptureManager) {
         this.luciqPrivateViewApi = luciqPrivateViewApi;
+        this.windowPixelCopyScreenshotCaptor = windowPixelCopyCaptureManager;
         this.pixelCopyScreenshotCaptor = pixelCopyCaptureManager;
         this.boundryScreenshotCaptor = boundryCaptureManager;
 
@@ -81,7 +87,7 @@ public class PrivateViewManager {
 
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    pixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
+                    ScreenshotResultCallback pixelCopyScreenshotResult = new ScreenshotResultCallback() {
                         @Override
                         public void onScreenshotResult(ScreenshotResult result) {
                             processScreenshot(result, privateViews, latch, capturingCallback);
@@ -91,6 +97,19 @@ public class PrivateViewManager {
                         @Override
                         public void onError() {
                             boundryScreenshotCaptor.capture(activity, boundryScreenshotResult);
+
+                        }
+                    };
+
+                    windowPixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
+                        @Override
+                        public void onScreenshotResult(ScreenshotResult result) {
+                            processScreenshot(result, privateViews, latch, capturingCallback);
+                        }
+
+                        @Override
+                        public void onError() {
+                            pixelCopyScreenshotCaptor.capture(activity, pixelCopyScreenshotResult);
 
                         }
                     });
@@ -134,10 +153,10 @@ public class PrivateViewManager {
             Paint paint = new Paint();  // Default color is black
 
             for (int i = 0; i < privateViews.size(); i += 4) {
-                float left = privateViews.get(i).floatValue() * pixelRatio;
-                float top = privateViews.get(i + 1).floatValue() * pixelRatio;
-                float right = privateViews.get(i + 2).floatValue() * pixelRatio;
-                float bottom = privateViews.get(i + 3).floatValue() * pixelRatio;
+                float left = (privateViews.get(i).floatValue() + result.getOffsetX()) * pixelRatio;
+                float top = (privateViews.get(i + 1).floatValue() + result.getOffsetY()) * pixelRatio;
+                float right = (privateViews.get(i + 2).floatValue() + result.getOffsetX()) * pixelRatio;
+                float bottom = (privateViews.get(i + 3).floatValue() + result.getOffsetY()) * pixelRatio;
                 canvas.drawRect(left, top, right, bottom, paint);  // Mask private view
             }
         } catch (Exception e) {

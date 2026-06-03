@@ -30,6 +30,7 @@ import ai.luciq.flutter.modules.SessionReplayApi;
 import ai.luciq.flutter.modules.SurveysApi;
 import ai.luciq.flutter.modules.capturing.BoundryCaptureManager;
 import ai.luciq.flutter.modules.capturing.PixelCopyCaptureManager;
+import ai.luciq.flutter.modules.capturing.WindowPixelCopyCaptureManager;
 
 import java.util.concurrent.Callable;
 
@@ -50,6 +51,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
     private Lifecycle lifecycle;
 
     private static PrivateViewManager privateViewManager;
+    private static final WindowPixelCopyCaptureManager windowPixelCopyCaptureManager = new WindowPixelCopyCaptureManager();
 
 
 
@@ -139,7 +141,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
             }
         };
 
-        privateViewManager = new PrivateViewManager(new LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi(messenger), new PixelCopyCaptureManager(), new BoundryCaptureManager(renderer));
+        privateViewManager = new PrivateViewManager(new LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi(messenger), windowPixelCopyCaptureManager, new PixelCopyCaptureManager(), new BoundryCaptureManager(renderer));
         LuciqPrivateView.init(messenger, privateViewManager);
 
         Callable<Float> refreshRateProvider = new Callable<Float>() {

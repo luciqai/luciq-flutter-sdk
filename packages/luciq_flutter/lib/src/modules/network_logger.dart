@@ -82,7 +82,7 @@ class NetworkLogger {
         w3Header?.w3CGeneratedHeader != null) {
       data.requestHeaders['traceparent'] = w3Header?.w3CGeneratedHeader;
     }
-    networkLogInternal(data);
+    await networkLogInternal(data);
   }
 
   @internal
@@ -119,8 +119,32 @@ class NetworkLogger {
     }
 
     final obfuscated = await _manager.obfuscateLog(processedData);
-    await _host.networkLog(obfuscated.toJson());
-    await APM.networkLogAndroid(obfuscated);
+
+    try {
+      await _host.networkLog(obfuscated.toJson());
+      LuciqLogger.I.d(
+        'Bug Reporting log sent — ${obfuscated.url}',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    } catch (e, s) {
+      LuciqLogger.I.e(
+        'Bug Reporting log FAILED — ${obfuscated.url} — $e\n$s',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    }
+
+    try {
+      await APM.networkLogAndroid(obfuscated);
+      LuciqLogger.I.d(
+        'APM/Session Replay log sent — ${obfuscated.url}',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    } catch (e, s) {
+      LuciqLogger.I.e(
+        'APM/Session Replay log FAILED — ${obfuscated.url} — $e\n$s',
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    }
   }
 
   @internal

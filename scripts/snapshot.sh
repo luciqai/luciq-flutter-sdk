@@ -11,6 +11,7 @@ cd "$REPO_ROOT"
 
 PUBSPEC="packages/luciq_flutter/pubspec.yaml"
 GITIGNORE=".gitignore"
+PACKAGE_GITIGNORE="packages/luciq_flutter/.gitignore"
 REPO_URL="https://github.com/luciqai/luciq-flutter-sdk.git"
 
 RED='\033[0;31m'
@@ -136,11 +137,21 @@ for dir_pattern in "android/**/generated/" "ios/**/Generated/"; do
   fi
 done
 
+# Remove the SPM Pigeon header ignore rule from the package .gitignore
+PIGEON_HEADER_PATTERN="ios/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter/*Pigeon.h"
+if grep -qF "${PIGEON_HEADER_PATTERN}" "$PACKAGE_GITIGNORE" 2>/dev/null; then
+  escaped_pattern=$(printf '%s\n' "$PIGEON_HEADER_PATTERN" | sed 's/[.[\*^$/]/\\&/g')
+  sed -i '' "/^${escaped_pattern}$/d" "$PACKAGE_GITIGNORE"
+  success "Removed SPM Pigeon header ignore rule from $PACKAGE_GITIGNORE"
+fi
+
 info "Force-adding generated files..."
 # Pigeon generated files (Android Java, iOS ObjC, Dart)
 git add -f packages/luciq_flutter/android/src/main/java/ai/luciq/flutter/generated/*.java 2>/dev/null || true
 git add -f packages/luciq_flutter/ios/Classes/Generated/*.h 2>/dev/null || true
 git add -f packages/luciq_flutter/ios/Classes/Generated/*.m 2>/dev/null || true
+# SPM Pigeon headers (Swift Package Manager source layout)
+git add -f packages/luciq_flutter/ios/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter/*Pigeon.h 2>/dev/null || true
 git add -f packages/luciq_flutter/lib/src/generated/*.g.dart 2>/dev/null || true
 # Mockito generated files
 git add -f packages/luciq_flutter/test/**/*.mocks.dart 2>/dev/null || true

@@ -2,8 +2,8 @@
 *.mocks.dart
 *.g.dart
 android/**/generated/
-ios/**/Generated/
-ios/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter/*Pigeon.h
+#ios/**/Generated/
+#ios/luciq_flutter/Sources/luciq_flutter/include/luciq_flutter/*Pigeon.h
 
 # Miscellaneous
 *.class

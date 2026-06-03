@@ -71,22 +71,14 @@ info "SDK version: $SDK_VERSION"
 info "Branch name: $BRANCH_NAME"
 
 # -----------------------------------------------------------------------------
-# Step 1: Create snapshot branch from latest master
+# Step 1: Create snapshot branch from current branch
 # -----------------------------------------------------------------------------
-info "Fetching latest master..."
-git fetch origin master
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+info "Current branch: $CURRENT_BRANCH"
 
-info "Stashing local changes..."
-git stash --include-untracked
-STASHED=true
-
-info "Creating branch '$BRANCH_NAME' from origin/master..."
-git checkout -b "$BRANCH_NAME" origin/master
+info "Creating branch '$BRANCH_NAME' from '$CURRENT_BRANCH'..."
+git checkout -b "$BRANCH_NAME"
 success "Branch '$BRANCH_NAME' created."
-
-info "Restoring stashed changes..."
-git stash pop || warn "Nothing to restore from stash."
-STASHED=false
 
 # -----------------------------------------------------------------------------
 # Step 2: Remove all packages except luciq_flutter to reduce size

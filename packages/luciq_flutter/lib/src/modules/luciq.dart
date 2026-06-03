@@ -691,7 +691,6 @@ class Luciq {
     return runCatchingAsync('Luciq.logUserSteps', () async {
       PrivateViewsManager.I.addAutoMasking(types);
     });
-
   }
 
   /// Enables and disables manual invocation and prompt options for bug and feedback.

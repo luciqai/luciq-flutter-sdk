@@ -28,7 +28,10 @@ static long long currentTimeMillis;
 
 - (void)mask:(UIImage *)screenshot
   completion:(void (^)(UIImage *))completion {
-    
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                   format:@"[PRIV.mask] phase=enter screenshotWidth=%.0f screenshotHeight=%.0f",
+        screenshot.size.width, screenshot.size.height];
+
     __weak typeof(self) weakSelf = self;
     // Wait for the Cupertino animation to complete
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -78,7 +81,9 @@ static long long currentTimeMillis;
     long long timeDifference = currentTimeMillis2 - currentTimeMillis;
 
     completion(maskedScreenshot);
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"Time Difference: %lld ms (Last: %lld, Current: %lld)", timeDifference, currentTimeMillis2, currentTimeMillis];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                   format:@"[PRIV.mask] phase=exit durationMs=%lld rectangleCount=%lu",
+        timeDifference, (unsigned long)privateViews.count];
 
 
 }
@@ -139,7 +144,9 @@ static long long currentTimeMillis;
 
 // Log error details
 - (void)logError:(FlutterError *)error {
-    [LuciqFlutterLogger e:[LuciqFlutterDebugTags privateView] format:@"getPrivateViews error code=%@", error.code];
+    [LuciqFlutterLogger e:[LuciqFlutterDebugTags privateView]
+                   format:@"[PRIV.getPrivateViews] phase=error errorType=PigeonError errorCode=%@",
+        error.code];
 }
 
 

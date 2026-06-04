@@ -30,6 +30,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)redactURL:(nullable NSString *)url;
 
+/// Returns a 4-hex-char correlation id (e.g. @"c7f3"). Mirrors
+/// `CallId.next()` on the Dart side. Used for native-originated
+/// callback fires so a single lifecycle can be reconstructed from
+/// the logs of all three layers.
++ (NSString *)nextCallId;
+
 @end
 
 NS_ASSUME_NONNULL_END

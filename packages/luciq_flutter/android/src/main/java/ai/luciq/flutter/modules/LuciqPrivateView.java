@@ -28,22 +28,26 @@ public class LuciqPrivateView implements LuciqPrivateViewPigeon.LuciqPrivateView
 
     @Override
     public void init() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW, "[init]");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                "[PRIV.init] phase=enter");
         LuciqApi.setScreenshotCaptor(new ScreenshotCaptor() {
             @Override
             public void capture(CapturingCallback listener) {
-
+                String callId = LuciqFlutterLogger.nextCallId();
+                LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                        "[PRIV.capture] #" + callId + " phase=fire delayMs=300");
                 (new Handler(Looper.getMainLooper())).postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         time = System.currentTimeMillis();
+                        LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                                "[PRIV.capture.mask] #" + callId + " phase=enter");
                         privateViewManager.mask(listener);
-
                     }
                 }, 300);
-
-
             }
         }, InternalCore.INSTANCE);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                "[PRIV.init] phase=exit");
     }
 }

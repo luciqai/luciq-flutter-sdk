@@ -13,6 +13,8 @@ import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.model.ScreenshotResult;
 import ai.luciq.flutter.modules.capturing.CaptureManager;
 import ai.luciq.flutter.modules.capturing.ScreenshotResultCallback;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
 
@@ -160,7 +162,8 @@ public class PrivateViewManager {
                 canvas.drawRect(left, top, right, bottom, paint);  // Mask private view
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                    "[PRIV.mask] phase=error errorType=" + e.getClass().getSimpleName(), e);
         }
     }
 }

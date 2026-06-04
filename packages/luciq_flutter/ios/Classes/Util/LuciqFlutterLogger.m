@@ -39,6 +39,19 @@ static LCQSDKDebugLogsLevel _currentLevel = LCQSDKDebugLogsLevelError;
     NSLog(@"[%@] ERROR: %@", tag, message);
 }
 
++ (NSString *)nextCallId {
+    static NSUInteger counter = 0;
+    static dispatch_once_t onceToken;
+    static NSLock *lock;
+    dispatch_once(&onceToken, ^{
+        lock = [[NSLock alloc] init];
+    });
+    [lock lock];
+    NSUInteger value = counter++ & 0xFFFF;
+    [lock unlock];
+    return [NSString stringWithFormat:@"%04lx", (unsigned long)value];
+}
+
 + (NSString *)redactURL:(NSString *)url {
     if (url.length == 0) return @"";
 

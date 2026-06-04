@@ -14,40 +14,58 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 @implementation SessionReplayApi
 
 - (void)setEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.setEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.setEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     LCQSessionReplay.enabled = [isEnabled boolValue];
 }
 
 - (void)setLuciqLogsEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.setLuciqLogsEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.setLuciqLogsEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     LCQSessionReplay.LCQLogsEnabled = [isEnabled boolValue];
 }
 
 - (void)setNetworkLogsEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.setNetworkLogsEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.setNetworkLogsEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     LCQSessionReplay.networkLogsEnabled = [isEnabled boolValue];
 }
 
 - (void)setUserStepsEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.setUserStepsEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.setUserStepsEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     LCQSessionReplay.userStepsEnabled = [isEnabled boolValue];
 }
 
-- (void)getSessionReplayLinkWithCompletion:(void (^)(NSString *, FlutterError *))completion {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.getSessionReplayLink]"];
+- (void)getSessionReplayLinkCallId:(NSString *)callId completion:(void (^)(NSString *, FlutterError *))completion {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.getSessionReplayLink] #%@ phase=enter", callId];
     NSString *link = LCQSessionReplay.sessionReplayLink;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.getSessionReplayLink] #%@ phase=exit resultLength=%lu resultPresent=%@",
+        callId,
+        (unsigned long)link.length,
+        (link.length > 0 ? @"true" : @"false")];
     completion(link, nil);
 }
 
 - (void)setScreenshotCapturingModeMode:(NSString *)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.setScreenshotCapturingMode] mode=%@", mode];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.setScreenshotCapturingMode] phase=enter mode=%@", mode];
     LCQScreenshotCapturingMode nativeMode = (ArgsRegistry.screenshotCapturingModes[mode]).integerValue;
     LCQSessionReplay.screenshotCapturingMode = nativeMode;
 }
 
 - (void)setScreenshotCaptureIntervalIntervalMs:(nonnull NSNumber *)intervalMs error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.setScreenshotCaptureInterval] intervalMs=%@", intervalMs];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.setScreenshotCaptureInterval] phase=enter intervalMs=%@", intervalMs];
     if ([intervalMs integerValue] < 500) {
+        [LuciqFlutterLogger e:[LuciqFlutterDebugTags sessionReplay]
+                       format:@"[SR.setScreenshotCaptureInterval] phase=error errorType=InvalidArgument errorMessage=intervalMs<500 intervalMs=%@", intervalMs];
         *error = [FlutterError errorWithCode:@"INVALID_CAPTURE_INTERVAL"
                                      message:@"intervalMs must be >= 500 on iOS"
                                      details:intervalMs];
@@ -57,7 +75,8 @@ extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setScreenshotQualityModeMode:(NSString *)mode error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay] format:@"[SR.setScreenshotQualityMode] mode=%@", mode];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags sessionReplay]
+                   format:@"[SR.setScreenshotQualityMode] phase=enter mode=%@", mode];
     LCQScreenshotQualityMode nativeMode = (ArgsRegistry.screenshotQualityModes[mode]).integerValue;
     LCQSessionReplay.screenshotQualityMode = nativeMode;
 }

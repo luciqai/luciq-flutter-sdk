@@ -39,31 +39,33 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setEnabled] isEnabled=" + isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setEnabled] phase=enter isEnabled=" + isEnabled);
         if (isEnabled) {
             BugReporting.setState(Feature.State.ENABLED);
         } else {
             BugReporting.setState(Feature.State.DISABLED);
         }
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setEnabled] phase=exit");
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void show(@NonNull String reportType, @Nullable List<String> invocationOptions) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[show] reportType=" + reportType
-                        + ", invocationOptions=" + invocationOptions);
+                "[BR.show] phase=enter reportType=" + reportType
+                        + " invocationOptionsCount=" + (invocationOptions != null ? invocationOptions.size() : 0));
         int[] options = new int[invocationOptions.size()];
         for (int i = 0; i < invocationOptions.size(); i++) {
             options[i] = ArgsRegistry.invocationOptions.get(invocationOptions.get(i));
         }
         int reportTypeInt = ArgsRegistry.reportTypes.get(reportType);
         BugReporting.show(reportTypeInt, options);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.show] phase=exit");
     }
 
     @Override
     public void setInvocationEvents(@NonNull List<String> events) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setInvocationEvents] events=" + events);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setInvocationEvents] phase=enter eventsCount=" + events.size());
         LuciqInvocationEvent[] invocationEventsArray = new LuciqInvocationEvent[events.size()];
 
         for (int i = 0; i < events.size(); i++) {
@@ -72,12 +74,13 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
         }
 
         BugReporting.setInvocationEvents(invocationEventsArray);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setInvocationEvents] phase=exit");
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setReportTypes(@NonNull List<String> types) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setReportTypes] types=" + types);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setReportTypes] phase=enter typesCount=" + types.size());
         int[] reportTypesArray = new int[types.size()];
 
         for (int i = 0; i < types.size(); i++) {
@@ -86,77 +89,86 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
         }
 
         BugReporting.setReportTypes(reportTypesArray);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setReportTypes] phase=exit");
     }
 
     @Override
     public void setExtendedBugReportMode(@NonNull String mode) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setExtendedBugReportMode] mode=" + mode);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setExtendedBugReportMode] phase=enter mode=" + mode);
         final ExtendedBugReport.State resolvedMode = ArgsRegistry.extendedBugReportStates.get(mode);
         BugReporting.setExtendedBugReportState(resolvedMode);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setExtendedBugReportMode] phase=exit");
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setInvocationOptions(@NonNull List<String> options) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[setInvocationOptions] options=" + options);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setInvocationOptions] phase=enter optionsCount=" + options.size());
         int[] resolvedOptions = new int[options.size()];
         for (int i = 0; i < options.size(); i++) {
             resolvedOptions[i] = ArgsRegistry.invocationOptions.get(options.get(i));
         }
         BugReporting.setOptions(resolvedOptions);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setInvocationOptions] phase=exit");
     }
 
     @Override
     public void setFloatingButtonEdge(@NonNull String edge, @NonNull Long offset) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setFloatingButtonEdge] edge=" + edge + ", offset=" + offset);
+                "[BR.setFloatingButtonEdge] phase=enter edge=" + edge + " offset=" + offset);
         final LuciqFloatingButtonEdge resolvedEdge = ArgsRegistry.floatingButtonEdges.get(edge);
         BugReporting.setFloatingButtonEdge(resolvedEdge);
         BugReporting.setFloatingButtonOffset(offset.intValue());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setFloatingButtonEdge] phase=exit");
     }
 
     @Override
     public void setVideoRecordingFloatingButtonPosition(@NonNull String position) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setVideoRecordingFloatingButtonPosition] position=" + position);
+                "[BR.setVideoRecordingFloatingButtonPosition] phase=enter position=" + position);
         final LuciqVideoRecordingButtonPosition resolvedPosition = ArgsRegistry.recordButtonPositions.get(position);
         BugReporting.setVideoRecordingFloatingButtonPosition(resolvedPosition);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setVideoRecordingFloatingButtonPosition] phase=exit");
     }
 
     @Override
     public void setShakingThresholdForiPhone(@NonNull Double threshold) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setShakingThresholdForiPhone] threshold=" + threshold);
+                "[BR.setShakingThresholdForiPhone] phase=enter threshold=" + threshold);
         // iOS Only
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setShakingThresholdForiPhone] phase=exit");
     }
 
     @Override
     public void setShakingThresholdForiPad(@NonNull Double threshold) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setShakingThresholdForiPad] threshold=" + threshold);
+                "[BR.setShakingThresholdForiPad] phase=enter threshold=" + threshold);
         // iOS Only
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setShakingThresholdForiPad] phase=exit");
     }
 
     @Override
     public void setShakingThresholdForAndroid(@NonNull Long threshold) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setShakingThresholdForAndroid] threshold=" + threshold);
+                "[BR.setShakingThresholdForAndroid] phase=enter threshold=" + threshold);
         BugReporting.setShakingThreshold(threshold.intValue());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setShakingThresholdForAndroid] phase=exit");
     }
 
     @Override
     public void setEnabledAttachmentTypes(@NonNull Boolean screenshot, @NonNull Boolean extraScreenshot, @NonNull Boolean galleryImage, @NonNull Boolean screenRecording) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setEnabledAttachmentTypes] screenshot=" + screenshot
-                        + ", extraScreenshot=" + extraScreenshot
-                        + ", galleryImage=" + galleryImage
-                        + ", screenRecording=" + screenRecording);
+                "[BR.setEnabledAttachmentTypes] phase=enter screenshot=" + screenshot
+                        + " extraScreenshot=" + extraScreenshot
+                        + " galleryImage=" + galleryImage
+                        + " screenRecording=" + screenRecording);
         BugReporting.setAttachmentTypesEnabled(screenshot, extraScreenshot, galleryImage, screenRecording);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setEnabledAttachmentTypes] phase=exit");
     }
 
     @Override
     public void bindOnInvokeCallback() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[bindOnInvokeCallback]");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.bindOnInvokeCallback] phase=enter");
         BugReporting.setOnInvokeCallback(new OnInvokeCallback() {
             @Override
             public void onInvoke() {
@@ -166,7 +178,11 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        flutterApi.onSdkInvoke(new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
+                        String callId = LuciqFlutterLogger.nextCallId();
+                        LuciqFlutterLogger.d(
+                                LuciqFlutterDebugTags.BUG_REPORTING,
+                                "[BR.onSdkInvoke] #" + callId + " phase=fire");
+                        flutterApi.onSdkInvoke(callId, new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
                             @Override
                             public void reply(Void reply) {
                             }
@@ -175,18 +191,25 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
                 });
             }
         });
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.bindOnInvokeCallback] phase=exit");
     }
 
     @Override
     public void bindOnDismissCallback() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[bindOnDismissCallback]");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.bindOnDismissCallback] phase=enter");
         BugReporting.setOnDismissCallback(new OnSdkDismissCallback() {
             @Override
             public void call(DismissType dismissType, ReportType reportType) {
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        flutterApi.onSdkDismiss(dismissType.toString(), reportType.toString(), new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
+                        String callId = LuciqFlutterLogger.nextCallId();
+                        String dismissTypeString = dismissType.toString();
+                        String reportTypeString = reportType.toString();
+                        LuciqFlutterLogger.d(
+                                LuciqFlutterDebugTags.BUG_REPORTING,
+                                "[BR.onSdkDismiss] #" + callId + " phase=fire dismissType=" + dismissTypeString + " reportType=" + reportTypeString);
+                        flutterApi.onSdkDismiss(callId, dismissTypeString, reportTypeString, new BugReportingPigeon.BugReportingFlutterApi.Reply<Void>() {
                             @Override
                             public void reply(Void reply) {
                             }
@@ -195,21 +218,23 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
                 });
             }
         });
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.bindOnDismissCallback] phase=exit");
     }
 
     @Override
     public void setDisclaimerText(@NonNull String text) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setDisclaimerText] length=" + text.length());
+                "[BR.setDisclaimerText] phase=enter length=" + text.length());
         BugReporting.setDisclaimerText(text);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setDisclaimerText] phase=exit");
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public void setCommentMinimumCharacterCount(@NonNull Long limit, @Nullable List<String> reportTypes) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setCommentMinimumCharacterCount] limit=" + limit
-                        + ", reportTypes=" + reportTypes);
+                "[BR.setCommentMinimumCharacterCount] phase=enter limit=" + limit
+                        + " reportTypesCount=" + (reportTypes != null ? reportTypes.size() : 0));
         int[] reportTypesArray = reportTypes == null ? new int[0] : new int[reportTypes.size()];
         if(reportTypes != null){
         for (int i = 0; i < reportTypes.size(); i++) {
@@ -218,16 +243,17 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
         }
     }
         BugReporting.setCommentMinimumCharacterCountForBugReportType(limit.intValue(), reportTypesArray);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setCommentMinimumCharacterCount] phase=exit");
     }
 
     @Override
 public void addUserConsents(String key, String description, Boolean mandatory, Boolean checked, String actionType) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[addUserConsents] keyLength=" + (key == null ? -1 : key.length())
-                        + ", descriptionLength=" + (description == null ? -1 : description.length())
-                        + ", mandatory=" + mandatory
-                        + ", checked=" + checked
-                        + ", actionType=" + actionType);
+                "[BR.addUserConsents] phase=enter keyLength=" + (key == null ? -1 : key.length())
+                        + " descriptionLength=" + (description == null ? -1 : description.length())
+                        + " mandatory=" + mandatory
+                        + " checked=" + checked
+                        + " actionType=" + actionType);
         ThreadManager.runOnMainThread(new Runnable() {
         @Override
         public void run() {
@@ -242,17 +268,21 @@ public void addUserConsents(String key, String description, Boolean mandatory, B
 
                 BugReporting.addUserConsent(key, description, mandatory, checked, mappedActionType);
             } catch (Exception e) {
-                e.printStackTrace();
+                LuciqFlutterLogger.e(
+                        LuciqFlutterDebugTags.BUG_REPORTING,
+                        "[BR.addUserConsents] phase=error errorType=" + e.getClass().getSimpleName(),
+                        e);
             }
         }
     });
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.addUserConsents] phase=exit");
 }
     @Override
     public void setProactiveReportingConfigurations(@NonNull Boolean enabled, @NonNull Long gapBetweenModals, @NonNull Long modalDelayAfterDetection) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
-                "[setProactiveReportingConfigurations] enabled=" + enabled
-                        + ", gapBetweenModals=" + gapBetweenModals
-                        + ", modalDelayAfterDetection=" + modalDelayAfterDetection);
+                "[BR.setProactiveReportingConfigurations] phase=enter enabled=" + enabled
+                        + " gapBetweenModals=" + gapBetweenModals
+                        + " modalDelayAfterDetection=" + modalDelayAfterDetection);
         ThreadManager.runOnMainThread(new Runnable() {
             @Override
             public void run() {
@@ -266,5 +296,6 @@ public void addUserConsents(String key, String description, Boolean mandatory, B
 
             }
         });
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setProactiveReportingConfigurations] phase=exit");
     }
 }

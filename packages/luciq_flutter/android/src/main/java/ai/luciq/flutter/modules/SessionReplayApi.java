@@ -17,63 +17,95 @@ public class SessionReplayApi implements SessionReplayPigeon.SessionReplayHostAp
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY, "[setEnabled] isEnabled=" + isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setEnabled] phase=enter isEnabled=" + isEnabled);
         SessionReplay.setEnabled(isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setEnabled] phase=exit");
     }
 
     @Override
     public void setNetworkLogsEnabled(@NonNull Boolean isEnabled) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
-                "[setNetworkLogsEnabled] isEnabled=" + isEnabled);
+                "[SR.setNetworkLogsEnabled] phase=enter isEnabled=" + isEnabled);
         SessionReplay.setNetworkLogsEnabled(isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setNetworkLogsEnabled] phase=exit");
     }
 
     @Override
     public void setLuciqLogsEnabled(@NonNull Boolean isEnabled) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
-                "[setLuciqLogsEnabled] isEnabled=" + isEnabled);
+                "[SR.setLuciqLogsEnabled] phase=enter isEnabled=" + isEnabled);
         SessionReplay.setLuciqLogsEnabled(isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setLuciqLogsEnabled] phase=exit");
     }
 
     @Override
     public void setUserStepsEnabled(@NonNull Boolean isEnabled) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
-                "[setUserStepsEnabled] isEnabled=" + isEnabled);
+                "[SR.setUserStepsEnabled] phase=enter isEnabled=" + isEnabled);
         SessionReplay.setUserStepsEnabled(isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setUserStepsEnabled] phase=exit");
     }
 
     @Override
-    public void getSessionReplayLink(@NonNull SessionReplayPigeon.Result<String> result) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY, "[getSessionReplayLink]");
-        SessionReplay.getSessionReplayLink(result::success);
+    public void getSessionReplayLink(@NonNull String callId, @NonNull SessionReplayPigeon.Result<String> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.getSessionReplayLink] #" + callId + " phase=enter");
+        SessionReplay.getSessionReplayLink(link -> {
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                    "[SR.getSessionReplayLink] #" + callId + " phase=exit resultLength="
+                            + (link != null ? link.length() : 0)
+                            + " resultPresent=" + (link != null && !link.isEmpty()));
+            result.success(link);
+        });
     }
 
     @Override
     public void setScreenshotCapturingMode(@NonNull String mode) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
-                "[setScreenshotCapturingMode] mode=" + mode);
-        final int capturingMode = ArgsRegistry.screenshotCapturingModes.get(mode);
+                "[SR.setScreenshotCapturingMode] phase=enter mode=" + mode);
+        final Integer capturingMode = ArgsRegistry.screenshotCapturingModes.get(mode);
+        if (capturingMode == null) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.SESSION_REPLAY,
+                    "[SR.setScreenshotCapturingMode] phase=error errorType=UnknownEnum mode=" + mode);
+            return;
+        }
         SessionReplay.setCapturingMode(capturingMode);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setScreenshotCapturingMode] phase=exit");
     }
 
     @Override
     public void setScreenshotCaptureInterval(@NonNull Long intervalMs) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
-                "[setScreenshotCaptureInterval] intervalMs=" + intervalMs);
+                "[SR.setScreenshotCaptureInterval] phase=enter intervalMs=" + intervalMs);
         if (intervalMs < 500L) {
             LuciqFlutterLogger.e(LuciqFlutterDebugTags.SESSION_REPLAY,
-                    "intervalMs must be >= 500 on Android");
+                    "[SR.setScreenshotCaptureInterval] phase=error errorType=InvalidArgument intervalMs=" + intervalMs);
             return;
         }
         SessionReplay.setScreenshotCaptureInterval(intervalMs.intValue());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setScreenshotCaptureInterval] phase=exit");
     }
 
     @Override
     public void setScreenshotQualityMode(@NonNull String mode) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
-                "[setScreenshotQualityMode] mode=" + mode);
-        final int quality = ArgsRegistry.screenshotQualityModes.get(mode);
+                "[SR.setScreenshotQualityMode] phase=enter mode=" + mode);
+        final Integer quality = ArgsRegistry.screenshotQualityModes.get(mode);
+        if (quality == null) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.SESSION_REPLAY,
+                    "[SR.setScreenshotQualityMode] phase=error errorType=UnknownEnum mode=" + mode);
+            return;
+        }
         SessionReplay.setScreenshotQuality(quality);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SESSION_REPLAY,
+                "[SR.setScreenshotQualityMode] phase=exit");
     }
 
 }

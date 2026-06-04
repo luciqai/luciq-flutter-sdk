@@ -7,7 +7,6 @@ import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_widget_binding_observer.dart';
 import 'package:meta/meta.dart';
 
@@ -401,13 +400,9 @@ class LuciqScreenRenderManager {
 
   /// @nodoc
   void _logExceptionErrorAndStackTrace(Object error, StackTrace stackTrace) {
-    //Log the crash details to the user.
-    LuciqLogger.I.e(
-      'Exception caught type=${error.runtimeType}',
-      tag: tag,
-    );
-
-    //Report nonfatal for the crash details.
+    // The originating exception is already logged by [hostCall] with
+    // phase=error and errorType=<runtimeType>; we don't duplicate the log
+    // line here. We still report the non-fatal crash to the dashboard.
     CrashReporting.reportHandledCrash(
       error,
       stackTrace,

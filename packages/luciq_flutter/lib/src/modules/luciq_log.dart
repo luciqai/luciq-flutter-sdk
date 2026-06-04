@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq_log.api.g.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:meta/meta.dart';
 
 class LuciqLog {
@@ -21,65 +21,61 @@ class LuciqLog {
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logVerbose(String message) async {
-    LuciqLogger.I.d(
-      'logVerbose length=${message.length}',
-      tag: DebugTags.luciqLog,
-    );
-    return _host.logVerbose(message);
-  }
+  static Future<void> logVerbose(String message) => hostCall(
+        'LOG.logVerbose',
+        () => _host.logVerbose(message),
+        tag: DebugTags.luciqLog,
+        args: {'length': message.length},
+      );
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logDebug(String message) async {
-    LuciqLogger.I.d(
-      'logDebug length=${message.length}',
-      tag: DebugTags.luciqLog,
-    );
-    return _host.logDebug(message);
-  }
+  static Future<void> logDebug(String message) => hostCall(
+        'LOG.logDebug',
+        () => _host.logDebug(message),
+        tag: DebugTags.luciqLog,
+        args: {'length': message.length},
+      );
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logInfo(String message) async {
-    LuciqLogger.I.d(
-      'logInfo length=${message.length}',
-      tag: DebugTags.luciqLog,
-    );
-    return _host.logInfo(message);
-  }
+  static Future<void> logInfo(String message) => hostCall(
+        'LOG.logInfo',
+        () => _host.logInfo(message),
+        tag: DebugTags.luciqLog,
+        args: {'length': message.length},
+      );
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logWarn(String message) async {
-    LuciqLogger.I.d(
-      'logWarn length=${message.length}',
-      tag: DebugTags.luciqLog,
-    );
-    return _host.logWarn(message);
-  }
+  static Future<void> logWarn(String message) => hostCall(
+        'LOG.logWarn',
+        () => _host.logWarn(message),
+        tag: DebugTags.luciqLog,
+        args: {'length': message.length},
+      );
 
   /// Appends a log [message] to Luciq internal log
   /// These logs are then sent along the next uploaded report.
   /// All log messages are timestamped
   /// Note: logs passed to this method are NOT printed to console
-  static Future<void> logError(String message) async {
-    LuciqLogger.I.d(
-      'logError length=${message.length}',
-      tag: DebugTags.luciqLog,
-    );
-    return _host.logError(message);
-  }
+  static Future<void> logError(String message) => hostCall(
+        'LOG.logError',
+        () => _host.logError(message),
+        tag: DebugTags.luciqLog,
+        args: {'length': message.length},
+      );
 
   /// Clears Luciq internal log
-  static Future<void> clearAllLogs() async {
-    LuciqLogger.I.d('clearAllLogs invoked', tag: DebugTags.luciqLog);
-    return _host.clearAllLogs();
-  }
+  static Future<void> clearAllLogs() => hostCall(
+        'LOG.clearAllLogs',
+        () => _host.clearAllLogs(),
+        tag: DebugTags.luciqLog,
+      );
 }

@@ -1,6 +1,7 @@
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/models/w3c_feature_flags.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:meta/meta.dart';
@@ -36,7 +37,10 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
   // Setter for the host API
   // ignore: use_setters_to_change_properties
   void $setHostApi(LuciqHostApi host) {
-    LuciqLogger.I.d('\$setHostApi', tag: DebugTags.featureFlags);
+    LuciqLogger.I.d(
+      '[FF.\$setHostApi] phase=enter',
+      tag: DebugTags.featureFlags,
+    );
     _host = host;
   }
 
@@ -52,8 +56,10 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
   set onNetworkBodyMaxSizeChangeCallback(
     OnNetworkBodyMaxSizeChangeCallback callback,
   ) {
-    LuciqLogger.I
-        .d('onNetworkBodyMaxSizeChangeCallback', tag: DebugTags.featureFlags);
+    LuciqLogger.I.d(
+      '[FF.onNetworkBodyMaxSizeChangeCallback] phase=enter callbackRegistered=true',
+      tag: DebugTags.featureFlags,
+    );
     _onNetworkBodyMaxSizeChangeCallback = callback;
   }
 
@@ -65,48 +71,53 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
 
   int get networkBodyMaxSize => _networkBodyMaxSize;
 
-  Future<W3cFeatureFlags> getW3CFeatureFlagsHeader() async {
-    LuciqLogger.I.d('getW3CFeatureFlagsHeader', tag: DebugTags.featureFlags);
-    if (LCQBuildInfo.instance.isAndroid) {
-      return Future.value(
-        W3cFeatureFlags(
-          isW3cCaughtHeaderEnabled: _isAndroidW3CCaughtHeader,
-          isW3cExternalGeneratedHeaderEnabled:
-              _isAndroidW3CExternalGeneratedHeader,
-          isW3cExternalTraceIDEnabled: _isAndroidW3CExternalTraceID,
-        ),
+  Future<W3cFeatureFlags> getW3CFeatureFlagsHeader() => hostCall(
+        'FF.getW3CFeatureFlagsHeader',
+        () async {
+          if (LCQBuildInfo.instance.isAndroid) {
+            return W3cFeatureFlags(
+              isW3cCaughtHeaderEnabled: _isAndroidW3CCaughtHeader,
+              isW3cExternalGeneratedHeaderEnabled:
+                  _isAndroidW3CExternalGeneratedHeader,
+              isW3cExternalTraceIDEnabled: _isAndroidW3CExternalTraceID,
+            );
+          }
+          final flags = await _host.isW3CFeatureFlagsEnabled();
+          return W3cFeatureFlags(
+            isW3cCaughtHeaderEnabled:
+                flags['isW3cCaughtHeaderEnabled'] ?? false,
+            isW3cExternalGeneratedHeaderEnabled:
+                flags['isW3cExternalGeneratedHeaderEnabled'] ?? false,
+            isW3cExternalTraceIDEnabled:
+                flags['isW3cExternalTraceIDEnabled'] ?? false,
+          );
+        },
+        tag: DebugTags.featureFlags,
+        args: {'isAndroid': LCQBuildInfo.instance.isAndroid},
       );
-    }
-    final flags = await _host.isW3CFeatureFlagsEnabled();
-    return W3cFeatureFlags(
-      isW3cCaughtHeaderEnabled: flags['isW3cCaughtHeaderEnabled'] ?? false,
-      isW3cExternalGeneratedHeaderEnabled:
-          flags['isW3cExternalGeneratedHeaderEnabled'] ?? false,
-      isW3cExternalTraceIDEnabled:
-          flags['isW3cExternalTraceIDEnabled'] ?? false,
-    );
-  }
 
-  Future<void> registerFeatureFlagsListener() async {
-    LuciqLogger.I
-        .d('registerFeatureFlagsListener', tag: DebugTags.featureFlags);
-    FeatureFlagsFlutterApi.setup(this); // Use 'this' instead of _instance
+  Future<void> registerFeatureFlagsListener() => hostCall(
+        'FF.registerFeatureFlagsListener',
+        () async {
+          FeatureFlagsFlutterApi.setup(this); // Use 'this' instead of _instance
 
-    // W3C Feature Flags
-    final featureFlags = await _host.isW3CFeatureFlagsEnabled();
-    _isAndroidW3CCaughtHeader =
-        featureFlags['isW3cCaughtHeaderEnabled'] ?? false;
-    _isAndroidW3CExternalTraceID =
-        featureFlags['isW3cExternalTraceIDEnabled'] ?? false;
-    _isAndroidW3CExternalGeneratedHeader =
-        featureFlags['isW3cExternalGeneratedHeaderEnabled'] ?? false;
+          // W3C Feature Flags
+          final featureFlags = await _host.isW3CFeatureFlagsEnabled();
+          _isAndroidW3CCaughtHeader =
+              featureFlags['isW3cCaughtHeaderEnabled'] ?? false;
+          _isAndroidW3CExternalTraceID =
+              featureFlags['isW3cExternalTraceIDEnabled'] ?? false;
+          _isAndroidW3CExternalGeneratedHeader =
+              featureFlags['isW3cExternalGeneratedHeaderEnabled'] ?? false;
 
-    // Network Body Max Size
-    final networkBodyMaxSize = await _host.getNetworkBodyMaxSize();
-    _networkBodyMaxSize = networkBodyMaxSize?.toInt() ?? 0;
+          // Network Body Max Size
+          final networkBodyMaxSize = await _host.getNetworkBodyMaxSize();
+          _networkBodyMaxSize = networkBodyMaxSize?.toInt() ?? 0;
 
-    return _host.registerFeatureFlagChangeListener();
-  }
+          return _host.registerFeatureFlagChangeListener();
+        },
+        tag: DebugTags.featureFlags,
+      );
 
   @override
   @internal
@@ -115,7 +126,16 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
     bool isW3cExternalGeneratedHeaderEnabled,
     bool isW3cCaughtHeaderEnabled,
   ) {
-    LuciqLogger.I.d('onW3CFeatureFlagChange', tag: DebugTags.featureFlags);
+    logCallbackFire(
+      'FF.onW3CFeatureFlagChange',
+      tag: DebugTags.featureFlags,
+      args: {
+        'isW3cExternalTraceIDEnabled': isW3cExternalTraceIDEnabled,
+        'isW3cExternalGeneratedHeaderEnabled':
+            isW3cExternalGeneratedHeaderEnabled,
+        'isW3cCaughtHeaderEnabled': isW3cCaughtHeaderEnabled,
+      },
+    );
     _isAndroidW3CCaughtHeader = isW3cCaughtHeaderEnabled;
     _isAndroidW3CExternalTraceID = isW3cExternalTraceIDEnabled;
     _isAndroidW3CExternalGeneratedHeader = isW3cExternalGeneratedHeaderEnabled;
@@ -123,8 +143,14 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
 
   @override
   void onNetworkLogBodyMaxSizeChange(int networkBodyMaxSize) {
-    LuciqLogger.I
-        .d('onNetworkLogBodyMaxSizeChange', tag: DebugTags.featureFlags);
+    logCallbackFire(
+      'FF.onNetworkLogBodyMaxSizeChange',
+      tag: DebugTags.featureFlags,
+      args: {
+        'networkBodyMaxSize': networkBodyMaxSize,
+        'callbackPresent': _onNetworkBodyMaxSizeChangeCallback != null,
+      },
+    );
     _networkBodyMaxSize = networkBodyMaxSize;
     _onNetworkBodyMaxSizeChangeCallback?.call();
   }

@@ -10,6 +10,11 @@ abstract class Logger {
     required LogLevel level,
     required String tag,
   });
+
+  void d(String message, {String tag = ''});
+  void e(String message, {String tag = ''});
+  void w(String message, {String tag = ''});
+  void v(String message, {String tag = ''});
 }
 
 class LuciqLogger implements Logger {
@@ -57,17 +62,21 @@ class LuciqLogger implements Logger {
     }
   }
 
+  @override
   void e(String message, {String tag = ''}) =>
       log(message, tag: tag, level: LogLevel.error);
 
+  @override
   void d(String message, {String tag = ''}) =>
       log(message, tag: tag, level: LogLevel.debug);
 
+  @override
   void v(String message, {String tag = ''}) =>
       log(message, tag: tag, level: LogLevel.verbose);
 
   /// Warning log. Mirrors RN's `Logger.warn`, gated at the debug threshold
   /// (warnings only surface when debug logs are on).
+  @override
   void w(String message, {String tag = ''}) =>
       log(message, tag: tag, level: LogLevel.debug);
 }

@@ -475,7 +475,7 @@ void main() {
         ),
       ).captured.single as String;
 
-      expect(capturedLog, contains('type=${exception.runtimeType}'));
+      expect(capturedLog, contains('errorType=${exception.runtimeType}'));
       // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called
@@ -519,6 +519,9 @@ void main() {
       realManager.setFrameData(frameTestData);
       // End the collector which should trigger the error
       realManager.endScreenRenderCollector();
+      // Let the fire-and-forget _reportScreenRenderFor* future settle so the
+      // async catch in _logExceptionErrorAndStackTrace runs before verify.
+      await Future<void>.delayed(Duration.zero);
 
       final capturedLog = verify(
         mLuciqLogger.e(
@@ -527,7 +530,7 @@ void main() {
         ),
       ).captured.single as String;
 
-      expect(capturedLog, contains('type=${exception.runtimeType}'));
+      expect(capturedLog, contains('errorType=${exception.runtimeType}'));
       // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called
@@ -571,6 +574,9 @@ void main() {
       realManager.setFrameData(frameTestData);
       // End the collector which should trigger the error
       realManager.endScreenRenderCollector(UiTraceType.custom);
+      // Let the fire-and-forget _reportScreenRenderFor* future settle so the
+      // async catch in _logExceptionErrorAndStackTrace runs before verify.
+      await Future<void>.delayed(Duration.zero);
 
       final capturedLog = verify(
         mLuciqLogger.e(
@@ -579,7 +585,7 @@ void main() {
         ),
       ).captured.single as String;
 
-      expect(capturedLog, contains('type=${exception.runtimeType}'));
+      expect(capturedLog, contains('errorType=${exception.runtimeType}'));
       // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called

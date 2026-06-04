@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/feature_requests.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:meta/meta.dart';
 
 enum ActionType { requestNewFeature, addCommentToFeature }
@@ -21,10 +21,11 @@ class FeatureRequests {
   }
 
   /// Shows the UI for feature requests list
-  static Future<void> show() async {
-    LuciqLogger.I.d('show invoked', tag: DebugTags.featureRequests);
-    return _host.show();
-  }
+  static Future<void> show() => hostCall(
+        'FR.show',
+        () => _host.show(),
+        tag: DebugTags.featureRequests,
+      );
 
   /// Sets whether users are required to enter an email address or not when sending reports.
   /// Defaults to YES.
@@ -34,11 +35,17 @@ class FeatureRequests {
   static Future<void> setEmailFieldRequired(
     bool isRequired,
     List<ActionType>? actionTypes,
-  ) async {
-    LuciqLogger.I.d(
-      'setEmailFieldRequired isRequired=$isRequired actionTypesCount=${actionTypes?.length ?? 0}',
-      tag: DebugTags.featureRequests,
-    );
-    return _host.setEmailFieldRequired(isRequired, actionTypes.mapToString());
-  }
+  ) =>
+      hostCall(
+        'FR.setEmailFieldRequired',
+        () => _host.setEmailFieldRequired(
+          isRequired,
+          actionTypes.mapToString(),
+        ),
+        tag: DebugTags.featureRequests,
+        args: {
+          'isRequired': isRequired,
+          'actionTypesCount': actionTypes?.length ?? 0,
+        },
+      );
 }

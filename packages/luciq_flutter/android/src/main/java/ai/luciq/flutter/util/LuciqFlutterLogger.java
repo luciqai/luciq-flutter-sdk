@@ -2,6 +2,8 @@ package ai.luciq.flutter.util;
 
 import android.util.Log;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import ai.luciq.library.LogLevel;
 
 /**
@@ -17,7 +19,20 @@ public final class LuciqFlutterLogger {
 
     private static volatile int currentLevel = LogLevel.ERROR;
 
+    private static final AtomicInteger callIdCounter = new AtomicInteger(0);
+
     private LuciqFlutterLogger() {}
+
+    /**
+     * Returns a 4-hex-char correlation id (e.g. "c7f3"). Mirrors
+     * {@code CallId.next()} on the Dart side. Used for native-originated
+     * callback fires so a single lifecycle can be reconstructed from
+     * the logs of all three layers.
+     */
+    public static String nextCallId() {
+        int value = callIdCounter.getAndIncrement() & 0xFFFF;
+        return String.format("%04x", value);
+    }
 
     public static void setLevel(int level) {
         currentLevel = level;

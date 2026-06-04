@@ -20,10 +20,11 @@ extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger
 
 
 - (void)initWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"[PrivateViewHost.init]"];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                   format:@"[PRIV.init] phase=enter"];
     [LuciqApi setScreenshotMaskingHandler:^(UIImage * _Nonnull screenshot, void (^ _Nonnull completion)(UIImage * _Nullable)) {
-        
-        
+        [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                       format:@"[PRIV.screenshotMaskingHandler] phase=enter"];
 
            [self.privateViewApi mask:screenshot completion:^(UIImage * _Nonnull maskedImage) {
              if (maskedImage != nil) {

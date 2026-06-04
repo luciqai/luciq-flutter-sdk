@@ -710,8 +710,8 @@ void main() {
       ).called(1);
       verify(
         mLuciqLogger.d(
-          argThat(contains('Reporting screen loading trace')),
-          tag: APM.tag,
+          argThat(contains('[APM.reportScreenLoadingCP] phase=enter')),
+          tag: DebugTags.apmScreenLoading,
         ),
       );
     });
@@ -1157,7 +1157,7 @@ void main() {
       mScreenLoadingManager.prepareUiTrace(screenName);
 
       verify(mLuciqLogger.e(
-        argThat(contains('type=_Exception')),
+        argThat(contains('errorType=_Exception')),
         tag: DebugTags.apmScreenLoading,
       ),).called(1);
     });

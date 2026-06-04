@@ -8,6 +8,7 @@ import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/crash_reporting.api.g.dart';
 import 'package:luciq_flutter/src/models/crash_data.dart';
 import 'package:luciq_flutter/src/models/exception_data.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -27,28 +28,35 @@ class CrashReporting {
 
   /// Enables and disables Enables and disables automatic crash reporting.
   /// [boolean] isEnabled
-  static Future<void> setEnabled(bool isEnabled) async {
-    LuciqLogger.I.d(
-      'setEnabled isEnabled=$isEnabled',
-      tag: DebugTags.crashReporting,
-    );
+  static Future<void> setEnabled(bool isEnabled) {
     enabled = isEnabled;
-    return _host.setEnabled(isEnabled);
+    return hostCall(
+      'CR.setEnabled',
+      () => _host.setEnabled(isEnabled),
+      tag: DebugTags.crashReporting,
+      args: {'isEnabled': isEnabled},
+    );
   }
 
-  static Future<void> reportCrash(Object exception, StackTrace stack) async {
-    LuciqLogger.I.d(
-      'reportCrash exceptionType=${exception.runtimeType}',
-      tag: DebugTags.crashReporting,
-    );
-    if (LCQBuildInfo.instance.isReleaseMode && enabled) {
-      await _reportUnhandledCrash(exception, stack);
-    } else {
-      FlutterError.dumpErrorToConsole(
-        FlutterErrorDetails(stack: stack, exception: exception),
+  static Future<void> reportCrash(Object exception, StackTrace stack) =>
+      hostCall(
+        'CR.reportCrash',
+        () async {
+          if (LCQBuildInfo.instance.isReleaseMode && enabled) {
+            await _reportUnhandledCrash(exception, stack);
+          } else {
+            FlutterError.dumpErrorToConsole(
+              FlutterErrorDetails(stack: stack, exception: exception),
+            );
+          }
+        },
+        tag: DebugTags.crashReporting,
+        args: {
+          'exceptionType': exception.runtimeType,
+          'isReleaseMode': LCQBuildInfo.instance.isReleaseMode,
+          'enabled': enabled,
+        },
       );
-    }
-  }
 
   /// Reports a handled crash to you dashboard
   /// [Object] exception
@@ -59,19 +67,25 @@ class CrashReporting {
     Map<String, String>? userAttributes,
     String? fingerprint,
     NonFatalExceptionLevel level = NonFatalExceptionLevel.error,
-  }) async {
-    LuciqLogger.I.d(
-      'reportHandledCrash exceptionType=${exception.runtimeType} stackPresent=${stack != null} userAttributesCount=${userAttributes?.length ?? 0} fingerprintPresent=${fingerprint != null} level=$level',
-      tag: DebugTags.crashReporting,
-    );
-    await _sendHandledCrash(
-      exception,
-      stack ?? StackTrace.current,
-      userAttributes,
-      fingerprint,
-      level,
-    );
-  }
+  }) =>
+      hostCall(
+        'CR.reportHandledCrash',
+        () => _sendHandledCrash(
+          exception,
+          stack ?? StackTrace.current,
+          userAttributes,
+          fingerprint,
+          level,
+        ),
+        tag: DebugTags.crashReporting,
+        args: {
+          'exceptionType': exception.runtimeType,
+          'stackPresent': stack != null,
+          'userAttributesCount': userAttributes?.length ?? 0,
+          'fingerprintPresent': fingerprint != null,
+          'level': level,
+        },
+      );
 
   static Future<void> _reportUnhandledCrash(
     Object exception,
@@ -112,7 +126,7 @@ class CrashReporting {
     Object exception,
   ) {
     LuciqLogger.I.d(
-      'getCrashDataFromException exceptionType=${exception.runtimeType}',
+      '[CR.getCrashDataFromException] phase=enter exceptionType=${exception.runtimeType}',
       tag: DebugTags.crashReporting,
     );
     final trace = Trace.from(stack);
@@ -132,6 +146,10 @@ class CrashReporting {
       message: exception.toString(),
       exception: frames,
     );
+    LuciqLogger.I.d(
+      '[CR.getCrashDataFromException] phase=exit frameCount=${frames.length}',
+      tag: DebugTags.crashReporting,
+    );
     return crashData;
   }
 
@@ -141,11 +159,10 @@ class CrashReporting {
   /// Requires the [Luciq NDK package](https://pub.dev/packages/luciq_flutter_ndk to be added to the project for this to work.
   ///
   /// This method is Android-only and has no effect on iOS.
-  static Future<void> setNDKEnabled(bool isEnabled) async {
-    LuciqLogger.I.d(
-      'setNDKEnabled isEnabled=$isEnabled',
-      tag: DebugTags.crashReporting,
-    );
-    return _host.setNDKEnabled(isEnabled);
-  }
+  static Future<void> setNDKEnabled(bool isEnabled) => hostCall(
+        'CR.setNDKEnabled',
+        () => _host.setNDKEnabled(isEnabled),
+        tag: DebugTags.crashReporting,
+        args: {'isEnabled': isEnabled},
+      );
 }

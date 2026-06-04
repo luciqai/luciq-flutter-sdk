@@ -17,37 +17,55 @@ public class LuciqLogApi implements LuciqLogPigeon.LuciqLogHostApi {
 
     @Override
     public void logVerbose(@NonNull String message) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG, "[logVerbose] length=" + message.length());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logVerbose] phase=enter length=" + message.length());
         LuciqLog.v(message);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logVerbose] phase=exit");
     }
 
     @Override
     public void logDebug(@NonNull String message) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG, "[logDebug] length=" + message.length());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logDebug] phase=enter length=" + message.length());
         LuciqLog.d(message);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logDebug] phase=exit");
     }
 
     @Override
     public void logInfo(@NonNull String message) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG, "[logInfo] length=" + message.length());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logInfo] phase=enter length=" + message.length());
         LuciqLog.i(message);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logInfo] phase=exit");
     }
 
     @Override
     public void logWarn(@NonNull String message) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG, "[logWarn] length=" + message.length());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logWarn] phase=enter length=" + message.length());
         LuciqLog.w(message);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logWarn] phase=exit");
     }
 
     @Override
     public void logError(@NonNull String message) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG, "[logError] length=" + message.length());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logError] phase=enter length=" + message.length());
         LuciqLog.e(message);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.logError] phase=exit");
     }
 
     @Override
     public void clearAllLogs() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG, "[clearAllLogs]");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.clearAllLogs] phase=enter");
         LuciqLog.clearLogs();
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.LUCIQ_LOG,
+                "[LOG.clearAllLogs] phase=exit");
     }
 }

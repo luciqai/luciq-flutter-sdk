@@ -19,49 +19,69 @@ extern void InitSurveysApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.setEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.setEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     BOOL boolValue = [isEnabled boolValue];
     LCQSurveys.enabled = boolValue;
 }
 
 - (void)showSurveyIfAvailableWithError:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.showSurveyIfAvailable]"];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.showSurveyIfAvailable] phase=enter"];
     [LCQSurveys showSurveyIfAvailable];
 }
 
-- (void)showSurveySurveyToken:(NSString *)surveyToken error:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.showSurvey] tokenPresent=%@ length=%lu", (surveyToken.length > 0 ? @"YES" : @"NO"), (unsigned long)surveyToken.length];
+- (void)showSurveyCallId:(NSString *)callId surveyToken:(NSString *)surveyToken error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.showSurvey] #%@ phase=enter tokenPresent=%@ tokenLength=%lu",
+        callId,
+        (surveyToken.length > 0 ? @"true" : @"false"),
+        (unsigned long)surveyToken.length];
     [LCQSurveys showSurveyWithToken:surveyToken];
 }
 
 - (void)setAutoShowingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.setAutoShowingEnabled] isEnabled=%@", ([isEnabled boolValue] ? @"YES" : @"NO")];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.setAutoShowingEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     BOOL boolValue = [isEnabled boolValue];
     LCQSurveys.autoShowingEnabled = boolValue;
 }
 
 - (void)setShouldShowWelcomeScreenShouldShowWelcomeScreen:(NSNumber *)shouldShowWelcomeScreen error:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.setShouldShowWelcomeScreen] shouldShow=%@", ([shouldShowWelcomeScreen boolValue] ? @"YES" : @"NO")];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.setShouldShowWelcomeScreen] phase=enter shouldShow=%@",
+        ([shouldShowWelcomeScreen boolValue] ? @"true" : @"false")];
     BOOL boolValue = [shouldShowWelcomeScreen boolValue];
     LCQSurveys.shouldShowWelcomeScreen = boolValue;
 }
 
 - (void)setAppStoreURLAppStoreURL:(NSString *)appStoreURL error:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.setAppStoreURL] url=%@", [LuciqFlutterLogger redactURL:appStoreURL]];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.setAppStoreURL] phase=enter url=%@",
+        [LuciqFlutterLogger redactURL:appStoreURL]];
     LCQSurveys.appStoreURL = appStoreURL;
 }
 
-- (void)hasRespondedToSurveySurveyToken:(NSString *)surveyToken completion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.hasRespondedToSurvey] tokenLength=%lu", (unsigned long)surveyToken.length];
+- (void)hasRespondedToSurveyCallId:(NSString *)callId surveyToken:(NSString *)surveyToken completion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.hasRespondedToSurvey] #%@ phase=enter tokenLength=%lu",
+        callId, (unsigned long)surveyToken.length];
     [LCQSurveys hasRespondedToSurveyWithToken:surveyToken
                             completionHandler:^(BOOL hasResponded) {
                               NSNumber *boolNumber = [NSNumber numberWithBool:hasResponded];
+                              [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                                             format:@"[SUR.hasRespondedToSurvey] #%@ phase=exit result=%@",
+                                  callId,
+                                  (hasResponded ? @"true" : @"false")];
                               completion(boolNumber, nil);
                             }];
 }
 
-- (void)getAvailableSurveysWithCompletion:(void (^)(NSArray<NSString *> *_Nullable, FlutterError *_Nullable))completion {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.getAvailableSurveys]"];
+- (void)getAvailableSurveysCallId:(NSString *)callId completion:(void (^)(NSArray<NSString *> *_Nullable, FlutterError *_Nullable))completion {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.getAvailableSurveys] #%@ phase=enter", callId];
     [LCQSurveys availableSurveysWithCompletionHandler:^(NSArray<LCQSurvey *> *availableSurveys) {
       NSMutableArray<NSString *> *titles = [[NSMutableArray alloc] init];
 
@@ -69,22 +89,34 @@ extern void InitSurveysApi(id<FlutterBinaryMessenger> messenger) {
           [titles addObject:[survey title]];
       }
 
+      [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                     format:@"[SUR.getAvailableSurveys] #%@ phase=exit resultCount=%lu",
+          callId,
+          (unsigned long)titles.count];
       completion(titles, nil);
     }];
 }
 
 - (void)bindOnShowSurveyCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.bindOnShowSurveyCallback]"];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.bindOnShowSurveyCallback] phase=enter"];
     LCQSurveys.willShowSurveyHandler = ^{
-      [self->_flutterApi onShowSurveyWithCompletion:^(FlutterError *_Nullable _){
+      NSString *callId = [LuciqFlutterLogger nextCallId];
+      [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                     format:@"[SUR.onShowSurvey] #%@ phase=fire", callId];
+      [self->_flutterApi onShowSurveyCallId:callId completion:^(FlutterError *_Nullable _){
       }];
     };
 }
 
 - (void)bindOnDismissSurveyCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[Surveys.bindOnDismissSurveyCallback]"];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.bindOnDismissSurveyCallback] phase=enter"];
     LCQSurveys.didDismissSurveyHandler = ^{
-      [self->_flutterApi onDismissSurveyWithCompletion:^(FlutterError *_Nullable _){
+      NSString *callId = [LuciqFlutterLogger nextCallId];
+      [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                     format:@"[SUR.onDismissSurvey] #%@ phase=fire", callId];
+      [self->_flutterApi onDismissSurveyCallId:callId completion:^(FlutterError *_Nullable _){
       }];
     };
 }

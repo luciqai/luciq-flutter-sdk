@@ -26,37 +26,48 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[setEnabled] isEnabled=" + isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.setEnabled] phase=enter isEnabled=" + isEnabled);
         if (isEnabled) {
             Replies.setState(Feature.State.ENABLED);
         } else {
             Replies.setState(Feature.State.DISABLED);
         }
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.setEnabled] phase=exit");
     }
 
     @Override
-    public void show() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[show]");
+    public void show(@NonNull String callId) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.show] #" + callId + " phase=enter");
         Replies.show();
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.show] #" + callId + " phase=exit");
     }
 
     @Override
     public void setInAppNotificationsEnabled(@NonNull Boolean isEnabled) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
-                "[setInAppNotificationsEnabled] isEnabled=" + isEnabled);
+                "[REP.setInAppNotificationsEnabled] phase=enter isEnabled=" + isEnabled);
         Replies.setInAppNotificationEnabled(isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.setInAppNotificationsEnabled] phase=exit");
     }
 
     @Override
     public void setInAppNotificationSound(@NonNull Boolean isEnabled) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
-                "[setInAppNotificationSound] isEnabled=" + isEnabled);
+                "[REP.setInAppNotificationSound] phase=enter isEnabled=" + isEnabled);
         Replies.setInAppNotificationSound(isEnabled);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.setInAppNotificationSound] phase=exit");
     }
 
     @Override
-    public void getUnreadRepliesCount(RepliesPigeon.Result<Long> result) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[getUnreadRepliesCount]");
+    public void getUnreadRepliesCount(@NonNull String callId, RepliesPigeon.Result<Long> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.getUnreadRepliesCount] #" + callId + " phase=enter");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -66,6 +77,8 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
                         ThreadManager.runOnMainThread(new Runnable() {
                             @Override
                             public void run() {
+                                LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                                        "[REP.getUnreadRepliesCount] #" + callId + " phase=exit result=" + count);
                                 result.success(count);
                             }
                         });
@@ -75,8 +88,9 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
     }
 
     @Override
-    public void hasChats(RepliesPigeon.Result<Boolean> result) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[hasChats]");
+    public void hasChats(@NonNull String callId, RepliesPigeon.Result<Boolean> result) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.hasChats] #" + callId + " phase=enter");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -86,6 +100,8 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
                         ThreadManager.runOnMainThread(new Runnable() {
                             @Override
                             public void run() {
+                                LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                                        "[REP.hasChats] #" + callId + " phase=exit result=" + hasChats);
                                 result.success(hasChats);
                             }
                         });
@@ -96,14 +112,18 @@ public class RepliesApi implements RepliesPigeon.RepliesHostApi {
 
     @Override
     public void bindOnNewReplyCallback() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES, "[bindOnNewReplyCallback]");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                "[REP.bindOnNewReplyCallback] phase=enter");
         Replies.setOnNewReplyReceivedCallback(new Runnable() {
             @Override
             public void run() {
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        flutterApi.onNewReply(new RepliesPigeon.RepliesFlutterApi.Reply<Void>() {
+                        String callId = LuciqFlutterLogger.nextCallId();
+                        LuciqFlutterLogger.d(LuciqFlutterDebugTags.REPLIES,
+                                "[REP.onNewReply] #" + callId + " phase=fire");
+                        flutterApi.onNewReply(callId, new RepliesPigeon.RepliesFlutterApi.Reply<Void>() {
                             @Override
                             public void reply(Void reply) {
                             }

@@ -68,8 +68,10 @@ class ScreenLoadingManager {
 
   /// @nodoc
   void _logExceptionErrorAndStackTrace(Object error, StackTrace stackTrace) {
+    final raw = error.toString();
+    final msg = raw.length > 256 ? '${raw.substring(0, 256)}...' : raw;
     LuciqLogger.I.e(
-      'Exception caught type=${error.runtimeType}',
+      '[APM-SL.exception] phase=error errorType=${error.runtimeType} errorMessage=$msg',
       tag: DebugTags.apmScreenLoading,
     );
   }

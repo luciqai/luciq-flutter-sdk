@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 
 /// Represents a custom span for performance tracking.
 class CustomSpan {
@@ -10,7 +13,12 @@ class CustomSpan {
   /// The span starts immediately upon creation.
   CustomSpan(this.name)
       : _startTimeInMicroseconds = LCQDateTime.I.now().microsecondsSinceEpoch,
-        _startMonotonicTimeInMicroseconds = LuciqMonotonicClock.I.now;
+        _startMonotonicTimeInMicroseconds = LuciqMonotonicClock.I.now {
+    spanId = hashForLog('$name|$_startTimeInMicroseconds');
+  }
+
+  /// Stable per-span correlation id for debug logs.
+  late final String spanId;
 
   /// The name of the custom span (max 150 characters).
   final String name;
@@ -66,6 +74,16 @@ class CustomSpan {
 
       // Calculate end time using wall clock
       _endTimeInMicroseconds = _startTimeInMicroseconds + _duration!;
+
+      LuciqLogger.I.kv(
+        'span.end',
+        tag: DebugTags.apmCustomSpan,
+        fields: {
+          'spanId': spanId,
+          'nameHash': hashForLog(name),
+          'durationUs': _duration,
+        },
+      );
 
       // Send to native SDK
       await CustomSpanManager.I.syncCustomSpan(

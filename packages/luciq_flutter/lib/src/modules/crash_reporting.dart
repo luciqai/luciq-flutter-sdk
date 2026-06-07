@@ -43,6 +43,14 @@ class CrashReporting {
     );
     if (LCQBuildInfo.instance.isReleaseMode && enabled) {
       await _reportUnhandledCrash(exception, stack);
+      LuciqLogger.I.kv(
+        'crash.reported',
+        tag: DebugTags.crashReporting,
+        fields: {
+          'exceptionType': exception.runtimeType,
+          'handled': false,
+        },
+      );
     } else {
       FlutterError.dumpErrorToConsole(
         FlutterErrorDetails(stack: stack, exception: exception),

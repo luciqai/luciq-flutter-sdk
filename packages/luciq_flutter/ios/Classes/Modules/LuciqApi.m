@@ -559,6 +559,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (UIFont *)loadFontFromPath:(NSString *)fontPath {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[loadFontFromPath] pathLength=%lu", (unsigned long) fontPath.length];
     NSString *fontFileName = [fontPath stringByDeletingPathExtension];
     NSArray *fontExtensions = @[@"ttf", @"otf", @"woff", @"woff2"];
 

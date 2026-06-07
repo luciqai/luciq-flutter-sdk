@@ -72,15 +72,8 @@ static long long currentTimeMillis;
 
     NSArray<NSValue *> *privateViews = [self convertToRectangles:rectangles];
     UIImage *maskedScreenshot = [self drawMaskedImage:screenshot withPrivateViews:privateViews];
-    static long long currentTimeMillis2;
-    currentTimeMillis2 = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
-
-    long long timeDifference = currentTimeMillis2 - currentTimeMillis;
 
     completion(maskedScreenshot);
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"Time Difference: %lld ms (Last: %lld, Current: %lld)", timeDifference, currentTimeMillis2, currentTimeMillis];
-
-
 }
 
 // Convert the raw rectangles array into CGRect values

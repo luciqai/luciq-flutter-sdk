@@ -1,9 +1,9 @@
+import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/constants/strings.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
-import 'package:luciq_flutter/src/models/custom_span.dart';
-import 'package:luciq_flutter/src/modules/luciq.dart' show Luciq;
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
 
@@ -105,9 +105,11 @@ class CustomSpanManager {
   Future<CustomSpan?> startCustomSpan(String name) async {
     // Validate name
     if (name.trim().isEmpty) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanNameEmpty,
+      LuciqLogger.I.kv(
+        'span.start.drop_empty_name',
         tag: tag,
+        level: LogLevel.error,
+        fields: {'message': LuciqStrings.customSpanNameEmpty},
       );
       return null;
     }
@@ -115,9 +117,15 @@ class CustomSpanManager {
     // Check if SDK is initialized
     final isSDKInitialized = await Luciq.isBuilt();
     if (!isSDKInitialized) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanSDKNotInitializedMessage,
+      LuciqLogger.I.kv(
+        'span.start.drop_sdk_not_built',
         tag: tag,
+        level: LogLevel.error,
+        fields: {
+          'nameHash': hashForLog(name),
+          'nameLen': name.length,
+          'message': LuciqStrings.customSpanSDKNotInitializedMessage,
+        },
       );
       return null;
     }
@@ -125,9 +133,13 @@ class CustomSpanManager {
     // Check if APM is enabled
     final isAPMEnabled = await FlagsConfig.apm.isEnabled();
     if (!isAPMEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanAPMDisabledMessage,
+      LuciqLogger.I.kv(
+        'span.start.drop_apm_disabled',
         tag: tag,
+        fields: {
+          'nameHash': hashForLog(name),
+          'message': LuciqStrings.customSpanAPMDisabledMessage,
+        },
       );
       return null;
     }
@@ -135,18 +147,28 @@ class CustomSpanManager {
     // Check if custom span feature is enabled
     final isCustomSpanEnabled = await FlagsConfig.customSpan.isEnabled();
     if (!isCustomSpanEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanDisabled,
+      LuciqLogger.I.kv(
+        'span.start.drop_feature_disabled',
         tag: tag,
+        fields: {
+          'nameHash': hashForLog(name),
+          'message': LuciqStrings.customSpanDisabled,
+        },
       );
       return null;
     }
 
     // Check span limit
     if (_activeSpans.length >= maxConcurrentSpans) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanLimitReached,
+      LuciqLogger.I.kv(
+        'span.start.drop_limit_reached',
         tag: tag,
+        level: LogLevel.error,
+        fields: {
+          'nameHash': hashForLog(name),
+          'active': _activeSpans.length,
+          'message': LuciqStrings.customSpanLimitReached,
+        },
       );
       return null;
     }
@@ -157,6 +179,18 @@ class CustomSpanManager {
     // Create span object and register it
     final span = CustomSpan(spanName);
     _activeSpans.add(span);
+
+    LuciqLogger.I.kv(
+      'span.start',
+      tag: tag,
+      fields: {
+        'spanId': span.spanId,
+        'nameHash': hashForLog(spanName),
+        'nameLen': spanName.length,
+        'active': _activeSpans.length,
+      },
+    );
+
     return span;
   }
 
@@ -182,18 +216,25 @@ class CustomSpanManager {
   ) async {
     // Validate name
     if (name.trim().isEmpty) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanNameEmpty,
+      LuciqLogger.I.kv(
+        'span.add_completed.drop_empty_name',
         tag: tag,
+        level: LogLevel.error,
+        fields: {'message': LuciqStrings.customSpanNameEmpty},
       );
       return;
     }
 
     // Validate timestamps
     if (endDate.isBefore(startDate) || endDate.isAtSameMomentAs(startDate)) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanEndTimeBeforeStartTime,
+      LuciqLogger.I.kv(
+        'span.add_completed.drop_bad_time',
         tag: tag,
+        level: LogLevel.error,
+        fields: {
+          'nameHash': hashForLog(name),
+          'message': LuciqStrings.customSpanEndTimeBeforeStartTime,
+        },
       );
       return;
     }
@@ -201,9 +242,14 @@ class CustomSpanManager {
     // Check if SDK is initialized
     final isSDKInitialized = await Luciq.isBuilt();
     if (!isSDKInitialized) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanSDKNotInitializedMessage,
+      LuciqLogger.I.kv(
+        'span.add_completed.drop_sdk_not_built',
         tag: tag,
+        level: LogLevel.error,
+        fields: {
+          'nameHash': hashForLog(name),
+          'message': LuciqStrings.customSpanSDKNotInitializedMessage,
+        },
       );
       return;
     }
@@ -211,9 +257,13 @@ class CustomSpanManager {
     // Check if APM is enabled
     final isAPMEnabled = await FlagsConfig.apm.isEnabled();
     if (!isAPMEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanAPMDisabledMessage,
+      LuciqLogger.I.kv(
+        'span.add_completed.drop_apm_disabled',
         tag: tag,
+        fields: {
+          'nameHash': hashForLog(name),
+          'message': LuciqStrings.customSpanAPMDisabledMessage,
+        },
       );
       return;
     }
@@ -221,9 +271,13 @@ class CustomSpanManager {
     // Check if custom span feature is enabled
     final isCustomSpanEnabled = await FlagsConfig.customSpan.isEnabled();
     if (!isCustomSpanEnabled) {
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanDisabled,
+      LuciqLogger.I.kv(
+        'span.add_completed.drop_feature_disabled',
         tag: tag,
+        fields: {
+          'nameHash': hashForLog(name),
+          'message': LuciqStrings.customSpanDisabled,
+        },
       );
       return;
     }
@@ -231,6 +285,17 @@ class CustomSpanManager {
     // Convert to microseconds
     final startTimestamp = startDate.microsecondsSinceEpoch;
     final endTimestamp = endDate.microsecondsSinceEpoch;
+
+    LuciqLogger.I.kv(
+      'span.add_completed',
+      tag: tag,
+      fields: {
+        'spanId': hashForLog('$name|$startTimestamp'),
+        'nameHash': hashForLog(name),
+        'nameLen': name.length,
+        'durationUs': endTimestamp - startTimestamp,
+      },
+    );
 
     // Send to native
     return syncCustomSpan(name, startTimestamp, endTimestamp);
@@ -246,24 +311,41 @@ class CustomSpanManager {
   ) async {
     // Validate name
     if (name.isEmpty) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanNameEmpty,
+      LuciqLogger.I.kv(
+        'span.sync.drop_empty_name',
         tag: tag,
+        level: LogLevel.error,
+        fields: {'message': LuciqStrings.customSpanNameEmpty},
       );
       return;
     }
 
     // Validate timestamps
     if (endTimestamp <= startTimestamp) {
-      LuciqLogger.I.e(
-        LuciqStrings.customSpanEndTimeBeforeStartTime,
+      LuciqLogger.I.kv(
+        'span.sync.drop_bad_time',
         tag: tag,
+        level: LogLevel.error,
+        fields: {
+          'nameHash': hashForLog(name),
+          'message': LuciqStrings.customSpanEndTimeBeforeStartTime,
+        },
       );
       return;
     }
 
     // Trim name to limit
     final spanName = _trimSpanName(name);
+
+    LuciqLogger.I.kv(
+      'span.sync',
+      tag: tag,
+      fields: {
+        'spanId': hashForLog('$name|$startTimestamp'),
+        'nameHash': hashForLog(spanName),
+        'durationUs': endTimestamp - startTimestamp,
+      },
+    );
 
     // Send to native
     return _host.syncCustomSpan(
@@ -278,9 +360,15 @@ class CustomSpanManager {
     var spanName = name.trim();
     if (spanName.length > maxNameLength) {
       spanName = spanName.substring(0, maxNameLength);
-      LuciqLogger.I.d(
-        LuciqStrings.customSpanNameTruncated,
+      LuciqLogger.I.kv(
+        'span.name_truncated',
         tag: tag,
+        fields: {
+          'nameHash': hashForLog(name),
+          'originalLen': name.length,
+          'truncatedLen': maxNameLength,
+          'message': LuciqStrings.customSpanNameTruncated,
+        },
       );
     }
     return spanName;

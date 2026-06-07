@@ -4,43 +4,12 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.graphics.Typeface;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-
-import ai.luciq.flutter.generated.LuciqPigeon;
-import ai.luciq.flutter.util.ArgsRegistry;
-import ai.luciq.flutter.util.LuciqFlutterDebugTags;
-import ai.luciq.flutter.util.LuciqFlutterLogger;
-import ai.luciq.flutter.util.Reflection;
-import ai.luciq.flutter.util.ThreadManager;
-import ai.luciq.library.ReproMode;
-import ai.luciq.library.internal.crossplatform.CoreFeature;
-import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
-import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
-import ai.luciq.library.internal.crossplatform.InternalCore;
-import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
-import ai.luciq.library.Feature;
-import ai.luciq.library.Luciq;
-import ai.luciq.library.LuciqColorTheme;
-import ai.luciq.library.LuciqCustomTextPlaceHolder;
-import ai.luciq.library.IssueType;
-import ai.luciq.library.Platform;
-import ai.luciq.library.ReproConfigurations;
-import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
-import ai.luciq.library.internal.crossplatform.InternalCore;
-import ai.luciq.library.internal.module.LuciqLocale;
-import ai.luciq.library.invocation.LuciqInvocationEvent;
-import ai.luciq.library.model.NetworkLog;
-import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
-import ai.luciq.library.ui.onboarding.WelcomeMessage;
-
-import io.flutter.FlutterInjector;
-import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.plugin.common.BinaryMessenger;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -51,12 +20,39 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import ai.luciq.flutter.generated.LuciqPigeon;
+import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
+import ai.luciq.flutter.util.Reflection;
+import ai.luciq.flutter.util.ThreadManager;
+import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
+import ai.luciq.library.Feature;
+import ai.luciq.library.IssueType;
+import ai.luciq.library.Luciq;
+import ai.luciq.library.LuciqColorTheme;
+import ai.luciq.library.LuciqCustomTextPlaceHolder;
+import ai.luciq.library.Platform;
+import ai.luciq.library.ReproConfigurations;
+import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
+import ai.luciq.library.internal.crossplatform.CoreFeature;
+import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
+import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
+import ai.luciq.library.internal.crossplatform.InternalCore;
+import ai.luciq.library.internal.module.LuciqLocale;
+import ai.luciq.library.invocation.LuciqInvocationEvent;
+import ai.luciq.library.model.NetworkLog;
+import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
+import ai.luciq.library.ui.onboarding.WelcomeMessage;
+import io.flutter.FlutterInjector;
+import io.flutter.embedding.engine.loader.FlutterLoader;
+import io.flutter.plugin.common.BinaryMessenger;
 
 public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     private final String TAG = LuciqApi.class.getName();
@@ -303,19 +299,19 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void appendTags(@NonNull List<String> tags) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[appendTags] count=" + tags.size());
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[appendTags] count=" + tags.size());
         Luciq.addTags(tags.toArray(new String[0]));
     }
 
     @Override
     public void resetTags() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[resetTags]");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[resetTags]");
         Luciq.resetTags();
     }
 
     @Override
     public void getTags(LuciqPigeon.Result<List<String>> result) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[getTags]");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[getTags]");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -549,10 +545,12 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void networkLog(@NonNull Map<String, Object> data) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.NETWORK,
-                "[networkLog] url=" + LuciqFlutterLogger.redactUrl((String) data.get("url"))
-                        + ", method=" + data.get("method")
-                        + ", responseCode=" + data.get("responseCode"));
+        if (LuciqFlutterLogger.getLevel() >= ai.luciq.library.LogLevel.DEBUG) {
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.NETWORK,
+                    "[networkLog] url=" + LuciqFlutterLogger.redactUrl((String) data.get("url"))
+                            + ", method=" + data.get("method")
+                            + ", responseCode=" + data.get("responseCode"));
+        }
         try {
             NetworkLog networkLog = new NetworkLog();
             String date = System.currentTimeMillis() + "";
@@ -660,8 +658,6 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     public void setTheme(@NonNull Map<String, Object> themeConfig) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[setTheme] keyCount=" + themeConfig.size());
         try {
-            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "setTheme called with keyCount=" + themeConfig.size());
-
             ai.luciq.library.model.LuciqTheme.Builder builder = new ai.luciq.library.model.LuciqTheme.Builder();
 
             if (themeConfig.containsKey("primaryColor")) {

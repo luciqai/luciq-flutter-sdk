@@ -45,7 +45,7 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
   @visibleForTesting
   // ignore: use_setters_to_change_properties
   static void setInstance(PrivateViewsManager instance) {
-    LuciqLogger.I.d('setInstance', tag: DebugTags.privateView);
+    LuciqLogger.I.kv('private_view.set_instance', tag: DebugTags.privateView);
     _instance = instance;
   }
 
@@ -59,9 +59,13 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
   late List<bool Function(Widget)> _viewChecks;
 
   void addAutoMasking(List<AutoMasking> masking) {
-    LuciqLogger.I.d(
-      'addAutoMasking count=${masking.length}',
+    LuciqLogger.I.kv(
+      'private_view.auto_masking',
       tag: DebugTags.privateView,
+      fields: {
+        'count': masking.length,
+        'kinds': masking.mapToString().join('|'),
+      },
     );
     _viewChecks = List.of([isPrivateWidget]);
     if (!(masking.contains(AutoMasking.none) && masking.length == 1)) {
@@ -172,10 +176,14 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
 
   @override
   List<double?> getPrivateViews() {
-    if (LuciqLogger.I.isDebugEnabled()) {
-      LuciqLogger.I.d('getPrivateViews', tag: DebugTags.privateView);
-    }
     final rects = getRectsOfPrivateViews();
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.kv(
+        'private_view.list',
+        tag: DebugTags.privateView,
+        fields: {'count': rects.length},
+      );
+    }
     final result = <double>[];
 
     for (final rect in rects) {

@@ -1,7 +1,11 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/user_steps/user_step_details.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
 
@@ -59,26 +63,69 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
     _pointerCount = 0;
 
     if (_gestureType == null) {
+      if (LuciqLogger.I.isDebugEnabled()) {
+        LuciqLogger.I.kv(
+          'user_step.drop',
+          tag: DebugTags.userSteps,
+          fields: {'reason': 'no_gesture'},
+        );
+      }
       return;
     }
     final tappedWidget =
         _getWidgetDetails(event.localPosition, context, _gestureType!);
-    if (tappedWidget != null) {
-      final userStepDetails = tappedWidget.copyWith(
-        gestureType: _gestureType,
-        gestureMetaData: _gestureMetaData,
-      );
-      if (userStepDetails.gestureType == null ||
-          userStepDetails.message == null) {
-        return;
+    if (tappedWidget == null) {
+      if (LuciqLogger.I.isDebugEnabled()) {
+        LuciqLogger.I.kv(
+          'user_step.drop',
+          tag: DebugTags.userSteps,
+          fields: {
+            'reason': 'no_target_widget',
+            'gestureType': _gestureType.toString(),
+          },
+        );
       }
+      return;
+    }
+    final userStepDetails = tappedWidget.copyWith(
+      gestureType: _gestureType,
+      gestureMetaData: _gestureMetaData,
+    );
+    if (userStepDetails.gestureType == null ||
+        userStepDetails.message == null) {
+      if (LuciqLogger.I.isDebugEnabled()) {
+        LuciqLogger.I.kv(
+          'user_step.drop',
+          tag: DebugTags.userSteps,
+          fields: {
+            'reason': userStepDetails.gestureType == null
+                ? 'null_gesture'
+                : 'null_message',
+          },
+        );
+      }
+      return;
+    }
 
-      Luciq.logUserSteps(
-        userStepDetails.gestureType!,
-        userStepDetails.message!,
-        userStepDetails.widgetName,
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.kv(
+        'user_step.detect',
+        tag: DebugTags.userSteps,
+        fields: {
+          'gestureType': userStepDetails.gestureType.toString(),
+          'meta': _gestureMetaData,
+          'widgetHash': hashForLog(userStepDetails.widgetName),
+          'widgetLen': userStepDetails.widgetName?.length ?? 0,
+          'isPrivate': tappedWidget.isPrivate,
+        },
       );
     }
+
+    Luciq.logUserSteps(
+      userStepDetails.gestureType!,
+      userStepDetails.message!,
+      userStepDetails.widgetName,
+    );
   }
 
   GestureType? _detectGestureType(Offset upLocation) {
@@ -219,6 +266,16 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
     if (userStepDetails.gestureType == null ||
         userStepDetails.message == null) {
       return;
+    }
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.kv(
+        'user_step.scroll',
+        tag: DebugTags.userSteps,
+        fields: {
+          'axis': direction.toString(),
+          'direction': swipeDirection,
+        },
+      );
     }
     Luciq.logUserSteps(
       userStepDetails.gestureType!,

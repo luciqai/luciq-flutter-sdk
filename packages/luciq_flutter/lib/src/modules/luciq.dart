@@ -1,17 +1,14 @@
 // ignore_for_file: avoid_classes_with_only_static_members
 
 import 'dart:async';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:typed_data';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unused_import
 import 'package:flutter/services.dart';
@@ -227,7 +224,8 @@ class Luciq {
       debugLogsLevel.toString(),
       appVariant,
     );
-    LuciqLogger.I.d('init completed (Dart side setup); native init dispatched', tag: DebugTags.core);
+    LuciqLogger.I.d('init completed (Dart side setup); native init dispatched',
+        tag: DebugTags.core);
     return FeatureFlagsManager().registerFeatureFlagsListener();
   }
 
@@ -306,7 +304,8 @@ class Luciq {
   /// Sets the color theme of the SDK's whole UI to the [colorTheme] given.
   /// It should be of type [ColorTheme].
   static Future<void> setColorTheme(ColorTheme colorTheme) async {
-    LuciqLogger.I.d('setColorTheme colorTheme=$colorTheme', tag: DebugTags.core);
+    LuciqLogger.I
+        .d('setColorTheme colorTheme=$colorTheme', tag: DebugTags.core);
     return _host.setColorTheme(colorTheme.toString());
   }
 
@@ -354,7 +353,8 @@ class Luciq {
 
   /// Clears all feature flags from the next report.
   static Future<void> clearAllFeatureFlags() async {
-    LuciqLogger.I.d('clearAllFeatureFlags invoked', tag: DebugTags.featureFlags);
+    LuciqLogger.I
+        .d('clearAllFeatureFlags invoked', tag: DebugTags.featureFlags);
     return _host.removeAllFeatureFlags();
   }
 
@@ -452,7 +452,8 @@ class Luciq {
   /// Adds specific user data that you need to be added to the reports
   /// [userData] data to be added
   static Future<void> setUserData(String userData) async {
-    LuciqLogger.I.d('setUserData length=${userData.length}', tag: DebugTags.core);
+    LuciqLogger.I
+        .d('setUserData length=${userData.length}', tag: DebugTags.core);
     return _host.setUserData(userData);
   }
 
@@ -657,7 +658,8 @@ class Luciq {
   /// Enables and disables user interaction steps.
   /// [boolean] isEnabled
   static Future<void> enableUserSteps(bool isEnabled) async {
-    LuciqLogger.I.d('enableUserSteps isEnabled=$isEnabled', tag: DebugTags.core);
+    LuciqLogger.I
+        .d('enableUserSteps isEnabled=$isEnabled', tag: DebugTags.core);
     return _host.setEnableUserSteps(isEnabled);
   }
 

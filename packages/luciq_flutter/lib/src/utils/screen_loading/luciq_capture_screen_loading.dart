@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
 import 'package:meta/meta.dart';
@@ -86,6 +89,17 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
       startMonotonicTimeInMicroseconds: startMonotonicTimeInMicroseconds,
     );
 
+    LuciqLogger.I.kv(
+      'capture_widget.init',
+      tag: DebugTags.apmScreenLoading,
+      fields: {
+        'screenHash': hashForLog(_sanitizedScreenName),
+        'screenLen': _sanitizedScreenName.length,
+        'isManual': widget.isManual,
+        'startUs': startTimeInMicroseconds,
+      },
+    );
+
     final didStartTrace =
         ScreenLoadingManager.I.startScreenLoadingTrace(trace!);
 
@@ -94,6 +108,14 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
     if (widget.isManual) {
       _didClaimManual =
           ScreenLoadingManager.I.claimManualScreenLoadingTrace(trace!);
+      LuciqLogger.I.kv(
+        'capture_widget.manual_claim',
+        tag: DebugTags.apmScreenLoading,
+        fields: {
+          'screenHash': hashForLog(_sanitizedScreenName),
+          'claimed': _didClaimManual,
+        },
+      );
     }
 
     // Ensures compatibility with Flutter versions before 3.0.0
@@ -103,6 +125,14 @@ class _LuciqCaptureScreenLoadingState extends State<LuciqCaptureScreenLoading> {
       final duration = stopwatch.elapsedMicroseconds;
       trace?.duration = duration;
       trace?.endTimeInMicroseconds = startTimeInMicroseconds + duration;
+      LuciqLogger.I.kv(
+        'capture_widget.first_frame',
+        tag: DebugTags.apmScreenLoading,
+        fields: {
+          'screenHash': hashForLog(_sanitizedScreenName),
+          'durationUs': duration,
+        },
+      );
 
       if (widget.isManual) {
         final autoStarted = await didStartTrace;

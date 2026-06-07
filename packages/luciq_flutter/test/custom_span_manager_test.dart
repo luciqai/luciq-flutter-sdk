@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
-import 'package:luciq_flutter/src/constants/strings.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
@@ -85,9 +84,11 @@ void main() {
 
         expect(span, isNull);
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanSDKNotInitializedMessage,
+          mLuciqLogger.kv(
+            'span.start.drop_sdk_not_built',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -100,9 +101,10 @@ void main() {
 
         expect(span, isNull);
         verify(
-          mLuciqLogger.d(
-            LuciqStrings.customSpanAPMDisabledMessage,
+          mLuciqLogger.kv(
+            'span.start.drop_apm_disabled',
             tag: CustomSpanManager.tag,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -116,9 +118,10 @@ void main() {
 
         expect(span, isNull);
         verify(
-          mLuciqLogger.d(
-            LuciqStrings.customSpanDisabled,
+          mLuciqLogger.kv(
+            'span.start.drop_feature_disabled',
             tag: CustomSpanManager.tag,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -128,9 +131,11 @@ void main() {
 
         expect(span, isNull);
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanNameEmpty,
+          mLuciqLogger.kv(
+            'span.start.drop_empty_name',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -140,9 +145,11 @@ void main() {
 
         expect(span, isNull);
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanNameEmpty,
+          mLuciqLogger.kv(
+            'span.start.drop_empty_name',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -167,9 +174,10 @@ void main() {
 
         expect(span?.name.length, 150);
         verify(
-          mLuciqLogger.d(
-            LuciqStrings.customSpanNameTruncated,
+          mLuciqLogger.kv(
+            'span.name_truncated',
             tag: CustomSpanManager.tag,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -185,9 +193,10 @@ void main() {
 
         expect(span?.name.length, 150);
         verifyNever(
-          mLuciqLogger.d(
-            LuciqStrings.customSpanNameTruncated,
+          mLuciqLogger.kv(
+            'span.name_truncated',
             tag: anyNamed('tag'),
+            fields: anyNamed('fields'),
           ),
         );
       });
@@ -247,9 +256,11 @@ void main() {
 
         expect(extraSpan, isNull);
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanLimitReached,
+          mLuciqLogger.kv(
+            'span.start.drop_limit_reached',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -339,9 +350,11 @@ void main() {
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanSDKNotInitializedMessage,
+          mLuciqLogger.kv(
+            'span.add_completed.drop_sdk_not_built',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -355,9 +368,10 @@ void main() {
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
         verify(
-          mLuciqLogger.d(
-            LuciqStrings.customSpanAPMDisabledMessage,
+          mLuciqLogger.kv(
+            'span.add_completed.drop_apm_disabled',
             tag: CustomSpanManager.tag,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -372,9 +386,10 @@ void main() {
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
         verify(
-          mLuciqLogger.d(
-            LuciqStrings.customSpanDisabled,
+          mLuciqLogger.kv(
+            'span.add_completed.drop_feature_disabled',
             tag: CustomSpanManager.tag,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -386,9 +401,11 @@ void main() {
         await manager.addCompletedCustomSpan('', start, end);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanNameEmpty,
+          mLuciqLogger.kv(
+            'span.add_completed.drop_empty_name',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -400,9 +417,11 @@ void main() {
         await manager.addCompletedCustomSpan('   ', start, end);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanNameEmpty,
+          mLuciqLogger.kv(
+            'span.add_completed.drop_empty_name',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -413,9 +432,11 @@ void main() {
         await manager.addCompletedCustomSpan('Test Span', sameTime, sameTime);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanEndTimeBeforeStartTime,
+          mLuciqLogger.kv(
+            'span.add_completed.drop_bad_time',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -427,9 +448,11 @@ void main() {
         await manager.addCompletedCustomSpan('Test Span', start, end);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanEndTimeBeforeStartTime,
+          mLuciqLogger.kv(
+            'span.add_completed.drop_bad_time',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -458,9 +481,11 @@ void main() {
         await manager.syncCustomSpan('', 1000, 2000);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanNameEmpty,
+          mLuciqLogger.kv(
+            'span.sync.drop_empty_name',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -469,9 +494,11 @@ void main() {
         await manager.syncCustomSpan('Test', 1000, 1000);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanEndTimeBeforeStartTime,
+          mLuciqLogger.kv(
+            'span.sync.drop_bad_time',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -480,9 +507,11 @@ void main() {
         await manager.syncCustomSpan('Test', 2000, 1000);
 
         verify(
-          mLuciqLogger.e(
-            LuciqStrings.customSpanEndTimeBeforeStartTime,
+          mLuciqLogger.kv(
+            'span.sync.drop_bad_time',
             tag: CustomSpanManager.tag,
+            level: LogLevel.error,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
       });
@@ -493,9 +522,10 @@ void main() {
         await manager.syncCustomSpan(longName, 1000, 2000);
 
         verify(
-          mLuciqLogger.d(
-            LuciqStrings.customSpanNameTruncated,
+          mLuciqLogger.kv(
+            'span.name_truncated',
             tag: CustomSpanManager.tag,
+            fields: anyNamed('fields'),
           ),
         ).called(1);
         verify(

@@ -41,6 +41,36 @@ class LuciqLogger implements Logger {
   ///   }
   bool isDebugEnabled() => _logLevel.getValue() <= LogLevel.debug.getValue();
 
+  /// Returns true when the current level is at verbose. Use for high-frequency
+  /// events (per-frame, per-pointer) that should be opt-in even when debug is
+  /// on.
+  bool isVerboseEnabled() =>
+      _logLevel.getValue() <= LogLevel.verbose.getValue();
+
+  /// Structured key/value log: emits `event=<event> k1=v1 k2=v2` on one line
+  /// so log streams can be grep-filtered and parsed by tooling.
+  ///
+  /// Null field values are skipped. Field values are interpolated as-is; pass
+  /// hashes/lengths via [hashForLog] for any user-provided string.
+  void kv(
+    String event, {
+    required String tag,
+    LogLevel level = LogLevel.debug,
+    Map<String, Object?> fields = const {},
+  }) {
+    if (level.getValue() < _logLevel.getValue()) return;
+    final buf = StringBuffer('event=')..write(event);
+    fields.forEach((k, v) {
+      if (v == null) return;
+      buf
+        ..write(' ')
+        ..write(k)
+        ..write('=')
+        ..write(v);
+    });
+    log(buf.toString(), tag: tag, level: level);
+  }
+
   @override
   void log(
     String message, {

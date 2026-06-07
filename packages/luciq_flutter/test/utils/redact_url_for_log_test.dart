@@ -21,7 +21,8 @@ void main() {
     });
     test('strips multi-parameter query', () {
       expect(
-        redactUrlForLog('https://api.example.com/auth?token=abc&user=12345&hash=xyz'),
+        redactUrlForLog(
+            'https://api.example.com/auth?token=abc&user=12345&hash=xyz'),
         'https://api.example.com/auth?<redacted>',
       );
     });
@@ -31,7 +32,8 @@ void main() {
     });
     test('never leaks sensitive query value', () {
       const sensitive = 'super-secret-token-value-9876';
-      final out = redactUrlForLog('https://api.example.com/users?token=$sensitive');
+      final out =
+          redactUrlForLog('https://api.example.com/users?token=$sensitive');
       expect(out.contains(sensitive), isFalse);
       expect(out.contains('token='), isFalse);
     });
@@ -40,13 +42,15 @@ void main() {
           'https://app.example.com/page');
     });
     test('strips fragment with sensitive data', () {
-      final out = redactUrlForLog('https://app.example.com/page#access_token=abc');
+      final out =
+          redactUrlForLog('https://app.example.com/page#access_token=abc');
       expect(out, 'https://app.example.com/page');
       expect(out.contains('abc'), isFalse);
       expect(out.contains('access_token'), isFalse);
     });
     test('cuts at query when query comes first', () {
-      expect(redactUrlForLog('https://api.example.com/users?email=u@x.com#anchor'),
+      expect(
+          redactUrlForLog('https://api.example.com/users?email=u@x.com#anchor'),
           'https://api.example.com/users?<redacted>');
     });
     test('cuts at fragment when fragment comes first', () {

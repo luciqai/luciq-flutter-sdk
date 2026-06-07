@@ -6,6 +6,7 @@ import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/models/luciq_route.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/repro_steps_constants.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
@@ -19,11 +20,17 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   final Duration _screenReportDelay;
   final List<LuciqRoute> _steps = [];
 
-  void screenChanged(Route newRoute) {
+  void screenChanged(Route newRoute, {String? transition}) {
+    final name = newRoute.settings.name;
     if (LuciqLogger.I.isDebugEnabled()) {
-      LuciqLogger.I.d(
-        'observer route changed screenNameLength=${newRoute.settings.name?.length ?? 0}',
+      LuciqLogger.I.kv(
+        'observer.route_changed',
         tag: DebugTags.screenTracking,
+        fields: {
+          'transition': transition,
+          'screenHash': hashForLog(name),
+          'screenLen': name?.length ?? 0,
+        },
       );
     }
     try {
@@ -70,18 +77,22 @@ class LuciqNavigatorObserver extends NavigatorObserver {
               _steps.remove(route);
             }
           } catch (e) {
-            LuciqLogger.I.e(
-              'Reporting screen change failed type=${e.runtimeType}',
+            LuciqLogger.I.kv(
+              'observer.report_failed',
               tag: DebugTags.screenTracking,
+              level: LogLevel.error,
+              fields: {'type': e.runtimeType},
             );
           }
         },
         Priority.idle,
       );
     } catch (e) {
-      LuciqLogger.I.e(
-        'Screen change handling failed type=${e.runtimeType}',
+      LuciqLogger.I.kv(
+        'observer.handle_failed',
         tag: DebugTags.screenTracking,
+        level: LogLevel.error,
+        fields: {'type': e.runtimeType},
       );
     }
   }
@@ -96,13 +107,13 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   @override
   void didPop(Route route, Route? previousRoute) {
     if (previousRoute != null) {
-      screenChanged(previousRoute);
+      screenChanged(previousRoute, transition: 'pop');
     }
   }
 
   @override
   void didPush(Route route, Route? previousRoute) {
-    screenChanged(route);
+    screenChanged(route, transition: 'push');
   }
 
   FutureOr<void> _startScreenRenderCollector(int? uiTraceId) async {

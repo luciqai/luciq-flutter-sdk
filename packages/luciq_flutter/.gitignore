@@ -3,6 +3,7 @@
 *.g.dart
 android/**/generated/
 ios/**/Generated/
+ios/luciq_flutter/
 
 # Miscellaneous
 *.class

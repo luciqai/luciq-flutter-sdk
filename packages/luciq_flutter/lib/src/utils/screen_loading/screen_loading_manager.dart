@@ -4,12 +4,15 @@ import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_trace.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/ui_trace.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
 import 'package:meta/meta.dart';
 
 const int _traceValidationTimeout = 500;
+const String _kSlDocs =
+    'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking';
 
 /// Manages screen loading traces and UI traces for performance monitoring.
 ///
@@ -60,17 +63,23 @@ class ScreenLoadingManager {
   void resetDidStartScreenLoading() {
     // Allows starting a new screen loading capture trace in the same ui trace (without navigating out and in to the same screen)
     currentUiTrace?.didStartScreenLoading = false;
-    LuciqLogger.I.d(
-      'Resetting didStartScreenLoading — setting didStartScreenLoading: ${currentUiTrace?.didStartScreenLoading}',
+    LuciqLogger.I.kv(
+      'screen_loading.reset_start',
       tag: DebugTags.apmScreenLoading,
+      fields: {'traceId': currentUiTrace?.traceId},
     );
   }
 
   /// @nodoc
   void _logExceptionErrorAndStackTrace(Object error, StackTrace stackTrace) {
-    LuciqLogger.I.e(
-      'Exception caught type=${error.runtimeType}',
+    LuciqLogger.I.kv(
+      'screen_loading.exception',
       tag: DebugTags.apmScreenLoading,
+      level: LogLevel.error,
+      fields: {
+        'traceId': currentUiTrace?.traceId,
+        'type': error.runtimeType,
+      },
     );
   }
 
@@ -78,10 +87,15 @@ class ScreenLoadingManager {
   Future<bool> _checkLuciqSDKBuilt(String apiName) async {
     final isLuciqSDKBuilt = await Luciq.isBuilt();
     if (!isLuciqSDKBuilt) {
-      LuciqLogger.I.e(
-        'Luciq API {$apiName} was called before the SDK is built. To build it, first by following the instructions at this link:\n'
-        'https://docs.luciq.ai/reference#showing-and-manipulating-the-invocation',
+      LuciqLogger.I.kv(
+        'screen_loading.sdk_not_built',
         tag: DebugTags.apmScreenLoading,
+        level: LogLevel.error,
+        fields: {
+          'api': apiName,
+          'docs':
+              'https://docs.luciq.ai/reference#showing-and-manipulating-the-invocation',
+        },
       );
     }
     return isLuciqSDKBuilt;
@@ -92,9 +106,10 @@ class ScreenLoadingManager {
   void resetDidReportScreenLoading() {
     // Allows reporting a new screen loading capture trace in the same ui trace even if one was reported before by resetting the flag which is used for checking.
     currentUiTrace?.didReportScreenLoading = false;
-    LuciqLogger.I.d(
-      'Resetting didExtendScreenLoading — setting didExtendScreenLoading: ${currentUiTrace?.didExtendScreenLoading}',
+    LuciqLogger.I.kv(
+      'screen_loading.reset_report',
       tag: DebugTags.apmScreenLoading,
+      fields: {'traceId': currentUiTrace?.traceId},
     );
   }
 
@@ -103,9 +118,10 @@ class ScreenLoadingManager {
   void resetDidExtendScreenLoading() {
     // Allows reporting a new screen loading capture trace in the same ui trace even if one was reported before by resetting the flag which is used for checking.
     currentUiTrace?.didExtendScreenLoading = false;
-    LuciqLogger.I.d(
-      'Resetting didReportScreenLoading — setting didReportScreenLoading: ${currentUiTrace?.didReportScreenLoading}',
+    LuciqLogger.I.kv(
+      'screen_loading.reset_extend',
       tag: DebugTags.apmScreenLoading,
+      fields: {'traceId': currentUiTrace?.traceId},
     );
   }
 
@@ -136,10 +152,14 @@ class ScreenLoadingManager {
         traceId: uiTraceId,
       );
 
-      LuciqLogger.I.d(
-        'Prepared UI trace — traceId: $uiTraceId, '
-        'screenNameLength: ${sanitizedScreenName.length} (pending validation)',
+      LuciqLogger.I.kv(
+        'ui_trace.prepare',
         tag: DebugTags.apmScreenLoading,
+        fields: {
+          'traceId': uiTraceId,
+          'screenHash': hashForLog(sanitizedScreenName),
+          'screenLen': sanitizedScreenName.length,
+        },
       );
 
       _validateAndActivateUiTrace(
@@ -168,33 +188,43 @@ class ScreenLoadingManager {
 
       final isAutoUiTraceEnabled = await FlagsConfig.uiTrace.isEnabled();
       if (!isAutoUiTraceEnabled) {
-        LuciqLogger.I.e(
-          'Auto UI trace is disabled, skipping starting the UI trace for screenNameLength=${screenName.length}.\n'
-          'Please refer to the documentation for how to enable APM on your app: '
-          'https://docs.luciq.ai/docs/react-native-apm-disabling-enabling',
+        LuciqLogger.I.kv(
+          'ui_trace.auto_disabled',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'traceId': trace.traceId,
+            'screenLen': screenName.length,
+            'docs':
+                'https://docs.luciq.ai/docs/react-native-apm-disabling-enabling',
+          },
         );
-        _discardUiTrace(trace, 'Auto UI trace disabled');
+        _discardUiTrace(trace, 'auto_disabled');
         return;
       }
 
       APM.startCpUiTrace(screenName, startTimeStampMicro, trace.traceId);
       trace.validationCompleter.complete(true);
 
-      LuciqLogger.I.d(
-        'UI trace validated — traceId: ${trace.traceId}, screenNameLength: ${screenName.length}',
+      LuciqLogger.I.kv(
+        'ui_trace.validate.ok',
         tag: DebugTags.apmScreenLoading,
+        fields: {
+          'traceId': trace.traceId,
+          'screenHash': hashForLog(screenName),
+        },
       );
     } catch (error, stackTrace) {
-      _discardUiTrace(trace, 'Exception type=${error.runtimeType}');
+      _discardUiTrace(trace, 'exception_${error.runtimeType}');
       _logExceptionErrorAndStackTrace(error, stackTrace);
     }
   }
 
   void _discardUiTrace(UiTrace trace, String reason) {
-    LuciqLogger.I.d(
-      'Discarding UI trace — reason: $reason',
+    LuciqLogger.I.kv(
+      'ui_trace.discard',
       tag: DebugTags.apmScreenLoading,
+      fields: {'traceId': trace.traceId, 'reason': reason},
     );
     if (!trace.validationCompleter.isCompleted) {
       trace.validationCompleter.complete(false);
@@ -243,9 +273,14 @@ class ScreenLoadingManager {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
       if (!isSDKBuilt) {
-        LuciqLogger.I.e(
-          'Luciq SDK is not built, skipping starting screen loading monitoring for screenNameLength=${trace.screenName.length}.',
+        LuciqLogger.I.kv(
+          'screen_loading.start.skip_sdk_not_built',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'traceId': currentUiTrace?.traceId,
+            'screenLen': trace.screenName.length,
+          },
         );
         return false;
       }
@@ -253,12 +288,15 @@ class ScreenLoadingManager {
       final isScreenLoadingEnabled =
           await FlagsConfig.screenLoading.isEnabled();
       if (!isScreenLoadingEnabled) {
-        LuciqLogger.I.e(
-          'Screen loading monitoring is disabled, skipping starting screen loading monitoring for screenNameLength=${trace.screenName.length}.\n'
-          'Please refer to the documentation for how to enable screen loading monitoring on your app: '
-          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+        LuciqLogger.I.kv(
+          'screen_loading.start.skip_disabled',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'traceId': currentUiTrace?.traceId,
+            'screenLen': trace.screenName.length,
+            'docs': _kSlDocs,
+          },
         );
 
         return false;
@@ -269,21 +307,30 @@ class ScreenLoadingManager {
       final didStartLoading = currentUiTrace?.didStartScreenLoading == true;
 
       if (isSameScreen && !didStartLoading) {
-        LuciqLogger.I.d(
-          'Starting screen loading trace — screenNameLength: ${trace.screenName.length}, startTimeInMicroseconds: ${trace.startTimeInMicroseconds}',
+        LuciqLogger.I.kv(
+          'screen_loading.start',
           tag: DebugTags.apmScreenLoading,
+          fields: {
+            'traceId': currentUiTrace?.traceId,
+            'screenHash': hashForLog(trace.screenName),
+            'startUs': trace.startTimeInMicroseconds,
+          },
         );
         currentUiTrace?.didStartScreenLoading = true;
         currentScreenLoadingTrace = trace;
         return true;
       }
-      LuciqLogger.I.d(
-        'failed to start screen loading trace — screenNameLength: ${trace.screenName.length}, startTimeInMicroseconds: ${trace.startTimeInMicroseconds}',
+      LuciqLogger.I.kv(
+        'screen_loading.start.skipped',
         tag: DebugTags.apmScreenLoading,
-      );
-      LuciqLogger.I.d(
-        'didStartScreenLoading: $didStartLoading, isSameScreen: $isSameScreen',
-        tag: DebugTags.apmScreenLoading,
+        fields: {
+          'traceId': currentUiTrace?.traceId,
+          'screenHash': hashForLog(trace.screenName),
+          'screenLen': trace.screenName.length,
+          'startUs': trace.startTimeInMicroseconds,
+          'didStart': didStartLoading,
+          'isSameScreen': isSameScreen,
+        },
       );
       return false;
     } catch (error, stackTrace) {
@@ -299,9 +346,14 @@ class ScreenLoadingManager {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
       if (!isSDKBuilt) {
-        LuciqLogger.I.e(
-          'Luciq SDK is not built, skipping reporting screen loading time for screenNameLength=${trace?.screenName.length ?? 0}.',
+        LuciqLogger.I.kv(
+          'screen_loading.report.skip_sdk_not_built',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'traceId': currentUiTrace?.traceId,
+            'screenLen': trace?.screenName.length ?? 0,
+          },
         );
         return;
       }
@@ -310,12 +362,15 @@ class ScreenLoadingManager {
       final isScreenLoadingEnabled =
           await FlagsConfig.screenLoading.isEnabled();
       if (!isScreenLoadingEnabled) {
-        LuciqLogger.I.e(
-          'Screen loading monitoring is disabled, skipping reporting screen loading time for screenNameLength=${trace?.screenName.length ?? 0}.\n'
-          'Please refer to the documentation for how to enable screen loading monitoring on your app: '
-          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+        LuciqLogger.I.kv(
+          'screen_loading.report.skip_disabled',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'traceId': currentUiTrace?.traceId,
+            'screenLen': trace?.screenName.length ?? 0,
+            'docs': _kSlDocs,
+          },
         );
 
         return;
@@ -333,18 +388,27 @@ class ScreenLoadingManager {
         final isUiTraceValid = await currentUiTrace?.whenValidated.timeout(
           const Duration(milliseconds: _traceValidationTimeout),
           onTimeout: () {
-            LuciqLogger.I.e(
-              'UI trace validation timed out — dropping screen loading trace',
+            LuciqLogger.I.kv(
+              'ui_trace.validate.timeout',
               tag: DebugTags.apmScreenLoading,
+              level: LogLevel.error,
+              fields: {
+                'traceId': currentUiTrace?.traceId,
+                'phase': 'report',
+              },
             );
             return false;
           },
         );
 
         if (isUiTraceValid != true) {
-          LuciqLogger.I.d(
-            'Dropping screen loading trace — UI trace validation failed for screenNameLength=${trace?.screenName.length ?? 0}',
+          LuciqLogger.I.kv(
+            'screen_loading.report.drop_validation',
             tag: DebugTags.apmScreenLoading,
+            fields: {
+              'traceId': currentUiTrace?.traceId,
+              'screenLen': trace?.screenName.length ?? 0,
+            },
           );
           currentScreenLoadingTrace = null;
           return;
@@ -359,17 +423,17 @@ class ScreenLoadingManager {
         );
         return;
       } else {
-        LuciqLogger.I.d(
-          'Failed to report screen loading trace — screenNameLength: ${trace?.screenName.length ?? 0}, '
-          'startTimeInMicroseconds: ${trace?.startTimeInMicroseconds}, '
-          'duration: $duration, '
-          'trace.duration: ${trace?.duration ?? 0}',
+        LuciqLogger.I.kv(
+          'screen_loading.report.skipped',
           tag: DebugTags.apmScreenLoading,
-        );
-        LuciqLogger.I.d(
-          'didReportScreenLoading: $isReported, '
-          'isSameName: $isSameScreen',
-          tag: DebugTags.apmScreenLoading,
+          fields: {
+            'traceId': currentUiTrace?.traceId,
+            'screenLen': trace?.screenName.length ?? 0,
+            'startUs': trace?.startTimeInMicroseconds,
+            'durationUs': duration ?? trace?.duration ?? 0,
+            'didReport': isReported,
+            'isSameScreen': isSameScreen,
+          },
         );
         _reportScreenLoadingDroppedError(trace);
       }
@@ -389,9 +453,11 @@ class ScreenLoadingManager {
       final isSDKBuilt =
           await _checkLuciqSDKBuilt("APM.LuciqCaptureScreenLoading");
       if (!isSDKBuilt) {
-        LuciqLogger.I.e(
-          'Luciq SDK is not built, skipping reporting manual screen loading time for screenNameLength=${screenName.length}.',
+        LuciqLogger.I.kv(
+          'screen_loading.report_manual.skip_sdk_not_built',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {'screenLen': screenName.length},
         );
         return;
       }
@@ -399,15 +465,27 @@ class ScreenLoadingManager {
       final isScreenLoadingEnabled =
           await FlagsConfig.screenLoading.isEnabled();
       if (!isScreenLoadingEnabled) {
-        LuciqLogger.I.e(
-          'Screen loading monitoring is disabled, skipping reporting manual screen loading time for screenNameLength=${screenName.length}.\n'
-          'Please refer to the documentation for how to enable screen loading monitoring on your app: '
-          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+        LuciqLogger.I.kv(
+          'screen_loading.report_manual.skip_disabled',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'screenLen': screenName.length,
+            'docs': _kSlDocs,
+          },
         );
         return;
       }
+
+      LuciqLogger.I.kv(
+        'screen_loading.report_manual',
+        tag: DebugTags.apmScreenLoading,
+        fields: {
+          'screenHash': hashForLog(screenName),
+          'startUs': startTimeInMicroseconds,
+          'durationUs': duration,
+        },
+      );
 
       APM.reportManualScreenLoadingCP(
         screenName,
@@ -445,9 +523,15 @@ class ScreenLoadingManager {
   }
 
   void _reportScreenLoadingDroppedError(ScreenLoadingTrace? trace) {
-    LuciqLogger.I.e(
-      "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — screenNameLength=${trace?.screenName.length ?? 0}",
+    LuciqLogger.I.kv(
+      'screen_loading.drop',
       tag: DebugTags.apmScreenLoading,
+      level: LogLevel.error,
+      fields: {
+        'traceId': currentUiTrace?.traceId,
+        'screenLen': trace?.screenName.length ?? 0,
+        'reason': 'not_current_or_already_reported',
+      },
     );
   }
 
@@ -463,12 +547,14 @@ class ScreenLoadingManager {
       final isScreenLoadingEnabled =
           await FlagsConfig.screenLoading.isEnabled();
       if (!isScreenLoadingEnabled) {
-        LuciqLogger.I.e(
-          'Screen loading monitoring is disabled, skipping ending screen loading monitoring with APM.endScreenLoading().\n'
-          'Please refer to the documentation for how to enable screen loading monitoring in your app: '
-          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+        LuciqLogger.I.kv(
+          'screen_loading.end.skip_disabled',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'traceId': uiTrace?.traceId,
+            'docs': _kSlDocs,
+          },
         );
         return;
       }
@@ -477,12 +563,14 @@ class ScreenLoadingManager {
           await FlagsConfig.endScreenLoading.isEnabled();
 
       if (!isEndScreenLoadingEnabled) {
-        LuciqLogger.I.e(
-          'End Screen loading API is disabled.\n'
-          'Please refer to the documentation for how to enable screen loading monitoring in your app: '
-          'https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
-          "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
+        LuciqLogger.I.kv(
+          'screen_loading.end.skip_api_disabled',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {
+            'traceId': uiTrace?.traceId,
+            'docs': _kSlDocs,
+          },
         );
 
         return;
@@ -490,9 +578,11 @@ class ScreenLoadingManager {
 
       final didExtendScreenLoading = uiTrace?.didExtendScreenLoading == true;
       if (didExtendScreenLoading) {
-        LuciqLogger.I.e(
-          'endScreenLoading has already been called for the current screen visit. Multiple calls to this API are not allowed during a single screen visit, only the first call will be considered.',
+        LuciqLogger.I.kv(
+          'screen_loading.end.skip_already_called',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {'traceId': uiTrace?.traceId},
         );
         return;
       }
@@ -501,9 +591,11 @@ class ScreenLoadingManager {
       final didStartScreenLoading =
           screenLoadingTrace?.startTimeInMicroseconds != null;
       if (!didStartScreenLoading) {
-        LuciqLogger.I.e(
-          "endScreenLoading wasn’t called as there is no active screen loading trace.",
+        LuciqLogger.I.kv(
+          'screen_loading.end.skip_no_active_trace',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {'traceId': uiTrace?.traceId},
         );
         return;
       }
@@ -524,37 +616,43 @@ class ScreenLoadingManager {
         extendedEndTimeInMicroseconds = 0;
         duration = 0;
 
-        LuciqLogger.I.e(
-          "endScreenLoading was called too early in the Screen Loading cycle. Please make sure to call the API after the screen is done loading.",
+        LuciqLogger.I.kv(
+          'screen_loading.end.premature',
           tag: DebugTags.apmScreenLoading,
+          level: LogLevel.error,
+          fields: {'traceId': uiTrace?.traceId},
         );
       }
-      LuciqLogger.I.d(
-        'endTimeInMicroseconds: ${screenLoadingTrace.endTimeInMicroseconds}, '
-        'didEndScreenLoadingPrematurely: $didEndScreenLoadingPrematurely, extendedEndTimeInMicroseconds: $extendedEndTimeInMicroseconds.',
+      LuciqLogger.I.kv(
+        'screen_loading.end',
         tag: DebugTags.apmScreenLoading,
-      );
-      LuciqLogger.I.d(
-        'Ending screen loading capture — duration: $extendedEndTimeInMicroseconds',
-        tag: DebugTags.apmScreenLoading,
+        fields: {
+          'traceId': uiTrace?.traceId,
+          'endUs': screenLoadingTrace.endTimeInMicroseconds,
+          'extendedEndUs': extendedEndTimeInMicroseconds,
+          'premature': didEndScreenLoadingPrematurely,
+        },
       );
 
       // Wait for UI trace validation before calling native API
       final isUiTraceValid = await uiTrace?.whenValidated.timeout(
         const Duration(milliseconds: _traceValidationTimeout),
         onTimeout: () {
-          LuciqLogger.I.e(
-            'UI trace validation timed out — dropping endScreenLoading',
+          LuciqLogger.I.kv(
+            'ui_trace.validate.timeout',
             tag: DebugTags.apmScreenLoading,
+            level: LogLevel.error,
+            fields: {'traceId': uiTrace.traceId, 'phase': 'end'},
           );
           return false;
         },
       );
 
       if (isUiTraceValid != true) {
-        LuciqLogger.I.d(
-          'Dropping endScreenLoading — UI trace validation failed',
+        LuciqLogger.I.kv(
+          'screen_loading.end.drop_validation',
           tag: DebugTags.apmScreenLoading,
+          fields: {'traceId': uiTrace?.traceId},
         );
         return;
       }

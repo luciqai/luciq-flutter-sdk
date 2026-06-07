@@ -451,8 +451,7 @@ void main() {
       verify(mScreenLoadingManager.endScreenLoading()).called(1);
     });
 
-    test('[wrapRoutes] should delegate to ScreenLoadingManager.wrapRoutes',
-        () {
+    test('[wrapRoutes] should delegate to ScreenLoadingManager.wrapRoutes', () {
       final routes = <String, WidgetBuilder>{
         '/home': (context) => const SizedBox(),
         '/settings': (context) => const SizedBox(),
@@ -466,16 +465,13 @@ void main() {
       }
     });
 
-    test(
-        '[wrapRoutes] with exclude should not wrap excluded routes',
-        () {
+    test('[wrapRoutes] with exclude should not wrap excluded routes', () {
       final routes = <String, WidgetBuilder>{
         '/home': (context) => const SizedBox(),
         '/settings': (context) => const SizedBox(),
       };
 
-      final wrappedRoutes =
-          APM.wrapRoutes(routes, exclude: ['/home']);
+      final wrappedRoutes = APM.wrapRoutes(routes, exclude: ['/home']);
 
       expect(wrappedRoutes['/home'], equals(routes['/home']));
     });

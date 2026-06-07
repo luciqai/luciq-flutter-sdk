@@ -2,11 +2,9 @@
 
 import 'dart:async';
 
+import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
-import 'package:luciq_flutter/src/models/network_data.dart';
-import 'package:luciq_flutter/src/models/w3c_header.dart';
-import 'package:luciq_flutter/src/modules/apm.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/iterable_ext.dart';
 import 'package:luciq_flutter/src/utils/luciq_constants.dart';
@@ -15,6 +13,10 @@ import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/network_manager.dart';
 import 'package:luciq_flutter/src/utils/w3c_header_utils.dart';
 import 'package:meta/meta.dart';
+
+String _reqId(NetworkData data) => hashForLog(
+      '${data.method}|${data.url}|${data.startTime.microsecondsSinceEpoch}',
+    );
 
 class NetworkLogger {
   static var _host = LuciqHostApi();
@@ -50,8 +52,8 @@ class NetworkLogger {
   /// });
   /// ```
   static void obfuscateLog(ObfuscateLogCallback callback) {
-    LuciqLogger.I.d(
-      'obfuscateLog callback registered',
+    LuciqLogger.I.kv(
+      'net.obfuscate_callback_registered',
       tag: DebugTags.network,
     );
     _manager.setObfuscateLogCallback(callback);
@@ -76,20 +78,14 @@ class NetworkLogger {
   /// });
   /// ```
   static void omitLog(OmitLogCallback callback) {
-    LuciqLogger.I.d(
-      'omitLog callback registered',
+    LuciqLogger.I.kv(
+      'net.omit_callback_registered',
       tag: DebugTags.network,
     );
     _manager.setOmitLogCallback(callback);
   }
 
   Future<void> networkLog(NetworkData data) async {
-    if (LuciqLogger.I.isDebugEnabled()) {
-      LuciqLogger.I.d(
-        'networkLog method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration}',
-        tag: DebugTags.network,
-      );
-    }
     final w3Header = await getW3CHeader(
       data.requestHeaders,
       data.startTime.millisecondsSinceEpoch,
@@ -103,18 +99,27 @@ class NetworkLogger {
 
   @internal
   Future<void> networkLogInternal(NetworkData data) async {
+    final reqId = _reqId(data);
     if (LuciqLogger.I.isDebugEnabled()) {
-      LuciqLogger.I.d(
-        'networkLogInternal method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration}',
+      LuciqLogger.I.kv(
+        'net.log_internal',
         tag: DebugTags.network,
+        fields: {
+          'reqId': reqId,
+          'method': data.method,
+          'urlHash': hashForLog(data.url),
+          'status': data.status,
+          'durationMs': data.duration,
+        },
       );
     }
     final omit = await _manager.omitLog(data);
     if (omit) {
       if (LuciqLogger.I.isDebugEnabled()) {
-        LuciqLogger.I.d(
-          'networkLogInternal omitted url=${redactUrlForLog(data.url)}',
+        LuciqLogger.I.kv(
+          'net.omit',
           tag: DebugTags.network,
+          fields: {'reqId': reqId, 'urlHash': hashForLog(data.url)},
         );
       }
       return;
@@ -141,10 +146,21 @@ class NetworkLogger {
       );
 
       // Log the truncation event.
-      final isBothExceeds = requestExceeds && responseExceeds;
-      LuciqLogger.I.e(
-        "Truncated network ${isBothExceeds ? 'request and response' : requestExceeds ? 'request' : 'response'} body",
+      final which = requestExceeds && responseExceeds
+          ? 'both'
+          : requestExceeds
+              ? 'req'
+              : 'res';
+      LuciqLogger.I.kv(
+        'net.truncate',
         tag: LuciqConstants.networkLoggerTag,
+        level: LogLevel.error,
+        fields: {
+          'reqId': reqId,
+          'which': which,
+          'reqBytes': data.requestBodySize,
+          'resBytes': data.responseBodySize,
+        },
       );
     }
 
@@ -152,27 +168,59 @@ class NetworkLogger {
 
     try {
       await _host.networkLog(obfuscated.toJson());
-      LuciqLogger.I.d(
-        'Bug Reporting log sent — ${redactUrlForLog(obfuscated.url)}',
-        tag: LuciqConstants.networkLoggerTag,
-      );
+      if (LuciqLogger.I.isDebugEnabled()) {
+        LuciqLogger.I.kv(
+          'net.upload',
+          tag: LuciqConstants.networkLoggerTag,
+          fields: {
+            'reqId': reqId,
+            'channel': 'bug',
+            'result': 'ok',
+            'urlHash': hashForLog(obfuscated.url),
+          },
+        );
+      }
     } catch (e) {
-      LuciqLogger.I.e(
-        'Bug Reporting log FAILED — ${redactUrlForLog(obfuscated.url)} — type=${e.runtimeType}',
+      LuciqLogger.I.kv(
+        'net.upload',
         tag: LuciqConstants.networkLoggerTag,
+        level: LogLevel.error,
+        fields: {
+          'reqId': reqId,
+          'channel': 'bug',
+          'result': 'fail',
+          'errType': e.runtimeType,
+          'url': redactUrlForLog(obfuscated.url),
+        },
       );
     }
 
     try {
       await APM.networkLogAndroid(obfuscated);
-      LuciqLogger.I.d(
-        'APM/Session Replay log sent — ${redactUrlForLog(obfuscated.url)}',
-        tag: LuciqConstants.networkLoggerTag,
-      );
+      if (LuciqLogger.I.isDebugEnabled()) {
+        LuciqLogger.I.kv(
+          'net.upload',
+          tag: LuciqConstants.networkLoggerTag,
+          fields: {
+            'reqId': reqId,
+            'channel': 'apm',
+            'result': 'ok',
+            'urlHash': hashForLog(obfuscated.url),
+          },
+        );
+      }
     } catch (e) {
-      LuciqLogger.I.e(
-        'APM/Session Replay log FAILED — ${redactUrlForLog(obfuscated.url)} — type=${e.runtimeType}',
+      LuciqLogger.I.kv(
+        'net.upload',
         tag: LuciqConstants.networkLoggerTag,
+        level: LogLevel.error,
+        fields: {
+          'reqId': reqId,
+          'channel': 'apm',
+          'result': 'fail',
+          'errType': e.runtimeType,
+          'url': redactUrlForLog(obfuscated.url),
+        },
       );
     }
   }
@@ -216,9 +264,10 @@ class NetworkLogger {
   /// Enables or disables network body logs capturing.
   /// [boolean] isEnabled
   static Future<void> setNetworkLogBodyEnabled(bool isEnabled) async {
-    LuciqLogger.I.d(
-      'setNetworkLogBodyEnabled isEnabled=$isEnabled',
+    LuciqLogger.I.kv(
+      'net.set_log_body_enabled',
       tag: DebugTags.network,
+      fields: {'isEnabled': isEnabled},
     );
     return _host.setNetworkLogBodyEnabled(isEnabled);
   }
@@ -226,9 +275,10 @@ class NetworkLogger {
   /// Enables or disables network logs sensitive information auto masking.
   /// [boolean] isEnabled
   static Future<void> setNetworkAutoMaskingEnabled(bool isEnabled) async {
-    LuciqLogger.I.d(
-      'setNetworkAutoMaskingEnabled isEnabled=$isEnabled',
+    LuciqLogger.I.kv(
+      'net.set_auto_masking_enabled',
       tag: DebugTags.network,
+      fields: {'isEnabled': isEnabled},
     );
     return _host.setNetworkAutoMaskingEnabled(isEnabled);
   }

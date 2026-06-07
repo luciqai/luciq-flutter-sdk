@@ -1,3 +1,7 @@
+import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:meta/meta.dart';
 
 class RouteMatcher {
@@ -30,6 +34,28 @@ class RouteMatcher {
   /// RouteMatcher.I.match('/user/**', '/user/123/profile'); // false
   /// ```
   bool match({
+    required String? routePath,
+    required String? actualPath,
+  }) {
+    final result = _matchInternal(routePath: routePath, actualPath: actualPath);
+    if (LuciqLogger.I.isVerboseEnabled()) {
+      LuciqLogger.I.kv(
+        'route_match',
+        tag: DebugTags.apmUITrace,
+        level: LogLevel.verbose,
+        fields: {
+          'routeHash': hashForLog(routePath),
+          'actualHash': hashForLog(actualPath),
+          'routeLen': routePath?.length ?? 0,
+          'actualLen': actualPath?.length ?? 0,
+          'matched': result,
+        },
+      );
+    }
+    return result;
+  }
+
+  bool _matchInternal({
     required String? routePath,
     required String? actualPath,
   }) {

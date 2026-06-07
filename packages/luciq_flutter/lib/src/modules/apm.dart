@@ -49,10 +49,16 @@ class APM {
   /// await span?.end();
   /// ```
   static Future<CustomSpan?> startCustomSpan(String name) {
-    LuciqLogger.I.d(
-      'startCustomSpan nameLength=${name.length}',
-      tag: DebugTags.apmCustomSpan,
-    );
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.kv(
+        'span.start.api',
+        tag: DebugTags.apmCustomSpan,
+        fields: {
+          'nameHash': hashForLog(name),
+          'nameLen': name.length,
+        },
+      );
+    }
     return CustomSpanManager.I.startCustomSpan(name);
   }
 
@@ -76,10 +82,16 @@ class APM {
     DateTime startDate,
     DateTime endDate,
   ) {
-    LuciqLogger.I.d(
-      'addCompletedCustomSpan nameLength=${name.length}',
-      tag: DebugTags.apmCustomSpan,
-    );
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.kv(
+        'span.add_completed.api',
+        tag: DebugTags.apmCustomSpan,
+        fields: {
+          'nameHash': hashForLog(name),
+          'nameLen': name.length,
+        },
+      );
+    }
     return CustomSpanManager.I.addCompletedCustomSpan(name, startDate, endDate);
   }
 
@@ -317,9 +329,18 @@ class APM {
   ///   The method is returning a `FutureOr<void>`.
   static FutureOr<void> networkLogAndroid(NetworkData data) {
     if (LuciqLogger.I.isDebugEnabled()) {
-      LuciqLogger.I.d(
-        'networkLogAndroid method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration}',
+      LuciqLogger.I.kv(
+        'net.log_android',
         tag: DebugTags.apmNetwork,
+        fields: {
+          'reqId': hashForLog(
+            '${data.method}|${data.url}|${data.startTime.microsecondsSinceEpoch}',
+          ),
+          'method': data.method,
+          'urlHash': hashForLog(data.url),
+          'status': data.status,
+          'durationMs': data.duration,
+        },
       );
     }
     if (LCQBuildInfo.instance.isAndroid) {
@@ -353,9 +374,15 @@ class APM {
     int startTimeInMicroseconds,
     int traceId,
   ) {
-    LuciqLogger.I.d(
-      'Starting Ui trace — traceId: $traceId, screenNameLength=${screenName.length}, microTimeStamp: $startTimeInMicroseconds',
-      tag: APM.tag,
+    LuciqLogger.I.kv(
+      'ui_trace.start_native',
+      tag: DebugTags.apmScreenLoading,
+      fields: {
+        'traceId': traceId,
+        'screenHash': hashForLog(screenName),
+        'screenLen': screenName.length,
+        'startUs': startTimeInMicroseconds,
+      },
     );
     return _host.startCpUiTrace(screenName, startTimeInMicroseconds, traceId);
   }
@@ -385,9 +412,14 @@ class APM {
     int durationInMicroseconds,
     int uiTraceId,
   ) {
-    LuciqLogger.I.d(
-      'Reporting screen loading trace — traceId: $uiTraceId, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
-      tag: APM.tag,
+    LuciqLogger.I.kv(
+      'screen_loading.report',
+      tag: DebugTags.apmScreenLoading,
+      fields: {
+        'traceId': uiTraceId,
+        'startUs': startTimeInMicroseconds,
+        'durationUs': durationInMicroseconds,
+      },
     );
     return _host.reportScreenLoadingCP(
       startTimeInMicroseconds,
@@ -417,9 +449,15 @@ class APM {
     int startTimeInMicroseconds,
     int durationInMicroseconds,
   ) {
-    LuciqLogger.I.d(
-      'Reporting manual screen loading trace — screenNameLength=${screenName.length}, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
-      tag: APM.tag,
+    LuciqLogger.I.kv(
+      'screen_loading.report_manual_native',
+      tag: DebugTags.apmScreenLoading,
+      fields: {
+        'screenHash': hashForLog(screenName),
+        'screenLen': screenName.length,
+        'startUs': startTimeInMicroseconds,
+        'durationUs': durationInMicroseconds,
+      },
     );
     return _host.reportManualScreenLoadingCP(
       screenName,
@@ -444,9 +482,13 @@ class APM {
     int endTimeInMicroseconds,
     int uiTraceId,
   ) {
-    LuciqLogger.I.d(
-      'Extending screen loading trace — traceId: $uiTraceId, endTimeInMicroseconds: $endTimeInMicroseconds',
-      tag: APM.tag,
+    LuciqLogger.I.kv(
+      'screen_loading.end_native',
+      tag: DebugTags.apmScreenLoading,
+      fields: {
+        'traceId': uiTraceId,
+        'endUs': endTimeInMicroseconds,
+      },
     );
     return _host.endScreenLoadingCP(endTimeInMicroseconds, uiTraceId);
   }
@@ -456,7 +498,8 @@ class APM {
   /// Returns:
   ///   A Future<void> is being returned.
   static Future<void> endScreenLoading() {
-    LuciqLogger.I.d('endScreenLoading invoked', tag: DebugTags.apmScreenLoading);
+    LuciqLogger.I
+        .d('endScreenLoading invoked', tag: DebugTags.apmScreenLoading);
     return ScreenLoadingManager.I.endScreenLoading();
   }
 
@@ -550,12 +593,19 @@ class APM {
   /// Returns:
   ///   A Future<List<double>> where the first element is the refresh rate and the second is the tolerance value.
   @internal
-  static Future<List<double?>> getDeviceRefreshRateAndTolerance() {
-    LuciqLogger.I.d(
-      'getDeviceRefreshRateAndTolerance invoked',
-      tag: DebugTags.apmScreenRendering,
-    );
-    return _host.getDeviceRefreshRateAndTolerance();
+  static Future<List<double?>> getDeviceRefreshRateAndTolerance() async {
+    final result = await _host.getDeviceRefreshRateAndTolerance();
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.kv(
+        'screen_render.refresh_rate',
+        tag: DebugTags.apmScreenRendering,
+        fields: {
+          'hz': result.isNotEmpty ? result[0] : null,
+          'tolerance': result.length > 1 ? result[1] : null,
+        },
+      );
+    }
+    return result;
   }
 
   /// Sets the screen Render state based on the provided boolean value.
@@ -568,9 +618,10 @@ class APM {
   /// Returns:
   ///   A Future<void> is being returned.
   static Future<void> setScreenRenderingEnabled(bool isEnabled) async {
-    LuciqLogger.I.d(
-      'setScreenRenderingEnabled isEnabled=$isEnabled',
+    LuciqLogger.I.kv(
+      'screen_render.set_enabled',
       tag: DebugTags.apmScreenRendering,
+      fields: {'isEnabled': isEnabled},
     );
     return _host.setScreenRenderEnabled(isEnabled);
   }
@@ -589,9 +640,16 @@ class APM {
   static Future<void> endScreenRenderForAutoUiTrace(
     LuciqScreenRenderData data,
   ) {
-    LuciqLogger.I.d(
-      'endScreenRenderForAutoUiTrace invoked',
+    LuciqLogger.I.kv(
+      'screen_render.end_auto',
       tag: DebugTags.apmScreenRendering,
+      fields: {
+        'traceId': data.traceId,
+        'frameCount': data.frameData.length,
+        'slowUs': data.slowFramesTotalDurationMicro,
+        'frozenUs': data.frozenFramesTotalDurationMicro,
+        'endUs': data.endTimeMicro,
+      },
     );
     return _host.endScreenRenderForAutoUiTrace(data.toMap());
   }
@@ -610,9 +668,16 @@ class APM {
   static Future<void> endScreenRenderForCustomUiTrace(
     LuciqScreenRenderData data,
   ) {
-    LuciqLogger.I.d(
-      'endScreenRenderForCustomUiTrace invoked',
+    LuciqLogger.I.kv(
+      'screen_render.end_custom',
       tag: DebugTags.apmScreenRendering,
+      fields: {
+        'traceId': data.traceId,
+        'frameCount': data.frameData.length,
+        'slowUs': data.slowFramesTotalDurationMicro,
+        'frozenUs': data.frozenFramesTotalDurationMicro,
+        'endUs': data.endTimeMicro,
+      },
     );
     return _host.endScreenRenderForCustomUiTrace(data.toMap());
   }

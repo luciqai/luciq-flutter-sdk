@@ -83,8 +83,8 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
             }
             LuciqNonFatalException.Level nonFatalExceptionLevelType = ArgsRegistry.nonFatalExceptionLevel.get(nonFatalExceptionLevel);
             if (nonFatalExceptionLevelType == null) {
-                LuciqFlutterLogger.e(LuciqFlutterDebugTags.CRASH_REPORTING,
-                        "[CR.sendNonFatalError] phase=error errorType=UnknownEnum nonFatalExceptionLevel="
+                LuciqFlutterLogger.w(LuciqFlutterDebugTags.CRASH_REPORTING,
+                        "[CR.sendNonFatalError] phase=warn errorType=UnknownEnum nonFatalExceptionLevel="
                                 + nonFatalExceptionLevel);
             }
             if (method == null) {

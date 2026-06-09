@@ -50,13 +50,11 @@ class NetworkLogger {
   ///   // Modify 'data' as needed and return it.
   /// });
   /// ```
-  static void obfuscateLog(ObfuscateLogCallback callback) {
-    LuciqLogger.I.d(
-      '[NET.obfuscateLog] phase=enter',
-      tag: DebugTags.network,
-    );
-    _manager.setObfuscateLogCallback(callback);
-  }
+  static void obfuscateLog(ObfuscateLogCallback callback) => hostCallSync(
+        'NET.obfuscateLog',
+        () => _manager.setObfuscateLogCallback(callback),
+        tag: DebugTags.network,
+      );
 
   /// Registers a callback to selectively omit network log data.
   ///
@@ -76,46 +74,51 @@ class NetworkLogger {
   ///   return data.url.startsWith('https://example.com');
   /// });
   /// ```
-  static void omitLog(OmitLogCallback callback) {
-    LuciqLogger.I.d(
-      '[NET.omitLog] phase=enter',
-      tag: DebugTags.network,
-    );
-    _manager.setOmitLogCallback(callback);
-  }
-
-  Future<void> networkLog(NetworkData data) => hostCall(
-        'NET.networkLog',
-        () async {
-          final w3Header = await getW3CHeader(
-            data.requestHeaders,
-            data.startTime.millisecondsSinceEpoch,
-          );
-          if (w3Header?.isW3cHeaderFound == false &&
-              w3Header?.w3CGeneratedHeader != null) {
-            data.requestHeaders['traceparent'] = w3Header?.w3CGeneratedHeader;
-          }
-          await networkLogInternal(data);
-        },
+  static void omitLog(OmitLogCallback callback) => hostCallSync(
+        'NET.omitLog',
+        () => _manager.setOmitLogCallback(callback),
         tag: DebugTags.network,
-        args: {
-          'method': data.method,
-          'url': redactUrlForLog(data.url),
-          'status': data.status,
-          'duration': data.duration,
-        },
       );
+
+  Future<void> networkLog(NetworkData data) {
+    // Network logging hits every HTTP call, so skip the URL redaction scan
+    // when debug logging is off.
+    final isDebug = LuciqLogger.I.isDebugEnabled();
+    return hostCall(
+      'NET.networkLog',
+      () async {
+        final w3Header = await getW3CHeader(
+          data.requestHeaders,
+          data.startTime.millisecondsSinceEpoch,
+        );
+        if (w3Header?.isW3cHeaderFound == false &&
+            w3Header?.w3CGeneratedHeader != null) {
+          data.requestHeaders['traceparent'] = w3Header?.w3CGeneratedHeader;
+        }
+        await networkLogInternal(data);
+      },
+      tag: DebugTags.network,
+      args: {
+        'method': data.method,
+        'url': isDebug ? redactUrlForLog(data.url) : '',
+        'status': data.status,
+        'duration': data.duration,
+      },
+    );
+  }
 
   @internal
   Future<void> networkLogInternal(NetworkData data) async {
+    final isDebug = LuciqLogger.I.isDebugEnabled();
+    final redactedUrl = isDebug ? redactUrlForLog(data.url) : '';
     LuciqLogger.I.d(
-      '[NET.networkLogInternal] phase=enter method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration}',
+      '[NET.networkLogInternal] phase=enter method=${data.method} url=$redactedUrl status=${data.status} duration=${data.duration}',
       tag: DebugTags.network,
     );
     final omit = await _manager.omitLog(data);
     if (omit) {
       LuciqLogger.I.d(
-        '[NET.networkLogInternal] phase=exit omitted=true url=${redactUrlForLog(data.url)}',
+        '[NET.networkLogInternal] phase=exit omitted=true',
         tag: DebugTags.network,
       );
       return;
@@ -143,7 +146,7 @@ class NetworkLogger {
 
       // Log the truncation event.
       LuciqLogger.I.w(
-        '[NET.networkLogInternal] phase=warn truncated requestExceeds=$requestExceeds responseExceeds=$responseExceeds',
+        '[NET.networkLogInternal] phase=warn reason=truncated requestExceeds=$requestExceeds responseExceeds=$responseExceeds',
         tag: DebugTags.network,
       );
     }
@@ -152,29 +155,26 @@ class NetworkLogger {
 
     try {
       await _host.networkLog(obfuscated.toJson());
-      LuciqLogger.I.d(
-        '[NET.networkLogInternal.brSink] phase=exit url=${redactUrlForLog(obfuscated.url)}',
-        tag: DebugTags.network,
-      );
     } catch (e) {
-      LuciqLogger.I.e(
-        '[NET.networkLogInternal.brSink] phase=error url=${redactUrlForLog(obfuscated.url)} errorType=${e.runtimeType}',
+      LuciqLogger.I.w(
+        '[NET.networkLogInternal] phase=warn sink=brSink errorType=${e.runtimeType}',
         tag: DebugTags.network,
       );
     }
 
     try {
       await APM.networkLogAndroid(obfuscated);
-      LuciqLogger.I.d(
-        '[NET.networkLogInternal.apmSink] phase=exit url=${redactUrlForLog(obfuscated.url)}',
-        tag: DebugTags.network,
-      );
     } catch (e) {
-      LuciqLogger.I.e(
-        '[NET.networkLogInternal.apmSink] phase=error url=${redactUrlForLog(obfuscated.url)} errorType=${e.runtimeType}',
+      LuciqLogger.I.w(
+        '[NET.networkLogInternal] phase=warn sink=apmSink errorType=${e.runtimeType}',
         tag: DebugTags.network,
       );
     }
+
+    LuciqLogger.I.d(
+      '[NET.networkLogInternal] phase=exit',
+      tag: DebugTags.network,
+    );
   }
 
   @internal

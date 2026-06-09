@@ -247,36 +247,36 @@ public class BugReportingApi implements BugReportingPigeon.BugReportingHostApi {
     }
 
     @Override
-public void addUserConsents(String key, String description, Boolean mandatory, Boolean checked, String actionType) {
+    public void addUserConsents(String key, String description, Boolean mandatory, Boolean checked, String actionType) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
                 "[BR.addUserConsents] phase=enter keyLength=" + (key == null ? -1 : key.length())
                         + " descriptionLength=" + (description == null ? -1 : description.length())
                         + " mandatory=" + mandatory
                         + " checked=" + checked
-                        + " actionType=" + actionType);
+                        + " actionTypePresent=" + (actionType != null));
         ThreadManager.runOnMainThread(new Runnable() {
-        @Override
-        public void run() {
-            String mappedActionType;
-            try {
-                if (actionType==null) {
-                    mappedActionType = null;
-                }
-                else {
-                    mappedActionType = ArgsRegistry.userConsentActionType.get(actionType);
-                }
+            @Override
+            public void run() {
+                String mappedActionType;
+                try {
+                    if (actionType == null) {
+                        mappedActionType = null;
+                    } else {
+                        mappedActionType = ArgsRegistry.userConsentActionType.get(actionType);
+                    }
 
-                BugReporting.addUserConsent(key, description, mandatory, checked, mappedActionType);
-            } catch (Exception e) {
-                LuciqFlutterLogger.e(
-                        LuciqFlutterDebugTags.BUG_REPORTING,
-                        "[BR.addUserConsents] phase=error errorType=" + e.getClass().getSimpleName(),
-                        e);
+                    BugReporting.addUserConsent(key, description, mandatory, checked, mappedActionType);
+                    LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.addUserConsents] phase=exit");
+                } catch (Exception e) {
+                    LuciqFlutterLogger.e(
+                            LuciqFlutterDebugTags.BUG_REPORTING,
+                            "[BR.addUserConsents] phase=error errorType=" + e.getClass().getSimpleName(),
+                            e);
+                }
             }
-        }
-    });
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.addUserConsents] phase=exit");
-}
+        });
+    }
+
     @Override
     public void setProactiveReportingConfigurations(@NonNull Boolean enabled, @NonNull Long gapBetweenModals, @NonNull Long modalDelayAfterDetection) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING,
@@ -286,16 +286,21 @@ public void addUserConsents(String key, String description, Boolean mandatory, B
         ThreadManager.runOnMainThread(new Runnable() {
             @Override
             public void run() {
-                ProactiveReportingConfigs configs = new ProactiveReportingConfigs.Builder()
-                        .setGapBetweenModals(gapBetweenModals) // Time in seconds
-                        .setModalDelayAfterDetection(modalDelayAfterDetection) // Time in seconds
-                        .isEnabled(enabled) //Enable/disable
-                        .build();
-                BugReporting.setProactiveReportingConfigurations(configs);
-
-
+                try {
+                    ProactiveReportingConfigs configs = new ProactiveReportingConfigs.Builder()
+                            .setGapBetweenModals(gapBetweenModals)
+                            .setModalDelayAfterDetection(modalDelayAfterDetection)
+                            .isEnabled(enabled)
+                            .build();
+                    BugReporting.setProactiveReportingConfigurations(configs);
+                    LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setProactiveReportingConfigurations] phase=exit");
+                } catch (Exception e) {
+                    LuciqFlutterLogger.e(
+                            LuciqFlutterDebugTags.BUG_REPORTING,
+                            "[BR.setProactiveReportingConfigurations] phase=error errorType=" + e.getClass().getSimpleName(),
+                            e);
+                }
             }
         });
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.BUG_REPORTING, "[BR.setProactiveReportingConfigurations] phase=exit");
     }
 }

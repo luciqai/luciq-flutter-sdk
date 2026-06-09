@@ -28,6 +28,7 @@ NSMutableDictionary *traces;
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.setEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     LCQAPM.enabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.setEnabled] phase=exit"];
 }
 
 // This method is used to check if the APM feature is enabled.
@@ -51,6 +52,7 @@ NSMutableDictionary *traces;
 - (void)setScreenLoadingEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenLoading] format:@"[APM.setScreenLoadingEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     [LCQAPM setScreenLoadingEnabled:[isEnabled boolValue]];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenLoading] format:@"[APM.setScreenLoadingEnabled] phase=exit"];
 }
 
 
@@ -73,6 +75,7 @@ NSMutableDictionary *traces;
 - (void)setColdAppLaunchEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmAppLaunch] format:@"[APM.setColdAppLaunchEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     LCQAPM.coldAppLaunchEnabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmAppLaunch] format:@"[APM.setColdAppLaunchEnabled] phase=exit"];
 }
 
 // This method is setting the enabled state of the auto UI trace feature in the APM module. It takes a
@@ -82,6 +85,7 @@ NSMutableDictionary *traces;
 - (void)setAutoUITraceEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.setAutoUITraceEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     LCQAPM.autoUITraceEnabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.setAutoUITraceEnabled] phase=exit"];
 }
 
 
@@ -90,6 +94,7 @@ NSMutableDictionary *traces;
 - (void)startFlowName:(nonnull NSString *)name error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.startFlow] phase=enter nameLength=%lu", (unsigned long)name.length];
     [LCQAPM startFlowWithName:name];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.startFlow] phase=exit"];
 }
 
 // This method sets an attribute for a specific flow identified by the
@@ -100,6 +105,7 @@ NSMutableDictionary *traces;
 - (void)setFlowAttributeName:(nonnull NSString *)name key:(nonnull NSString *)key value:(nullable NSString *)value error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.setFlowAttribute] phase=enter nameLength=%lu keyLength=%lu valuePresent=%@", (unsigned long)name.length, (unsigned long)key.length, (value != nil ? @"true" : @"false")];
     [LCQAPM setAttributeForFlowWithName:name key:key value:value];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.setFlowAttribute] phase=exit"];
 }
 
 // This method is responsible for ending a flow with the given `name`.
@@ -107,6 +113,7 @@ NSMutableDictionary *traces;
 - (void)endFlowName:(nonnull NSString *)name error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.endFlow] phase=enter nameLength=%lu", (unsigned long)name.length];
     [LCQAPM endFlowWithName:name];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmFlow] format:@"[APM.endFlow] phase=exit"];
 }
 
 // This method is responsible for starting a UI trace with the given `name`.
@@ -114,6 +121,7 @@ NSMutableDictionary *traces;
 - (void)startUITraceName:(NSString *)name error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.startUITrace] phase=enter nameLength=%lu", (unsigned long)name.length];
     [LCQAPM startUITraceWithName:name];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.startUITrace] phase=exit"];
 }
 
 // The method is responsible for ending the currently active UI trace.
@@ -121,17 +129,20 @@ NSMutableDictionary *traces;
 - (void)endUITraceWithError:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.endUITrace] phase=enter"];
     [LCQAPM endUITrace];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.endUITrace] phase=exit"];
 }
 
 // The method is responsible for ending the app launch process in the APM module.
 - (void)endAppLaunchWithError:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmAppLaunch] format:@"[APM.endAppLaunch] phase=enter"];
     [LCQAPM endAppLaunch];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmAppLaunch] format:@"[APM.endAppLaunch] phase=exit"];
 }
 
 - (void)networkLogAndroidData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmNetwork] format:@"[APM.networkLogAndroid] phase=enter platform=iOS noop=true"];
     // Android Only
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmNetwork] format:@"[APM.networkLogAndroid] phase=exit"];
 }
 
 
@@ -144,6 +155,7 @@ NSMutableDictionary *traces;
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.startCpUiTrace] phase=enter screenNameLength=%lu traceId=%@", (unsigned long)screenName.length, traceId];
     NSTimeInterval startTimeStampMUS = [microTimeStamp doubleValue];
     [LCQAPM startUITraceCPWithName:screenName startTimestampMUS:startTimeStampMUS];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmUITrace] format:@"[APM.startCpUiTrace] phase=exit"];
 }
 
 
@@ -161,6 +173,7 @@ NSMutableDictionary *traces;
     NSTimeInterval startTimeStampMicroMUS = [startTimeStampMicro doubleValue];
     NSTimeInterval durationMUS = [durationMicro doubleValue];
     [LCQAPM reportScreenLoadingCPWithStartTimestampMUS:startTimeStampMicroMUS durationMUS:durationMUS];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenLoading] format:@"[APM.reportScreenLoadingCP] phase=exit"];
 }
 
 - (void)reportManualScreenLoadingCPScreenName:(nonnull NSString *)screenName startTimeStampMicro:(nonnull NSNumber *)startTimeStampMicro durationMicro:(nonnull NSNumber *)durationMicro error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
@@ -168,6 +181,7 @@ NSMutableDictionary *traces;
     NSTimeInterval startTimeStampMicroMUS = [startTimeStampMicro doubleValue];
     NSTimeInterval durationMUS = [durationMicro doubleValue];
     [LCQAPM reportScreenLoadingCPUITraceWithName:screenName screenLoadingStartMUS:startTimeStampMicroMUS screenLoadingDurationMUS:durationMUS stages:nil];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenLoading] format:@"[APM.reportManualScreenLoadingCP] phase=exit"];
 }
 
 // This method is responsible for extend the end time if the screen loading custom
@@ -180,6 +194,7 @@ NSMutableDictionary *traces;
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenLoading] format:@"[APM.endScreenLoadingCP] phase=enter uiTraceId=%@", uiTraceId];
     NSTimeInterval endScreenLoadingCPWithEndTimestampMUS = [timeStampMicro doubleValue];
     [LCQAPM endScreenLoadingCPWithEndTimestampMUS:endScreenLoadingCPWithEndTimestampMUS];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenLoading] format:@"[APM.endScreenLoadingCP] phase=exit"];
 }
 
 // This method is used to check whether the end screen loading feature is enabled or not.
@@ -218,7 +233,7 @@ NSMutableDictionary *traces;
 - (void)setScreenRenderEnabledIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.setScreenRenderEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     [LCQAPM setScreenRenderingEnabled:[isEnabled boolValue]];
-
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.setScreenRenderEnabled] phase=exit"];
 }
 
 
@@ -238,6 +253,7 @@ NSMutableDictionary *traces;
         }
     }
     [LCQAPM endAutoUITraceCPWithFrames:frameInfos];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.endScreenRenderForAutoUiTrace] phase=exit"];
 }
 
 
@@ -258,6 +274,7 @@ NSMutableDictionary *traces;
     }
 
     [LCQAPM endCustomUITraceCPWithFrames:frameInfos];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.endScreenRenderForCustomUiTrace] phase=exit"];
 }
 
 - (void)getDeviceRefreshRateAndToleranceWithCompletion:(nonnull void (^)(NSArray<NSNumber *> * _Nullable, FlutterError * _Nullable))completion {
@@ -313,6 +330,7 @@ NSMutableDictionary *traces;
         [LCQAPM addCompletedCustomSpanWithName:name
                                      startDate:startDate
                                        endDate:endDate];
+        [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmCustomSpan] format:@"[APM.syncCustomSpan] phase=exit"];
     }
     @catch (NSException *exception) {
         [LuciqFlutterLogger e:[LuciqFlutterDebugTags apmCustomSpan]

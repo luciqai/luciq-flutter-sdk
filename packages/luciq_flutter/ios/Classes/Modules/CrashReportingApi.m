@@ -27,7 +27,7 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
                                                                options:NSJSONReadingMutableContainers
                                                                  error:&jsonError];
     if (jsonError != nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags crashReporting] format:@"[CR.sendJsonCrash] phase=error errorType=JSONDecodeError errorMessage=%@", (jsonError.localizedDescription ?: @"")];
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags crashReporting] format:@"[CR.sendJsonCrash] phase=warn errorType=JSONDecodeError errorMessage=%@", (jsonError.localizedDescription ?: @"")];
     }
     BOOL isNonFatal = [isHandled boolValue];
 
@@ -50,7 +50,7 @@ extern void InitCrashReportingApi(id<FlutterBinaryMessenger> messenger) {
                                                                options:NSJSONReadingMutableContainers
                                                                  error:&jsonError];
     if (jsonError != nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags crashReporting] format:@"[CR.sendNonFatalError] phase=error errorType=JSONDecodeError errorMessage=%@", (jsonError.localizedDescription ?: @"")];
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags crashReporting] format:@"[CR.sendNonFatalError] phase=warn errorType=JSONDecodeError errorMessage=%@", (jsonError.localizedDescription ?: @"")];
     }
     LCQNonFatalLevel level = (ArgsRegistry.nonFatalExceptionLevel[nonFatalExceptionLevel]).integerValue;
     [LCQCrashReporting cp_reportNonFatalCrashWithStackTrace:stackTrace

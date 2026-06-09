@@ -42,11 +42,31 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)initToken:(nonnull NSString *)token invocationEvents:(nonnull NSArray<NSString *> *)invocationEvents debugLogsLevel:(nonnull NSString *)debugLogsLevel appVariant:(nullable NSString *)appVariant error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    // Resolve the debug log level first so the gate is correct for any log
+    // emitted during init (including the enter line itself). Defaulting to
+    // Error on unknown input avoids quietly turning on max verbosity in prod
+    // when the Dart side passes a string we don't recognize.
+    NSNumber *resolvedLogLevelNumber = ArgsRegistry.sdkLogLevels[debugLogsLevel];
+    LCQSDKDebugLogsLevel resolvedLogLevel = resolvedLogLevelNumber
+        ? resolvedLogLevelNumber.integerValue
+        : LCQSDKDebugLogsLevelError;
+    [LuciqFlutterLogger setLevel:resolvedLogLevel];
+
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
+                   format:@"[Luciq.init] phase=enter tokenPresent=%@ invocationEventsCount=%lu debugLogsLevel=%ld appVariantPresent=%@",
+        (token.length > 0 ? @"true" : @"false"),
+        (unsigned long)invocationEvents.count,
+        (long)resolvedLogLevel,
+        (appVariant != nil ? @"true" : @"false")];
+
+    if (ArgsRegistry.sdkLogLevels[debugLogsLevel] == nil) {
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                       format:@"[Luciq.init] phase=warn errorType=UnknownEnum debugLogsLevel=%@", debugLogsLevel];
+    }
 
     if(appVariant != nil){
         Luciq.appVariant = appVariant;
     }
-
 
     SEL setPrivateApiSEL = NSSelectorFromString(@"setCurrentPlatform:");
     if ([[Luciq class] respondsToSelector:setPrivateApiSEL]) {
@@ -57,35 +77,19 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
         [inv setArgument:&(platformID) atIndex:2];
         [inv invoke];
     }
-    
+
     // Disable automatic capturing of native iOS network logs to avoid duplicate
     // logs of the same request when using a native network client like cupertino_http
     [LCQNetworkLogger disableAutomaticCapturingOfNetworkLogs];
 
     LCQInvocationEvent resolvedEvents = 0;
-
-
     for (NSString *event in invocationEvents) {
         if (ArgsRegistry.invocationEvents[event] == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                           format:@"[Luciq.init] phase=error errorType=UnknownEnum event=%@", event];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                           format:@"[Luciq.init] phase=warn errorType=UnknownEnum event=%@", event];
         }
         resolvedEvents |= (ArgsRegistry.invocationEvents[event]).integerValue;
     }
-
-    LCQSDKDebugLogsLevel resolvedLogLevel = (ArgsRegistry.sdkLogLevels[debugLogsLevel]).integerValue;
-    if (ArgsRegistry.sdkLogLevels[debugLogsLevel] == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                       format:@"[Luciq.init] phase=error errorType=UnknownEnum debugLogsLevel=%@", debugLogsLevel];
-    }
-
-    [LuciqFlutterLogger setLevel:resolvedLogLevel];
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
-                   format:@"[Luciq.init] phase=enter tokenPresent=%@ invocationEventsCount=%lu debugLogsLevel=%ld appVariantPresent=%@",
-        (token.length > 0 ? @"true" : @"false"),
-        (unsigned long)invocationEvents.count,
-        (long)resolvedLogLevel,
-        (appVariant != nil ? @"true" : @"false")];
 
     [Luciq setSdkDebugLogsLevel:resolvedLogLevel];
     [Luciq startWithToken:token invocationEvents:resolvedEvents];
@@ -96,72 +100,82 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 - (void)showWithError:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.show] phase=enter"];
     [Luciq show];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.show] phase=exit"];
 }
 
 - (void)showWelcomeMessageWithModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error {
     LCQWelcomeMessageMode resolvedMode = (ArgsRegistry.welcomeMessageStates[mode]).integerValue;
-    if (ArgsRegistry.welcomeMessageStates[mode] == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                       format:@"[Luciq.showWelcomeMessageWithMode] phase=error errorType=UnknownEnum mode=%@", mode];
-    }
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.showWelcomeMessageWithMode] phase=enter mode=%ld", (long)resolvedMode];
+    if (ArgsRegistry.welcomeMessageStates[mode] == nil) {
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                       format:@"[Luciq.showWelcomeMessageWithMode] phase=warn errorType=UnknownEnum mode=%@", mode];
+    }
     [Luciq showWelcomeMessageWithMode:resolvedMode];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.showWelcomeMessageWithMode] phase=exit"];
 }
 
 - (void)identifyUserEmail:(NSString *)email name:(nullable NSString *)name userId:(nullable NSString *)userId error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.identifyUser] phase=enter emailLength=%lu namePresent=%@ userIdPresent=%@", (unsigned long)email.length, (name != nil ? @"true" : @"false"), (userId != nil ? @"true" : @"false")];
     [Luciq identifyUserWithID:userId email:email name:name];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.identifyUser] phase=exit"];
 }
 
 - (void)setUserDataData:(NSString *)data error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setUserData] phase=enter length=%lu", (unsigned long)data.length];
     [Luciq setUserData:data];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setUserData] phase=exit"];
 }
 
 - (void)logUserEventName:(NSString *)name error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=enter nameLength=%lu", (unsigned long)name.length];
     [Luciq logUserEventWithName:name];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=exit"];
 }
 
 - (void)logOutWithError:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logOut] phase=enter"];
     [Luciq logOut];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logOut] phase=exit"];
 }
 
 - (void)setLocaleLocale:(NSString *)locale error:(FlutterError *_Nullable *_Nonnull)error {
     LCQLocale resolvedLocale = (ArgsRegistry.locales[locale]).integerValue;
-    if (ArgsRegistry.locales[locale] == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                       format:@"[Luciq.setLocale] phase=error errorType=UnknownEnum locale=%@", locale];
-    }
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setLocale] phase=enter locale=%ld", (long)resolvedLocale];
+    if (ArgsRegistry.locales[locale] == nil) {
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                       format:@"[Luciq.setLocale] phase=warn errorType=UnknownEnum locale=%@", locale];
+    }
     [Luciq setLocale:resolvedLocale];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setLocale] phase=exit"];
 }
 
 - (void)setColorThemeTheme:(NSString *)theme error:(FlutterError *_Nullable *_Nonnull)error {
     LCQColorTheme resolvedTheme = (ArgsRegistry.colorThemes[theme]).integerValue;
-    if (ArgsRegistry.colorThemes[theme] == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                       format:@"[Luciq.setColorTheme] phase=error errorType=UnknownEnum theme=%@", theme];
-    }
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setColorTheme] phase=enter theme=%ld", (long)resolvedTheme];
+    if (ArgsRegistry.colorThemes[theme] == nil) {
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                       format:@"[Luciq.setColorTheme] phase=warn errorType=UnknownEnum theme=%@", theme];
+    }
     [Luciq setColorTheme:resolvedTheme];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setColorTheme] phase=exit"];
 }
 
 - (void)setWelcomeMessageModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error {
     LCQWelcomeMessageMode resolvedMode = (ArgsRegistry.welcomeMessageStates[mode]).integerValue;
-    if (ArgsRegistry.welcomeMessageStates[mode] == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                       format:@"[Luciq.setWelcomeMessageMode] phase=error errorType=UnknownEnum mode=%@", mode];
-    }
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setWelcomeMessageMode] phase=enter mode=%ld", (long)resolvedMode];
+    if (ArgsRegistry.welcomeMessageStates[mode] == nil) {
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                       format:@"[Luciq.setWelcomeMessageMode] phase=warn errorType=UnknownEnum mode=%@", mode];
+    }
     [Luciq setWelcomeMessageMode:resolvedMode];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setWelcomeMessageMode] phase=exit"];
 }
 
 
 - (void)setSessionProfilerEnabledEnabled:(NSNumber *)enabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setSessionProfilerEnabled] phase=enter enabled=%@", ([enabled boolValue] ? @"true" : @"false")];
     [Luciq setSessionProfilerEnabled:[enabled boolValue]];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setSessionProfilerEnabled] phase=exit"];
 }
 
 - (void)setValueForStringWithKeyValue:(NSString *)value key:(NSString *)key error:(FlutterError *_Nullable *_Nonnull)error {
@@ -173,16 +187,19 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     else {
         [LuciqFlutterLogger w:[LuciqFlutterDebugTags core] format:@"[Luciq.setValueForStringWithKey] phase=warn reason=androidOnlyKey key=%@", key];
     }
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setValueForStringWithKey] phase=exit"];
 }
 
 - (void)appendTagsTags:(NSArray<NSString *> *)tags error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.appendTags] phase=enter count=%lu", (unsigned long)tags.count];
     [Luciq appendTags:tags];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.appendTags] phase=exit"];
 }
 
 - (void)resetTagsWithError:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.resetTags] phase=enter"];
     [Luciq resetTags];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.resetTags] phase=exit"];
 }
 
 - (void)getTagsWithCompletion:(nonnull void (^)(NSArray<NSString *> * _Nullable, FlutterError * _Nullable))completion {
@@ -200,11 +217,13 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 - (void)setUserAttributeValue:(NSString *)value key:(NSString *)key error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setUserAttribute] phase=enter valueLength=%lu keyLength=%lu", (unsigned long)value.length, (unsigned long)key.length];
     [Luciq setUserAttribute:value withKey:key];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setUserAttribute] phase=exit"];
 }
 
 - (void)removeUserAttributeKey:(NSString *)key error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.removeUserAttribute] phase=enter keyLength=%lu", (unsigned long)key.length];
     [Luciq removeUserAttributeForKey:key];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.removeUserAttribute] phase=exit"];
 }
 
 - (void)getUserAttributeForKeyKey:(nonnull NSString *)key completion:(nonnull void (^)(NSString * _Nullable, FlutterError * _Nullable))completion {
@@ -231,8 +250,8 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     if (bugMode != nil) {
         LCQUserStepsMode resolvedBugMode = ArgsRegistry.reproModes[bugMode].integerValue;
         if (ArgsRegistry.reproModes[bugMode] == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                           format:@"[Luciq.setReproStepsConfig] phase=error errorType=UnknownEnum bugMode=%@", bugMode];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                           format:@"[Luciq.setReproStepsConfig] phase=warn errorType=UnknownEnum bugMode=%@", bugMode];
         }
         [Luciq setReproStepsFor:LCQIssueTypeBug withMode:resolvedBugMode];
     }
@@ -240,8 +259,8 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     if (crashMode != nil) {
         LCQUserStepsMode resolvedCrashMode = ArgsRegistry.reproModes[crashMode].integerValue;
         if (ArgsRegistry.reproModes[crashMode] == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                           format:@"[Luciq.setReproStepsConfig] phase=error errorType=UnknownEnum crashMode=%@", crashMode];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                           format:@"[Luciq.setReproStepsConfig] phase=warn errorType=UnknownEnum crashMode=%@", crashMode];
         }
         [Luciq setReproStepsFor:LCQIssueTypeAllCrashes withMode:resolvedCrashMode];
     }
@@ -249,11 +268,12 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     if (sessionReplayMode != nil) {
         LCQUserStepsMode resolvedSessionReplayMode = ArgsRegistry.reproModes[sessionReplayMode].integerValue;
         if (ArgsRegistry.reproModes[sessionReplayMode] == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                           format:@"[Luciq.setReproStepsConfig] phase=error errorType=UnknownEnum sessionReplayMode=%@", sessionReplayMode];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                           format:@"[Luciq.setReproStepsConfig] phase=warn errorType=UnknownEnum sessionReplayMode=%@", sessionReplayMode];
         }
         [Luciq setReproStepsFor:LCQIssueTypeSessionReplay withMode:resolvedSessionReplayMode];
     }
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setReproStepsConfig] phase=exit"];
 }
 
 - (UIImage *)getImageForAsset:(NSString *)assetName {
@@ -290,6 +310,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
         Luciq.customBrandingImage = defaultImage.imageAsset;
     }
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setCustomBrandingImage] phase=exit"];
 }
 
 - (void)reportScreenChangeScreenName:(NSString *)screenName error:(FlutterError *_Nullable *_Nonnull)error {
@@ -302,6 +323,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
         [inv setArgument:&(screenName) atIndex:2];
         [inv invoke];
     }
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags screenTracking] format:@"[Luciq.reportScreenChange] phase=exit"];
 }
 
 - (UIFont *)getFontForAsset:(NSString *)assetName  error:(FlutterError *_Nullable *_Nonnull)error {
@@ -335,21 +357,25 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setFont] phase=enter fontAssetPresent=%@", (fontAsset.length > 0 ? @"true" : @"false")];
     UIFont *font = [self getFontForAsset:fontAsset error:error];
     Luciq.font = font;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setFont] phase=exit"];
 }
 
 - (void)addFileAttachmentWithURLFilePath:(NSString *)filePath fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.addFileAttachmentWithURL] phase=enter filePath=%@ fileNameLength=%lu", [LuciqFlutterLogger redactURL:filePath], (unsigned long)fileName.length];
     [Luciq addFileAttachmentWithURL:[NSURL URLWithString:filePath]];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.addFileAttachmentWithURL] phase=exit"];
 }
 
 - (void)addFileAttachmentWithDataData:(FlutterStandardTypedData *)data fileName:(NSString *)fileName error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.addFileAttachmentWithData] phase=enter bytes=%lu fileNameLength=%lu", (unsigned long)data.data.length, (unsigned long)fileName.length];
     [Luciq addFileAttachmentWithData:[data data]];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.addFileAttachmentWithData] phase=exit"];
 }
 
 - (void)clearFileAttachmentsWithError:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.clearFileAttachments] phase=enter"];
     [Luciq clearFileAttachments];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.clearFileAttachments] phase=exit"];
 }
 
 - (void)networkLogData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error {
@@ -429,11 +455,13 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
                                  timestamp:networkStartTimeInSeconds
                    generatedW3CTraceparent:w3CGeneratedHeader
                     caughtedW3CTraceparent:w3CCaughtHeader];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.networkLog] phase=exit"];
 }
 
 - (void)willRedirectToStoreWithError:(FlutterError * _Nullable __autoreleasing *)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.willRedirectToStore] phase=enter"];
     [Luciq willRedirectToAppStore];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.willRedirectToStore] phase=exit"];
 }
 
 - (void)addFeatureFlagsFeatureFlagsMap:(nonnull NSDictionary<NSString *,NSString *> *)featureFlagsMap error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
@@ -450,13 +478,14 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
         }
     }
     [Luciq addFeatureFlags:featureFlags];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags featureFlags] format:@"[Luciq.addFeatureFlags] phase=exit"];
 }
 
 
 - (void)removeAllFeatureFlagsWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags featureFlags] format:@"[Luciq.removeAllFeatureFlags] phase=enter"];
     [Luciq removeAllFeatureFlags];
-
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags featureFlags] format:@"[Luciq.removeAllFeatureFlags] phase=exit"];
 }
 
 
@@ -481,7 +510,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 - (void)registerFeatureFlagChangeListenerWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags featureFlags] format:@"[Luciq.registerFeatureFlagChangeListener] phase=enter platform=iOS noop=true"];
     // Android only. We still need this method to exist to match the Pigeon-generated protocol.
-
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags featureFlags] format:@"[Luciq.registerFeatureFlagChangeListener] phase=exit"];
 }
 
 
@@ -506,8 +535,8 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     @try {
 
         if (ArgsRegistry.userStepsGesture[gestureType] == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags core]
-                           format:@"[Luciq.logUserSteps] phase=error errorType=UnknownEnum gestureType=%@", gestureType];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                           format:@"[Luciq.logUserSteps] phase=warn errorType=UnknownEnum gestureType=%@", gestureType];
         }
         LCQUIEventType event = ArgsRegistry.userStepsGesture[gestureType].integerValue;
         LCQUserStep *userStep = [[LCQUserStep alloc] initWithEvent:event automatic: YES];
@@ -530,6 +559,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 - (void)setEnableUserStepsIsEnabled:(nonnull NSNumber *)isEnabled error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setEnableUserSteps] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     Luciq.trackUserSteps = isEnabled.boolValue;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setEnableUserSteps] phase=exit"];
 }
 
 - (void)enableAutoMaskingAutoMasking:(nonnull NSArray<NSString *> *)autoMasking error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
@@ -538,14 +568,14 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
     for (NSString *event in autoMasking) {
         if (ArgsRegistry.autoMasking[event] == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags privateView]
-                           format:@"[Luciq.enableAutoMasking] phase=error errorType=UnknownEnum event=%@", event];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags privateView]
+                           format:@"[Luciq.enableAutoMasking] phase=warn errorType=UnknownEnum event=%@", event];
         }
         resolvedEvents |= (ArgsRegistry.autoMasking[event]).integerValue;
     }
 
     [Luciq setAutoMaskScreenshots: resolvedEvents];
-
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"[Luciq.enableAutoMasking] phase=exit"];
 }
 + (void)setScreenshotMaskingHandler:(nullable void (^)(UIImage * _Nonnull __strong, void (^ _Nonnull __strong)(UIImage * _Nonnull __strong)))maskingHandler {
     [Luciq setScreenshotMaskingHandler:maskingHandler];
@@ -555,14 +585,14 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
                           error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setNetworkLogBodyEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     LCQNetworkLogger.logBodyEnabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setNetworkLogBodyEnabled] phase=exit"];
 }
 
 
 - (void)setAppVariantAppVariant:(nonnull NSString *)appVariant error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setAppVariant] phase=enter appVariantLength=%lu", (unsigned long)appVariant.length];
-
     Luciq.appVariant = appVariant;
-
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setAppVariant] phase=exit"];
 }
 
 
@@ -601,6 +631,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [self setFontIfPresent:themeConfig[@"ctaFontPath"] ?: themeConfig[@"ctaFontAsset"] forTheme:theme type:@"cta"];
 
     Luciq.theme = theme;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setTheme] phase=exit"];
 }
 
 - (void)setFontIfPresent:(NSString *)fontPath forTheme:(LCQTheme *)theme type:(NSString *)type {
@@ -736,6 +767,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 - (void)setFullscreenIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setFullscreen] phase=enter isEnabled=%@ platform=iOS noop=true", ([isEnabled boolValue] ? @"true" : @"false")];
     // Empty implementation as requested
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setFullscreen] phase=exit"];
 }
 
 - (void)getNetworkBodyMaxSizeWithCompletion:(nonnull void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion {
@@ -750,21 +782,25 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 - (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setNetworkAutoMaskingEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     LCQNetworkLogger.autoMaskingEnabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setNetworkAutoMaskingEnabled] phase=exit"];
 }
 
 - (void)setWebViewMonitoringEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setWebViewMonitoringEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     Luciq.webViewMonitoringEnabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setWebViewMonitoringEnabled] phase=exit"];
 }
 
 - (void)setWebViewUserInteractionsTrackingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setWebViewUserInteractionsTrackingEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     Luciq.webViewUserInteractionsTrackingEnabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setWebViewUserInteractionsTrackingEnabled] phase=exit"];
 }
 
 - (void)setWebViewNetworkTrackingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setWebViewNetworkTrackingEnabled] phase=enter isEnabled=%@", ([isEnabled boolValue] ? @"true" : @"false")];
     Luciq.webViewNetworkTrackingEnabled = [isEnabled boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setWebViewNetworkTrackingEnabled] phase=exit"];
 }
 
 @end

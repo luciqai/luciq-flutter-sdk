@@ -31,8 +31,8 @@ String redactUrlForLog(String? url) {
     }
     final atIdx = stripped.lastIndexOf('@', authorityEnd - 1);
     if (atIdx > authorityStart - 1 && atIdx < authorityEnd) {
-      stripped = stripped.substring(0, authorityStart) +
-          stripped.substring(atIdx + 1);
+      stripped =
+          stripped.substring(0, authorityStart) + stripped.substring(atIdx + 1);
     }
   }
 
@@ -45,7 +45,6 @@ String redactUrlForLog(String? url) {
 
   // Mark a redacted query only when a real query string was cut (i.e. `?`
   // preceded any `#`). A `?` inside a fragment is part of the fragment.
-  final cutAtQuery =
-      queryIdx != -1 && (fragIdx == -1 || queryIdx < fragIdx);
+  final cutAtQuery = queryIdx != -1 && (fragIdx == -1 || queryIdx < fragIdx);
   return stripped.substring(0, cutoff) + (cutAtQuery ? '?<redacted>' : '');
 }

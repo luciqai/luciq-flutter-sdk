@@ -40,8 +40,8 @@ public class FeatureRequestsApi implements FeatureRequestsPigeon.FeatureRequests
         for (int i = 0; i < actionTypes.size(); i++) {
             Integer mapped = ArgsRegistry.actionTypes.get(actionTypes.get(i));
             if (mapped == null) {
-                LuciqFlutterLogger.e(LuciqFlutterDebugTags.FEATURE_REQUESTS,
-                        "[FR.setEmailFieldRequired] phase=error errorType=UnknownEnum actionType="
+                LuciqFlutterLogger.w(LuciqFlutterDebugTags.FEATURE_REQUESTS,
+                        "[FR.setEmailFieldRequired] phase=warn errorType=UnknownEnum actionType="
                                 + actionTypes.get(i));
                 continue;
             }

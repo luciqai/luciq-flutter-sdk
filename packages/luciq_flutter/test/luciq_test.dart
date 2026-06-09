@@ -491,8 +491,7 @@ void main() {
       verify(mHost.setWebViewMonitoringEnabled(false)).called(1);
     });
 
-    test(
-        '[setWebViewUserInteractionsTrackingEnabled] should call host method',
+    test('[setWebViewUserInteractionsTrackingEnabled] should call host method',
         () async {
       await Luciq.setWebViewUserInteractionsTrackingEnabled(true);
 

@@ -23,12 +23,14 @@ extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
         ([isEnabled boolValue] ? @"true" : @"false")];
     BOOL boolValue = [isEnabled boolValue];
     LCQReplies.enabled = boolValue;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.setEnabled] phase=exit"];
 }
 
 - (void)showCallId:(NSString *)callId error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
                    format:@"[REP.show] #%@ phase=enter", callId];
     [LCQReplies show];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.show] #%@ phase=exit", callId];
 }
 
 - (void)setInAppNotificationsEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
@@ -37,12 +39,14 @@ extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
         ([isEnabled boolValue] ? @"true" : @"false")];
     BOOL boolValue = [isEnabled boolValue];
     LCQReplies.inAppNotificationsEnabled = boolValue;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.setInAppNotificationsEnabled] phase=exit"];
 }
 
 - (void)setInAppNotificationSoundIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
                    format:@"[REP.setInAppNotificationSound] phase=enter platform=iOS noop=true"];
     // Android Only
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.setInAppNotificationSound] phase=exit"];
 }
 
 - (void)getUnreadRepliesCountCallId:(NSString *)callId completion:(nonnull void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion {
@@ -76,6 +80,7 @@ extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
       [self->_flutterApi onNewReplyCallId:callId completion:^(FlutterError *_Nullable _){
       }];
     };
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.bindOnNewReplyCallback] phase=exit"];
 }
 
 @end

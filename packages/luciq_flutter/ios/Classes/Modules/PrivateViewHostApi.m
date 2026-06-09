@@ -30,8 +30,12 @@ extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger
              if (maskedImage != nil) {
                  completion(maskedImage);
                 }
+             [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                            format:@"[PRIV.screenshotMaskingHandler] phase=exit resultPresent=%@",
+                 (maskedImage != nil ? @"true" : @"false")];
            }];
        }];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"[PRIV.init] phase=exit"];
 }
 
 @end

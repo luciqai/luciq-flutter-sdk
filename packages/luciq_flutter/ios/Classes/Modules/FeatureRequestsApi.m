@@ -24,7 +24,7 @@ extern void InitFeatureRequestsApi(id<FlutterBinaryMessenger> messenger) {
     for (NSString *type in actionTypes) {
         NSNumber *mapped = ArgsRegistry.actionTypes[type];
         if (mapped == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags featureRequests] format:@"[FR.setEmailFieldRequired] phase=error errorType=UnknownEnum actionType=%@", type];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags featureRequests] format:@"[FR.setEmailFieldRequired] phase=warn errorType=UnknownEnum actionType=%@", type];
             continue;
         }
         resolvedTypes |= mapped.integerValue;

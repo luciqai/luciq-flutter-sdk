@@ -17,6 +17,7 @@ import ai.luciq.flutter.util.LuciqFlutterDebugTags;
 import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.Reflection;
 import ai.luciq.flutter.util.ThreadManager;
+import ai.luciq.library.LogLevel;
 import ai.luciq.library.ReproMode;
 import ai.luciq.library.internal.crossplatform.CoreFeature;
 import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
@@ -135,7 +136,10 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     @Override
     public void init(@NonNull String token, @NonNull List<String> invocationEvents, @NonNull String debugLogsLevel, @Nullable String appVariant) {
         final Application application = (Application) context;
-        final int parsedLogLevel = ArgsRegistry.sdkLogLevels.get(debugLogsLevel);
+        // HashMap.getOrDefault bypasses ArgsMap's NonNull-checking get override,
+        // so an unrecognized debugLogsLevel string falls back to ERROR instead
+        // of NPE-ing init.
+        final int parsedLogLevel = ArgsRegistry.sdkLogLevels.getOrDefault(debugLogsLevel, LogLevel.ERROR);
         LuciqFlutterLogger.setLevel(parsedLogLevel);
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
                 "[Luciq.init] phase=enter tokenPresent=" + (token != null && !token.isEmpty())
@@ -347,22 +351,22 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void appendTags(@NonNull List<String> tags) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS,
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
                 "[Luciq.appendTags] phase=enter count=" + tags.size());
         Luciq.addTags(tags.toArray(new String[0]));
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[Luciq.appendTags] phase=exit");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.appendTags] phase=exit");
     }
 
     @Override
     public void resetTags() {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[Luciq.resetTags] phase=enter");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.resetTags] phase=enter");
         Luciq.resetTags();
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[Luciq.resetTags] phase=exit");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.resetTags] phase=exit");
     }
 
     @Override
     public void getTags(LuciqPigeon.Result<List<String>> result) {
-        LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS, "[Luciq.getTags] phase=enter");
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.getTags] phase=enter");
         ThreadManager.runOnBackground(
                 new Runnable() {
                     @Override
@@ -372,7 +376,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                         ThreadManager.runOnMainThread(new Runnable() {
                             @Override
                             public void run() {
-                                LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS,
+                                LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
                                         "[Luciq.getTags] phase=exit resultPresent=" + (tags != null)
                                                 + " resultCount=" + (tags != null ? tags.size() : 0));
                                 result.success(tags);
@@ -825,9 +829,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 return android.graphics.Color.parseColor(colorString);
             }
         } catch (Exception e) {
-            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
-                    "[Luciq.setTheme] phase=error errorType=" + e.getClass().getSimpleName() + " key=" + key,
-                    e);
+            LuciqFlutterLogger.w(LuciqFlutterDebugTags.CORE,
+                    "[Luciq.setTheme.color] phase=warn errorType=" + e.getClass().getSimpleName() + " key=" + key);
         }
         return android.graphics.Color.BLACK;
     }
@@ -856,9 +859,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 }
             }
         } catch (Exception e) {
-            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
-                    "[Luciq.setTheme] phase=error errorType=" + e.getClass().getSimpleName() + " key=" + key,
-                    e);
+            LuciqFlutterLogger.w(LuciqFlutterDebugTags.CORE,
+                    "[Luciq.setTheme.textStyle] phase=warn errorType=" + e.getClass().getSimpleName() + " key=" + key);
         }
         return Typeface.NORMAL;
     }
@@ -912,6 +914,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
             try {
                 return Typeface.create(fontName, Typeface.NORMAL);
             } catch (Exception e2) {
+                LuciqFlutterLogger.w(LuciqFlutterDebugTags.CORE,
+                        "[Luciq.setTheme.typeface] phase=warn errorType=" + e2.getClass().getSimpleName());
                 return Typeface.DEFAULT;
             }
         }

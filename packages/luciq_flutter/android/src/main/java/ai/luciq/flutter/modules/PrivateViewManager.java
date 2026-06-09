@@ -77,10 +77,13 @@ public class PrivateViewManager {
             };
 
             try {
+                final String callId = LuciqFlutterLogger.nextCallId();
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        luciqPrivateViewApi.getPrivateViews(result -> {
+                        LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                                "[PRIV.capture] #" + callId + " phase=fire");
+                        luciqPrivateViewApi.getPrivateViews(callId, result -> {
                             privateViews.set(result);
                             latch.countDown();
                         });
@@ -163,7 +166,7 @@ public class PrivateViewManager {
             }
         } catch (Exception e) {
             LuciqFlutterLogger.e(LuciqFlutterDebugTags.PRIVATE_VIEW,
-                    "[PRIV.mask] phase=error errorType=" + e.getClass().getSimpleName(), e);
+                    "[PRIV.capture.mask] phase=error errorType=" + e.getClass().getSimpleName(), e);
         }
     }
 }

@@ -49,8 +49,14 @@ Fields:
   - `enter` - the API was called.
   - `exit`  - the API returned (success path). May carry
     `result` / `resultLength` / `resultCount` / `resultPresent`.
+  - `warn`  - the API completed but with a recoverable degradation
+    (request body truncated past the size limit, payload omitted by
+    a user-supplied callback). Always followed by a `phase=exit` line
+    on the same call - `warn` is informational, not terminal.
   - `error` - the API threw or set an error. Always carries
-    `errorType` and (on Dart) a truncated `errorMessage`.
+    `errorType` and (on Dart) a truncated `errorMessage`. A failing
+    Pigeon-mapped enum validation closes the call on `error` - no
+    matching `exit` follows.
   - `fire`  - a callback from native into Dart was invoked.
 - `key=value` - additional context. Values follow these rules:
   - booleans: lowercase `true` / `false`.
@@ -212,7 +218,7 @@ adb logcat -s LCQ-Flutter-Android-SUR | grep 'phase=error'
 ### Watch every async/callback API across layers
 
 ```
-adb logcat | grep -E 'phase=(enter|exit|error|fire)'
+adb logcat | grep -E 'phase=(enter|exit|warn|error|fire)'
 ```
 
 ### Check that native exceptions are surfacing
@@ -231,7 +237,9 @@ adb logcat | grep 'LCQ-Flutter-Android-' | grep 'phase=error'
 - The `#<callId>` token, when present, is unique within the live
   process for the originating call - join on it to reconstruct a
   trace.
-- `phase` is a closed vocabulary: `enter`, `exit`, `error`, `fire`.
+- `phase` is a closed vocabulary: `enter`, `exit`, `warn`, `error`,
+  `fire`. `warn` is informational and is always followed by `exit`
+  on the same call; `error` is terminal and is not followed by `exit`.
 - `errorType` is always the runtime class name; `errorMessage` is
   truncated to 256 chars with a trailing `...` when longer.
 - Tag layer prefix (`LCQ-Flutter-`, `LCQ-Flutter-iOS-`,

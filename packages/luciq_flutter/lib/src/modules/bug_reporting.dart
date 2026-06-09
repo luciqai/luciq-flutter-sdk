@@ -284,7 +284,8 @@ class BugReporting implements BugReportingFlutterApi {
   ) =>
       hostCall(
         'BR.show',
-        () => _host.show(reportType.toString(), invocationOptions.mapToString()),
+        () =>
+            _host.show(reportType.toString(), invocationOptions.mapToString()),
         tag: DebugTags.bugReporting,
         args: {
           'reportType': reportType,
@@ -295,7 +296,8 @@ class BugReporting implements BugReportingFlutterApi {
   /// Sets the threshold value of the shake gesture for iPhone/iPod Touch
   /// Default for iPhone is 2.5.
   /// [threshold] iPhoneShakingThreshold double
-  static Future<void> setShakingThresholdForiPhone(double threshold) => hostCall(
+  static Future<void> setShakingThresholdForiPhone(double threshold) =>
+      hostCall(
         'BR.setShakingThresholdForiPhone',
         () async {
           if (LCQBuildInfo.instance.isIOS) {

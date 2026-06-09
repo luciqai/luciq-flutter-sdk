@@ -29,7 +29,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.show] phase=enter reportType=%@ optionsCount=%lu", reportType, (unsigned long)invocationOptions.count];
     NSNumber *mappedType = ArgsRegistry.reportTypes[reportType];
     if (mappedType == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.show] phase=error errorType=UnknownEnum reportType=%@", reportType];
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.show] phase=warn errorType=UnknownEnum reportType=%@", reportType];
     }
     LCQBugReportingReportType resolvedType = mappedType.integerValue;
     LCQBugReportingOption resolvedOptions = 0;
@@ -37,7 +37,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     for (NSString *option in invocationOptions) {
         NSNumber *mappedOption = ArgsRegistry.invocationOptions[option];
         if (mappedOption == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.show] phase=error errorType=UnknownEnum invocationOption=%@", option];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.show] phase=warn errorType=UnknownEnum invocationOption=%@", option];
             continue;
         }
         resolvedOptions |= mappedOption.integerValue;
@@ -54,7 +54,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     for (NSString *event in events) {
         NSNumber *mapped = ArgsRegistry.invocationEvents[event];
         if (mapped == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setInvocationEvents] phase=error errorType=UnknownEnum invocationEvent=%@", event];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setInvocationEvents] phase=warn errorType=UnknownEnum invocationEvent=%@", event];
             continue;
         }
         resolvedEvents |= mapped.integerValue;
@@ -71,7 +71,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     for (NSString *type in types) {
         NSNumber *mapped = ArgsRegistry.reportTypes[type];
         if (mapped == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setReportTypes] phase=error errorType=UnknownEnum reportType=%@", type];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setReportTypes] phase=warn errorType=UnknownEnum reportType=%@", type];
             continue;
         }
         resolvedTypes |= mapped.integerValue;
@@ -85,7 +85,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setExtendedBugReportMode] phase=enter mode=%@", mode];
     NSNumber *mapped = ArgsRegistry.extendedBugReportStates[mode];
     if (mapped == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setExtendedBugReportMode] phase=error errorType=UnknownEnum mode=%@", mode];
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setExtendedBugReportMode] phase=warn errorType=UnknownEnum mode=%@", mode];
     }
     LCQExtendedBugReportMode resolvedMode = mapped.integerValue;
     LCQBugReporting.extendedBugReportMode = resolvedMode;
@@ -99,7 +99,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     for (NSString *option in options) {
         NSNumber *mapped = ArgsRegistry.invocationOptions[option];
         if (mapped == nil) {
-            [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setInvocationOptions] phase=error errorType=UnknownEnum invocationOption=%@", option];
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setInvocationOptions] phase=warn errorType=UnknownEnum invocationOption=%@", option];
             continue;
         }
         resolvedOptions |= mapped.integerValue;
@@ -113,7 +113,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setFloatingButtonEdge] phase=enter edge=%@ offset=%@", edge, offset];
     NSNumber *mapped = ArgsRegistry.floatingButtonEdges[edge];
     if (mapped == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setFloatingButtonEdge] phase=error errorType=UnknownEnum edge=%@", edge];
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setFloatingButtonEdge] phase=warn errorType=UnknownEnum edge=%@", edge];
     }
     CGRectEdge resolvedEdge = mapped.doubleValue;
     LCQBugReporting.floatingButtonEdge = resolvedEdge;
@@ -125,7 +125,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setVideoRecordingFloatingButtonPosition] phase=enter position=%@", position];
     NSNumber *mapped = ArgsRegistry.recordButtonPositions[position];
     if (mapped == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setVideoRecordingFloatingButtonPosition] phase=error errorType=UnknownEnum position=%@", position];
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setVideoRecordingFloatingButtonPosition] phase=warn errorType=UnknownEnum position=%@", position];
     }
     LCQPosition resolvedPosition = mapped.integerValue;
     LCQBugReporting.videoRecordingFloatingButtonPosition = resolvedPosition;
@@ -236,7 +236,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
         for (NSString *reportType in reportTypes) {
             NSNumber *mapped = ArgsRegistry.reportTypes[reportType];
             if (mapped == nil) {
-                [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setCommentMinimumCharacterCount] phase=error errorType=UnknownEnum reportType=%@", reportType];
+                [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.setCommentMinimumCharacterCount] phase=warn errorType=UnknownEnum reportType=%@", reportType];
                 continue;
             }
             resolvedTypes |= mapped.integerValue;
@@ -257,7 +257,7 @@ extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
 
     NSNumber *mappedActionNumber = ArgsRegistry.userConsentActionTypes[actionType];
     if (actionType != nil && mappedActionNumber == nil) {
-        [LuciqFlutterLogger e:[LuciqFlutterDebugTags bugReporting] format:@"[BR.addUserConsents] phase=error errorType=UnknownEnum actionType=%@", actionType];
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags bugReporting] format:@"[BR.addUserConsents] phase=warn errorType=UnknownEnum actionType=%@", actionType];
     }
     LCQConsentAction mappedActionType = mappedActionNumber.integerValue;
 

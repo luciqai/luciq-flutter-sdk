@@ -154,4 +154,48 @@ public class LuciqFlutterLoggerTest {
             org.junit.Assert.assertEquals("fragment '#' should not leak: " + url, -1, out.indexOf('#'));
         }
     }
+
+    @Test public void nextCallId_returnsFourCharLowerHex() {
+        String id = LuciqFlutterLogger.nextCallId();
+        org.junit.Assert.assertEquals("expected 4-char id, got: " + id, 4, id.length());
+        org.junit.Assert.assertTrue("expected lower-hex chars, got: " + id, id.matches("[0-9a-f]{4}"));
+    }
+
+    @Test public void nextCallId_zeroPadsSmallValues() throws Exception {
+        seedCallIdCounter(0);
+        org.junit.Assert.assertEquals("0000", LuciqFlutterLogger.nextCallId());
+        org.junit.Assert.assertEquals("0001", LuciqFlutterLogger.nextCallId());
+        org.junit.Assert.assertEquals("0002", LuciqFlutterLogger.nextCallId());
+    }
+
+    @Test public void nextCallId_wrapsAt0xFFFF() throws Exception {
+        seedCallIdCounter(0xFFFE);
+        // 0xFFFE & 0xFFFF -> "fffe"
+        org.junit.Assert.assertEquals("fffe", LuciqFlutterLogger.nextCallId());
+        // 0xFFFF & 0xFFFF -> "ffff"
+        org.junit.Assert.assertEquals("ffff", LuciqFlutterLogger.nextCallId());
+        // 0x10000 & 0xFFFF -> "0000"; wrap stays inside 4 chars
+        org.junit.Assert.assertEquals("0000", LuciqFlutterLogger.nextCallId());
+        org.junit.Assert.assertEquals("0001", LuciqFlutterLogger.nextCallId());
+    }
+
+    @Test public void setLevel_belowNone_suppressesEverything() {
+        // Defensive: a level value below NONE (the "most quiet" threshold)
+        // should silence all output, matching what NONE does.
+        LuciqFlutterLogger.setLevel(LogLevel.NONE - 1);
+        LuciqFlutterLogger.d(TAG, "below-none-debug");
+        LuciqFlutterLogger.w(TAG, "below-none-warn");
+        LuciqFlutterLogger.e(TAG, "below-none-error");
+        mockLog.verify(() -> Log.d(TAG, "below-none-debug"), never());
+        mockLog.verify(() -> Log.w(TAG, "below-none-warn"), never());
+        mockLog.verify(() -> Log.e(TAG, "below-none-error"), never());
+    }
+
+    private static void seedCallIdCounter(int value) throws Exception {
+        java.lang.reflect.Field f = LuciqFlutterLogger.class.getDeclaredField("callIdCounter");
+        f.setAccessible(true);
+        java.util.concurrent.atomic.AtomicInteger counter =
+                (java.util.concurrent.atomic.AtomicInteger) f.get(null);
+        counter.set(value);
+    }
 }

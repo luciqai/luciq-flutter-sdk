@@ -102,13 +102,23 @@ String _format(
   String phase,
   Map<String, Object?> args,
 ) {
-  final buf = StringBuffer('[')..write(method)..write(']');
+  final buf = StringBuffer('[')
+    ..write(method)
+    ..write(']');
   if (callId != null) {
-    buf..write(' #')..write(callId);
+    buf
+      ..write(' #')
+      ..write(callId);
   }
-  buf..write(' phase=')..write(phase);
+  buf
+    ..write(' phase=')
+    ..write(phase);
   args.forEach((k, v) {
-    buf..write(' ')..write(k)..write('=')..write(_formatValue(v));
+    buf
+      ..write(' ')
+      ..write(k)
+      ..write('=')
+      ..write(_formatValue(v));
   });
   return buf.toString();
 }

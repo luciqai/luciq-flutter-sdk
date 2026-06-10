@@ -4,44 +4,13 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-
-import ai.luciq.flutter.generated.LuciqPigeon;
-import ai.luciq.flutter.util.ArgsRegistry;
-import ai.luciq.flutter.util.LuciqFlutterDebugTags;
-import ai.luciq.flutter.util.LuciqFlutterLogger;
-import ai.luciq.flutter.util.Reflection;
-import ai.luciq.flutter.util.ThreadManager;
-import ai.luciq.library.LogLevel;
-import ai.luciq.library.ReproMode;
-import ai.luciq.library.internal.crossplatform.CoreFeature;
-import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
-import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
-import ai.luciq.library.internal.crossplatform.InternalCore;
-import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
-import ai.luciq.library.Feature;
-import ai.luciq.library.Luciq;
-import ai.luciq.library.LuciqColorTheme;
-import ai.luciq.library.LuciqCustomTextPlaceHolder;
-import ai.luciq.library.IssueType;
-import ai.luciq.library.Platform;
-import ai.luciq.library.ReproConfigurations;
-import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
-import ai.luciq.library.internal.crossplatform.InternalCore;
-import ai.luciq.library.internal.module.LuciqLocale;
-import ai.luciq.library.invocation.LuciqInvocationEvent;
-import ai.luciq.library.model.NetworkLog;
-import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
-import ai.luciq.library.ui.onboarding.WelcomeMessage;
-
-import io.flutter.FlutterInjector;
-import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.plugin.common.BinaryMessenger;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -52,12 +21,40 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import ai.luciq.flutter.generated.LuciqPigeon;
+import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
+import ai.luciq.flutter.util.Reflection;
+import ai.luciq.flutter.util.ThreadManager;
+import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
+import ai.luciq.library.Feature;
+import ai.luciq.library.IssueType;
+import ai.luciq.library.LogLevel;
+import ai.luciq.library.Luciq;
+import ai.luciq.library.LuciqColorTheme;
+import ai.luciq.library.LuciqCustomTextPlaceHolder;
+import ai.luciq.library.Platform;
+import ai.luciq.library.ReproConfigurations;
+import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
+import ai.luciq.library.internal.crossplatform.CoreFeature;
+import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
+import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
+import ai.luciq.library.internal.crossplatform.InternalCore;
+import ai.luciq.library.internal.module.LuciqLocale;
+import ai.luciq.library.invocation.LuciqInvocationEvent;
+import ai.luciq.library.model.NetworkLog;
+import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
+import ai.luciq.library.ui.onboarding.WelcomeMessage;
+import io.flutter.FlutterInjector;
+import io.flutter.embedding.engine.loader.FlutterLoader;
+import io.flutter.plugin.common.BinaryMessenger;
 
 public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     private final String TAG = LuciqApi.class.getName();
@@ -139,7 +136,10 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         // HashMap.getOrDefault bypasses ArgsMap's NonNull-checking get override,
         // so an unrecognized debugLogsLevel string falls back to ERROR instead
         // of NPE-ing init.
-        final int parsedLogLevel = ArgsRegistry.sdkLogLevels.getOrDefault(debugLogsLevel, LogLevel.ERROR);
+        int parsedLogLevel = LogLevel.ERROR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            parsedLogLevel = ArgsRegistry.sdkLogLevels.getOrDefault(debugLogsLevel, LogLevel.ERROR);
+        }
         LuciqFlutterLogger.setLevel(parsedLogLevel);
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
                 "[Luciq.init] phase=enter tokenPresent=" + (token != null && !token.isEmpty())
@@ -1017,33 +1017,6 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
             LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
                     "[Luciq.setWebViewNetworkTrackingEnabled] phase=error errorType=" + e.getClass().getSimpleName(),
                     e);
-        }
-    }
-
-    @Override
-    public void setWebViewMonitoringEnabled(@NonNull Boolean isEnabled) {
-        try {
-            Luciq.setWebViewMonitoringEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void setWebViewUserInteractionsTrackingEnabled(@NonNull Boolean isEnabled) {
-        try {
-            Luciq.setWebViewUserInteractionsTrackingEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void setWebViewNetworkTrackingEnabled(@NonNull Boolean isEnabled) {
-        try {
-            Luciq.setWebViewNetworkTrackingEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

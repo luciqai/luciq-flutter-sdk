@@ -156,7 +156,7 @@ class NetworkLogger {
     try {
       await _host.networkLog(obfuscated.toJson());
     } catch (e) {
-      LuciqLogger.I.w(
+      LuciqLogger.I.e(
         '[NET.networkLogInternal] phase=warn sink=brSink errorType=${e.runtimeType}',
         tag: DebugTags.network,
       );
@@ -165,7 +165,7 @@ class NetworkLogger {
     try {
       await APM.networkLogAndroid(obfuscated);
     } catch (e) {
-      LuciqLogger.I.w(
+      LuciqLogger.I.e(
         '[NET.networkLogInternal] phase=warn sink=apmSink errorType=${e.runtimeType}',
         tag: DebugTags.network,
       );

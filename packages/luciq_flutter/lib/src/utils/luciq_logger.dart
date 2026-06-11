@@ -30,13 +30,7 @@ class LuciqLogger implements Logger {
     _instance = instance;
   }
 
-  LogLevel _logLevel = LogLevel.error;
-
-  LogLevel get logLevel => _logLevel;
-
-  set logLevel(LogLevel level) {
-    _logLevel = level;
-  }
+  LogLevel logLevel = LogLevel.error;
 
   /// Returns true when the current level is at debug or verbose. Use to gate
   /// expensive payload construction:
@@ -44,7 +38,7 @@ class LuciqLogger implements Logger {
   ///   if (LuciqLogger.I.isDebugEnabled()) {
   ///     LuciqLogger.I.d('big payload: ' + buildPayload(), tag: DebugTags.network);
   ///   }
-  bool isDebugEnabled() => _logLevel.getValue() <= LogLevel.debug.getValue();
+  bool isDebugEnabled() => logLevel.getValue() <= LogLevel.debug.getValue();
 
   @override
   void log(
@@ -52,7 +46,7 @@ class LuciqLogger implements Logger {
     required LogLevel level,
     String tag = '',
   }) {
-    if (level.getValue() >= _logLevel.getValue()) {
+    if (level.getValue() >= logLevel.getValue()) {
       developer.log(
         message,
         name: tag,

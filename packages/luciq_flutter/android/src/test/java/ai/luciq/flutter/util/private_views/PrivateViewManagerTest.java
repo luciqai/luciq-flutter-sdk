@@ -76,10 +76,10 @@ public class PrivateViewManagerTest {
     public void testMask() throws InterruptedException {
         ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback capturingCallbackMock = mock(ai.luciq.flutter.util.privateViews.ScreenshotCaptor.CapturingCallback.class);
         doAnswer(invocation -> {
-            LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi.Reply<List<Double>> callback = invocation.getArgument(0);  // Get the callback
+            LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi.Reply<List<Double>> callback = invocation.getArgument(1);  // Get the callback
             callback.reply(Arrays.asList(10.0, 20.0, 100.0, 200.0));  // Trigger the success callback
             return null;
-        }).when(LuciqPrivateViewFlutterApiMock).getPrivateViews(any(LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi.Reply.class));  // Mock the method call
+        }).when(LuciqPrivateViewFlutterApiMock).getPrivateViews(any(String.class), any(LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi.Reply.class));  // Mock the method call
 
 
         // Trigger the mask operation

@@ -71,7 +71,7 @@ public class RepliesApiTest {
 
     @Test
     public void testShow() {
-        api.show();
+        api.show("callId");
 
         mReplies.verify(Replies::show);
     }
@@ -101,7 +101,7 @@ public class RepliesApiTest {
 
         mReplies.when(Replies::getUnreadRepliesCount).thenReturn((int) expected);
 
-        api.getUnreadRepliesCount(result);
+        api.getUnreadRepliesCount("callId", result);
 
         verify(result).success(expected);
         mReplies.verify(Replies::getUnreadRepliesCount);
@@ -114,7 +114,7 @@ public class RepliesApiTest {
 
         mReplies.when(Replies::hasChats).thenReturn(expected);
 
-        api.hasChats(result);
+        api.hasChats("callId", result);
 
         verify(result).success(expected);
         mReplies.verify(Replies::hasChats);

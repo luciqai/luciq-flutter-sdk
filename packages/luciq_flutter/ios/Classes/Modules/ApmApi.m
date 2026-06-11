@@ -238,8 +238,8 @@ NSMutableDictionary *traces;
 
 
 - (void)endScreenRenderForAutoUiTraceData:(nonnull NSDictionary<NSString *,id> *)data error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.endScreenRenderForAutoUiTrace] phase=enter frameDataCount=%lu", (unsigned long)((NSArray *)data[@"frameData"]).count];
-    NSArray<NSArray<NSNumber *> *> *rawFrames = data[@"frameData"];
+    NSArray<NSArray<NSNumber *> *> *rawFrames = [data[@"frameData"] isKindOfClass:[NSArray class]] ? data[@"frameData"] : nil;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.endScreenRenderForAutoUiTrace] phase=enter frameDataCount=%lu", (unsigned long)rawFrames.count];
     NSMutableArray<LCQFrameInfo *> *frameInfos = [[NSMutableArray alloc] init];
 
     if (rawFrames && [rawFrames isKindOfClass:[NSArray class]]) {
@@ -258,8 +258,8 @@ NSMutableDictionary *traces;
 
 
 - (void)endScreenRenderForCustomUiTraceData:(nonnull NSDictionary<NSString *,id> *)data error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.endScreenRenderForCustomUiTrace] phase=enter frameDataCount=%lu", (unsigned long)((NSArray *)data[@"frameData"]).count];
-    NSArray<NSArray<NSNumber *> *> *rawFrames = data[@"frameData"];
+    NSArray<NSArray<NSNumber *> *> *rawFrames = [data[@"frameData"] isKindOfClass:[NSArray class]] ? data[@"frameData"] : nil;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmScreenRendering] format:@"[APM.endScreenRenderForCustomUiTrace] phase=enter frameDataCount=%lu", (unsigned long)rawFrames.count];
     NSMutableArray<LCQFrameInfo *> *frameInfos = [[NSMutableArray alloc] init];
 
     if (rawFrames && [rawFrames isKindOfClass:[NSArray class]]) {

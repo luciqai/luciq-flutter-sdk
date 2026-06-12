@@ -190,12 +190,15 @@ class LuciqDioInterceptor extends Interceptor {
     final sensitiveKeys = [
       'password',
       'currentPassword',
+      'client_secret',
     ];
 
     map.forEach((key, value) {
       final lowerKey = key.toLowerCase();
 
       if (sensitiveKeys.any((sensitive) => lowerKey.contains(sensitive))) {
+        map[key] = '***REDACTED***';
+      } else if (value is String && _isStripeToken(value)) {
         map[key] = '***REDACTED***';
       } else if (value is Map<String, dynamic>) {
         _removeSensitiveFields(value);
@@ -207,5 +210,12 @@ class LuciqDioInterceptor extends Interceptor {
         }
       }
     });
+  }
+
+  // Detects Stripe payment method tokens (pm_*) and client secrets (pi_*_secret_*, seti_*_secret_*)
+  bool _isStripeToken(String value) {
+    if (value.startsWith('pm_')) return true;
+    if (RegExp(r'^[a-z]{2,}_[A-Za-z0-9]+_secret_').hasMatch(value)) return true;
+    return false;
   }
 }

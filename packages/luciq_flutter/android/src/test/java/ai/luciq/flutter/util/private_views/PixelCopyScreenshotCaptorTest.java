@@ -12,6 +12,8 @@ import static org.robolectric.Shadows.shadowOf;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Looper;
+import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import ai.luciq.flutter.model.ScreenshotResult;
@@ -76,16 +78,36 @@ public class PixelCopyScreenshotCaptorTest {
         }
     }
 
+    @Test
+    public void testCaptureWithPixelCopyGivenInvalidSurface() {
+        SurfaceView surfaceView = mockFlutterViewInPixelCopy();
+        Surface invalidSurface = mock(Surface.class);
+        when(invalidSurface.isValid()).thenReturn(false);
+        when(surfaceView.getHolder().getSurface()).thenReturn(invalidSurface);
 
-    private void mockFlutterViewInPixelCopy() {
+        ScreenshotResultCallback mockScreenshotResultCallback = mock(ScreenshotResultCallback.class);
 
-            SurfaceView mockSurfaceView = mock(SurfaceView.class);
-            FlutterView flutterView = mock(FlutterView.class);
-            when(flutterView.getChildAt(0)).thenReturn(mockSurfaceView);
-            when(flutterView.getChildCount()).thenReturn(1);
+        captureManager.capture(activityMock, mockScreenshotResultCallback);
 
-            when(activityMock.findViewById(FlutterActivity.FLUTTER_VIEW_ID)).thenReturn(flutterView);
-            when(mockSurfaceView.getWidth()).thenReturn(100);
-            when(mockSurfaceView.getHeight()).thenReturn(100);
-        }
+        verify(mockScreenshotResultCallback).onError();
+    }
+
+
+    private SurfaceView mockFlutterViewInPixelCopy() {
+        SurfaceView mockSurfaceView = mock(SurfaceView.class);
+        SurfaceHolder surfaceHolder = mock(SurfaceHolder.class);
+        Surface surface = mock(Surface.class);
+        FlutterView flutterView = mock(FlutterView.class);
+        when(flutterView.getChildAt(0)).thenReturn(mockSurfaceView);
+        when(flutterView.getChildCount()).thenReturn(1);
+
+        when(activityMock.findViewById(FlutterActivity.FLUTTER_VIEW_ID)).thenReturn(flutterView);
+        when(mockSurfaceView.getWidth()).thenReturn(100);
+        when(mockSurfaceView.getHeight()).thenReturn(100);
+        when(mockSurfaceView.getHolder()).thenReturn(surfaceHolder);
+        when(surfaceHolder.getSurface()).thenReturn(surface);
+        when(surface.isValid()).thenReturn(true);
+
+        return mockSurfaceView;
+    }
 }

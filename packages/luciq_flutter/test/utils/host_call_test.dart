@@ -12,6 +12,7 @@ class _RecordedLog {
 
 class _RecordingLogger implements Logger {
   final List<_RecordedLog> entries = [];
+  bool debugEnabled = true;
 
   @override
   void log(String message, {required LogLevel level, required String tag}) {
@@ -33,6 +34,9 @@ class _RecordingLogger implements Logger {
   @override
   void v(String message, {String tag = ''}) =>
       log(message, level: LogLevel.verbose, tag: tag);
+
+  @override
+  bool isDebugEnabled() => debugEnabled;
 }
 
 void main() {
@@ -111,7 +115,8 @@ void main() {
       );
     });
 
-    test('logs error and rethrows', () async {
+    test('logs error and rethrows: errorType at error, message at debug',
+        () async {
       Object? caught;
       try {
         await hostCall<void>(
@@ -125,17 +130,40 @@ void main() {
       }
 
       expect(caught, isA<StateError>());
-      expect(logger.entries.length, 2);
+      expect(logger.entries.length, 3);
       expect(logger.entries[0].message, '[CORE.boom] #beef phase=enter');
       expect(logger.entries[1].level, LogLevel.error);
       expect(
         logger.entries[1].message,
+        '[CORE.boom] #beef phase=error errorType=StateError',
+      );
+      expect(logger.entries[2].level, LogLevel.debug);
+      expect(
+        logger.entries[2].message,
         startsWith('[CORE.boom] #beef phase=error errorType=StateError '
             'errorMessage='),
       );
     });
 
-    test('truncates long error messages', () async {
+    test('errorMessage is suppressed when debug is off', () async {
+      logger.debugEnabled = false;
+      try {
+        await hostCall<void>(
+          'CORE.boom',
+          () async => throw StateError('with-pii https://x.y/a@b'),
+          tag: 'T:',
+        );
+      } catch (_) {}
+
+      expect(logger.entries.length, 1);
+      expect(logger.entries.single.level, LogLevel.error);
+      expect(
+        logger.entries.single.message,
+        '[CORE.boom] phase=error errorType=StateError',
+      );
+    });
+
+    test('truncates long error messages on the debug line', () async {
       final long = 'x' * 300;
       try {
         await hostCall<void>(
@@ -145,10 +173,12 @@ void main() {
         );
       } catch (_) {}
 
-      final errLine = logger.entries.last.message;
+      final debugLine = logger.entries
+          .lastWhere((e) => e.level == LogLevel.debug)
+          .message;
       // 256-char ceiling + trailing "..." marker
-      expect(errLine.contains('...'), isTrue);
-      expect(errLine.contains('x' * 257), isFalse);
+      expect(debugLine.contains('...'), isTrue);
+      expect(debugLine.contains('x' * 257), isFalse);
     });
 
     test('omits callId marker when none provided', () async {
@@ -173,7 +203,7 @@ void main() {
       expect(logger.entries[1].message, '[CORE.flag] phase=exit result=true');
     });
 
-    test('rethrows and logs error', () {
+    test('rethrows and logs error: errorType at error, message at debug', () {
       expect(
         () => hostCallSync<void>(
           'CORE.s',
@@ -182,11 +212,14 @@ void main() {
         ),
         throwsA(isA<ArgumentError>()),
       );
-      expect(logger.entries.last.level, LogLevel.error);
-      expect(
-        logger.entries.last.message,
-        startsWith('[CORE.s] phase=error errorType='),
+      final errorLine =
+          logger.entries.firstWhere((e) => e.level == LogLevel.error);
+      expect(errorLine.message, '[CORE.s] phase=error errorType=ArgumentError');
+      final debugErrorLine = logger.entries.lastWhere(
+        (e) =>
+            e.level == LogLevel.debug && e.message.contains('phase=error'),
       );
+      expect(debugErrorLine.message, contains('errorMessage='));
     });
   });
 

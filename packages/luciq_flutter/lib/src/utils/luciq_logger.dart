@@ -15,6 +15,10 @@ abstract class Logger {
   void e(String message, {String tag = ''});
   void w(String message, {String tag = ''});
   void v(String message, {String tag = ''});
+
+  /// Whether the current threshold admits debug-level emissions. Use to gate
+  /// expensive payload construction in hot paths.
+  bool isDebugEnabled();
 }
 
 class LuciqLogger implements Logger {
@@ -38,6 +42,7 @@ class LuciqLogger implements Logger {
   ///   if (LuciqLogger.I.isDebugEnabled()) {
   ///     LuciqLogger.I.d('big payload: ' + buildPayload(), tag: DebugTags.network);
   ///   }
+  @override
   bool isDebugEnabled() => logLevel.getValue() <= LogLevel.debug.getValue();
 
   @override

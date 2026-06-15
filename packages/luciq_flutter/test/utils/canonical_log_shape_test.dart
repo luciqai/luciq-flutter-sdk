@@ -22,6 +22,7 @@ void main() {
 
   setUp(() {
     logger = MockLuciqLogger();
+    when(logger.isDebugEnabled()).thenReturn(true);
     LuciqLogger.setInstance(logger);
   });
 

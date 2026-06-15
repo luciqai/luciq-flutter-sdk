@@ -36,13 +36,14 @@ Future<T> hostCall<T>(
   String? callId,
   Map<String, Object?> args = const {},
 }) async {
-  _logger.d(_formatEnter(method, callId, args), tag: tag);
+  final logging = _logger.isDebugEnabled();
+  if (logging) _logger.d(_formatEnter(method, callId, args), tag: tag);
   try {
     final result = await body();
-    _logger.d(_formatExit(method, callId, result), tag: tag);
+    if (logging) _logger.d(_formatExit(method, callId, result), tag: tag);
     return result;
   } catch (e) {
-    _logger.e(_formatError(method, callId, e), tag: tag);
+    _logError(method, callId, e, tag: tag, debugEnabled: logging);
     rethrow;
   }
 }
@@ -55,13 +56,14 @@ T hostCallSync<T>(
   String? callId,
   Map<String, Object?> args = const {},
 }) {
-  _logger.d(_formatEnter(method, callId, args), tag: tag);
+  final logging = _logger.isDebugEnabled();
+  if (logging) _logger.d(_formatEnter(method, callId, args), tag: tag);
   try {
     final result = body();
-    _logger.d(_formatExit(method, callId, result), tag: tag);
+    if (logging) _logger.d(_formatExit(method, callId, result), tag: tag);
     return result;
   } catch (e) {
-    _logger.e(_formatError(method, callId, e), tag: tag);
+    _logError(method, callId, e, tag: tag, debugEnabled: logging);
     rethrow;
   }
 }
@@ -76,6 +78,7 @@ void logCallbackFire(
   String? callId,
   Map<String, Object?> args = const {},
 }) {
+  if (!_logger.isDebugEnabled()) return;
   _logger.d(_format(method, callId, 'fire', args), tag: tag);
 }
 
@@ -87,13 +90,30 @@ String _formatExit(String method, String? callId, Object? result) {
   return _format(method, callId, 'exit', args);
 }
 
-String _formatError(String method, String? callId, Object error) {
+/// Emits the canonical `phase=error` pair: `errorType` always (error level),
+/// `errorMessage` only when debug is enabled. `errorMessage` is
+/// `error.toString()` and routinely embeds URLs, file paths, and route names
+/// that the rest of the SDK redacts, so it must not surface at the default
+/// (error-level) threshold.
+void _logError(
+  String method,
+  String? callId,
+  Object error, {
+  required String tag,
+  required bool debugEnabled,
+}) {
   final type = error.runtimeType.toString();
-  final msg = _truncate(error.toString(), _maxErrorMessageLength);
-  return _format(method, callId, 'error', {
-    'errorType': type,
-    'errorMessage': msg,
-  });
+  _logger.e(_format(method, callId, 'error', {'errorType': type}), tag: tag);
+  if (debugEnabled) {
+    final msg = _truncate(error.toString(), _maxErrorMessageLength);
+    _logger.d(
+      _format(method, callId, 'error', {
+        'errorType': type,
+        'errorMessage': msg,
+      }),
+      tag: tag,
+    );
+  }
 }
 
 String _format(

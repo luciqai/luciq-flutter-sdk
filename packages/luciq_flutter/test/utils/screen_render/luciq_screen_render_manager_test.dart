@@ -452,6 +452,7 @@ void main() {
 
       LuciqScreenRenderManager.setInstance(realManager);
       LuciqLogger.setInstance(mLuciqLogger);
+      when(mLuciqLogger.isDebugEnabled()).thenReturn(false);
       APM.$setHostApi(mApmHostForErrorTest);
 
       // Mock CrashReporting host to prevent platform channel calls
@@ -468,14 +469,16 @@ void main() {
 
       await realManager.init(mWidgetBindingForErrorTest);
 
-      final capturedLog = verify(
+      final capturedLogs = verify(
         mLuciqLogger.e(
           captureAny,
           tag: LuciqScreenRenderManager.tag,
         ),
-      ).captured.single as String;
+      ).captured.cast<String>();
 
-      expect(capturedLog, contains('errorType=${exception.runtimeType}'));
+      final managerLog = capturedLogs
+          .firstWhere((m) => m.startsWith('[ScreenRender]'));
+      expect(managerLog, contains('errorType=${exception.runtimeType}'));
       // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called
@@ -523,14 +526,16 @@ void main() {
       // async catch in _logExceptionErrorAndStackTrace runs before verify.
       await Future<void>.delayed(Duration.zero);
 
-      final capturedLog = verify(
+      final capturedLogs = verify(
         mLuciqLogger.e(
           captureAny,
           tag: LuciqScreenRenderManager.tag,
         ),
-      ).captured.single as String;
+      ).captured.cast<String>();
 
-      expect(capturedLog, contains('errorType=${exception.runtimeType}'));
+      final managerLog = capturedLogs
+          .firstWhere((m) => m.startsWith('[ScreenRender]'));
+      expect(managerLog, contains('errorType=${exception.runtimeType}'));
       // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called
@@ -578,14 +583,16 @@ void main() {
       // async catch in _logExceptionErrorAndStackTrace runs before verify.
       await Future<void>.delayed(Duration.zero);
 
-      final capturedLog = verify(
+      final capturedLogs = verify(
         mLuciqLogger.e(
           captureAny,
           tag: LuciqScreenRenderManager.tag,
         ),
-      ).captured.single as String;
+      ).captured.cast<String>();
 
-      expect(capturedLog, contains('errorType=${exception.runtimeType}'));
+      final managerLog = capturedLogs
+          .firstWhere((m) => m.startsWith('[ScreenRender]'));
+      expect(managerLog, contains('errorType=${exception.runtimeType}'));
       // stacktrace no longer logged
 
       // Verify that non-fatal crash reporting was called

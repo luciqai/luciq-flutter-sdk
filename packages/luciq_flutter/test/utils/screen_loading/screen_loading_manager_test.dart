@@ -71,6 +71,7 @@ void main() {
     APM.$setHostApi(mApmHost);
     Luciq.$setHostApi(mLuciqHost);
     LuciqLogger.setInstance(mLuciqLogger);
+    when(mLuciqLogger.isDebugEnabled()).thenReturn(true);
     LCQDateTime.setInstance(mDateTime);
     LCQBuildInfo.setInstance(mLCQBuildInfo);
     RouteMatcher.setInstance(mRouteMatcher);

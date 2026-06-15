@@ -7,8 +7,12 @@ import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_widget_binding_observer.dart';
 import 'package:meta/meta.dart';
+
+/// Maximum characters of an exception message kept in a debug log line.
+const int _maxErrorMessageLength = 256;
 
 @internal
 enum UiTraceType {
@@ -400,9 +404,23 @@ class LuciqScreenRenderManager {
 
   /// @nodoc
   void _logExceptionErrorAndStackTrace(Object error, StackTrace stackTrace) {
-    // The originating exception is already logged by [hostCall] with
-    // phase=error and errorType=<runtimeType>; we don't duplicate the log
-    // line here. We still report the non-fatal crash to the dashboard.
+    // `init()` and `dispose()` catch failures from internal work that never
+    // crosses `hostCall`, so we emit the canonical error line here. Only the
+    // type goes to the error-level path (always on); the truncated message
+    // and stack trace are debug-gated to avoid leaking paths/route names.
+    final type = error.runtimeType.toString();
+    LuciqLogger.I.e('[ScreenRender] phase=error errorType=$type', tag: tag);
+    if (LuciqLogger.I.isDebugEnabled()) {
+      final msg = error.toString();
+      final truncated = msg.length > _maxErrorMessageLength
+          ? '${msg.substring(0, _maxErrorMessageLength)}...'
+          : msg;
+      LuciqLogger.I.d(
+        '[ScreenRender] phase=error errorType=$type '
+        'errorMessage=$truncated stackTrace=$stackTrace',
+        tag: tag,
+      );
+    }
     CrashReporting.reportHandledCrash(
       error,
       stackTrace,

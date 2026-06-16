@@ -123,6 +123,56 @@ class NetworkLogger {
     await APM.networkLogAndroid(obfuscated);
   }
 
+  /// Logs a gRPC network call.
+  ///
+  /// Mirrors [networkLog] but routes through a dedicated native bridge
+  /// that consumes gRPC-specific fields (notably [NetworkData.gRPCMethod]).
+  Future<void> networkLogGrpc(NetworkData data) async {
+    final w3Header = await getW3CHeader(
+      data.requestHeaders,
+      data.startTime.millisecondsSinceEpoch,
+    );
+    if (w3Header?.isW3cHeaderFound == false &&
+        w3Header?.w3CGeneratedHeader != null) {
+      data.requestHeaders['traceparent'] = w3Header?.w3CGeneratedHeader;
+    }
+    networkLogGrpcInternal(data);
+  }
+
+  @internal
+  Future<void> networkLogGrpcInternal(NetworkData data) async {
+    final omit = await _manager.omitLog(data);
+    if (omit) return;
+
+    final requestExceeds = await _manager.didRequestBodyExceedSizeLimit(data);
+    final responseExceeds = await _manager.didResponseBodyExceedSizeLimit(data);
+
+    var processedData = data;
+    if (requestExceeds || responseExceeds) {
+      processedData = data.copyWith(
+        requestBody: requestExceeds
+            ? LuciqConstants.getRequestBodyReplacementMessage(
+                data.requestBodySize,
+              )
+            : data.requestBody,
+        responseBody: responseExceeds
+            ? LuciqConstants.getResponseBodyReplacementMessage(
+                data.responseBodySize,
+              )
+            : data.responseBody,
+      );
+
+      final isBothExceeds = requestExceeds && responseExceeds;
+      LuciqLogger.I.e(
+        "Truncated gRPC ${isBothExceeds ? 'request and response' : requestExceeds ? 'request' : 'response'} body",
+        tag: LuciqConstants.networkLoggerTag,
+      );
+    }
+
+    final obfuscated = await _manager.obfuscateLog(processedData);
+    await _host.networkLogGrpc(obfuscated.toJson());
+  }
+
   @internal
   Future<W3CHeader?> getW3CHeader(
     Map<String, dynamic> header,

@@ -19,6 +19,8 @@ class NetworkData {
     this.errorCode = 0,
     this.errorDomain = '',
     this.errorName,
+    this.gRPCMethod,
+    this.serverErrorMessage,
     W3CHeader? w3cHeader,
   }) {
     _w3cHeader = w3cHeader;
@@ -41,6 +43,8 @@ class NetworkData {
   final int errorCode;
   final String errorDomain;
   final String? errorName;
+  final String? gRPCMethod;
+  final String? serverErrorMessage;
   W3CHeader? _w3cHeader;
 
   @override
@@ -65,6 +69,8 @@ class NetworkData {
           errorCode == other.errorCode &&
           errorDomain == other.errorDomain &&
           errorName == other.errorName &&
+          gRPCMethod == other.gRPCMethod &&
+          serverErrorMessage == other.serverErrorMessage &&
           _w3cHeader == other._w3cHeader;
 
   @override
@@ -86,6 +92,8 @@ class NetworkData {
       errorCode.hashCode ^
       errorDomain.hashCode ^
       errorName.hashCode ^
+      gRPCMethod.hashCode ^
+      serverErrorMessage.hashCode ^
       _w3cHeader.hashCode;
 
   NetworkData copyWith({
@@ -106,6 +114,8 @@ class NetworkData {
     int? errorCode,
     String? errorDomain,
     String? errorName,
+    String? gRPCMethod,
+    String? serverErrorMessage,
     W3CHeader? w3cHeader,
   }) {
     return NetworkData(
@@ -126,6 +136,8 @@ class NetworkData {
       errorCode: errorCode ?? this.errorCode,
       errorDomain: errorDomain ?? this.errorDomain,
       errorName: errorName ?? this.errorName,
+      gRPCMethod: gRPCMethod ?? this.gRPCMethod,
+      serverErrorMessage: serverErrorMessage ?? this.serverErrorMessage,
       w3cHeader: w3cHeader ?? _w3cHeader,
     );
   }
@@ -150,6 +162,8 @@ class NetworkData {
       'errorDomain': errorDomain,
       'errorCode': errorCode,
       'errorName': errorName,
+      'gRPCMethod': gRPCMethod,
+      'serverErrorMessage': serverErrorMessage,
       "isW3cHeaderFound": _w3cHeader?.isW3cHeaderFound,
       "partialId": _w3cHeader?.partialId,
       "networkStartTimeInSeconds": _w3cHeader?.networkStartTimeInSeconds,

@@ -362,6 +362,14 @@ class MockLuciqHostApi extends _i1.Mock implements _i3.LuciqHostApi {
       ) as _i4.Future<void>);
 
   @override
+  _i4.Future<void> networkLogGrpc(Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(#networkLogGrpc, [arg_data]),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
   _i4.Future<void> registerFeatureFlagChangeListener() => (super.noSuchMethod(
         Invocation.method(#registerFeatureFlagChangeListener, []),
         returnValue: _i4.Future<void>.value(),

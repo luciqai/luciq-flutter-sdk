@@ -410,6 +410,82 @@ void main() {
     });
   });
 
+  group('[networkLogGrpc]', () {
+    final grpcData = NetworkData(
+      url: "grpc://example.com/foo.Service/Method",
+      method: "POST",
+      requestContentType: "application/grpc",
+      responseContentType: "application/grpc",
+      startTime: DateTime.now(),
+      gRPCMethod: "/foo.Service/Method",
+    );
+
+    test('should call host networkLogGrpc once and not APM bridge', () async {
+      when(mBuildInfo.isAndroid).thenReturn(false);
+      when(mManager.obfuscateLog(grpcData)).thenReturn(grpcData);
+      when(mManager.omitLog(grpcData)).thenReturn(false);
+
+      await logger.networkLogGrpcInternal(grpcData);
+
+      verify(
+        mLuciqHost.networkLogGrpc(grpcData.toJson()),
+      ).called(1);
+
+      verifyNever(mLuciqHost.networkLog(any));
+      verifyNever(mApmHost.networkLogAndroid(any));
+    });
+
+    test('should not bridge to APM on Android', () async {
+      when(mBuildInfo.isAndroid).thenReturn(true);
+      when(mManager.obfuscateLog(grpcData)).thenReturn(grpcData);
+      when(mManager.omitLog(grpcData)).thenReturn(false);
+
+      await logger.networkLogGrpcInternal(grpcData);
+
+      verify(
+        mLuciqHost.networkLogGrpc(grpcData.toJson()),
+      ).called(1);
+
+      verifyNever(mApmHost.networkLogAndroid(any));
+    });
+
+    test('should obfuscate before logging', () async {
+      final obfuscated = grpcData.copyWith(requestBody: 'obfuscated');
+
+      when(mBuildInfo.isAndroid).thenReturn(false);
+      when(mManager.obfuscateLog(grpcData)).thenReturn(obfuscated);
+      when(mManager.omitLog(grpcData)).thenReturn(false);
+
+      await logger.networkLogGrpcInternal(grpcData);
+
+      verify(mManager.obfuscateLog(grpcData)).called(1);
+      verify(
+        mLuciqHost.networkLogGrpc(obfuscated.toJson()),
+      ).called(1);
+    });
+
+    test('should skip logging when omitted', () async {
+      when(mBuildInfo.isAndroid).thenReturn(false);
+      when(mManager.omitLog(grpcData)).thenReturn(true);
+
+      await logger.networkLogGrpcInternal(grpcData);
+
+      verify(mManager.omitLog(grpcData)).called(1);
+      verifyNever(mLuciqHost.networkLogGrpc(any));
+    });
+
+    test('should add traceparent header when missing', () async {
+      final data = grpcData.copyWith(requestHeaders: <String, dynamic>{});
+      when(mBuildInfo.isAndroid).thenReturn(false);
+      when(mManager.obfuscateLog(data)).thenReturn(data);
+      when(mManager.omitLog(data)).thenReturn(false);
+
+      await logger.networkLogGrpc(data);
+
+      expect(data.requestHeaders.containsKey('traceparent'), isTrue);
+    });
+  });
+
   test('[setNetworkAutoMaskingEnabled] should call host method', () async {
     const enabled = true;
 

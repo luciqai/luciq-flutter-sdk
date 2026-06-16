@@ -284,7 +284,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
       final requestBody = parseGrpcBody(request);
       final responseBody = parseGrpcBody(response);
 
-      _networkLogger.networkLog(
+      _networkLogger.networkLogGrpc(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -300,6 +300,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           responseContentType: 'application/grpc',
           endTime: endTime,
           duration: endTime.difference(startTime).inMicroseconds,
+          gRPCMethod: method.path,
           w3cHeader: ctx.w3cHeader,
         ),
       );
@@ -337,7 +338,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           ? (trailers['grpc-message'] ?? resCapture.body())
           : resCapture.body();
 
-      _networkLogger.networkLog(
+      _networkLogger.networkLogGrpc(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -355,6 +356,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           errorDomain: isError ? 'grpc' : '',
           endTime: endTime,
           duration: endTime.difference(startTime).inMicroseconds,
+          gRPCMethod: method.path,
+          serverErrorMessage: isError ? trailers['grpc-message'] : null,
           w3cHeader: ctx.w3cHeader,
         ),
       );
@@ -414,7 +417,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         _annotateStreamMetrics(responseHeaders, resCapture, startTime);
       }
 
-      _networkLogger.networkLog(
+      _networkLogger.networkLogGrpc(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -433,6 +436,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           responseContentType: 'application/grpc',
           endTime: endTime,
           duration: endTime.difference(startTime).inMicroseconds,
+          gRPCMethod: method.path,
+          serverErrorMessage: errorMessage,
           w3cHeader: ctx.w3cHeader,
         ),
       );

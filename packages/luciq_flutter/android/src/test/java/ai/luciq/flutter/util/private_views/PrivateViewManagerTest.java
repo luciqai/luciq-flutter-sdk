@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
@@ -147,6 +148,25 @@ public class PrivateViewManagerTest {
         verify(windowPixelCopyScreenCaptor).capture(any(), any());
         verify(pixelCopyScreenCaptor).capture(any(), any());
         verify(boundryScreenCaptor, never()).capture(any(), any());
+    }
+
+    @Test
+    public void testMaskShouldNotFallbackToPixelCopyWhenActivityIsFinishing() {
+        ScreenshotCaptor.CapturingCallback capturingCallbackMock = mock(ScreenshotCaptor.CapturingCallback.class);
+        doAnswer(invocation -> {
+            when(activityMock.isFinishing()).thenReturn(true);
+            ScreenshotResultCallback callback = invocation.getArgument(1);
+            callback.onError();
+            return null;
+        }).when(windowPixelCopyScreenCaptor).capture(any(), any());
+
+        privateViewManager.mask(capturingCallbackMock);
+        shadowOf(Looper.getMainLooper()).idle();
+
+        verify(windowPixelCopyScreenCaptor).capture(any(), any());
+        verify(pixelCopyScreenCaptor, never()).capture(any(), any());
+        verify(boundryScreenCaptor, never()).capture(any(), any());
+        verify(capturingCallbackMock).onCapturingFailure(any(Throwable.class));
     }
 
     @Test

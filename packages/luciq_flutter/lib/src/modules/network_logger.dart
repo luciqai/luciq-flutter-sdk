@@ -184,7 +184,7 @@ class NetworkLogger {
   ) async {
     final w3cFlags = await FeatureFlagsManager().getW3CFeatureFlagsHeader();
 
-    if (w3cFlags.isW3cExternalTraceIDEnabled == false) {
+    if (w3cFlags == null || w3cFlags.isW3cExternalTraceIDEnabled == false) {
       return null;
     }
 

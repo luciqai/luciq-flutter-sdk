@@ -102,7 +102,7 @@ class APM {
   /// Returns:
   ///   A Future<bool> object is being returned.
   @internal
-  static Future<bool> isEnabled() => hostCall(
+  static Future<bool?> isEnabled() => hostCall(
         'APM.isEnabled',
         () => _host.isEnabled(),
         tag: DebugTags.apmAppLaunch,
@@ -129,7 +129,7 @@ class APM {
   /// Returns:
   ///   A Future<bool> object is being returned.
   @internal
-  static Future<bool> isScreenLoadingEnabled() => hostCall(
+  static Future<bool?> isScreenLoadingEnabled() => hostCall(
         'APM.isScreenLoadingEnabled',
         () => _host.isScreenLoadingEnabled(),
         tag: DebugTags.apmScreenLoading,
@@ -507,7 +507,7 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isEndScreenLoadingEnabled() => hostCall(
+  static Future<bool?> isEndScreenLoadingEnabled() => hostCall(
         'APM.isEndScreenLoadingEnabled',
         () => _host.isEndScreenLoadingEnabled(),
         tag: DebugTags.apmScreenLoading,
@@ -543,7 +543,7 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isAutoUiTraceEnabled() => hostCall(
+  static Future<bool?> isAutoUiTraceEnabled() => hostCall(
         'APM.isAutoUiTraceEnabled',
         () => _host.isAutoUiTraceEnabled(),
         tag: DebugTags.apmUITrace,
@@ -559,7 +559,7 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isScreenRenderEnabled() => hostCall(
+  static Future<bool?> isScreenRenderEnabled() => hostCall(
         'APM.isScreenRenderEnabled',
         () => _host.isScreenRenderEnabled(),
         tag: DebugTags.apmScreenRendering,
@@ -571,7 +571,7 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isCustomSpanEnabled() => hostCall(
+  static Future<bool?> isCustomSpanEnabled() => hostCall(
         'APM.isCustomSpanEnabled',
         () => _host.isCustomSpanEnabled(),
         tag: DebugTags.apmCustomSpan,
@@ -586,7 +586,7 @@ class APM {
   /// Returns:
   ///   A Future<List<double>> where the first element is the refresh rate and the second is the tolerance value.
   @internal
-  static Future<List<double?>> getDeviceRefreshRateAndTolerance() => hostCall(
+  static Future<List<double?>?> getDeviceRefreshRateAndTolerance() => hostCall(
         'APM.getDeviceRefreshRateAndTolerance',
         () => _host.getDeviceRefreshRateAndTolerance(),
         tag: DebugTags.apmScreenRendering,

@@ -86,7 +86,7 @@ class Surveys implements SurveysFlutterApi {
   /// Returns an array containing the available surveys.
   /// [callback] availableSurveysCallback callback with
   /// argument available surveys
-  static Future<List<String>> getAvailableSurveys() {
+  static Future<List<String>?> getAvailableSurveys() {
     final callId = CallId.next();
     return hostCall(
       'SUR.getAvailableSurveys',
@@ -170,7 +170,7 @@ class Surveys implements SurveysFlutterApi {
   /// This block is executed on the UI thread. Could be used for performing any
   /// UI changes  after the survey's UI is dismissed.
   /// [callback]  A callback that gets executed after the survey's UI is dismissed.
-  static Future<bool> hasRespondedToSurvey(String surveyToken) {
+  static Future<bool?> hasRespondedToSurvey(String surveyToken) {
     final callId = CallId.next();
     return hostCall(
       'SUR.hasRespondedToSurvey',

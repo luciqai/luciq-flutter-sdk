@@ -23,13 +23,18 @@ void resetHostCallLogger() {
 /// canonical lifecycle `phase=enter` -> `phase=exit | phase=error` line pair
 /// without each call site repeating the format.
 ///
+/// Errors thrown by `body` are logged and swallowed - the call resolves with
+/// `null` instead. This keeps SDK failures from propagating into the host app,
+/// per the SDK-wide rule that no exception may escape into the embedding
+/// application.
+///
 /// `method` is the fully-qualified short form used in logs, e.g.
 /// `SUR.showSurvey`. `tag` is the `DebugTags` constant for the area. `callId`
 /// is included on async/callback APIs so Dart and native logs can be matched.
 /// `args` are formatted as `key=value` pairs and never include raw payload -
 /// callers are responsible for converting strings/lists into `*Length` /
 /// `*Count` / `*Present` summaries before passing them in.
-Future<T> hostCall<T>(
+Future<T?> hostCall<T>(
   String method,
   Future<T> Function() body, {
   required String tag,
@@ -44,12 +49,12 @@ Future<T> hostCall<T>(
     return result;
   } catch (e) {
     _logError(method, callId, e, tag: tag, debugEnabled: logging);
-    rethrow;
+    return null;
   }
 }
 
 /// Synchronous variant of [hostCall].
-T hostCallSync<T>(
+T? hostCallSync<T>(
   String method,
   T Function() body, {
   required String tag,
@@ -64,7 +69,7 @@ T hostCallSync<T>(
     return result;
   } catch (e) {
     _logError(method, callId, e, tag: tag, debugEnabled: logging);
-    rethrow;
+    return null;
   }
 }
 

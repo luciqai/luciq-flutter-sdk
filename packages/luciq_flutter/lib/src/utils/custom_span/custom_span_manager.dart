@@ -113,7 +113,7 @@ class CustomSpanManager {
     }
 
     // Check if SDK is initialized
-    final isSDKInitialized = await Luciq.isBuilt();
+    final isSDKInitialized = (await Luciq.isBuilt()) ?? false;
     if (!isSDKInitialized) {
       LuciqLogger.I.e(
         LuciqStrings.customSpanSDKNotInitializedMessage,
@@ -199,7 +199,7 @@ class CustomSpanManager {
     }
 
     // Check if SDK is initialized
-    final isSDKInitialized = await Luciq.isBuilt();
+    final isSDKInitialized = (await Luciq.isBuilt()) ?? false;
     if (!isSDKInitialized) {
       LuciqLogger.I.e(
         LuciqStrings.customSpanSDKNotInitializedMessage,

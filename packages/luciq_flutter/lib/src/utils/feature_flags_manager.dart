@@ -71,7 +71,7 @@ class FeatureFlagsManager implements FeatureFlagsFlutterApi {
 
   int get networkBodyMaxSize => _networkBodyMaxSize;
 
-  Future<W3cFeatureFlags> getW3CFeatureFlagsHeader() => hostCall(
+  Future<W3cFeatureFlags?> getW3CFeatureFlagsHeader() => hostCall(
         'FF.getW3CFeatureFlagsHeader',
         () async {
           if (LCQBuildInfo.instance.isAndroid) {

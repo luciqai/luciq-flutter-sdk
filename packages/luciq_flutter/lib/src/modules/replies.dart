@@ -65,7 +65,7 @@ class Replies implements RepliesFlutterApi {
 
   /// Tells whether the user has chats already or not.
   /// [callback] - callback that is invoked if chats exist
-  static Future<bool> hasChats() {
+  static Future<bool?> hasChats() {
     final callId = CallId.next();
     return hostCall(
       'REP.hasChats',
@@ -93,7 +93,7 @@ class Replies implements RepliesFlutterApi {
   /// has, then possibly notify them about it with your own UI.
   /// [function] callback with argument
   /// Notifications count, or -1 in case the SDK has not been initialized.
-  static Future<int> getUnreadRepliesCount() {
+  static Future<int?> getUnreadRepliesCount() {
     final callId = CallId.next();
     return hostCall(
       'REP.getUnreadRepliesCount',

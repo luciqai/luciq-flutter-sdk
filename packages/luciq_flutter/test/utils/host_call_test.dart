@@ -115,21 +115,17 @@ void main() {
       );
     });
 
-    test('logs error and rethrows: errorType at error, message at debug',
+    test(
+        'logs error and returns null on throw: errorType at error, message at debug',
         () async {
-      Object? caught;
-      try {
-        await hostCall<void>(
-          'CORE.boom',
-          () async => throw StateError('nope'),
-          tag: 'T:',
-          callId: 'beef',
-        );
-      } catch (e) {
-        caught = e;
-      }
+      final result = await hostCall<int>(
+        'CORE.boom',
+        () async => throw StateError('nope'),
+        tag: 'T:',
+        callId: 'beef',
+      );
 
-      expect(caught, isA<StateError>());
+      expect(result, isNull);
       expect(logger.entries.length, 3);
       expect(logger.entries[0].message, '[CORE.boom] #beef phase=enter');
       expect(logger.entries[1].level, LogLevel.error);
@@ -147,14 +143,13 @@ void main() {
 
     test('errorMessage is suppressed when debug is off', () async {
       logger.debugEnabled = false;
-      try {
-        await hostCall<void>(
-          'CORE.boom',
-          () async => throw StateError('with-pii https://x.y/a@b'),
-          tag: 'T:',
-        );
-      } catch (_) {}
+      final result = await hostCall<int>(
+        'CORE.boom',
+        () async => throw StateError('with-pii https://x.y/a@b'),
+        tag: 'T:',
+      );
 
+      expect(result, isNull);
       expect(logger.entries.length, 1);
       expect(logger.entries.single.level, LogLevel.error);
       expect(
@@ -165,14 +160,13 @@ void main() {
 
     test('truncates long error messages on the debug line', () async {
       final long = 'x' * 300;
-      try {
-        await hostCall<void>(
-          'CORE.boom',
-          () async => throw Exception(long),
-          tag: 'T:',
-        );
-      } catch (_) {}
+      final result = await hostCall<int>(
+        'CORE.boom',
+        () async => throw Exception(long),
+        tag: 'T:',
+      );
 
+      expect(result, isNull);
       final debugLine = logger.entries
           .lastWhere((e) => e.level == LogLevel.debug)
           .message;
@@ -203,15 +197,15 @@ void main() {
       expect(logger.entries[1].message, '[CORE.flag] phase=exit result=true');
     });
 
-    test('rethrows and logs error: errorType at error, message at debug', () {
-      expect(
-        () => hostCallSync<void>(
-          'CORE.s',
-          () => throw ArgumentError('bad'),
-          tag: 'T:',
-        ),
-        throwsA(isA<ArgumentError>()),
+    test('returns null and logs error: errorType at error, message at debug',
+        () {
+      final result = hostCallSync<int>(
+        'CORE.s',
+        () => throw ArgumentError('bad'),
+        tag: 'T:',
       );
+
+      expect(result, isNull);
       final errorLine =
           logger.entries.firstWhere((e) => e.level == LogLevel.error);
       expect(errorLine.message, '[CORE.s] phase=error errorType=ArgumentError');

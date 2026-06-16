@@ -98,7 +98,7 @@ class SessionReplay {
   /// ```dart
   /// await SessionReplay.getSessionReplayLink();
   /// ```
-  static Future<String> getSessionReplayLink() {
+  static Future<String?> getSessionReplayLink() {
     final callId = CallId.next();
     return hostCall(
       'SR.getSessionReplayLink',
@@ -155,21 +155,21 @@ class SessionReplay {
   /// // Capture every 2 seconds
   /// await SessionReplay.setScreenshotCaptureInterval(2000);
   /// ```
-  static Future<void> setScreenshotCaptureInterval(int intervalMs) => hostCall(
-        'SR.setScreenshotCaptureInterval',
-        () async {
-          if (intervalMs < 500) {
-            throw ArgumentError.value(
-              intervalMs,
-              'intervalMs',
-              'must be greater than or equal to 500',
-            );
-          }
-          return _host.setScreenshotCaptureInterval(intervalMs);
-        },
-        tag: DebugTags.sessionReplay,
-        args: {'intervalMs': intervalMs},
+  static Future<void> setScreenshotCaptureInterval(int intervalMs) {
+    if (intervalMs < 500) {
+      throw ArgumentError.value(
+        intervalMs,
+        'intervalMs',
+        'must be greater than or equal to 500',
       );
+    }
+    return hostCall(
+      'SR.setScreenshotCaptureInterval',
+      () => _host.setScreenshotCaptureInterval(intervalMs),
+      tag: DebugTags.sessionReplay,
+      args: {'intervalMs': intervalMs},
+    );
+  }
 
   /// Sets the visual quality of captured screenshots.
   ///

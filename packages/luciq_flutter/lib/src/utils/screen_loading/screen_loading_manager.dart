@@ -78,7 +78,7 @@ class ScreenLoadingManager {
 
   /// Checks if the Luciq SDK is built before calling API methods.
   Future<bool> _checkLuciqSDKBuilt(String apiName) async {
-    final isLuciqSDKBuilt = await Luciq.isBuilt();
+    final isLuciqSDKBuilt = (await Luciq.isBuilt()) ?? false;
     if (!isLuciqSDKBuilt) {
       LuciqLogger.I.e(
         'Luciq API {$apiName} was called before the SDK is built. To build it, first by following the instructions at this link:\n'

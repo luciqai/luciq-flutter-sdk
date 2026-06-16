@@ -34,7 +34,7 @@ class _ScreenLoadingPageState extends State<ScreenLoadingPage> {
 
   void _extendScreenLoadingTesting() async {
     final isEnabled = await APM.isScreenLoadingEnabled();
-    if (!isEnabled) {
+    if (isEnabled != true) {
       debugPrint(
         'Screen loading monitoring is disabled, skipping extend.',
       );

@@ -236,7 +236,7 @@ class LuciqScreenRenderManager {
       1 / displayRefreshRate * 1000;
 
   /// Get device refresh rate from native side.
-  Future<List<double?>> get _getDeviceRefreshRateAndToleranceFromNative =>
+  Future<List<double?>?> get _getDeviceRefreshRateAndToleranceFromNative =>
       APM.getDeviceRefreshRateAndTolerance();
 
   /// add new [WidgetsBindingObserver] to track app lifecycle.
@@ -278,10 +278,15 @@ class LuciqScreenRenderManager {
 
   Future<double> get _getSlowFrameThresholdMs async {
     final deviceRefreshRateAndTolerance =
-        await _getDeviceRefreshRateAndToleranceFromNative;
-    final deviceRefreshRate = deviceRefreshRateAndTolerance[0] ??
+        await _getDeviceRefreshRateAndToleranceFromNative ?? const <double?>[];
+    final deviceRefreshRate = (deviceRefreshRateAndTolerance.isNotEmpty
+            ? deviceRefreshRateAndTolerance[0]
+            : null) ??
         60; // default to 60 FPS if not available
-    final toleranceMs = (deviceRefreshRateAndTolerance[1] ?? 10) /
+    final toleranceMs = ((deviceRefreshRateAndTolerance.length > 1
+                ? deviceRefreshRateAndTolerance[1]
+                : null) ??
+            10) /
         1000; // convert the tolerance from microseconds to milliseconds
     final targetMsPerFrame = _targetMsPerFrame(deviceRefreshRate);
     return double.parse(

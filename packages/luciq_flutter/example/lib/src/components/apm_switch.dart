@@ -12,7 +12,7 @@ class _APMSwitchState extends State<APMSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<bool?>(
         future: APM.isEnabled(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {

@@ -184,7 +184,7 @@ class Luciq {
 
   /// @nodoc
   @internal
-  static Future<bool> isEnabled() => hostCall(
+  static Future<bool?> isEnabled() => hostCall(
         'Luciq.isEnabled',
         () => _host.isEnabled(),
         tag: DebugTags.core,
@@ -192,7 +192,7 @@ class Luciq {
 
   /// @nodoc
   @internal
-  static Future<bool> isBuilt() => hostCall(
+  static Future<bool?> isBuilt() => hostCall(
         'Luciq.isBuilt',
         () => _host.isBuilt(),
         tag: DebugTags.core,
@@ -347,7 +347,7 @@ class Luciq {
       );
 
   /// Gets all tags of reported feedback, bug or crash. Returns the list of tags.
-  static Future<List<String>?> getTags() => hostCall(
+  static Future<List<String>?> getTags() => hostCall<List<String>?>(
         'Luciq.getTags',
         () async {
           final tags = await _host.getTags();
@@ -404,7 +404,8 @@ class Luciq {
       );
 
   /// Returns the user attribute associated with a given [key].
-  static Future<String?> getUserAttributeForKey(String key) => hostCall(
+  static Future<String?> getUserAttributeForKey(String key) =>
+      hostCall<String?>(
         'Luciq.getUserAttributeForKey',
         () => _host.getUserAttributeForKey(key),
         tag: DebugTags.core,
@@ -412,7 +413,7 @@ class Luciq {
       );
 
   /// A new Map containing all the currently set user attributes, or an empty Map if no user attributes have been set.
-  static Future<Map<String, String>> getUserAttributes() => hostCall(
+  static Future<Map<String, String>?> getUserAttributes() => hostCall(
         'Luciq.getUserAttributes',
         () async {
           final attributes = await _host.getUserAttributes();

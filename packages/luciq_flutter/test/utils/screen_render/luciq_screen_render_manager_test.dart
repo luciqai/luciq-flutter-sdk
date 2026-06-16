@@ -459,8 +459,7 @@ void main() {
       CrashReporting.$setHostApi(mCrashReportingHost);
     });
 
-    test('should log error and stack trace when init() encounters an exception',
-        () async {
+    test('should log error when init() encounters an exception', () async {
       const error = 'Test error in getDeviceRefreshRateAndTolerance';
       final exception = Exception(error);
 
@@ -476,24 +475,16 @@ void main() {
         ),
       ).captured.cast<String>();
 
-      final managerLog = capturedLogs
-          .firstWhere((m) => m.startsWith('[ScreenRender]'));
-      expect(managerLog, contains('errorType=${exception.runtimeType}'));
-      // stacktrace no longer logged
-
-      // Verify that non-fatal crash reporting was called
-      verify(
-        mCrashReportingHost.sendNonFatalError(
-          any, // jsonCrash
-          any, // userAttributes
-          any, // fingerprint
-          any, // nonFatalExceptionLevel
-        ),
-      ).called(1);
+      // hostCall now swallows the exception and emits the canonical
+      // [APM.getDeviceRefreshRateAndTolerance] phase=error line itself.
+      final hostCallLog = capturedLogs.firstWhere(
+        (m) => m.startsWith('[APM.getDeviceRefreshRateAndTolerance]'),
+      );
+      expect(hostCallLog, contains('errorType=${exception.runtimeType}'));
     });
 
     test(
-        'should log error and stack trace when _reportScreenRenderForAutoUiTrace() encounters an exception',
+        'should log error when _reportScreenRenderForAutoUiTrace() encounters an exception',
         () async {
       const error = 'Test error in endScreenRenderForAutoUiTrace';
       final exception = Exception(error);
@@ -523,7 +514,7 @@ void main() {
       // End the collector which should trigger the error
       realManager.endScreenRenderCollector();
       // Let the fire-and-forget _reportScreenRenderFor* future settle so the
-      // async catch in _logExceptionErrorAndStackTrace runs before verify.
+      // hostCall-level error log fires before verify.
       await Future<void>.delayed(Duration.zero);
 
       final capturedLogs = verify(
@@ -533,24 +524,14 @@ void main() {
         ),
       ).captured.cast<String>();
 
-      final managerLog = capturedLogs
-          .firstWhere((m) => m.startsWith('[ScreenRender]'));
-      expect(managerLog, contains('errorType=${exception.runtimeType}'));
-      // stacktrace no longer logged
-
-      // Verify that non-fatal crash reporting was called
-      verify(
-        mCrashReportingHost.sendNonFatalError(
-          any, // jsonCrash
-          any, // userAttributes
-          any, // fingerprint
-          any, // nonFatalExceptionLevel
-        ),
-      ).called(1);
+      final hostCallLog = capturedLogs.firstWhere(
+        (m) => m.startsWith('[APM.endScreenRenderForAutoUiTrace]'),
+      );
+      expect(hostCallLog, contains('errorType=${exception.runtimeType}'));
     });
 
     test(
-        'should log error and stack trace when _reportScreenRenderForCustomUiTrace() encounters an exception',
+        'should log error when _reportScreenRenderForCustomUiTrace() encounters an exception',
         () async {
       const error = 'Test error in endScreenRenderForCustomUiTrace';
       final exception = Exception(error);
@@ -580,7 +561,7 @@ void main() {
       // End the collector which should trigger the error
       realManager.endScreenRenderCollector(UiTraceType.custom);
       // Let the fire-and-forget _reportScreenRenderFor* future settle so the
-      // async catch in _logExceptionErrorAndStackTrace runs before verify.
+      // hostCall-level error log fires before verify.
       await Future<void>.delayed(Duration.zero);
 
       final capturedLogs = verify(
@@ -590,20 +571,10 @@ void main() {
         ),
       ).captured.cast<String>();
 
-      final managerLog = capturedLogs
-          .firstWhere((m) => m.startsWith('[ScreenRender]'));
-      expect(managerLog, contains('errorType=${exception.runtimeType}'));
-      // stacktrace no longer logged
-
-      // Verify that non-fatal crash reporting was called
-      verify(
-        mCrashReportingHost.sendNonFatalError(
-          any, // jsonCrash
-          any, // userAttributes
-          any, // fingerprint
-          any, // nonFatalExceptionLevel
-        ),
-      ).called(1);
+      final hostCallLog = capturedLogs.firstWhere(
+        (m) => m.startsWith('[APM.endScreenRenderForCustomUiTrace]'),
+      );
+      expect(hostCallLog, contains('errorType=${exception.runtimeType}'));
     });
   });
 }

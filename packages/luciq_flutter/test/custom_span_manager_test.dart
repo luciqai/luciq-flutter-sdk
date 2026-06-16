@@ -56,6 +56,7 @@ void main() {
     final time = DateTime.now();
     when(mDateTime.now()).thenReturn(time);
     when(mMonotonicClock.now).thenReturn(1000000);
+    when(mLuciqLogger.isDebugEnabled()).thenReturn(false);
   });
 
   tearDown(() {

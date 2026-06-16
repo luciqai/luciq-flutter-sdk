@@ -2,8 +2,12 @@
 
 import 'dart:async';
 
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/surveys.api.g.dart';
+import 'package:luciq_flutter/src/utils/call_id.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:meta/meta.dart';
 
 typedef OnShowSurveyCallback = void Function();
@@ -32,14 +36,26 @@ class Surveys implements SurveysFlutterApi {
   /// @nodoc
   @internal
   @override
-  void onShowSurvey() {
+  void onShowSurvey(String callId) {
+    logCallbackFire(
+      'SUR.onShowSurvey',
+      tag: DebugTags.surveys,
+      callId: callId,
+      args: {'callbackPresent': _onShowCallback != null},
+    );
     _onShowCallback?.call();
   }
 
   /// @nodoc
   @internal
   @override
-  void onDismissSurvey() {
+  void onDismissSurvey(String callId) {
+    logCallbackFire(
+      'SUR.onDismissSurvey',
+      tag: DebugTags.surveys,
+      callId: callId,
+      args: {'callbackPresent': _onDismissCallback != null},
+    );
     _onDismissCallback?.call();
   }
 
@@ -50,24 +66,37 @@ class Surveys implements SurveysFlutterApi {
   /// To manually display any available surveys, call `Luciq.showSurveyIfAvailable()`.
   /// Defaults to `true`.
   /// [isEnabled] A boolean to set whether Luciq Surveys is enabled or disabled.
-  static Future<void> setEnabled(bool isEnabled) async {
-    return _host.setEnabled(isEnabled);
-  }
+  static Future<void> setEnabled(bool isEnabled) => hostCall(
+        'SUR.setEnabled',
+        () => _host.setEnabled(isEnabled),
+        tag: DebugTags.surveys,
+        args: {'isEnabled': isEnabled},
+      );
 
   ///Sets whether auto surveys showing are enabled or not.
   /// [isEnabled] A boolean to indicate whether the
   /// surveys auto showing are enabled or not.
-  static Future<void> setAutoShowingEnabled(bool isEnabled) async {
-    return _host.setAutoShowingEnabled(isEnabled);
-  }
+  static Future<void> setAutoShowingEnabled(bool isEnabled) => hostCall(
+        'SUR.setAutoShowingEnabled',
+        () => _host.setAutoShowingEnabled(isEnabled),
+        tag: DebugTags.surveys,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Returns an array containing the available surveys.
   /// [callback] availableSurveysCallback callback with
   /// argument available surveys
-  static Future<List<String>> getAvailableSurveys() async {
-    final titles = await _host.getAvailableSurveys();
-
-    return titles.cast<String>();
+  static Future<List<String>?> getAvailableSurveys() {
+    final callId = CallId.next();
+    return hostCall(
+      'SUR.getAvailableSurveys',
+      () async {
+        final titles = await _host.getAvailableSurveys(callId);
+        return titles.cast<String>();
+      },
+      tag: DebugTags.surveys,
+      callId: callId,
+    );
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
@@ -76,9 +105,13 @@ class Surveys implements SurveysFlutterApi {
   /// [callback]  A callback that gets executed before presenting the survey's UI.
   static Future<void> setOnShowCallback(
     OnShowSurveyCallback callback,
-  ) async {
+  ) {
     _onShowCallback = callback;
-    return _host.bindOnShowSurveyCallback();
+    return hostCall(
+      'SUR.setOnShowCallback',
+      () => _host.bindOnShowSurveyCallback(),
+      tag: DebugTags.surveys,
+    );
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
@@ -87,52 +120,82 @@ class Surveys implements SurveysFlutterApi {
   /// [callback]  A callback that gets executed after the survey's UI is dismissed.
   static Future<void> setOnDismissCallback(
     OnDismissSurveyCallback callback,
-  ) async {
+  ) {
     _onDismissCallback = callback;
-    return _host.bindOnDismissSurveyCallback();
+    return hostCall(
+      'SUR.setOnDismissCallback',
+      () => _host.bindOnDismissSurveyCallback(),
+      tag: DebugTags.surveys,
+    );
   }
 
   /// Setting an option for all the surveys to show a welcome screen before
   /// [shouldShowWelcomeScreen] A boolean for setting whether the  welcome screen should show.
   static Future<void> setShouldShowWelcomeScreen(
     bool shouldShowWelcomeScreen,
-  ) async {
-    return _host.setShouldShowWelcomeScreen(shouldShowWelcomeScreen);
-  }
+  ) =>
+      hostCall(
+        'SUR.setShouldShowWelcomeScreen',
+        () => _host.setShouldShowWelcomeScreen(shouldShowWelcomeScreen),
+        tag: DebugTags.surveys,
+        args: {'shouldShowWelcomeScreen': shouldShowWelcomeScreen},
+      );
 
   ///  Shows one of the surveys that were not shown before, that also have conditions
   /// that match the current device/user.
   /// Does nothing if there are no available surveys or if a survey has already been shown
   /// in the current session.
-  static Future<void> showSurveyIfAvailable() async {
-    return _host.showSurveyIfAvailable();
-  }
+  static Future<void> showSurveyIfAvailable() => hostCall(
+        'SUR.showSurveyIfAvailable',
+        () => _host.showSurveyIfAvailable(),
+        tag: DebugTags.surveys,
+      );
 
   /// Shows survey with a specific token.
   /// Does nothing if there are no available surveys with that specific token.
   /// Answered and cancelled surveys won't show up again.
   /// [surveyToken] - A String with a survey token.
-  static Future<void> showSurvey(String surveyToken) async {
-    return _host.showSurvey(surveyToken);
+  static Future<void> showSurvey(String surveyToken) {
+    final callId = CallId.next();
+    return hostCall(
+      'SUR.showSurvey',
+      () => _host.showSurvey(callId, surveyToken),
+      tag: DebugTags.surveys,
+      callId: callId,
+      args: {'surveyTokenLength': surveyToken.length},
+    );
   }
 
   /// Sets a block of code to be executed just before the SDK's UI is presented.
   /// This block is executed on the UI thread. Could be used for performing any
   /// UI changes  after the survey's UI is dismissed.
   /// [callback]  A callback that gets executed after the survey's UI is dismissed.
-  static Future<bool> hasRespondedToSurvey(String surveyToken) async {
-    final hasResponded = await _host.hasRespondedToSurvey(surveyToken);
-
-    return hasResponded;
+  static Future<bool?> hasRespondedToSurvey(String surveyToken) {
+    final callId = CallId.next();
+    return hostCall(
+      'SUR.hasRespondedToSurvey',
+      () => _host.hasRespondedToSurvey(callId, surveyToken),
+      tag: DebugTags.surveys,
+      callId: callId,
+      args: {'surveyTokenLength': surveyToken.length},
+    );
   }
 
   /// iOS Only
   /// Sets url for the published iOS app on AppStore, You can redirect
   /// NPS Surveys or AppRating Surveys to AppStore to let users rate your app on AppStore itself.
   /// [appStoreURL] A String url for the published iOS app on AppStore
-  static Future<void> setAppStoreURL(String appStoreURL) async {
-    if (LCQBuildInfo.instance.isIOS) {
-      return _host.setAppStoreURL(appStoreURL);
-    }
-  }
+  static Future<void> setAppStoreURL(String appStoreURL) => hostCall(
+        'SUR.setAppStoreURL',
+        () async {
+          if (LCQBuildInfo.instance.isIOS) {
+            return _host.setAppStoreURL(appStoreURL);
+          }
+        },
+        tag: DebugTags.surveys,
+        args: {
+          'url': redactUrlForLog(appStoreURL),
+          'isIOS': LCQBuildInfo.instance.isIOS,
+        },
+      );
 }

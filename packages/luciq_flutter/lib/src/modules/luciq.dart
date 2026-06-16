@@ -16,9 +16,11 @@ import 'package:flutter/material.dart';
 // ignore: unused_import
 import 'package:flutter/services.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart';
@@ -182,21 +184,28 @@ class Luciq {
 
   /// @nodoc
   @internal
-  static Future<bool> isEnabled() async {
-    return _host.isEnabled();
-  }
+  static Future<bool?> isEnabled() => hostCall(
+        'Luciq.isEnabled',
+        () => _host.isEnabled(),
+        tag: DebugTags.core,
+      );
 
   /// @nodoc
   @internal
-  static Future<bool> isBuilt() async {
-    return _host.isBuilt();
-  }
+  static Future<bool?> isBuilt() => hostCall(
+        'Luciq.isBuilt',
+        () => _host.isBuilt(),
+        tag: DebugTags.core,
+      );
 
   /// Enables or disables Luciq functionality.
   /// [boolean] isEnabled
-  static Future<void> setEnabled(bool isEnabled) async {
-    return _host.setEnabled(isEnabled);
-  }
+  static Future<void> setEnabled(bool isEnabled) => hostCall(
+        'Luciq.setEnabled',
+        () => _host.setEnabled(isEnabled),
+        tag: DebugTags.core,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Starts the SDK.
   /// This is the main SDK method that does all the magic. This is the only
@@ -210,16 +219,44 @@ class Luciq {
     required List<InvocationEvent> invocationEvents,
     LogLevel debugLogsLevel = LogLevel.error,
     String? appVariant,
-  }) async {
+  }) {
     $setup();
     LuciqLogger.I.logLevel = debugLogsLevel;
-    await _host.init(
-      token,
-      invocationEvents.mapToString(),
-      debugLogsLevel.toString(),
-      appVariant,
+    return hostCall<void>(
+      'Luciq.init',
+      () async {
+        await _host.init(
+          token,
+          invocationEvents.mapToString(),
+          debugLogsLevel.toString(),
+          appVariant,
+        );
+        return FeatureFlagsManager().registerFeatureFlagsListener();
+      },
+      tag: DebugTags.core,
+      args: {
+        'tokenPresent': token.isNotEmpty,
+        'invocationEventsCount': invocationEvents.length,
+        'debugLogsLevel': debugLogsLevel,
+        'appVariantPresent': appVariant != null,
+      },
     );
-    return FeatureFlagsManager().registerFeatureFlagsListener();
+  }
+
+  /// Changes the Dart-side debug log verbosity at runtime.
+  ///
+  /// Use this to capture a debug trace mid-session (e.g. a support flow
+  /// where the user reproduces an issue) without re-initializing the SDK.
+  /// Affects only the Dart [LuciqLogger]; the native SDK log level is set
+  /// at [init] time and is not changed by this call.
+  static void setDebugLogsLevel(LogLevel level) {
+    final previous = LuciqLogger.I.logLevel;
+    // Emit BEFORE mutating so the transition is visible even when lowering to none.
+    LuciqLogger.I.d(
+      '[Luciq.setDebugLogsLevel] phase=enter previous=$previous level=$level',
+      tag: DebugTags.core,
+    );
+    LuciqLogger.I.logLevel = level;
   }
 
   /// Sets a [callback] to be called wehenever a screen name is captured to mask
@@ -227,6 +264,10 @@ class Luciq {
   static void setScreenNameMaskingCallback(
     ScreenNameMaskingCallback? callback,
   ) {
+    LuciqLogger.I.d(
+      '[Luciq.setScreenNameMaskingCallback] phase=enter callbackPresent=${callback != null}',
+      tag: DebugTags.core,
+    );
     ScreenNameMasker.I.setMaskingCallback(callback);
   }
 
@@ -234,9 +275,13 @@ class Luciq {
   /// [welcomeMessageMode] is an enum to set the welcome message mode to live, or beta.
   static Future<void> showWelcomeMessageWithMode(
     WelcomeMessageMode welcomeMessageMode,
-  ) async {
-    return _host.showWelcomeMessageWithMode(welcomeMessageMode.toString());
-  }
+  ) =>
+      hostCall(
+        'Luciq.showWelcomeMessageWithMode',
+        () => _host.showWelcomeMessageWithMode(welcomeMessageMode.toString()),
+        tag: DebugTags.core,
+        args: {'mode': welcomeMessageMode},
+      );
 
   /// Sets the default value of the user's [email] and hides the email field from the reporting UI
   /// and set the user's [name] and [id] to be included with all reports.
@@ -246,117 +291,179 @@ class Luciq {
     String? email, [
     String? name,
     String? id,
-  ]) async {
-    return _host.identifyUser(email, name, id);
-  }
+  ]) =>
+      hostCall(
+        'Luciq.identifyUser',
+        () => _host.identifyUser(email, name, id),
+        tag: DebugTags.core,
+        args: {
+          'emailPresent': email != null,
+          'namePresent': name != null,
+          'idPresent': id != null,
+        },
+      );
 
   /// Sets the default value of the user's email to nil and show email field and remove user name
   /// from all reports
   /// It also reset the chats on device and removes user attributes, user data and completed surveys.
-  static Future<void> logOut() async {
-    return _host.logOut();
-  }
+  static Future<void> logOut() => hostCall(
+        'Luciq.logOut',
+        () => _host.logOut(),
+        tag: DebugTags.core,
+      );
 
   /// Sets the SDK's [locale].
   /// Use to change the SDK's UI to different language.
   /// Defaults to the device's current locale.
-  static Future<void> setLocale(LCQLocale locale) async {
-    return _host.setLocale(locale.toString());
-  }
+  static Future<void> setLocale(LCQLocale locale) => hostCall(
+        'Luciq.setLocale',
+        () => _host.setLocale(locale.toString()),
+        tag: DebugTags.core,
+        args: {'locale': locale},
+      );
 
   /// Sets the color theme of the SDK's whole UI to the [colorTheme] given.
   /// It should be of type [ColorTheme].
-  static Future<void> setColorTheme(ColorTheme colorTheme) async {
-    return _host.setColorTheme(colorTheme.toString());
-  }
+  static Future<void> setColorTheme(ColorTheme colorTheme) => hostCall(
+        'Luciq.setColorTheme',
+        () => _host.setColorTheme(colorTheme.toString()),
+        tag: DebugTags.core,
+        args: {'colorTheme': colorTheme},
+      );
 
   /// Appends a set of [tags] to previously added tags of reported feedback, bug or crash.
-  static Future<void> appendTags(List<String> tags) async {
-    return _host.appendTags(tags);
-  }
+  static Future<void> appendTags(List<String> tags) => hostCall(
+        'Luciq.appendTags',
+        () => _host.appendTags(tags),
+        tag: DebugTags.core,
+        args: {'count': tags.length},
+      );
 
   /// Manually removes all tags of reported feedback, bug or crash.
-  static Future<void> resetTags() async {
-    return _host.resetTags();
-  }
+  static Future<void> resetTags() => hostCall(
+        'Luciq.resetTags',
+        () => _host.resetTags(),
+        tag: DebugTags.core,
+      );
 
   /// Gets all tags of reported feedback, bug or crash. Returns the list of tags.
-  static Future<List<String>?> getTags() async {
-    final tags = await _host.getTags();
-    return tags?.cast<String>();
-  }
+  static Future<List<String>?> getTags() => hostCall<List<String>?>(
+        'Luciq.getTags',
+        () async {
+          final tags = await _host.getTags();
+          return tags?.cast<String>();
+        },
+        tag: DebugTags.core,
+      );
 
   /// Adds feature flags to the next report.
-  static Future<void> addFeatureFlags(List<FeatureFlag> featureFlags) async {
-    final map = <String, String>{};
-    for (final value in featureFlags) {
-      map[value.name] = value.variant ?? '';
-    }
-
-    return _host.addFeatureFlags(map);
-  }
+  static Future<void> addFeatureFlags(List<FeatureFlag> featureFlags) =>
+      hostCall(
+        'Luciq.addFeatureFlags',
+        () {
+          final map = <String, String>{};
+          for (final value in featureFlags) {
+            map[value.name] = value.variant ?? '';
+          }
+          return _host.addFeatureFlags(map);
+        },
+        tag: DebugTags.featureFlags,
+        args: {'count': featureFlags.length},
+      );
 
   /// Removes certain feature flags from the next report.
-  static Future<void> removeFeatureFlags(List<String> featureFlags) async {
-    return _host.removeFeatureFlags(featureFlags);
-  }
+  static Future<void> removeFeatureFlags(List<String> featureFlags) => hostCall(
+        'Luciq.removeFeatureFlags',
+        () => _host.removeFeatureFlags(featureFlags),
+        tag: DebugTags.featureFlags,
+        args: {'count': featureFlags.length},
+      );
 
   /// Clears all feature flags from the next report.
-  static Future<void> clearAllFeatureFlags() async {
-    return _host.removeAllFeatureFlags();
-  }
+  static Future<void> clearAllFeatureFlags() => hostCall(
+        'Luciq.clearAllFeatureFlags',
+        () => _host.removeAllFeatureFlags(),
+        tag: DebugTags.featureFlags,
+      );
 
   /// Add custom user attribute [value] with a [key] that is going to be sent with each feedback, bug or crash.
-  static Future<void> setUserAttribute(String value, String key) async {
-    return _host.setUserAttribute(value, key);
-  }
+  static Future<void> setUserAttribute(String value, String key) => hostCall(
+        'Luciq.setUserAttribute',
+        () => _host.setUserAttribute(value, key),
+        tag: DebugTags.core,
+        args: {'keyLength': key.length, 'valueLength': value.length},
+      );
 
   /// Removes a given [key] and its associated value from user attributes.
   /// Does nothing if a [key] does not exist.
-  static Future<void> removeUserAttribute(String key) async {
-    return _host.removeUserAttribute(key);
-  }
+  static Future<void> removeUserAttribute(String key) => hostCall(
+        'Luciq.removeUserAttribute',
+        () => _host.removeUserAttribute(key),
+        tag: DebugTags.core,
+        args: {'keyLength': key.length},
+      );
 
   /// Returns the user attribute associated with a given [key].
-  static Future<String?> getUserAttributeForKey(String key) {
-    return _host.getUserAttributeForKey(key);
-  }
+  static Future<String?> getUserAttributeForKey(String key) =>
+      hostCall<String?>(
+        'Luciq.getUserAttributeForKey',
+        () => _host.getUserAttributeForKey(key),
+        tag: DebugTags.core,
+        args: {'keyLength': key.length},
+      );
 
   /// A new Map containing all the currently set user attributes, or an empty Map if no user attributes have been set.
-  static Future<Map<String, String>> getUserAttributes() async {
-    final attributes = await _host.getUserAttributes();
-    return attributes != null
-        ? Map<String, String>.from(attributes)
-        : <String, String>{};
-  }
+  static Future<Map<String, String>?> getUserAttributes() => hostCall(
+        'Luciq.getUserAttributes',
+        () async {
+          final attributes = await _host.getUserAttributes();
+          return attributes != null
+              ? Map<String, String>.from(attributes)
+              : <String, String>{};
+        },
+        tag: DebugTags.core,
+      );
 
   /// invoke sdk manually
-  static Future<void> show() async {
-    return _host.show();
-  }
+  static Future<void> show() => hostCall(
+        'Luciq.show',
+        () => _host.show(),
+        tag: DebugTags.core,
+      );
 
   /// Logs a user event with [name] that happens through the lifecycle of the application.
   /// Logged user events are going to be sent with each report, as well as at the end of a session.
-  static Future<void> logUserEvent(String name) async {
-    return _host.logUserEvent(name);
-  }
+  static Future<void> logUserEvent(String name) => hostCall(
+        'Luciq.logUserEvent',
+        () => _host.logUserEvent(name),
+        tag: DebugTags.core,
+        args: {'nameLength': name.length},
+      );
 
   /// Overrides any of the strings shown in the SDK with custom ones.
   /// Allows you to customize a [value] shown to users in the SDK using a predefined [key].
   static Future<void> setValueForStringWithKey(
     String value,
     CustomTextPlaceHolderKey key,
-  ) async {
-    return _host.setValueForStringWithKey(value, key.toString());
-  }
+  ) =>
+      hostCall(
+        'Luciq.setValueForStringWithKey',
+        () => _host.setValueForStringWithKey(value, key.toString()),
+        tag: DebugTags.core,
+        args: {'key': key, 'valueLength': value.length},
+      );
 
   /// Enable/disable session profiler
   /// [sessionProfilerEnabled] desired state of the session profiler feature.
   static Future<void> setSessionProfilerEnabled(
     bool sessionProfilerEnabled,
-  ) async {
-    return _host.setSessionProfilerEnabled(sessionProfilerEnabled);
-  }
+  ) =>
+      hostCall(
+        'Luciq.setSessionProfilerEnabled',
+        () => _host.setSessionProfilerEnabled(sessionProfilerEnabled),
+        tag: DebugTags.core,
+        args: {'sessionProfilerEnabled': sessionProfilerEnabled},
+      );
 
   /// Sets the primary color of the SDK's UI.
   /// Sets the color of UI elements indicating interactivity or call to action.
@@ -367,14 +474,21 @@ class Luciq {
     'This API is deprecated. Please use Luciq.setTheme instead.',
   )
   static Future<void> setPrimaryColor(Color color) async {
+    LuciqLogger.I.d(
+      '[Luciq.setPrimaryColor] phase=enter',
+      tag: DebugTags.core,
+    );
     await setTheme(ThemeConfig(primaryColor: color.toString()));
   }
 
   /// Adds specific user data that you need to be added to the reports
   /// [userData] data to be added
-  static Future<void> setUserData(String userData) async {
-    return _host.setUserData(userData);
-  }
+  static Future<void> setUserData(String userData) => hostCall(
+        'Luciq.setUserData',
+        () => _host.setUserData(userData),
+        tag: DebugTags.core,
+        args: {'length': userData.length},
+      );
 
   /// Add file to be attached to the bug report.
   /// [filePath] of the file
@@ -382,9 +496,16 @@ class Luciq {
   static Future<void> addFileAttachmentWithURL(
     String filePath,
     String fileName,
-  ) async {
-    return _host.addFileAttachmentWithURL(filePath, fileName);
-  }
+  ) =>
+      hostCall(
+        'Luciq.addFileAttachmentWithURL',
+        () => _host.addFileAttachmentWithURL(filePath, fileName),
+        tag: DebugTags.core,
+        args: {
+          'filePathLength': filePath.length,
+          'fileNameLength': fileName.length,
+        },
+      );
 
   /// Add file to be attached to the bug report.
   /// [data] of the file
@@ -392,37 +513,58 @@ class Luciq {
   static Future<void> addFileAttachmentWithData(
     Uint8List data,
     String fileName,
-  ) async {
-    return _host.addFileAttachmentWithData(data, fileName);
-  }
+  ) =>
+      hostCall(
+        'Luciq.addFileAttachmentWithData',
+        () => _host.addFileAttachmentWithData(data, fileName),
+        tag: DebugTags.core,
+        args: {
+          'dataLength': data.length,
+          'fileNameLength': fileName.length,
+        },
+      );
 
   /// Clears all Uris of the attached files.
   /// The URIs which added via {@link Luciq#addFileAttachment} API not the physical files.
-  static Future<void> clearFileAttachments() async {
-    return _host.clearFileAttachments();
-  }
+  static Future<void> clearFileAttachments() => hostCall(
+        'Luciq.clearFileAttachments',
+        () => _host.clearFileAttachments(),
+        tag: DebugTags.core,
+      );
 
   /// Sets the welcome message mode to live, beta or disabled.
   /// [welcomeMessageMode] An enum to set the welcome message mode to live, beta or disabled.
   static Future<void> setWelcomeMessageMode(
     WelcomeMessageMode welcomeMessageMode,
-  ) async {
-    return _host.setWelcomeMessageMode(welcomeMessageMode.toString());
-  }
+  ) =>
+      hostCall(
+        'Luciq.setWelcomeMessageMode',
+        () => _host.setWelcomeMessageMode(welcomeMessageMode.toString()),
+        tag: DebugTags.core,
+        args: {'mode': welcomeMessageMode},
+      );
 
   /// Reports that the screen has been changed (repro steps)
   /// [screenName] String containing the screen name
-  static Future<void> reportScreenChange(String screenName) async {
-    return _host.reportScreenChange(screenName);
-  }
+  static Future<void> reportScreenChange(String screenName) => hostCall(
+        'Luciq.reportScreenChange',
+        () => _host.reportScreenChange(screenName),
+        tag: DebugTags.screenTracking,
+        args: {'screenNameLength': screenName.length},
+      );
 
   /// Changes the font of Luciq's UI.
   /// [font] The asset path to the font file (e.g. "fonts/Poppins.ttf").
-  static Future<void> setFont(String font) async {
-    if (LCQBuildInfo.I.isIOS) {
-      return _host.setFont(font);
-    }
-  }
+  static Future<void> setFont(String font) => hostCall(
+        'Luciq.setFont',
+        () async {
+          if (LCQBuildInfo.I.isIOS) {
+            return _host.setFont(font);
+          }
+        },
+        tag: DebugTags.core,
+        args: {'fontLength': font.length, 'isIOS': LCQBuildInfo.I.isIOS},
+      );
 
   /// Sets the repro steps mode for Bug Reporting, Crash Reporting and Session Replay.
   ///
@@ -445,7 +587,7 @@ class Luciq {
     ReproStepsMode? crash,
     ReproStepsMode? sessionReplay,
     ReproStepsMode? all,
-  }) async {
+  }) {
     var bugMode = bug;
     var crashMode = crash;
     var sessionReplayMode = sessionReplay;
@@ -456,10 +598,20 @@ class Luciq {
       sessionReplayMode = all;
     }
 
-    return _host.setReproStepsConfig(
-      bugMode?.toString(),
-      crashMode?.toString(),
-      sessionReplayMode?.toString(),
+    return hostCall(
+      'Luciq.setReproStepsConfig',
+      () => _host.setReproStepsConfig(
+        bugMode?.toString(),
+        crashMode?.toString(),
+        sessionReplayMode?.toString(),
+      ),
+      tag: DebugTags.core,
+      args: {
+        'bug': bugMode,
+        'crash': crashMode,
+        'sessionReplay': sessionReplayMode,
+        'allPresent': all != null,
+      },
     );
   }
 
@@ -471,25 +623,33 @@ class Luciq {
     required AssetImage light,
     required AssetImage dark,
     BuildContext? context,
-  }) async {
-    var configuration = ImageConfiguration.empty;
-    if (context != null) {
-      configuration = createLocalImageConfiguration(context);
-    }
+  }) =>
+      hostCall(
+        'Luciq.setCustomBrandingImage',
+        () async {
+          var configuration = ImageConfiguration.empty;
+          if (context != null) {
+            configuration = createLocalImageConfiguration(context);
+          }
 
-    final lightKey = await light.obtainKey(configuration);
-    final darkKey = await dark.obtainKey(configuration);
-    return _host.setCustomBrandingImage(lightKey.name, darkKey.name);
-  }
+          final lightKey = await light.obtainKey(configuration);
+          final darkKey = await dark.obtainKey(configuration);
+          return _host.setCustomBrandingImage(lightKey.name, darkKey.name);
+        },
+        tag: DebugTags.core,
+        args: {'contextPresent': context != null},
+      );
 
   /// Allows detection of app review sessions which are submitted through custom prompts.
   ///
   /// Use this when utilizing a custom app rating prompt. It should be called
   /// once the user clicks on the Call to Action (CTA) that redirects them to the app store.
   /// Helps track session data for insights on user interactions during review submission.
-  static Future<void> willRedirectToStore() async {
-    return _host.willRedirectToStore();
-  }
+  static Future<void> willRedirectToStore() => hostCall(
+        'Luciq.willRedirectToStore',
+        () => _host.willRedirectToStore(),
+        tag: DebugTags.core,
+      );
 
   /// Sets the fullscreen mode for Luciq UI.
   ///
@@ -499,16 +659,22 @@ class Luciq {
   /// ```dart
   /// Luciq.setFullscreen(true);
   /// ```
-  static Future<void> setFullscreen(bool isEnabled) async {
-    return _host.setFullscreen(isEnabled);
-  }
+  static Future<void> setFullscreen(bool isEnabled) => hostCall(
+        'Luciq.setFullscreen',
+        () => _host.setFullscreen(isEnabled),
+        tag: DebugTags.core,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// This property sets the `appVariant` string to be included in all network requests.
   ///  It should be set before calling [init] method.
   /// [appVariant] used to set current App variant name
-  static Future<void> setAppVariant(String appVariant) async {
-    return _host.setAppVariant(appVariant);
-  }
+  static Future<void> setAppVariant(String appVariant) => hostCall(
+        'Luciq.setAppVariant',
+        () => _host.setAppVariant(appVariant),
+        tag: DebugTags.core,
+        args: {'appVariantLength': appVariant.length},
+      );
 
   /// Sets a custom theme for Luciq UI elements.
   ///
@@ -534,15 +700,20 @@ class Luciq {
   ///   secondaryFontAsset: 'fonts/YourFont.ttf'
   /// ));
   /// ```
-  static Future<void> setTheme(ThemeConfig themeConfig) async {
-    return _host.setTheme(themeConfig.toMap());
-  }
+  static Future<void> setTheme(ThemeConfig themeConfig) => hostCall(
+        'Luciq.setTheme',
+        () => _host.setTheme(themeConfig.toMap()),
+        tag: DebugTags.core,
+      );
 
   /// Enables and disables user interaction steps.
   /// [boolean] isEnabled
-  static Future<void> enableUserSteps(bool isEnabled) async {
-    return _host.setEnableUserSteps(isEnabled);
-  }
+  static Future<void> enableUserSteps(bool isEnabled) => hostCall(
+        'Luciq.enableUserSteps',
+        () => _host.setEnableUserSteps(isEnabled),
+        tag: DebugTags.core,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Master switch that controls all WebView tracking data collection,
   /// including user interactions, network logs and WebView screen loading
@@ -557,9 +728,12 @@ class Luciq {
   /// by adding `luciq { webViewsTrackingEnabled = true }` to your app's
   /// `build.gradle`. Without this, no WebView tracking code is compiled
   /// into your app.
-  static Future<void> setWebViewMonitoringEnabled(bool isEnabled) async {
-    return _host.setWebViewMonitoringEnabled(isEnabled);
-  }
+  static Future<void> setWebViewMonitoringEnabled(bool isEnabled) => hostCall(
+        'Luciq.setWebViewMonitoringEnabled',
+        () => _host.setWebViewMonitoringEnabled(isEnabled),
+        tag: DebugTags.core,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Enables capturing user interactions inside WebViews (tap, scroll,
   /// navigation, swipe). These are reported in the logs section and
@@ -569,9 +743,13 @@ class Luciq {
   /// [setWebViewMonitoringEnabled] to be enabled.
   static Future<void> setWebViewUserInteractionsTrackingEnabled(
     bool isEnabled,
-  ) async {
-    return _host.setWebViewUserInteractionsTrackingEnabled(isEnabled);
-  }
+  ) =>
+      hostCall(
+        'Luciq.setWebViewUserInteractionsTrackingEnabled',
+        () => _host.setWebViewUserInteractionsTrackingEnabled(isEnabled),
+        tag: DebugTags.core,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Enables capturing network logs (Fetch/XHR) triggered from inside
   /// WebViews. Captured requests appear in the logs section of bug,
@@ -579,9 +757,13 @@ class Luciq {
   ///
   /// Disabled by default. Requires the master switch
   /// [setWebViewMonitoringEnabled] to be enabled.
-  static Future<void> setWebViewNetworkTrackingEnabled(bool isEnabled) async {
-    return _host.setWebViewNetworkTrackingEnabled(isEnabled);
-  }
+  static Future<void> setWebViewNetworkTrackingEnabled(bool isEnabled) =>
+      hostCall(
+        'Luciq.setWebViewNetworkTrackingEnabled',
+        () => _host.setWebViewNetworkTrackingEnabled(isEnabled),
+        tag: DebugTags.core,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Sets the screenshot auto-masking types to apply before screenshots
   /// are sent with reports.
@@ -602,6 +784,10 @@ class Luciq {
   static Future<void> setAutoMaskScreenshotTypes(
     List<AutoMasking> types,
   ) async {
+    LuciqLogger.I.d(
+      '[Luciq.setAutoMaskScreenshotTypes] phase=enter count=${types.length}',
+      tag: DebugTags.privateView,
+    );
     PrivateViewsManager.I.addAutoMasking(types);
   }
 
@@ -611,7 +797,15 @@ class Luciq {
     GestureType gestureType,
     String message,
     String? viewName,
-  ) async {
-    return _host.logUserSteps(gestureType.toString(), message, viewName);
-  }
+  ) =>
+      hostCall(
+        'Luciq.logUserSteps',
+        () => _host.logUserSteps(gestureType.toString(), message, viewName),
+        tag: DebugTags.core,
+        args: {
+          'gestureType': gestureType,
+          'messageLength': message.length,
+          'viewNamePresent': viewName != null,
+        },
+      );
 }

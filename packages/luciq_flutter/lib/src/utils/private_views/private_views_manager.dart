@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq_private_view.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
 
 enum AutoMasking { labels, textInputs, media, webViews, none }
@@ -43,6 +46,8 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
   @visibleForTesting
   // ignore: use_setters_to_change_properties
   static void setInstance(PrivateViewsManager instance) {
+    LuciqLogger.I
+        .d('[PRIV.setInstance] phase=enter', tag: DebugTags.privateView);
     _instance = instance;
   }
 
@@ -55,13 +60,18 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
 
   late List<bool Function(Widget)> _viewChecks;
 
-  void addAutoMasking(List<AutoMasking> masking) {
-    _viewChecks = List.of([isPrivateWidget]);
-    if (!(masking.contains(AutoMasking.none) && masking.length == 1)) {
-      _viewChecks.addAll(masking.map((e) => e.hides()).toList());
-    }
-    _host.enableAutoMasking(masking.mapToString());
-  }
+  void addAutoMasking(List<AutoMasking> masking) => hostCallSync(
+        'PRIV.addAutoMasking',
+        () {
+          _viewChecks = List.of([isPrivateWidget]);
+          if (!(masking.contains(AutoMasking.none) && masking.length == 1)) {
+            _viewChecks.addAll(masking.map((e) => e.hides()).toList());
+          }
+          _host.enableAutoMasking(masking.mapToString());
+        },
+        tag: DebugTags.privateView,
+        args: {'count': masking.length},
+      );
 
   Rect? getLayoutRectInfoFromRenderObject(RenderObject? renderObject) {
     if (renderObject == null || !renderObject.attached) {
@@ -164,7 +174,12 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
   }
 
   @override
-  List<double?> getPrivateViews() {
+  List<double?> getPrivateViews(String callId) {
+    logCallbackFire(
+      'PRIV.capture',
+      tag: DebugTags.privateView,
+      callId: callId,
+    );
     final rects = getRectsOfPrivateViews();
     final result = <double>[];
 
@@ -176,6 +191,11 @@ class PrivateViewsManager implements LuciqPrivateViewFlutterApi {
         rect.bottom,
       ]);
     }
+
+    LuciqLogger.I.d(
+      '[PRIV.capture] #$callId phase=exit rectCount=${rects.length}',
+      tag: DebugTags.privateView,
+    );
 
     return result;
   }

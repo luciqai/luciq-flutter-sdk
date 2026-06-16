@@ -31,7 +31,7 @@
 - (void)testShow {
     FlutterError *error;
 
-    [self.api showWithError:&error];
+    [self.api showCallId:@"callId" error:&error];
 
     OCMVerify([self.mReplies show]);
 }
@@ -51,7 +51,7 @@
     
     OCMStub([self.mReplies unreadRepliesCount]).andReturn(expected);
 
-    [self.api getUnreadRepliesCountWithCompletion:^(NSNumber *actual, FlutterError *error) {
+    [self.api getUnreadRepliesCountCallId:@"callId" completion:^(NSNumber *actual, FlutterError *error) {
         [expectation fulfill];
         XCTAssertEqual(expected, actual.integerValue);
     }];
@@ -66,7 +66,7 @@
 
     OCMStub([self.mReplies hasChats]).andReturn(expected);
 
-    [self.api hasChatsWithCompletion:^(NSNumber *actual, FlutterError *error) {
+    [self.api hasChatsCallId:@"callId" completion:^(NSNumber *actual, FlutterError *error) {
         [expectation fulfill];
         XCTAssertEqual(expected, actual.boolValue);
     }];
@@ -82,7 +82,7 @@
     LCQReplies.didReceiveReplyHandler();
 
     OCMVerify([self.mReplies setDidReceiveReplyHandler:[OCMArg any]]);
-    OCMVerify([self.mFlutterApi onNewReplyWithCompletion:[OCMArg invokeBlock]]);
+    OCMVerify([self.mFlutterApi onNewReplyCallId:[OCMArg any] completion:[OCMArg invokeBlock]]);
 }
 
 @end

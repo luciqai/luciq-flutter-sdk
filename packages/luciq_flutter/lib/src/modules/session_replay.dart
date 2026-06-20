@@ -3,7 +3,10 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/session_replay.api.g.dart';
+import 'package:luciq_flutter/src/utils/call_id.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 
 enum ScreenshotCapturingMode {
   navigation,
@@ -36,9 +39,12 @@ class SessionReplay {
   /// ```dart
   /// await SessionReplay.setEnabled(true);
   /// ```
-  static Future<void> setEnabled(bool isEnabled) async {
-    return _host.setEnabled(isEnabled);
-  }
+  static Future<void> setEnabled(bool isEnabled) => hostCall(
+        'SR.setEnabled',
+        () => _host.setEnabled(isEnabled),
+        tag: DebugTags.sessionReplay,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Enables or disables network logs for Session Replay.
   /// By default, network logs are enabled.
@@ -48,9 +54,12 @@ class SessionReplay {
   /// ```dart
   /// await SessionReplay.setNetworkLogsEnabled(true);
   /// ```
-  static Future<void> setNetworkLogsEnabled(bool isEnabled) async {
-    return _host.setNetworkLogsEnabled(isEnabled);
-  }
+  static Future<void> setNetworkLogsEnabled(bool isEnabled) => hostCall(
+        'SR.setNetworkLogsEnabled',
+        () => _host.setNetworkLogsEnabled(isEnabled),
+        tag: DebugTags.sessionReplay,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Enables or disables Luciq logs for Session Replay.
   /// By default, Luciq logs are enabled.
@@ -60,9 +69,12 @@ class SessionReplay {
   /// ```dart
   /// await SessionReplay.setLuciqLogsEnabled(true);
   /// ```
-  static Future<void> setLuciqLogsEnabled(bool isEnabled) async {
-    return _host.setLuciqLogsEnabled(isEnabled);
-  }
+  static Future<void> setLuciqLogsEnabled(bool isEnabled) => hostCall(
+        'SR.setLuciqLogsEnabled',
+        () => _host.setLuciqLogsEnabled(isEnabled),
+        tag: DebugTags.sessionReplay,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Enables or disables capturing of user steps  for Session Replay.
   /// By default, user steps are enabled.
@@ -72,9 +84,12 @@ class SessionReplay {
   /// ```dart
   /// await SessionReplay.setUserStepsEnabled(true);
   /// ```
-  static Future<void> setUserStepsEnabled(bool isEnabled) async {
-    return _host.setUserStepsEnabled(isEnabled);
-  }
+  static Future<void> setUserStepsEnabled(bool isEnabled) => hostCall(
+        'SR.setUserStepsEnabled',
+        () => _host.setUserStepsEnabled(isEnabled),
+        tag: DebugTags.sessionReplay,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Retrieves current session's replay link.
   ///
@@ -83,8 +98,14 @@ class SessionReplay {
   /// ```dart
   /// await SessionReplay.getSessionReplayLink();
   /// ```
-  static Future<String> getSessionReplayLink() async {
-    return _host.getSessionReplayLink();
+  static Future<String?> getSessionReplayLink() {
+    final callId = CallId.next();
+    return hostCall(
+      'SR.getSessionReplayLink',
+      () => _host.getSessionReplayLink(callId),
+      tag: DebugTags.sessionReplay,
+      callId: callId,
+    );
   }
 
   /// Sets when screenshots are captured for Video-like Session Replay.
@@ -103,9 +124,13 @@ class SessionReplay {
   /// ```
   static Future<void> setScreenshotCapturingMode(
     ScreenshotCapturingMode mode,
-  ) async {
-    return _host.setScreenshotCapturingMode(mode.toString());
-  }
+  ) =>
+      hostCall(
+        'SR.setScreenshotCapturingMode',
+        () => _host.setScreenshotCapturingMode(mode.toString()),
+        tag: DebugTags.sessionReplay,
+        args: {'mode': mode},
+      );
 
   /// Sets the capture interval for Frequency mode.
   ///
@@ -130,7 +155,7 @@ class SessionReplay {
   /// // Capture every 2 seconds
   /// await SessionReplay.setScreenshotCaptureInterval(2000);
   /// ```
-  static Future<void> setScreenshotCaptureInterval(int intervalMs) async {
+  static Future<void> setScreenshotCaptureInterval(int intervalMs) {
     if (intervalMs < 500) {
       throw ArgumentError.value(
         intervalMs,
@@ -138,8 +163,12 @@ class SessionReplay {
         'must be greater than or equal to 500',
       );
     }
-
-    return _host.setScreenshotCaptureInterval(intervalMs);
+    return hostCall(
+      'SR.setScreenshotCaptureInterval',
+      () => _host.setScreenshotCaptureInterval(intervalMs),
+      tag: DebugTags.sessionReplay,
+      args: {'intervalMs': intervalMs},
+    );
   }
 
   /// Sets the visual quality of captured screenshots.
@@ -167,7 +196,11 @@ class SessionReplay {
   /// ```
   static Future<void> setScreenshotQualityMode(
     ScreenshotQualityMode mode,
-  ) async {
-    return _host.setScreenshotQualityMode(mode.toString());
-  }
+  ) =>
+      hostCall(
+        'SR.setScreenshotQualityMode',
+        () => _host.setScreenshotQualityMode(mode.toString()),
+        tag: DebugTags.sessionReplay,
+        args: {'mode': mode},
+      );
 }

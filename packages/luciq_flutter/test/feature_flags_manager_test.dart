@@ -36,9 +36,9 @@ void main() {
     );
     final isW3CExternalTraceID =
         await FeatureFlagsManager().getW3CFeatureFlagsHeader();
-    expect(isW3CExternalTraceID.isW3cExternalTraceIDEnabled, true);
-    expect(isW3CExternalTraceID.isW3cExternalGeneratedHeaderEnabled, true);
-    expect(isW3CExternalTraceID.isW3cCaughtHeaderEnabled, true);
+    expect(isW3CExternalTraceID?.isW3cExternalTraceIDEnabled, true);
+    expect(isW3CExternalTraceID?.isW3cExternalGeneratedHeaderEnabled, true);
+    expect(isW3CExternalTraceID?.isW3cCaughtHeaderEnabled, true);
 
     verify(
       mLuciqHost.isW3CFeatureFlagsEnabled(),
@@ -61,9 +61,9 @@ void main() {
 
     final isW3CExternalTraceID =
         await FeatureFlagsManager().getW3CFeatureFlagsHeader();
-    expect(isW3CExternalTraceID.isW3cExternalTraceIDEnabled, true);
-    expect(isW3CExternalTraceID.isW3cExternalGeneratedHeaderEnabled, true);
-    expect(isW3CExternalTraceID.isW3cCaughtHeaderEnabled, true);
+    expect(isW3CExternalTraceID?.isW3cExternalTraceIDEnabled, true);
+    expect(isW3CExternalTraceID?.isW3cExternalGeneratedHeaderEnabled, true);
+    expect(isW3CExternalTraceID?.isW3cCaughtHeaderEnabled, true);
     verify(
       mLuciqHost.isW3CFeatureFlagsEnabled(),
     ).called(1);

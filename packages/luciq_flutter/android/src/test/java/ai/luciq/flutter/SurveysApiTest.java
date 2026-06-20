@@ -86,7 +86,7 @@ public class SurveysApiTest {
     public void testShowSurvey() {
         String token = "survey-token";
 
-        api.showSurvey(token);
+        api.showSurvey("callId", token);
 
         mSurveys.verify(() -> Surveys.showSurvey(token));
     }
@@ -117,7 +117,7 @@ public class SurveysApiTest {
 
         mSurveys.when(() -> Surveys.hasRespondToSurvey(token)).thenReturn(expected);
 
-        api.hasRespondedToSurvey(token, result);
+        api.hasRespondedToSurvey("callId", token, result);
 
         verify(result).success(expected);
         mSurveys.verify(() -> Surveys.hasRespondToSurvey(token));
@@ -131,7 +131,7 @@ public class SurveysApiTest {
 
         mSurveys.when(Surveys::getAvailableSurveys).thenReturn(surveys);
 
-        api.getAvailableSurveys(result);
+        api.getAvailableSurveys("callId", result);
 
         verify(result).success(expected);
         mSurveys.verify(Surveys::getAvailableSurveys);

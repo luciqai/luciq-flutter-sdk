@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.PixelCopy;
+import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.RequiresApi;
@@ -30,6 +32,11 @@ public class PixelCopyCaptureManager implements CaptureManager {
         }
 
         SurfaceView surfaceView = (SurfaceView) flutterView.getChildAt(0);
+        if (!isValidSurface(surfaceView)) {
+            screenshotResultCallback.onError();
+            return;
+        }
+
         Bitmap bitmap = createBitmapFromSurface(surfaceView);
 
         if (bitmap == null) {
@@ -37,14 +44,22 @@ public class PixelCopyCaptureManager implements CaptureManager {
             return;
         }
 
-        PixelCopy.request(surfaceView, bitmap, copyResult -> {
-            if (copyResult == PixelCopy.SUCCESS) {
-                DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
-                screenshotResultCallback.onScreenshotResult(new ScreenshotResult(displayMetrics.density, bitmap));
-            } else {
-                screenshotResultCallback.onError();
-            }
-        }, new Handler(Looper.getMainLooper()));
+        try {
+            PixelCopy.request(surfaceView, bitmap, copyResult -> {
+                try {
+                    if (copyResult == PixelCopy.SUCCESS) {
+                        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
+                        screenshotResultCallback.onScreenshotResult(new ScreenshotResult(displayMetrics.density, bitmap));
+                    } else {
+                        screenshotResultCallback.onError();
+                    }
+                } catch (Exception e) {
+                    screenshotResultCallback.onError();
+                }
+            }, new Handler(Looper.getMainLooper()));
+        } catch (Exception e) {
+            screenshotResultCallback.onError();
+        }
     }
 
     private FlutterView getFlutterView(Activity activity) {
@@ -57,6 +72,16 @@ public class PixelCopyCaptureManager implements CaptureManager {
         boolean hasChildren = flutterView.getChildCount() > 0;
         boolean isSurfaceView = flutterView.getChildAt(0) instanceof SurfaceView;
         return hasChildren && isSurfaceView;
+    }
+
+    private boolean isValidSurface(SurfaceView surfaceView) {
+        SurfaceHolder holder = surfaceView.getHolder();
+        if (holder == null) {
+            return false;
+        }
+
+        Surface surface = holder.getSurface();
+        return surface != null && surface.isValid();
     }
 
     private Bitmap createBitmapFromSurface(SurfaceView surfaceView) {

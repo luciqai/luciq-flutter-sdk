@@ -1,6 +1,64 @@
 # Changelog
 
 
+## Unreleased
+
+### Add
+- comprehensive debug logging across all modules and performance-critical hot paths, ensuring the strict protection and redaction of SDK consumer PII.
+
+### BREAKING CHANGES
+
+Errors thrown by native (Pigeon) host calls are now logged and swallowed by the SDK instead of being re-thrown into your app. This honors the SDK rule that no exception may escape into the embedding application. As a consequence, every public API that previously returned a value now returns its nullable equivalent — `null` signals that the underlying host call failed.
+
+Affected public APIs:
+
+| API | Before | After |
+| --- | --- | --- |
+| `Luciq.getUserAttributes()` | `Future<Map<String, String>>` | `Future<Map<String, String>?>` |
+| `Replies.hasChats()` | `Future<bool>` | `Future<bool?>` |
+| `Replies.getUnreadRepliesCount()` | `Future<int>` | `Future<int?>` |
+| `SessionReplay.getSessionReplayLink()` | `Future<String>` | `Future<String?>` |
+| `Surveys.getAvailableSurveys()` | `Future<List<String>>` | `Future<List<String>?>` |
+| `Surveys.hasRespondedToSurvey()` | `Future<bool>` | `Future<bool?>` |
+
+Migration: coalesce with a sensible default or null-check before use, e.g.
+
+```dart
+final hasChats = (await Replies.hasChats()) ?? false;
+final unread = (await Replies.getUnreadRepliesCount()) ?? 0;
+final link = await SessionReplay.getSessionReplayLink();
+if (link != null) { ... }
+```
+
+
+## [19.7.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.7.0...19.6.0)
+
+### Added
+
+- **WebView Support:** New APIs to monitor WebViews in your app, including page navigations, user interactions, and network requests issued from inside the WebView. Screenshots and session replays now capture WebView content alongside the rest of the UI.
+
+  Enable WebView monitoring after `Luciq.init`:
+
+  ```dart
+  // Enable WebView monitoring (required for the APIs below).
+  Luciq.setWebViewMonitoringEnabled(true);
+
+  // Track taps and other user interactions inside WebViews.
+  Luciq.setWebViewUserInteractionsTrackingEnabled(true);
+
+  // Log network requests issued from WebViews.
+  Luciq.setWebViewNetworkTrackingEnabled(true);
+  ```
+
+  All three APIs default to disabled. `setWebViewMonitoringEnabled` must be on for the user-interactions and network-tracking APIs to take effect.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.7.0 ([#57](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.7.0).
+
+- Bump Luciq Android SDK to v19.7.0 ([#57](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.7.0).
+
+
 ## [19.6.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.6.0...19.4.0)
 
 ### Added
@@ -14,7 +72,7 @@
 - Bump Luciq Android SDK to v19.6.0 ([#60](https://github.com/luciqai/luciq-flutter-sdk/pull/60)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.6.0).
 
 
-## [19.4.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
+## [19.4.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.4.0...19.3.0) (April 8, 2026)
 
 ### Added
 
@@ -60,7 +118,7 @@
 
 - Bump Luciq Android SDK to v19.4.0 ([#48](https://github.com/luciqai/luciq-flutter-sdk/pull/48)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.4.0).
 
-## [19.3.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.3.0...19.2.2) (March 9, 2026)
+## [19.3.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.3.0...19.2.2) (March 9, 2026)
 
 ### Changed
 
@@ -68,7 +126,7 @@
 
 - Bump Luciq Android SDK to v19.3.0 ([#42](https://github.com/luciqai/luciq-flutter-sdk/pull/42)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.3.0).
 
-## [19.2.2] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.2...19.2.1) (February 24, 2026)
+## [19.2.2](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.2...19.2.1) (February 24, 2026)
 
 ### Added
 
@@ -81,7 +139,7 @@
 - Bump Luciq Android SDK to v19.2.2 ([#41](https://github.com/luciqai/luciq-flutter-sdk/pull/41)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.4.1).
 
 
-## [19.2.1] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.1...19.1.0) (January 28, 2026)
+## [19.2.1](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.2.1...19.1.0) (January 28, 2026)
 
 ### Added
 
@@ -94,7 +152,7 @@
 - Bump Luciq Android SDK to v19.2.1 ([#36](https://github.com/luciqai/luciq-flutter-sdk/pull/36)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v19.2.1).
 
 
-## [19.1.0] (https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
+## [19.1.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.1.0...19.0.0) (January 5, 2026)
 
 ### Changed
 
@@ -149,6 +207,7 @@
 - Bump Luciq iOS SDK to v18.0.1 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-iOS-sdk/releases/tag/18.0.1).
 
 - Bump Luciq Android SDK to v18.0.1 ([#10](https://github.com/luciqai/luciq-flutter-sdk/pull/10)). [See release notes](https://github.com/luciqai/Luciq-Android-sdk/releases/tag/v18.0.1).
+
 
 ## [18.0.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v18.0.0...dev) (September 24, 2025)
 

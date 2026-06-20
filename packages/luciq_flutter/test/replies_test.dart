@@ -38,7 +38,7 @@ void main() {
     await Replies.show();
 
     verify(
-      mHost.show(),
+      mHost.show(any),
     ).called(1);
   });
 
@@ -65,25 +65,25 @@ void main() {
 
   test('[getUnreadRepliesCount] should call host method', () async {
     const count = 10;
-    when(mHost.getUnreadRepliesCount()).thenAnswer((_) async => count);
+    when(mHost.getUnreadRepliesCount(any)).thenAnswer((_) async => count);
 
     final result = await Replies.getUnreadRepliesCount();
 
     expect(result, count);
     verify(
-      mHost.getUnreadRepliesCount(),
+      mHost.getUnreadRepliesCount(any),
     ).called(1);
   });
 
   test('[hasChats] should call host method', () async {
     const hasChats = true;
-    when(mHost.hasChats()).thenAnswer((_) async => hasChats);
+    when(mHost.hasChats(any)).thenAnswer((_) async => hasChats);
 
     final result = await Replies.hasChats();
 
     expect(result, hasChats);
     verify(
-      mHost.hasChats(),
+      mHost.hasChats(any),
     ).called(1);
   });
 
@@ -93,5 +93,24 @@ void main() {
     verify(
       mHost.bindOnNewReplyCallback(),
     ).called(1);
+  });
+
+  test('[onNewReply] fires the registered callback when invoked from native',
+      () async {
+    var fired = 0;
+    await Replies.setOnNewReplyReceivedCallback(() => fired++);
+
+    // Simulate a native -> Dart Pigeon callback with the native-minted callId.
+    Replies().onNewReply('a1b2');
+
+    expect(fired, 1);
+  });
+
+  test('[onNewReply] does not throw when called with a callback set', () async {
+    await Replies.setOnNewReplyReceivedCallback(() {});
+
+    // There is no public unregister API, so the most we can assert here is
+    // that the dispatch path itself is well-behaved.
+    expect(() => Replies().onNewReply('beef'), returnsNormally);
   });
 }

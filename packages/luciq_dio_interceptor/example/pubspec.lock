@@ -144,7 +144,7 @@ packages:
       path: "../../luciq_flutter"
       relative: true
     source: path
-    version: "19.6.0"
+    version: "19.7.0"
   matcher:
     dependency: transitive
     description:

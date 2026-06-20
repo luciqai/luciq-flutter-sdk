@@ -1,3 +1,5 @@
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:meta/meta.dart';
 
 class RouteMatcher {
@@ -13,6 +15,7 @@ class RouteMatcher {
   @visibleForTesting
   // ignore: use_setters_to_change_properties
   static void setInstance(RouteMatcher instance) {
+    LuciqLogger.I.d('setInstance', tag: DebugTags.apmUITrace);
     _instance = instance;
   }
 
@@ -33,6 +36,13 @@ class RouteMatcher {
     required String? routePath,
     required String? actualPath,
   }) {
+    if (LuciqLogger.I.isDebugEnabled()) {
+      LuciqLogger.I.d(
+        'match routePathLength=${routePath?.length ?? 0} '
+        'actualPathLength=${actualPath?.length ?? 0}',
+        tag: DebugTags.apmUITrace,
+      );
+    }
     // null paths are considered equal.
     if (routePath == null || actualPath == null) {
       return routePath == actualPath;

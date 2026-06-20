@@ -9,7 +9,7 @@ buildscript {
         maven { url "https://central.sonatype.com/repository/maven-snapshots/" }
     }
     dependencies {
-        classpath 'ai.luciq.library:luciq-plugin:19.7.0'
+        classpath 'ai.luciq.library:luciq-plugin:19.8.0'
     }
 }
 

@@ -1,11 +1,7 @@
-# melos_managed_dependency_overrides: luciq_flutter,luciq_gql_link,luciq_grpc_interceptor,luciq_http_client,http
+# melos_managed_dependency_overrides: luciq_flutter,luciq_http_client,http
 dependency_overrides:
   luciq_flutter:
     path: ../
-  luciq_gql_link:
-    path: ../../luciq_gql_link
-  luciq_grpc_interceptor:
-    path: ../../luciq_grpc_interceptor
   luciq_http_client:
     path: ../../luciq_http_client
   http: ^1.1.0

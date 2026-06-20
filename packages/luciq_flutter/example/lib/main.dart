@@ -97,25 +97,7 @@ void main() {
   );
 }
 
-final obfuscatedUrls = ['auth/login', 'profile'];
-void configureLuciqNetworkObfuscation() {
-  NetworkLogger.obfuscateLog((NetworkData data) {
-    if (obfuscatedUrls.any((path) => data.url.contains(path))) {
-      // ── Scrub request ──────────────────────────────────────────────
-      data.requestBody = null;           // remove request payload
-      data.requestHeaders = {};          // remove all request headers
 
-      // ── Scrub response ─────────────────────────────────────────────
-      data.responseBody = null;          // remove response payload
-      data.responseHeaders = {};         // remove all response headers
-    }
-
-    // data.url and data.statusCode are intentionally left untouched.
-    return data;
-  });
-}
-
-//
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 

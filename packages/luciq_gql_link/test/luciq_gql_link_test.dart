@@ -33,6 +33,7 @@ void main() {
     Luciq.$setHostApi(mHost);
     NetworkLogger.$setHostApi(mHost);
     LuciqLogger.setInstance(mLogger);
+    when(mLogger.isDebugEnabled()).thenReturn(false);
     when(mHost.isW3CFeatureFlagsEnabled()).thenAnswer(
       (_) => Future<Map<String, bool>>.value(<String, bool>{
         'isW3cCaughtHeaderEnabled': true,

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name              = 'luciq_flutter'
-  s.version           = '19.7.0'
+  s.version           = '19.8.0'
   s.summary           = 'Flutter plugin for integrating the Luciq SDK.'
   s.author            = 'Luciq'
   s.homepage          = 'https://www.luciq.ai/platforms/flutter'
@@ -17,6 +17,6 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig   = { 'OTHER_LDFLAGS' => '-framework "Flutter" -framework "LuciqSDK"'}
 
   s.dependency 'Flutter'
-  s.dependency 'Luciq', '19.7.0'
+  s.dependency 'Luciq', '19.8.1'
 end
 

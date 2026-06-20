@@ -1,10 +1,16 @@
 # Changelog
 
 
-## Unreleased
+## [19.8.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.8.0...19.7.0)
 
 ### Add
 - comprehensive debug logging across all modules and performance-critical hot paths, ensuring the strict protection and redaction of SDK consumer PII.
+
+### Changed
+
+- Bump Luciq iOS SDK to v19.8.1 ([#62](https://github.com/luciqai/luciq-flutter-sdk/pull/62)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.8.1).
+
+- Bump Luciq Android SDK to v19.8.0 ([#62](https://github.com/luciqai/luciq-flutter-sdk/pull/62)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.8.0).
 
 ### BREAKING CHANGES
 

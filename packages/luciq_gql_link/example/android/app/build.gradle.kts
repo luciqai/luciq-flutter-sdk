@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "ai.luciq.gql_link_example"
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

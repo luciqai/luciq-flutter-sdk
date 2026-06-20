@@ -126,6 +126,19 @@ public class PrivateViewManager {
                             }
 
                         }
+                    };
+
+                    windowPixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
+                        @Override
+                        public void onScreenshotResult(ScreenshotResult result) {
+                            processScreenshot(result, privateViews, latch, capturingCallback);
+                        }
+
+                        @Override
+                        public void onError() {
+                            pixelCopyScreenshotCaptor.capture(activity, pixelCopyScreenshotResult);
+
+                        }
                     });
                 } else {
                     boundryScreenshotCaptor.capture(captureActivity, boundryScreenshotResult);

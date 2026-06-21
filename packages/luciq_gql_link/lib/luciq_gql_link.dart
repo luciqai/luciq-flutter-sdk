@@ -8,7 +8,7 @@ import 'package:gql_http_link/gql_http_link.dart'
 import 'package:gql_link/gql_link.dart';
 import 'package:http/http.dart' show MultipartFile;
 import 'package:luciq_flutter/luciq_flutter.dart';
-// ignore: invalid_use_of_internal_member
+// ignore: implementation_imports, invalid_use_of_internal_member
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
 const _operationTypeHeader = 'x-luciq-graphql-operation-type';

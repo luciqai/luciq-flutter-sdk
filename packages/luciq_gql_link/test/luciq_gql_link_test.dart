@@ -736,7 +736,7 @@ void main() {
       );
 
       final exception = HttpLinkServerException(
-        response: http.Response('', 504, headers: const {}),
+        response: http.Response('', 504),
         parsedResponse: const Response(response: {}),
       );
 
@@ -1154,7 +1154,7 @@ void main() {
             contains('request:'),
             contains('type=query'),
             contains('name=GetUser'),
-          )),
+          ),),
           tag: 'LuciqGqlLink',
         ),
       ).called(1);
@@ -1164,7 +1164,7 @@ void main() {
             contains('response:'),
             contains('status=200'),
             contains('gqlErrors=0'),
-          )),
+          ),),
           tag: 'LuciqGqlLink',
         ),
       ).called(1);
@@ -1202,7 +1202,7 @@ void main() {
             contains('error:'),
             contains('status=502'),
             contains('name=GetUser'),
-          )),
+          ),),
           tag: 'LuciqGqlLink',
         ),
       ).called(1);

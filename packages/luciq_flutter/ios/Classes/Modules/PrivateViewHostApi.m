@@ -7,6 +7,8 @@
 
 #import "PrivateViewHostApi.h"
 #import "luciq_flutter/LuciqApi.h"
+#import "../Util/LuciqFlutterLogger.h"
+#import "../Util/LuciqFlutterDebugTags.h"
 
 extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger, PrivateViewApi * _Nonnull privateViewApi) {
     PrivateViewHostApi *api = [[PrivateViewHostApi alloc] init];
@@ -18,16 +20,22 @@ extern void InitPrivateViewHostApi(id<FlutterBinaryMessenger> _Nonnull messenger
 
 
 - (void)initWithError:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                   format:@"[PRIV.init] phase=enter"];
     [LuciqApi setScreenshotMaskingHandler:^(UIImage * _Nonnull screenshot, void (^ _Nonnull completion)(UIImage * _Nullable)) {
-        
-        
+        [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                       format:@"[PRIV.screenshotMaskingHandler] phase=enter"];
 
            [self.privateViewApi mask:screenshot completion:^(UIImage * _Nonnull maskedImage) {
              if (maskedImage != nil) {
                  completion(maskedImage);
                 }
+             [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                            format:@"[PRIV.screenshotMaskingHandler] phase=exit resultPresent=%@",
+                 (maskedImage != nil ? @"true" : @"false")];
            }];
        }];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"[PRIV.init] phase=exit"];
 }
 
 @end

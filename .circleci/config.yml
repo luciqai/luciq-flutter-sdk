@@ -478,6 +478,33 @@ jobs:
           working_directory: packages/luciq_flutter_ndk
           command: Escape flutter publish-dependancy
 
+  release_gql_link_plugin:
+    macos:
+      xcode: 16.4.0
+    resource_class: m4pro.medium
+    working_directory: "~/project"
+    steps:
+      - advanced-checkout/shallow-checkout:
+          path: ~/project
+      # Flutter doesn't support Apple Silicon yet, so we need to install Rosetta use Flutter on M1 machines.
+      - run:
+          name: Install Rosetta
+          command: softwareupdate --install-rosetta --agree-to-license
+      - setup_flutter
+      - run:
+          name: Clone Escape
+          command: git clone -b master2 git@github.com:Instabug/Escape.git
+      - run:
+          name: Build Escape
+          working_directory: Escape
+          command: |
+            swift build -c release
+            cp -f .build/release/Escape /usr/local/bin/escape
+      - run:
+          name: Publish Package
+          working_directory: packages/luciq_gql_link
+          command: Escape flutter publish-dependancy
+
   release_luciq_flutter:
     macos:
       xcode: 16.4.0
@@ -619,6 +646,20 @@ workflows:
       - release_modular_plugin:
           requires:
             - hold_release_modular_plugin
+            - verify_pub
+          filters:
+            branches:
+              only: master
+      - hold_release_gql_link_plugin:
+          type: approval
+          requires:
+            - test_flutter-stable
+          filters:
+            branches:
+              only: master
+      - release_gql_link_plugin:
+          requires:
+            - hold_release_gql_link_plugin
             - verify_pub
           filters:
             branches:

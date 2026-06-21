@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
@@ -70,6 +71,7 @@ void main() {
     APM.$setHostApi(mApmHost);
     Luciq.$setHostApi(mLuciqHost);
     LuciqLogger.setInstance(mLuciqLogger);
+    when(mLuciqLogger.isDebugEnabled()).thenReturn(true);
     LCQDateTime.setInstance(mDateTime);
     LCQBuildInfo.setInstance(mLCQBuildInfo);
     RouteMatcher.setInstance(mRouteMatcher);
@@ -94,7 +96,7 @@ void main() {
       verify(
         mLuciqLogger.d(
           argThat(contains('Resetting didStartScreenLoading')),
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
     });
@@ -116,7 +118,7 @@ void main() {
       verify(
         mLuciqLogger.d(
           argThat(contains('Resetting didExtendScreenLoading')),
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
     });
@@ -148,7 +150,7 @@ void main() {
       verify(
         mLuciqLogger.d(
           argThat(contains('Resetting didReportScreenLoading')),
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
     });
@@ -197,7 +199,7 @@ void main() {
         mLuciqLogger.e(
           'Luciq API {APM.LuciqCaptureScreenLoading} was called before the SDK is built. To build it, first by following the instructions at this link:\n'
           'https://docs.luciq.ai/reference#showing-and-manipulating-the-invocation',
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
     });
@@ -225,10 +227,10 @@ void main() {
       );
       verify(
         mLuciqLogger.e(
-          'Screen loading monitoring is disabled, skipping starting screen loading monitoring for screen: $screenName.\n'
+          'Screen loading monitoring is disabled, skipping starting screen loading monitoring for screenNameLength=${screenName.length}.\n'
           'Please refer to the documentation for how to enable screen loading monitoring on your app: https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
           "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
     });
@@ -288,7 +290,7 @@ void main() {
       verify(
         mLuciqLogger.d(
           argThat(contains('failed to start screen loading trace')),
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
     });
@@ -327,7 +329,7 @@ void main() {
       verify(
         mLuciqLogger.d(
           argThat(contains('Starting screen loading trace')),
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
     });
@@ -468,7 +470,7 @@ void main() {
         mLuciqLogger.e(
           'Luciq API {APM.LuciqCaptureScreenLoading} was called before the SDK is built. To build it, first by following the instructions at this link:\n'
           'https://docs.luciq.ai/reference#showing-and-manipulating-the-invocation',
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
       verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
@@ -501,10 +503,10 @@ void main() {
       );
       verify(
         mLuciqLogger.e(
-          'Screen loading monitoring is disabled, skipping reporting screen loading time for screen: $screenName.\n'
+          'Screen loading monitoring is disabled, skipping reporting screen loading time for screenNameLength=${screenName.length}.\n'
           'Please refer to the documentation for how to enable screen loading monitoring on your app: https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
           "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
       verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
@@ -583,8 +585,8 @@ void main() {
       verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
       verify(
         mLuciqLogger.e(
-          "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — $differentTrace",
-          tag: APM.tag,
+          "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — screenNameLength=${differentTrace.screenName.length}",
+          tag: DebugTags.apmScreenLoading,
         ),
       );
     });
@@ -618,8 +620,8 @@ void main() {
       verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
       verify(
         mLuciqLogger.e(
-          "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — $screenLoadingTrace",
-          tag: APM.tag,
+          "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — screenNameLength=${screenLoadingTrace.screenName.length}",
+          tag: DebugTags.apmScreenLoading,
         ),
       );
     });
@@ -657,8 +659,8 @@ void main() {
       );
       verify(
         mLuciqLogger.e(
-          "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — $expectedScreenLoadingTrace",
-          tag: APM.tag,
+          "Screen Loading trace dropped as the trace isn't from the current screen, or another trace was reported before the current one. — screenNameLength=${expectedScreenLoadingTrace?.screenName.length ?? 0}",
+          tag: DebugTags.apmScreenLoading,
         ),
       );
     });
@@ -709,8 +711,8 @@ void main() {
       ).called(1);
       verify(
         mLuciqLogger.d(
-          argThat(contains('Reporting screen loading trace')),
-          tag: APM.tag,
+          argThat(contains('[APM.reportScreenLoadingCP] phase=enter')),
+          tag: DebugTags.apmScreenLoading,
         ),
       );
     });
@@ -764,7 +766,7 @@ void main() {
         mLuciqLogger.e(
           'Luciq API {endScreenLoading} was called before the SDK is built. To build it, first by following the instructions at this link:\n'
           'https://docs.luciq.ai/reference#showing-and-manipulating-the-invocation',
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
       verifyNever(mApmHost.endScreenLoadingCP(any, any));
@@ -790,7 +792,7 @@ void main() {
           'Screen loading monitoring is disabled, skipping ending screen loading monitoring with APM.endScreenLoading().\n'
           'Please refer to the documentation for how to enable screen loading monitoring in your app: https://docs.luciq.ai/docs/flutter-apm-screen-loading#disablingenabling-screen-loading-tracking '
           "If Screen Loading is enabled but you're still seeing this message, please reach out to support.",
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       ).called(1);
       verifyNever(mApmHost.endScreenLoadingCP(any, any));
@@ -827,7 +829,7 @@ void main() {
       verify(
         mLuciqLogger.e(
           'endScreenLoading has already been called for the current screen visit. Multiple calls to this API are not allowed during a single screen visit, only the first call will be considered.',
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       );
       verifyNever(mApmHost.endScreenLoadingCP(any, any));
@@ -852,7 +854,7 @@ void main() {
       verify(
         mLuciqLogger.e(
           argThat(contains("endScreenLoading wasn")),
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       );
       verifyNever(mApmHost.endScreenLoadingCP(any, any));
@@ -884,7 +886,7 @@ void main() {
       verify(
         mLuciqLogger.e(
           'endScreenLoading was called too early in the Screen Loading cycle. Please make sure to call the API after the screen is done loading.',
-          tag: APM.tag,
+          tag: DebugTags.apmScreenLoading,
         ),
       );
       verify(mApmHost.endScreenLoadingCP(prematureDuration, uiTrace.traceId))
@@ -1046,8 +1048,7 @@ void main() {
       when(mDateTime.now()).thenReturn(time);
       when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
       when(mApmHost.isAutoUiTraceEnabled()).thenAnswer((_) async => true);
-      when(mApmHost.startCpUiTrace(any, any, any))
-          .thenAnswer((_) async => {});
+      when(mApmHost.startCpUiTrace(any, any, any)).thenAnswer((_) async => {});
     });
 
     test(
@@ -1062,15 +1063,16 @@ void main() {
 
       await uiTrace?.whenValidated;
 
-      verify(mApmHost.startCpUiTrace(
-        screenName,
-        time.microsecondsSinceEpoch,
-        time.millisecondsSinceEpoch,
-      ),).called(1);
+      verify(
+        mApmHost.startCpUiTrace(
+          screenName,
+          time.microsecondsSinceEpoch,
+          time.millisecondsSinceEpoch,
+        ),
+      ).called(1);
     });
 
-    test(
-        '[prepareUiTrace] should sanitize screen name with leading slash',
+    test('[prepareUiTrace] should sanitize screen name with leading slash',
         () async {
       mScreenLoadingManager.prepareUiTrace('/Home');
 
@@ -1079,14 +1081,15 @@ void main() {
       expect(uiTrace?.screenName, 'Home');
     });
 
-    test(
-        '[prepareUiTrace] should use matchingScreenName when provided',
+    test('[prepareUiTrace] should use matchingScreenName when provided',
         () async {
       const matchingName = 'matchingScreen';
-      when(RouteMatcher.I.match(
-        routePath: anyNamed('routePath'),
-        actualPath: anyNamed('actualPath'),
-      ),).thenReturn(true);
+      when(
+        RouteMatcher.I.match(
+          routePath: anyNamed('routePath'),
+          actualPath: anyNamed('actualPath'),
+        ),
+      ).thenReturn(true);
 
       mScreenLoadingManager.prepareUiTrace(screenName, matchingName);
 
@@ -1096,8 +1099,7 @@ void main() {
       expect(uiTrace?.matches(screenName), isTrue);
     });
 
-    test(
-        '[prepareUiTrace] should discard UiTrace when SDK is not built',
+    test('[prepareUiTrace] should discard UiTrace when SDK is not built',
         () async {
       when(mLuciqHost.isBuilt()).thenAnswer((_) async => false);
 
@@ -1130,10 +1132,12 @@ void main() {
       expect(mScreenLoadingManager.currentUiTrace, isNull);
 
       verifyNever(mApmHost.startCpUiTrace(any, any, any));
-      verify(mLuciqLogger.e(
-        argThat(contains('Auto UI trace is disabled')),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.e(
+          argThat(contains('Auto UI trace is disabled')),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
     });
 
     test(
@@ -1148,17 +1152,18 @@ void main() {
       expect(oldUiTrace.didStartScreenLoading, isFalse);
     });
 
-    test(
-        '[prepareUiTrace] should handle exception gracefully and log error',
+    test('[prepareUiTrace] should handle exception gracefully and log error',
         () async {
       when(mDateTime.now()).thenThrow(Exception('test exception'));
 
       mScreenLoadingManager.prepareUiTrace(screenName);
 
-      verify(mLuciqLogger.e(
-        argThat(contains('test exception')),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.e(
+          argThat(contains('errorType=_Exception')),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
     });
   });
 
@@ -1171,8 +1176,7 @@ void main() {
       when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
     });
 
-    test(
-        '[reportManualScreenLoading] with SDK not built should log error',
+    test('[reportManualScreenLoading] with SDK not built should log error',
         () async {
       when(mLuciqHost.isBuilt()).thenAnswer((_) async => false);
 
@@ -1182,11 +1186,16 @@ void main() {
         testDuration,
       );
 
-      verify(mLuciqLogger.e(
-        argThat(contains(
-            'Luciq SDK is not built, skipping reporting manual screen loading',),),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.e(
+          argThat(
+            contains(
+              'Luciq SDK is not built, skipping reporting manual screen loading',
+            ),
+          ),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
       verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any));
     });
 
@@ -1202,19 +1211,23 @@ void main() {
         testDuration,
       );
 
-      verify(mLuciqLogger.e(
-        argThat(contains(
-            'Screen loading monitoring is disabled, skipping reporting manual screen loading',),),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.e(
+          argThat(
+            contains(
+              'Screen loading monitoring is disabled, skipping reporting manual screen loading',
+            ),
+          ),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
       verifyNever(mApmHost.reportManualScreenLoadingCP(any, any, any));
     });
 
     test(
         '[reportManualScreenLoading] should report to native when everything is enabled',
         () async {
-      when(FlagsConfig.screenLoading.isEnabled())
-          .thenAnswer((_) async => true);
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
       when(mApmHost.reportManualScreenLoadingCP(any, any, any))
           .thenAnswer((_) async => {});
 
@@ -1224,11 +1237,13 @@ void main() {
         testDuration,
       );
 
-      verify(mApmHost.reportManualScreenLoadingCP(
-        testScreenName,
-        startTime,
-        testDuration,
-      ),).called(1);
+      verify(
+        mApmHost.reportManualScreenLoadingCP(
+          testScreenName,
+          startTime,
+          testDuration,
+        ),
+      ).called(1);
     });
   });
 
@@ -1254,8 +1269,7 @@ void main() {
           time.microsecondsSinceEpoch + 1000;
       mScreenLoadingManager.currentScreenLoadingTrace = screenLoadingTrace;
       when(mLuciqHost.isBuilt()).thenAnswer((_) async => true);
-      when(FlagsConfig.screenLoading.isEnabled())
-          .thenAnswer((_) async => true);
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
     });
 
     test(
@@ -1265,15 +1279,22 @@ void main() {
 
       await ScreenLoadingManager.I.reportScreenLoading(screenLoadingTrace);
 
-      expect(mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
-          isFalse,);
+      expect(
+        mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
+        isFalse,
+      );
       expect(mScreenLoadingManager.currentScreenLoadingTrace, isNull);
       verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
-      verify(mLuciqLogger.d(
-        argThat(contains(
-            'Dropping screen loading trace — UI trace validation failed',),),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.d(
+          argThat(
+            contains(
+              'Dropping screen loading trace — UI trace validation failed',
+            ),
+          ),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
     });
 
     test(
@@ -1282,14 +1303,18 @@ void main() {
       // Never complete the validation completer — triggers timeout
       await ScreenLoadingManager.I.reportScreenLoading(screenLoadingTrace);
 
-      expect(mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
-          isFalse,);
+      expect(
+        mScreenLoadingManager.currentUiTrace?.didReportScreenLoading,
+        isFalse,
+      );
       expect(mScreenLoadingManager.currentScreenLoadingTrace, isNull);
       verifyNever(mApmHost.reportScreenLoadingCP(any, any, any));
-      verify(mLuciqLogger.e(
-        argThat(contains('UI trace validation timed out')),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.e(
+          argThat(contains('UI trace validation timed out')),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
     });
   });
 
@@ -1322,30 +1347,29 @@ void main() {
     test(
         '[endScreenLoading] with endScreenLoading feature flag disabled should log error',
         () async {
-      when(FlagsConfig.screenLoading.isEnabled())
-          .thenAnswer((_) async => true);
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
       when(FlagsConfig.endScreenLoading.isEnabled())
           .thenAnswer((_) async => false);
 
       await ScreenLoadingManager.I.endScreenLoading();
 
-      verify(mLuciqLogger.e(
-        argThat(contains('End Screen loading API is disabled')),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.e(
+          argThat(contains('End Screen loading API is disabled')),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
       verifyNever(mApmHost.endScreenLoadingCP(any, any));
     });
 
     test(
         '[endScreenLoading] should drop when UI trace validation completes with false',
         () async {
-      final invalidUiTrace =
-          UiTrace(screenName: screenName, traceId: traceId);
+      final invalidUiTrace = UiTrace(screenName: screenName, traceId: traceId);
       invalidUiTrace.validationCompleter.complete(false);
       mScreenLoadingManager.currentUiTrace = invalidUiTrace;
 
-      when(FlagsConfig.screenLoading.isEnabled())
-          .thenAnswer((_) async => true);
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
       when(FlagsConfig.endScreenLoading.isEnabled())
           .thenAnswer((_) async => true);
 
@@ -1353,23 +1377,25 @@ void main() {
 
       expect(invalidUiTrace.didExtendScreenLoading, isFalse);
       verifyNever(mApmHost.endScreenLoadingCP(any, any));
-      verify(mLuciqLogger.d(
-        argThat(contains(
-            'Dropping endScreenLoading — UI trace validation failed',),),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.d(
+          argThat(
+            contains(
+              'Dropping endScreenLoading — UI trace validation failed',
+            ),
+          ),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
     });
 
-    test(
-        '[endScreenLoading] should drop when UI trace validation times out',
+    test('[endScreenLoading] should drop when UI trace validation times out',
         () async {
-      final pendingUiTrace =
-          UiTrace(screenName: screenName, traceId: traceId);
+      final pendingUiTrace = UiTrace(screenName: screenName, traceId: traceId);
       // Never complete the validation completer
       mScreenLoadingManager.currentUiTrace = pendingUiTrace;
 
-      when(FlagsConfig.screenLoading.isEnabled())
-          .thenAnswer((_) async => true);
+      when(FlagsConfig.screenLoading.isEnabled()).thenAnswer((_) async => true);
       when(FlagsConfig.endScreenLoading.isEnabled())
           .thenAnswer((_) async => true);
 
@@ -1377,11 +1403,14 @@ void main() {
 
       expect(pendingUiTrace.didExtendScreenLoading, isFalse);
       verifyNever(mApmHost.endScreenLoadingCP(any, any));
-      verify(mLuciqLogger.e(
-        argThat(
-            contains('UI trace validation timed out'),),
-        tag: APM.tag,
-      ),).called(1);
+      verify(
+        mLuciqLogger.e(
+          argThat(
+            contains('UI trace validation timed out'),
+          ),
+          tag: DebugTags.apmScreenLoading,
+        ),
+      ).called(1);
     });
   });
 

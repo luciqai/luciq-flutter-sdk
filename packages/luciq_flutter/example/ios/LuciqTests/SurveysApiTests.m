@@ -41,7 +41,7 @@
     NSString *token = @"survey-token";
     FlutterError *error;
 
-    [self.api showSurveySurveyToken:token error:&error];
+    [self.api showSurveyCallId:@"callId" surveyToken:token error:&error];
 
     OCMVerify([self.mSurveys showSurveyWithToken:token]);
 }
@@ -71,7 +71,7 @@
 
     OCMStub([self.mSurveys hasRespondedToSurveyWithToken:token completionHandler:([OCMArg invokeBlockWithArgs:expected, nil])]);
 
-    [self.api hasRespondedToSurveySurveyToken:token completion:^(NSNumber *actual, FlutterError *error) {
+    [self.api hasRespondedToSurveyCallId:@"callId" surveyToken:token completion:^(NSNumber *actual, FlutterError *error) {
         [expectation fulfill];
         XCTAssertEqual(expected.boolValue, actual.boolValue);
     }];
@@ -89,7 +89,7 @@
 
     OCMStub([self.mSurveys availableSurveysWithCompletionHandler:([OCMArg invokeBlockWithArgs:surveys, nil])]);;
 
-    [self.api getAvailableSurveysWithCompletion:^(NSArray<NSString *> *actual, FlutterError *error) {
+    [self.api getAvailableSurveysCallId:@"callId" completion:^(NSArray<NSString *> *actual, FlutterError *error) {
         [expectation fulfill];
         XCTAssertTrue([expected isEqualToArray:actual]);
     }];
@@ -105,7 +105,7 @@
     LCQSurveys.willShowSurveyHandler();
 
     OCMVerify([self.mSurveys setWillShowSurveyHandler:[OCMArg any]]);
-    OCMVerify([self.mFlutterApi onShowSurveyWithCompletion:[OCMArg invokeBlock]]);
+    OCMVerify([self.mFlutterApi onShowSurveyCallId:[OCMArg any] completion:[OCMArg invokeBlock]]);
 }
 
 - (void)testBindOnDismissSurveyCallback {
@@ -115,7 +115,7 @@
     LCQSurveys.didDismissSurveyHandler();
 
     OCMVerify([self.mSurveys setDidDismissSurveyHandler:[OCMArg any]]);
-    OCMVerify([self.mFlutterApi onDismissSurveyWithCompletion:[OCMArg invokeBlock]]);
+    OCMVerify([self.mFlutterApi onDismissSurveyCallId:[OCMArg any] completion:[OCMArg invokeBlock]]);
 }
 
 @end

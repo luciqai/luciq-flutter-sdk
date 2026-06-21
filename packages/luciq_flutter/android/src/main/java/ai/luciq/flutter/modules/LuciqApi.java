@@ -1020,30 +1020,4 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         }
     }
 
-    @Override
-    public void setWebViewMonitoringEnabled(@NonNull Boolean isEnabled) {
-        try {
-            Luciq.setWebViewMonitoringEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void setWebViewUserInteractionsTrackingEnabled(@NonNull Boolean isEnabled) {
-        try {
-            Luciq.setWebViewUserInteractionsTrackingEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void setWebViewNetworkTrackingEnabled(@NonNull Boolean isEnabled) {
-        try {
-            Luciq.setWebViewNetworkTrackingEnabled(isEnabled);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

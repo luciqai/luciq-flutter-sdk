@@ -114,32 +114,20 @@ public class PrivateViewManager {
                     windowPixelCopyScreenshotCaptor.capture(captureActivity, new ScreenshotResultCallback() {
                         @Override
                         public void onScreenshotResult(ScreenshotResult result) {
-                            processScreenshot(result, privateViews, latch, capturingCallback);
+                          processScreenshot(result, privateViews, latch, capturingCallback);
                         }
 
                         @Override
                         public void onError() {
-                            if (isActivityValid(captureActivity)) {
-                                pixelCopyScreenshotCaptor.capture(captureActivity, pixelCopyScreenshotResult);
-                            } else {
-                                capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
-                            }
+                          if (isActivityValid(captureActivity)) {
+                            pixelCopyScreenshotCaptor.capture(captureActivity, pixelCopyScreenshotResult);
+                          } else {
+                            capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
+                          }
 
                         }
-                    };
+                      });
 
-                    windowPixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
-                        @Override
-                        public void onScreenshotResult(ScreenshotResult result) {
-                            processScreenshot(result, privateViews, latch, capturingCallback);
-                        }
-
-                        @Override
-                        public void onError() {
-                            pixelCopyScreenshotCaptor.capture(activity, pixelCopyScreenshotResult);
-
-                        }
-                    });
                 } else {
                     boundryScreenshotCaptor.capture(captureActivity, boundryScreenshotResult);
                 }

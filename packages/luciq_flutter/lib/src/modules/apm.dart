@@ -3,13 +3,16 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart' show WidgetBuilder;
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/models/custom_span.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/models/network_data.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:luciq_flutter/src/utils/ui_trace/flags_config.dart';
@@ -47,6 +50,10 @@ class APM {
   /// await span?.end();
   /// ```
   static Future<CustomSpan?> startCustomSpan(String name) {
+    LuciqLogger.I.d(
+      '[APM.startCustomSpan] phase=enter nameLength=${name.length}',
+      tag: DebugTags.apmCustomSpan,
+    );
     return CustomSpanManager.I.startCustomSpan(name);
   }
 
@@ -70,6 +77,10 @@ class APM {
     DateTime startDate,
     DateTime endDate,
   ) {
+    LuciqLogger.I.d(
+      '[APM.addCompletedCustomSpan] phase=enter nameLength=${name.length}',
+      tag: DebugTags.apmCustomSpan,
+    );
     return CustomSpanManager.I.addCompletedCustomSpan(name, startDate, endDate);
   }
 
@@ -79,18 +90,23 @@ class APM {
 
   /// Enables or disables APM feature.
   /// [boolean] isEnabled
-  static Future<void> setEnabled(bool isEnabled) async {
-    return _host.setEnabled(isEnabled);
-  }
+  static Future<void> setEnabled(bool isEnabled) => hostCall(
+        'APM.setEnabled',
+        () => _host.setEnabled(isEnabled),
+        tag: DebugTags.apmAppLaunch,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Returns a Future<bool> indicating whether [APM] is enabled.
   ///
   /// Returns:
   ///   A Future<bool> object is being returned.
   @internal
-  static Future<bool> isEnabled() async {
-    return _host.isEnabled();
-  }
+  static Future<bool?> isEnabled() => hostCall(
+        'APM.isEnabled',
+        () => _host.isEnabled(),
+        tag: DebugTags.apmAppLaunch,
+      );
 
   /// Sets the screen loading state based on the provided boolean value.
   ///
@@ -101,18 +117,23 @@ class APM {
   ///
   /// Returns:
   ///   A Future<void> is being returned.
-  static Future<void> setScreenLoadingEnabled(bool isEnabled) {
-    return _host.setScreenLoadingEnabled(isEnabled);
-  }
+  static Future<void> setScreenLoadingEnabled(bool isEnabled) => hostCall(
+        'APM.setScreenLoadingEnabled',
+        () => _host.setScreenLoadingEnabled(isEnabled),
+        tag: DebugTags.apmScreenLoading,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Returns a Future<bool> indicating whether screen loading is enabled.
   ///
   /// Returns:
   ///   A Future<bool> object is being returned.
   @internal
-  static Future<bool> isScreenLoadingEnabled() async {
-    return _host.isScreenLoadingEnabled();
-  }
+  static Future<bool?> isScreenLoadingEnabled() => hostCall(
+        'APM.isScreenLoadingEnabled',
+        () => _host.isScreenLoadingEnabled(),
+        tag: DebugTags.apmScreenLoading,
+      );
 
   /// Sets whether cold app launch is enabled or not.
   ///
@@ -122,9 +143,12 @@ class APM {
   ///
   /// Returns:
   ///   The method is returning a `Future<void>`.
-  static Future<void> setColdAppLaunchEnabled(bool isEnabled) async {
-    return _host.setColdAppLaunchEnabled(isEnabled);
-  }
+  static Future<void> setColdAppLaunchEnabled(bool isEnabled) => hostCall(
+        'APM.setColdAppLaunchEnabled',
+        () => _host.setColdAppLaunchEnabled(isEnabled),
+        tag: DebugTags.apmAppLaunch,
+        args: {'isEnabled': isEnabled},
+      );
 
   // ============================================================
   // App Flows
@@ -140,11 +164,16 @@ class APM {
   ///
   /// The method will only execute if APM is enabled, the feature is
   /// active, and the SDK has been initialized.
-  static Future<void> startFlow(String name) async {
-    if (name.isNotEmpty) {
-      return _host.startFlow(name.trim());
-    }
-  }
+  static Future<void> startFlow(String name) => hostCall(
+        'APM.startFlow',
+        () async {
+          if (name.isNotEmpty) {
+            return _host.startFlow(name.trim());
+          }
+        },
+        tag: DebugTags.apmFlow,
+        args: {'nameLength': name.length, 'nameIsEmpty': name.isEmpty},
+      );
 
   /// Assigns a custom attribute to an AppFlow with the specified [name], [key], and [value].
   ///
@@ -157,9 +186,18 @@ class APM {
     String name,
     String key,
     String? value,
-  ) async {
-    return _host.setFlowAttribute(name, key, value);
-  }
+  ) =>
+      hostCall(
+        'APM.setFlowAttribute',
+        () => _host.setFlowAttribute(name, key, value),
+        tag: DebugTags.apmFlow,
+        args: {
+          'nameLength': name.length,
+          'keyLength': key.length,
+          'valueLength': value?.length ?? 0,
+          'valuePresent': value != null,
+        },
+      );
 
   /// Ends a flow with the specified name.
   ///
@@ -169,9 +207,12 @@ class APM {
   ///
   /// Returns:
   ///   The method is returning a `Future<void>`.
-  static Future<void> endFlow(String name) async {
-    return _host.endFlow(name);
-  }
+  static Future<void> endFlow(String name) => hostCall(
+        'APM.endFlow',
+        () => _host.endFlow(name),
+        tag: DebugTags.apmFlow,
+        args: {'nameLength': name.length},
+      );
 
   // ============================================================
   // UI Traces
@@ -186,9 +227,12 @@ class APM {
   ///
   /// Returns:
   ///   The method returns a `Future<void>`.
-  static Future<void> setAutoUITraceEnabled(bool isEnabled) async {
-    return _host.setAutoUITraceEnabled(isEnabled);
-  }
+  static Future<void> setAutoUITraceEnabled(bool isEnabled) => hostCall(
+        'APM.setAutoUITraceEnabled',
+        () => _host.setAutoUITraceEnabled(isEnabled),
+        tag: DebugTags.apmUITrace,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Starts a UI trace with the given name.
   ///
@@ -198,46 +242,59 @@ class APM {
   ///
   /// Returns:
   ///   The method is returning a `Future<void>`.
-  static Future<void> startUITrace(String name) async {
-    final isScreenRenderingEnabled =
-        await FlagsConfig.screenRendering.isEnabled();
-    await LuciqScreenRenderManager.I
-        .checkForScreenRenderInitialization(isScreenRenderingEnabled);
+  static Future<void> startUITrace(String name) => hostCall(
+        'APM.startUITrace',
+        () async {
+          final isScreenRenderingEnabled =
+              await FlagsConfig.screenRendering.isEnabled();
+          await LuciqScreenRenderManager.I
+              .checkForScreenRenderInitialization(isScreenRenderingEnabled);
 
-    // Ends the active custom ui trace before starting new one.
-    if (isScreenRenderingEnabled) {
-      LuciqScreenRenderManager.I.endScreenRenderCollector(UiTraceType.custom);
-    }
-    return _host.startUITrace(name).then(
-      (_) {
-        // Start screen render collector for custom ui trace if enabled.
-        if (isScreenRenderingEnabled) {
-          LuciqScreenRenderManager.I
-              .startScreenRenderCollectorForTraceId(0, UiTraceType.custom);
-        }
-      },
-    );
-  }
+          // Ends the active custom ui trace before starting new one.
+          if (isScreenRenderingEnabled) {
+            LuciqScreenRenderManager.I
+                .endScreenRenderCollector(UiTraceType.custom);
+          }
+          return _host.startUITrace(name).then(
+            (_) {
+              // Start screen render collector for custom ui trace if enabled.
+              if (isScreenRenderingEnabled) {
+                LuciqScreenRenderManager.I.startScreenRenderCollectorForTraceId(
+                  0,
+                  UiTraceType.custom,
+                );
+              }
+            },
+          );
+        },
+        tag: DebugTags.apmUITrace,
+        args: {'nameLength': name.length},
+      );
 
   /// The [endUITrace] function ends a UI trace.
   ///
   /// Returns:
   ///   The method is returning a `Future<void>`.
-  static Future<void> endUITrace() async {
-    // End screen render collector for custom ui trace if enabled.
-    if (LuciqScreenRenderManager.I.screenRenderEnabled) {
-      LuciqScreenRenderManager.I.endScreenRenderCollector(UiTraceType.custom);
+  static Future<void> endUITrace() => hostCall(
+        'APM.endUITrace',
+        () async {
+          // End screen render collector for custom ui trace if enabled.
+          if (LuciqScreenRenderManager.I.screenRenderEnabled) {
+            LuciqScreenRenderManager.I
+                .endScreenRenderCollector(UiTraceType.custom);
 
-      final isAutoUiTraceEnabled = await FlagsConfig.uiTrace.isEnabled();
+            final isAutoUiTraceEnabled = await FlagsConfig.uiTrace.isEnabled();
 
-      // dispose the LuciqScreenRenderManager if AutoUiTrace is disabled.
-      if (!isAutoUiTraceEnabled) LuciqScreenRenderManager.I.dispose();
+            // dispose the LuciqScreenRenderManager if AutoUiTrace is disabled.
+            if (!isAutoUiTraceEnabled) LuciqScreenRenderManager.I.dispose();
 
-      return;
-    }
+            return;
+          }
 
-    return _host.endUITrace();
-  }
+          return _host.endUITrace();
+        },
+        tag: DebugTags.apmUITrace,
+      );
 
   // ============================================================
   // App Launch
@@ -249,9 +306,11 @@ class APM {
   ///
   /// Returns:
   ///   The method is returning a `Future<void>`.
-  static Future<void> endAppLaunch() async {
-    return _host.endAppLaunch();
-  }
+  static Future<void> endAppLaunch() => hostCall(
+        'APM.endAppLaunch',
+        () => _host.endAppLaunch(),
+        tag: DebugTags.apmAppLaunch,
+      );
 
   // ============================================================
   // Network Logging
@@ -267,9 +326,24 @@ class APM {
   /// Returns:
   ///   The method is returning a `FutureOr<void>`.
   static FutureOr<void> networkLogAndroid(NetworkData data) {
-    if (LCQBuildInfo.instance.isAndroid) {
-      return _host.networkLogAndroid(data.toJson());
+    if (!LCQBuildInfo.instance.isAndroid) {
+      LuciqLogger.I.d(
+        '[APM.networkLogAndroid] phase=enter method=${data.method} url=${redactUrlForLog(data.url)} status=${data.status} duration=${data.duration} isAndroid=false',
+        tag: DebugTags.apmNetwork,
+      );
+      return null;
     }
+    return hostCall(
+      'APM.networkLogAndroid',
+      () => _host.networkLogAndroid(data.toJson()),
+      tag: DebugTags.apmNetwork,
+      args: {
+        'method': data.method,
+        'url': redactUrlForLog(data.url),
+        'status': data.status,
+        'duration': data.duration,
+      },
+    );
   }
 
   // ============================================================
@@ -297,13 +371,21 @@ class APM {
     String screenName,
     int startTimeInMicroseconds,
     int traceId,
-  ) {
-    LuciqLogger.I.d(
-      'Starting Ui trace — traceId: $traceId, screenName: $screenName, microTimeStamp: $startTimeInMicroseconds',
-      tag: APM.tag,
-    );
-    return _host.startCpUiTrace(screenName, startTimeInMicroseconds, traceId);
-  }
+  ) =>
+      hostCall(
+        'APM.startCpUiTrace',
+        () => _host.startCpUiTrace(
+          screenName,
+          startTimeInMicroseconds,
+          traceId,
+        ),
+        tag: DebugTags.apmUITrace,
+        args: {
+          'traceId': traceId,
+          'screenNameLength': screenName.length,
+          'startTimeInMicroseconds': startTimeInMicroseconds,
+        },
+      );
 
   // ============================================================
   // Screen Loading Methods
@@ -329,17 +411,21 @@ class APM {
     int startTimeInMicroseconds,
     int durationInMicroseconds,
     int uiTraceId,
-  ) {
-    LuciqLogger.I.d(
-      'Reporting screen loading trace — traceId: $uiTraceId, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
-      tag: APM.tag,
-    );
-    return _host.reportScreenLoadingCP(
-      startTimeInMicroseconds,
-      durationInMicroseconds,
-      uiTraceId,
-    );
-  }
+  ) =>
+      hostCall(
+        'APM.reportScreenLoadingCP',
+        () => _host.reportScreenLoadingCP(
+          startTimeInMicroseconds,
+          durationInMicroseconds,
+          uiTraceId,
+        ),
+        tag: DebugTags.apmScreenLoading,
+        args: {
+          'traceId': uiTraceId,
+          'startTimeInMicroseconds': startTimeInMicroseconds,
+          'durationInMicroseconds': durationInMicroseconds,
+        },
+      );
 
   /// Reports manual screen loading trace with specific details.
   ///
@@ -361,17 +447,21 @@ class APM {
     String screenName,
     int startTimeInMicroseconds,
     int durationInMicroseconds,
-  ) {
-    LuciqLogger.I.d(
-      'Reporting manual screen loading trace — screenName: $screenName, startTimeInMicroseconds: $startTimeInMicroseconds, durationInMicroseconds: $durationInMicroseconds',
-      tag: APM.tag,
-    );
-    return _host.reportManualScreenLoadingCP(
-      screenName,
-      startTimeInMicroseconds,
-      durationInMicroseconds,
-    );
-  }
+  ) =>
+      hostCall(
+        'APM.reportManualScreenLoadingCP',
+        () => _host.reportManualScreenLoadingCP(
+          screenName,
+          startTimeInMicroseconds,
+          durationInMicroseconds,
+        ),
+        tag: DebugTags.apmScreenLoading,
+        args: {
+          'screenNameLength': screenName.length,
+          'startTimeInMicroseconds': startTimeInMicroseconds,
+          'durationInMicroseconds': durationInMicroseconds,
+        },
+      );
 
   /// Extends a screen loading trace with the provided end time and UI trace ID.
   ///
@@ -388,19 +478,26 @@ class APM {
   static Future<void> endScreenLoadingCP(
     int endTimeInMicroseconds,
     int uiTraceId,
-  ) {
-    LuciqLogger.I.d(
-      'Extending screen loading trace — traceId: $uiTraceId, endTimeInMicroseconds: $endTimeInMicroseconds',
-      tag: APM.tag,
-    );
-    return _host.endScreenLoadingCP(endTimeInMicroseconds, uiTraceId);
-  }
+  ) =>
+      hostCall(
+        'APM.endScreenLoadingCP',
+        () => _host.endScreenLoadingCP(endTimeInMicroseconds, uiTraceId),
+        tag: DebugTags.apmScreenLoading,
+        args: {
+          'traceId': uiTraceId,
+          'endTimeInMicroseconds': endTimeInMicroseconds,
+        },
+      );
 
   /// Extends the currently active screen loading trace using the [ScreenLoadingManager].
   ///
   /// Returns:
   ///   A Future<void> is being returned.
   static Future<void> endScreenLoading() {
+    LuciqLogger.I.d(
+      '[APM.endScreenLoading] phase=enter',
+      tag: DebugTags.apmScreenLoading,
+    );
     return ScreenLoadingManager.I.endScreenLoading();
   }
 
@@ -410,9 +507,11 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isEndScreenLoadingEnabled() async {
-    return _host.isEndScreenLoadingEnabled();
-  }
+  static Future<bool?> isEndScreenLoadingEnabled() => hostCall(
+        'APM.isEndScreenLoadingEnabled',
+        () => _host.isEndScreenLoadingEnabled(),
+        tag: DebugTags.apmScreenLoading,
+      );
 
   /// The function [wrapRoutes] wraps the given routes with a [LuciqCaptureScreenLoading] widget, excluding specified
   /// routes. This allows Luciq to automatically capture screen loading times.
@@ -431,6 +530,10 @@ class APM {
     Map<String, WidgetBuilder> routes, {
     List<String> exclude = const [],
   }) {
+    LuciqLogger.I.d(
+      '[APM.wrapRoutes] phase=enter routeCount=${routes.length} excludeCount=${exclude.length}',
+      tag: DebugTags.apmScreenLoading,
+    );
     return ScreenLoadingManager.wrapRoutes(routes, exclude: exclude);
   }
 
@@ -440,9 +543,11 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isAutoUiTraceEnabled() async {
-    return _host.isAutoUiTraceEnabled();
-  }
+  static Future<bool?> isAutoUiTraceEnabled() => hostCall(
+        'APM.isAutoUiTraceEnabled',
+        () => _host.isAutoUiTraceEnabled(),
+        tag: DebugTags.apmUITrace,
+      );
 
   // ============================================================
   // Screen Rendering Methods
@@ -454,9 +559,11 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isScreenRenderEnabled() async {
-    return _host.isScreenRenderEnabled();
-  }
+  static Future<bool?> isScreenRenderEnabled() => hostCall(
+        'APM.isScreenRenderEnabled',
+        () => _host.isScreenRenderEnabled(),
+        tag: DebugTags.apmScreenRendering,
+      );
 
   /// Returns a Future<bool> indicating whether the custom
   /// span is enabled.
@@ -464,9 +571,11 @@ class APM {
   /// Returns:
   ///   A Future<bool> is being returned.
   @internal
-  static Future<bool> isCustomSpanEnabled() async {
-    return _host.isCustomSpanEnabled();
-  }
+  static Future<bool?> isCustomSpanEnabled() => hostCall(
+        'APM.isCustomSpanEnabled',
+        () => _host.isCustomSpanEnabled(),
+        tag: DebugTags.apmCustomSpan,
+      );
 
   /// Retrieve the device refresh rate from native side .
   ///
@@ -477,9 +586,11 @@ class APM {
   /// Returns:
   ///   A Future<List<double>> where the first element is the refresh rate and the second is the tolerance value.
   @internal
-  static Future<List<double?>> getDeviceRefreshRateAndTolerance() {
-    return _host.getDeviceRefreshRateAndTolerance();
-  }
+  static Future<List<double?>?> getDeviceRefreshRateAndTolerance() => hostCall(
+        'APM.getDeviceRefreshRateAndTolerance',
+        () => _host.getDeviceRefreshRateAndTolerance(),
+        tag: DebugTags.apmScreenRendering,
+      );
 
   /// Sets the screen Render state based on the provided boolean value.
   ///
@@ -490,9 +601,12 @@ class APM {
   ///
   /// Returns:
   ///   A Future<void> is being returned.
-  static Future<void> setScreenRenderingEnabled(bool isEnabled) async {
-    return _host.setScreenRenderEnabled(isEnabled);
-  }
+  static Future<void> setScreenRenderingEnabled(bool isEnabled) => hostCall(
+        'APM.setScreenRenderingEnabled',
+        () => _host.setScreenRenderEnabled(isEnabled),
+        tag: DebugTags.apmScreenRendering,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Ends screen rendering for
   /// automatic UI tracing using data provided in `LuciqScreenRenderData` object.
@@ -507,9 +621,12 @@ class APM {
   @internal
   static Future<void> endScreenRenderForAutoUiTrace(
     LuciqScreenRenderData data,
-  ) {
-    return _host.endScreenRenderForAutoUiTrace(data.toMap());
-  }
+  ) =>
+      hostCall(
+        'APM.endScreenRenderForAutoUiTrace',
+        () => _host.endScreenRenderForAutoUiTrace(data.toMap()),
+        tag: DebugTags.apmScreenRendering,
+      );
 
   /// Ends the screen render for a custom
   /// UI trace using data provided in `LuciqScreenRenderData`.
@@ -524,7 +641,10 @@ class APM {
   @internal
   static Future<void> endScreenRenderForCustomUiTrace(
     LuciqScreenRenderData data,
-  ) {
-    return _host.endScreenRenderForCustomUiTrace(data.toMap());
-  }
+  ) =>
+      hostCall(
+        'APM.endScreenRenderForCustomUiTrace',
+        () => _host.endScreenRenderForCustomUiTrace(data.toMap()),
+        tag: DebugTags.apmScreenRendering,
+      );
 }

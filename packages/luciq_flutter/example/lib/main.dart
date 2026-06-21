@@ -57,9 +57,15 @@ void main() {
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',
       );
+      Luciq.setAutoMaskScreenshotTypes([AutoMasking.webViews]);
+
+      Luciq.setWebViewMonitoringEnabled(true);
+      Luciq.setWebViewUserInteractionsTrackingEnabled(true);
+      Luciq.setWebViewNetworkTrackingEnabled(true);
 
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
+
 
       BugReporting.setProactiveReportingConfigurations(
         const ProactiveReportingConfigs(
@@ -78,15 +84,19 @@ void main() {
       };
 
       runApp(
-        ChangeNotifierProvider(
-          create: (_) => CallbackHandlersProvider(),
-          child: const MyApp(),
+        // LuciqWidget is required to register the private-view screenshot
+        LuciqWidget(
+          child: ChangeNotifierProvider(
+            create: (_) => CallbackHandlersProvider(),
+            child: const MyApp(),
+          ),
         ),
       );
     },
     CrashReporting.reportCrash,
   );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);

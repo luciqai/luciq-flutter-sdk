@@ -11,7 +11,7 @@ import 'package:luciq_grpc_interceptor/src/tapped_response_stream.dart';
 export 'src/grpc_status_mapper.dart' show grpcStatusToHttpStatus;
 
 const int _kStreamBufferCapBytes = 64 * 1024;
-const String _logTag = 'LuciqGrpcInterceptor';
+const String _logTag = 'LCQ-Flutter-GRPC:';
 
 class LuciqGrpcInterceptor extends ClientInterceptor {
   final NetworkLogger _networkLogger = NetworkLogger();
@@ -27,7 +27,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
     final ctx = _CallContext();
 
     LuciqLogger.I.d(
-      'unary start: method=${method.path}',
+      '[interceptUnary] phase=start method=${method.path}',
       tag: _logTag,
     );
 
@@ -42,7 +42,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           headers = await response.headers;
         } catch (e) {
           LuciqLogger.I.v(
-            'unary headers fetch failed: $e method=${method.path}',
+            '[interceptUnary] phase=warn op=fetchHeaders '
+            'method=${method.path} errorType=${e.runtimeType}',
             tag: _logTag,
           );
         }
@@ -50,7 +51,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           trailers = await response.trailers;
         } catch (e) {
           LuciqLogger.I.v(
-            'unary trailers fetch failed: $e method=${method.path}',
+            '[interceptUnary] phase=warn op=fetchTrailers '
+            'method=${method.path} errorType=${e.runtimeType}',
             tag: _logTag,
           );
         }
@@ -58,7 +60,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         final grpcStatus = _readGrpcStatus(trailers);
         if (grpcStatus != null && grpcStatus != StatusCode.ok) {
           LuciqLogger.I.d(
-            'unary trailer-status non-OK: '
+            '[interceptUnary] phase=trailerStatus '
             'method=${method.path} code=$grpcStatus '
             'message="${trailers['grpc-message'] ?? ''}"',
             tag: _logTag,
@@ -89,8 +91,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
       },
       onError: (Object error) async {
         LuciqLogger.I.e(
-          'unary error: method=${method.path} '
-          'type=${error.runtimeType} '
+          '[interceptUnary] phase=error method=${method.path} '
+          'errorType=${error.runtimeType} '
           'code=${error is GrpcError ? error.code : 'n/a'}',
           tag: _logTag,
         );
@@ -121,7 +123,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
     final terminal = _TerminalGuard();
 
     LuciqLogger.I.d(
-      'stream start: method=${method.path}',
+      '[interceptStreaming] phase=start method=${method.path}',
       tag: _logTag,
     );
 
@@ -133,6 +135,10 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
     });
 
     final stream = invoker(method, tappedRequests, modifiedOptions);
+    LuciqLogger.I.v(
+      '[interceptStreaming] phase=dispatch method=${method.path}',
+      tag: _logTag,
+    );
     final tappedResponses = stream.map((res) {
       resCapture.append(res);
       return res;
@@ -146,13 +152,14 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           headers = await stream.headers;
         } catch (e) {
           LuciqLogger.I.v(
-            'stream headers fetch failed: $e method=${method.path}',
+            '[interceptStreaming] phase=warn op=fetchHeaders '
+            'method=${method.path} errorType=${e.runtimeType}',
             tag: _logTag,
           );
         }
         LuciqLogger.I.d(
-          'stream complete: method=${method.path} '
-          'grpc-status=${trailers['grpc-status']} '
+          '[interceptStreaming] phase=complete method=${method.path} '
+          'grpcStatus=${trailers['grpc-status']} '
           'messages=${resCapture.messageCount} '
           'reqBytes=${reqCapture.byteCount} '
           'resBytes=${resCapture.byteCount}',
@@ -175,13 +182,14 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           headers = await stream.headers;
         } catch (e) {
           LuciqLogger.I.v(
-            'stream headers fetch failed (onError): $e method=${method.path}',
+            '[interceptStreaming] phase=warn op=fetchHeaders onError=true '
+            'method=${method.path} errorType=${e.runtimeType}',
             tag: _logTag,
           );
         }
         LuciqLogger.I.e(
-          'stream error: method=${method.path} '
-          'type=${error.runtimeType} '
+          '[interceptStreaming] phase=error method=${method.path} '
+          'errorType=${error.runtimeType} '
           'code=${error is GrpcError ? error.code : 'n/a'} '
           'messages=${resCapture.messageCount}',
           tag: _logTag,
@@ -205,7 +213,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
       onCancel: () {
         if (!terminal.claim()) return;
         LuciqLogger.I.d(
-          'stream cancelled by consumer: method=${method.path} '
+          '[interceptStreaming] phase=cancelled method=${method.path} '
           'messages=${resCapture.messageCount}',
           tag: _logTag,
         );
@@ -233,6 +241,10 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         providers: [
           (Map<String, String> metadata, String uri) async {
             try {
+              LuciqLogger.I.v(
+                '[_withW3CProvider] phase=enter authority=$uri',
+                tag: _logTag,
+              );
               // ignore: invalid_use_of_internal_member
               final header = await _networkLogger.getW3CHeader(
                 Map<String, dynamic>.from(metadata),
@@ -243,7 +255,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
                 metadata['traceparent'] = header!.w3CGeneratedHeader!;
               }
               LuciqLogger.I.v(
-                'w3c: authority=$uri '
+                '[_withW3CProvider] phase=w3c authority=$uri '
                 'generated=${header?.w3CGeneratedHeader != null} '
                 'inboundFound=${header?.isW3cHeaderFound == true}',
                 tag: _logTag,
@@ -255,7 +267,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
               );
             } catch (e) {
               LuciqLogger.I.e(
-                'w3c provider failed: $e authority=$uri',
+                '[_withW3CProvider] phase=error authority=$uri '
+                'errorType=${e.runtimeType}',
                 tag: _logTag,
               );
               ctx.completeProvider(
@@ -305,13 +318,14 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         ),
       );
       LuciqLogger.I.d(
-        'unary logged: method=${method.path} status=200 '
+        '[_logUnarySuccess] phase=exit method=${method.path} status=200 '
         'duration=${endTime.difference(startTime).inMicroseconds}us',
         tag: _logTag,
       );
     } catch (e) {
       LuciqLogger.I.e(
-        'unary log failed: $e method=${method.path}',
+        '[_logUnarySuccess] phase=error method=${method.path} '
+        'errorType=${e.runtimeType}',
         tag: _logTag,
       );
     }
@@ -362,7 +376,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         ),
       );
       LuciqLogger.I.d(
-        'stream logged: method=${method.path} '
+        '[_logStreamComplete] phase=exit method=${method.path} '
         'grpc=$grpcStatus http=${grpcStatusToHttpStatus(grpcStatus)} '
         'messages=${resCapture.messageCount} '
         'duration=${endTime.difference(startTime).inMicroseconds}us',
@@ -370,7 +384,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
       );
     } catch (e) {
       LuciqLogger.I.e(
-        'stream log failed: $e method=${method.path}',
+        '[_logStreamComplete] phase=error method=${method.path} '
+        'errorType=${e.runtimeType}',
         tag: _logTag,
       );
     }
@@ -442,14 +457,15 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         ),
       );
       LuciqLogger.I.d(
-        'failure logged: method=${method.path} '
+        '[_logFailure] phase=exit method=${method.path} '
         'status=$status domain=$errorDomain code=$errorCode '
         'duration=${endTime.difference(startTime).inMicroseconds}us',
         tag: _logTag,
       );
     } catch (e) {
       LuciqLogger.I.e(
-        'failure log failed: $e method=${method.path}',
+        '[_logFailure] phase=error method=${method.path} '
+        'errorType=${e.runtimeType}',
         tag: _logTag,
       );
     }
@@ -540,6 +556,11 @@ class _StreamCapture {
     if (_capturedBytes + encodedBytes > _kStreamBufferCapBytes) {
       _truncated = true;
       _buffer.write('...[truncated at $_kStreamBufferCapBytes bytes]');
+      LuciqLogger.I.w(
+        '[_StreamCapture.append] phase=warn op=truncate '
+        'cap=$_kStreamBufferCapBytes messages=$messageCount',
+        tag: _logTag,
+      );
       return;
     }
     if (_buffer.isNotEmpty) _buffer.write('\n');

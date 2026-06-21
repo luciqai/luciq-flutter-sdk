@@ -139,12 +139,13 @@ packages:
     source: path
     version: "3.1.1"
   luciq_flutter:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../luciq_flutter"
-      relative: true
-    source: path
-    version: "19.6.0"
+      name: luciq_flutter
+      sha256: "8f7491eeaaec9711a15bda820ff4575b1ef579e56c25dd69892aee881f6587e8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "19.7.0"
   matcher:
     dependency: transitive
     description:

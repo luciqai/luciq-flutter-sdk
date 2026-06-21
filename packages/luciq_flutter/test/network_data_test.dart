@@ -82,6 +82,17 @@ void main() {
     expect(map['responseHeaders'], data.responseHeaders);
   });
 
+  test('[gqlQueryName] defaults to null and serializes as null', () async {
+    expect(data.gqlQueryName, isNull);
+    expect(data.toJson()['gqlQueryName'], isNull);
+  });
+
+  test('[gqlQueryName] is preserved through copyWith and toJson', () async {
+    final withQuery = data.copyWith(gqlQueryName: 'GetUser');
+    expect(withQuery.gqlQueryName, 'GetUser');
+    expect(withQuery.toJson()['gqlQueryName'], 'GetUser');
+  });
+
   test('[gRPCMethod] should round-trip through copyWith and toJson', () async {
     const grpcMethod = '/foo.Service/Method';
     const serverErrorMessage = 'internal error';

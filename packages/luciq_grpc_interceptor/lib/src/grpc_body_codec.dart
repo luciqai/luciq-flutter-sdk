@@ -1,17 +1,36 @@
 import 'dart:convert';
 
+// ignore: invalid_use_of_internal_member
+import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+
+const String _logTag = 'LCQ-Flutter-GRPC:';
+
 String parseGrpcBody(dynamic data) {
   if (data == null) return '';
   try {
     final json = _toProto3JsonIfPossible(data);
     if (json != null) return jsonEncode(json);
-  } catch (_) {}
+  } catch (e) {
+    LuciqLogger.I.v(
+      '[parseGrpcBody] phase=warn op=proto3Json errorType=${e.runtimeType}',
+      tag: _logTag,
+    );
+  }
   try {
     return jsonEncode(data);
-  } catch (_) {}
+  } catch (e) {
+    LuciqLogger.I.v(
+      '[parseGrpcBody] phase=warn op=jsonEncode errorType=${e.runtimeType}',
+      tag: _logTag,
+    );
+  }
   try {
     return data.toString();
-  } catch (_) {
+  } catch (e) {
+    LuciqLogger.I.v(
+      '[parseGrpcBody] phase=warn op=toString errorType=${e.runtimeType}',
+      tag: _logTag,
+    );
     return '';
   }
 }
@@ -21,17 +40,34 @@ int calculateGrpcBodySize(dynamic data) {
   try {
     final bytes = _writeToBufferIfPossible(data);
     if (bytes != null) return bytes.length;
-  } catch (_) {}
+  } catch (e) {
+    LuciqLogger.I.v(
+      '[calculateGrpcBodySize] phase=warn op=writeToBuffer '
+      'errorType=${e.runtimeType}',
+      tag: _logTag,
+    );
+  }
   try {
     if (data is String) return utf8.encode(data).length;
     if (data is List<int>) return data.length;
     final json = _toProto3JsonIfPossible(data);
     if (json != null) return utf8.encode(jsonEncode(json)).length;
     return utf8.encode(jsonEncode(data)).length;
-  } catch (_) {}
+  } catch (e) {
+    LuciqLogger.I.v(
+      '[calculateGrpcBodySize] phase=warn op=jsonEncode '
+      'errorType=${e.runtimeType}',
+      tag: _logTag,
+    );
+  }
   try {
     return utf8.encode(data.toString()).length;
-  } catch (_) {
+  } catch (e) {
+    LuciqLogger.I.v(
+      '[calculateGrpcBodySize] phase=warn op=toString '
+      'errorType=${e.runtimeType}',
+      tag: _logTag,
+    );
     return 0;
   }
 }

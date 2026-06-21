@@ -2,14 +2,17 @@
 
 import 'dart:async';
 
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/models/network_data.dart';
 import 'package:luciq_flutter/src/models/w3c_header.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
+import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/iterable_ext.dart';
 import 'package:luciq_flutter/src/utils/luciq_constants.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/src/utils/luciq_utils.dart';
 import 'package:luciq_flutter/src/utils/network_manager.dart';
 import 'package:luciq_flutter/src/utils/w3c_header_utils.dart';
 import 'package:meta/meta.dart';
@@ -47,9 +50,11 @@ class NetworkLogger {
   ///   // Modify 'data' as needed and return it.
   /// });
   /// ```
-  static void obfuscateLog(ObfuscateLogCallback callback) {
-    _manager.setObfuscateLogCallback(callback);
-  }
+  static void obfuscateLog(ObfuscateLogCallback callback) => hostCallSync(
+        'NET.obfuscateLog',
+        () => _manager.setObfuscateLogCallback(callback),
+        tag: DebugTags.network,
+      );
 
   /// Registers a callback to selectively omit network log data.
   ///
@@ -69,26 +74,55 @@ class NetworkLogger {
   ///   return data.url.startsWith('https://example.com');
   /// });
   /// ```
-  static void omitLog(OmitLogCallback callback) {
-    _manager.setOmitLogCallback(callback);
-  }
+  static void omitLog(OmitLogCallback callback) => hostCallSync(
+        'NET.omitLog',
+        () => _manager.setOmitLogCallback(callback),
+        tag: DebugTags.network,
+      );
 
-  Future<void> networkLog(NetworkData data) async {
-    final w3Header = await getW3CHeader(
-      data.requestHeaders,
-      data.startTime.millisecondsSinceEpoch,
+  Future<void> networkLog(NetworkData data) {
+    // Network logging hits every HTTP call, so skip the URL redaction scan
+    // when debug logging is off.
+    final isDebug = LuciqLogger.I.isDebugEnabled();
+    return hostCall(
+      'NET.networkLog',
+      () async {
+        final w3Header = await getW3CHeader(
+          data.requestHeaders,
+          data.startTime.millisecondsSinceEpoch,
+        );
+        if (w3Header?.isW3cHeaderFound == false &&
+            w3Header?.w3CGeneratedHeader != null) {
+          data.requestHeaders['traceparent'] = w3Header?.w3CGeneratedHeader;
+        }
+        await networkLogInternal(data);
+      },
+      tag: DebugTags.network,
+      args: {
+        'method': data.method,
+        'url': isDebug ? redactUrlForLog(data.url) : '',
+        'status': data.status,
+        'duration': data.duration,
+      },
     );
-    if (w3Header?.isW3cHeaderFound == false &&
-        w3Header?.w3CGeneratedHeader != null) {
-      data.requestHeaders['traceparent'] = w3Header?.w3CGeneratedHeader;
-    }
-    networkLogInternal(data);
   }
 
   @internal
   Future<void> networkLogInternal(NetworkData data) async {
+    final isDebug = LuciqLogger.I.isDebugEnabled();
+    final redactedUrl = isDebug ? redactUrlForLog(data.url) : '';
+    LuciqLogger.I.d(
+      '[NET.networkLogInternal] phase=enter method=${data.method} url=$redactedUrl status=${data.status} duration=${data.duration}',
+      tag: DebugTags.network,
+    );
     final omit = await _manager.omitLog(data);
-    if (omit) return;
+    if (omit) {
+      LuciqLogger.I.d(
+        '[NET.networkLogInternal] phase=exit omitted=true',
+        tag: DebugTags.network,
+      );
+      return;
+    }
 
     // Check size limits early to avoid processing large bodies
     final requestExceeds = await _manager.didRequestBodyExceedSizeLimit(data);
@@ -111,16 +145,36 @@ class NetworkLogger {
       );
 
       // Log the truncation event.
-      final isBothExceeds = requestExceeds && responseExceeds;
-      LuciqLogger.I.e(
-        "Truncated network ${isBothExceeds ? 'request and response' : requestExceeds ? 'request' : 'response'} body",
-        tag: LuciqConstants.networkLoggerTag,
+      LuciqLogger.I.w(
+        '[NET.networkLogInternal] phase=warn reason=truncated requestExceeds=$requestExceeds responseExceeds=$responseExceeds',
+        tag: DebugTags.network,
       );
     }
 
     final obfuscated = await _manager.obfuscateLog(processedData);
-    await _host.networkLog(obfuscated.toJson());
-    await APM.networkLogAndroid(obfuscated);
+
+    try {
+      await _host.networkLog(obfuscated.toJson());
+    } catch (e) {
+      LuciqLogger.I.e(
+        '[NET.networkLogInternal] phase=warn sink=brSink errorType=${e.runtimeType}',
+        tag: DebugTags.network,
+      );
+    }
+
+    try {
+      await APM.networkLogAndroid(obfuscated);
+    } catch (e) {
+      LuciqLogger.I.e(
+        '[NET.networkLogInternal] phase=warn sink=apmSink errorType=${e.runtimeType}',
+        tag: DebugTags.network,
+      );
+    }
+
+    LuciqLogger.I.d(
+      '[NET.networkLogInternal] phase=exit',
+      tag: DebugTags.network,
+    );
   }
 
   /// Logs a gRPC network call.
@@ -165,7 +219,7 @@ class NetworkLogger {
       final isBothExceeds = requestExceeds && responseExceeds;
       LuciqLogger.I.e(
         "Truncated gRPC ${isBothExceeds ? 'request and response' : requestExceeds ? 'request' : 'response'} body",
-        tag: LuciqConstants.networkLoggerTag,
+        tag: DebugTags.network,
       );
     }
 
@@ -180,7 +234,7 @@ class NetworkLogger {
   ) async {
     final w3cFlags = await FeatureFlagsManager().getW3CFeatureFlagsHeader();
 
-    if (w3cFlags.isW3cExternalTraceIDEnabled == false) {
+    if (w3cFlags == null || w3cFlags.isW3cExternalTraceIDEnabled == false) {
       return null;
     }
 
@@ -211,13 +265,19 @@ class NetworkLogger {
 
   /// Enables or disables network body logs capturing.
   /// [boolean] isEnabled
-  static Future<void> setNetworkLogBodyEnabled(bool isEnabled) async {
-    return _host.setNetworkLogBodyEnabled(isEnabled);
-  }
+  static Future<void> setNetworkLogBodyEnabled(bool isEnabled) => hostCall(
+        'NET.setNetworkLogBodyEnabled',
+        () => _host.setNetworkLogBodyEnabled(isEnabled),
+        tag: DebugTags.network,
+        args: {'isEnabled': isEnabled},
+      );
 
   /// Enables or disables network logs sensitive information auto masking.
   /// [boolean] isEnabled
-  static Future<void> setNetworkAutoMaskingEnabled(bool isEnabled) async {
-    return _host.setNetworkAutoMaskingEnabled(isEnabled);
-  }
+  static Future<void> setNetworkAutoMaskingEnabled(bool isEnabled) => hostCall(
+        'NET.setNetworkAutoMaskingEnabled',
+        () => _host.setNetworkAutoMaskingEnabled(isEnabled),
+        tag: DebugTags.network,
+        args: {'isEnabled': isEnabled},
+      );
 }

@@ -38,6 +38,9 @@ dependencyResolutionManagement {
                 password System.getenv("LUCIQ_REPOSITORY_PASSWORD")
             }
         }
+        maven {
+ url "https://central.sonatype.com/repository/maven-snapshots/"
+}
     }
 }
 

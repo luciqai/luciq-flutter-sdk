@@ -39,7 +39,7 @@ void main() {
     when(mHost.getNetworkBodyMaxSize()).thenAnswer(
       (_) => Future.value(10240),
     );
-    when(mHost.networkLog(any)).thenAnswer((_) => Future<void>.value());
+    when(mHost.networkLogGrpc(any)).thenAnswer((_) => Future<void>.value());
   });
 
   final method = ClientMethod<String, String>(
@@ -181,7 +181,7 @@ void main() {
   group('LuciqGrpcInterceptor - interceptUnary', () {
     test('logs successful unary call', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -210,7 +210,7 @@ void main() {
 
     test('logs error on failed unary call', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -246,7 +246,7 @@ void main() {
 
     test('logs grpc://authority/path when providers run', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -282,7 +282,7 @@ void main() {
 
     test('logs trailer-status non-OK as gRPC error', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -311,7 +311,7 @@ void main() {
     });
 
     test('passes W3C header via MetadataProvider in CallOptions', () async {
-      when(mHost.networkLog(any)).thenAnswer((_) => Future<void>.value());
+      when(mHost.networkLogGrpc(any)).thenAnswer((_) => Future<void>.value());
 
       final interceptor = LuciqGrpcInterceptor();
       final mockCall = createMockCall();
@@ -332,7 +332,7 @@ void main() {
     });
 
     test('preserves existing CallOptions metadata', () async {
-      when(mHost.networkLog(any)).thenAnswer((_) => Future<void>.value());
+      when(mHost.networkLogGrpc(any)).thenAnswer((_) => Future<void>.value());
 
       final interceptor = LuciqGrpcInterceptor();
       final mockCall = createMockCall();
@@ -353,7 +353,7 @@ void main() {
 
     test('stress test - 1000 unary calls', () async {
       var logCount = 0;
-      when(mHost.networkLog(any)).thenAnswer((_) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((_) {
         logCount++;
         return Future<void>.value();
       });
@@ -381,7 +381,7 @@ void main() {
   group('LuciqGrpcInterceptor - interceptStreaming', () {
     test('logs streaming call on completion via trailers', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -409,7 +409,7 @@ void main() {
 
     test('captures multi-message server stream body and metrics', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -452,7 +452,7 @@ void main() {
 
     test('treats malformed grpc-status as UNKNOWN, not OK', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -480,7 +480,7 @@ void main() {
 
     test('logs streaming call error', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -510,7 +510,7 @@ void main() {
 
     test('logs CANCELLED when consumer cancels before trailers', () async {
       final logs = <Map<String, dynamic>>[];
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         logs.add(
           invocation.positionalArguments[0] as Map<String, dynamic>,
         );
@@ -557,7 +557,7 @@ void main() {
 
     test('streaming onError surfaces headers in responseHeaders', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();
@@ -597,7 +597,7 @@ void main() {
 
     test('captures client-streaming request body and size', () async {
       final completer = Completer<Map<String, dynamic>>();
-      when(mHost.networkLog(any)).thenAnswer((invocation) {
+      when(mHost.networkLogGrpc(any)).thenAnswer((invocation) {
         final data = invocation.positionalArguments[0] as Map<String, dynamic>;
         if (!completer.isCompleted) completer.complete(data);
         return Future<void>.value();

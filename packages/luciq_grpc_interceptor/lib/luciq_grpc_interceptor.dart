@@ -297,7 +297,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
       final requestBody = parseGrpcBody(request);
       final responseBody = parseGrpcBody(response);
 
-      _networkLogger.networkLogGrpc(
+      _networkLogger.networkLog(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -352,7 +352,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           ? (trailers['grpc-message'] ?? resCapture.body())
           : resCapture.body();
 
-      _networkLogger.networkLogGrpc(
+      _networkLogger.networkLog(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -432,7 +432,7 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         _annotateStreamMetrics(responseHeaders, resCapture, startTime);
       }
 
-      _networkLogger.networkLogGrpc(
+      _networkLogger.networkLog(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),

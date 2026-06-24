@@ -458,47 +458,6 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.networkLog] phase=exit"];
 }
 
-- (void)networkLogGrpcData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error {
-    NSString *url = data[@"url"];
-    NSInteger requestBodySize = [data[@"requestBodySize"] integerValue];
-    NSInteger responseBodySize = [data[@"responseBodySize"] integerValue];
-    NSInteger responseCode = [data[@"responseCode"] integerValue];
-    NSInteger errorCode = [data[@"errorCode"] integerValue];
-    NSString *errorDomain = data[@"errorDomain"];
-    NSDictionary *requestHeaders = data[@"requestHeaders"];
-    if ([requestHeaders count] == 0) {
-        requestHeaders = @{};
-    }
-    NSDictionary *responseHeaders = data[@"responseHeaders"];
-    NSString *contentType = data[@"responseContentType"];
-    NSTimeInterval startTime = [data[@"startTime"] doubleValue] * 1000;
-    NSTimeInterval duration = [data[@"duration"] doubleValue];
-
-    NSString *gRPCMethod = nil;
-    NSString *serverErrorMessage = nil;
-
-    if (data[@"gRPCMethod"] != [NSNull null]) {
-        gRPCMethod = data[@"gRPCMethod"];
-    }
-    if (data[@"serverErrorMessage"] != [NSNull null]) {
-        serverErrorMessage = data[@"serverErrorMessage"];
-    }
-
-    [LCQNetworkLogger addGrpcNetworkLogWithUrl:url
-                               requestBodySize:requestBodySize
-                              responseBodySize:responseBodySize
-                                  responseCode:responseCode
-                                requestHeaders:requestHeaders
-                               responseHeaders:responseHeaders
-                                   contentType:contentType
-                                     startTime:startTime
-                                   errorDomain:errorDomain
-                                     errorCode:errorCode
-                                      duration:duration
-                                    gRPCMethod:gRPCMethod
-                            serverErrorMessage:serverErrorMessage];
-}
-
 - (void)willRedirectToStoreWithError:(FlutterError * _Nullable __autoreleasing *)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.willRedirectToStore] phase=enter"];
     [Luciq willRedirectToAppStore];

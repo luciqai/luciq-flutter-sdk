@@ -108,8 +108,6 @@ abstract class LuciqHostApi {
 
   void networkLog(Map<String, Object> data);
 
-  void networkLogGrpc(Map<String, Object> data);
-
   void registerFeatureFlagChangeListener();
 
   Map<String, bool> isW3CFeatureFlagsEnabled();

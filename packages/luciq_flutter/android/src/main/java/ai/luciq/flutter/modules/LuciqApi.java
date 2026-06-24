@@ -672,15 +672,6 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     }
 
     @Override
-    public void networkLogGrpc(@NonNull Map<String, Object> data) {
-        // TODO: Wire to the native Android SDK once an equivalent of
-        // LCQNetworkLogger.addGrpcNetworkLogWithUrl: is exposed by the
-        // Luciq Android SDK. The bridge contract mirrors the iOS handler
-        // and the keys in `data` match NetworkData.toJson() (including
-        // `gRPCMethod` and `serverErrorMessage`).
-    }
-
-    @Override
     public void registerFeatureFlagChangeListener() {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.FEATURE_FLAGS,
                 "[Luciq.registerFeatureFlagChangeListener] phase=enter");

@@ -34,12 +34,26 @@ await for (
 final update in stream) { ... }
 ```
 
+## Unified network logging
+
+gRPC calls are logged through the SDK's **standard network-logging pipeline** - the same path used
+for HTTP traffic. There is no longer a separate native gRPC bridge; calls are identified solely by
+their `grpc://` URL.
+
+As a result, every network-log control applies to gRPC exactly as it does to HTTP:
+
+- **Network log obfuscation / filtering** registered on the SDK applies to gRPC calls.
+- **Body-size limits** (configurable from the Luciq backend) truncate gRPC request/response bodies.
+- gRPC calls appear inline with HTTP calls in the dashboard's network list.
+
+No extra setup is required beyond adding the interceptor.
+
 ## What gets logged
 
 For every RPC the dashboard receives:
 
 - **URL** of the form `grpc://<authority><method.path>` so calls to different backends can be told
-  apart.
+  apart. This URL is the only signal used to classify a call as gRPC.
 - **Request and response bodies**, serialized via `toProto3Json()` for protobuf messages and via
   `jsonEncode` for plain Dart objects. For streaming RPCs, every message in both directions is
   captured up to a 64 KiB in-memory buffer per call (see "Limits" below).

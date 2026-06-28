@@ -667,6 +667,8 @@ workflows:
           filters:
             branches:
               only: master
+      - hold_sync_public_docs_changelog:
+          type: approval
       - hold_release_gql_link_plugin:
           type: approval
           requires:
@@ -689,10 +691,7 @@ workflows:
               only: master
       - sync_public_docs_changelog:
           requires:
-            - release_luciq_flutter
-          filters:
-            branches:
-              only: master
+            - hold_sync_public_docs_changelog
       - release_slack_notification:
           channel: C8PDY2Q8H
           requires:

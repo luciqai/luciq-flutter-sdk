@@ -433,12 +433,24 @@ class Luciq {
 
   /// Logs a user event with [name] that happens through the lifecycle of the application.
   /// Logged user events are going to be sent with each report, as well as at the end of a session.
-  static Future<void> logUserEvent(String name) => hostCall(
-        'Luciq.logUserEvent',
-        () => _host.logUserEvent(name),
-        tag: DebugTags.core,
-        args: {'nameLength': name.length},
-      );
+  /// Optionally attach key-value [parameters] to enrich the event.
+  static Future<void> logUserEvent(
+    String name, [
+    List<UserEventParam> parameters = const [],
+  ]) {
+    final parametersMap = {
+      for (final param in parameters) param.key: param.value,
+    };
+    return hostCall(
+      'Luciq.logUserEvent',
+      () => _host.logUserEvent(name, parametersMap),
+      tag: DebugTags.core,
+      args: {
+        'nameLength': name.length,
+        'parametersCount': parameters.length,
+      },
+    );
+  }
 
   /// Overrides any of the strings shown in the SDK with custom ones.
   /// Allows you to customize a [value] shown to users in the SDK using a predefined [key].

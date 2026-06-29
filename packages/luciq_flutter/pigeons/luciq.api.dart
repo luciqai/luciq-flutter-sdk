@@ -43,7 +43,7 @@ abstract class LuciqHostApi {
 
   void setAppVariant(String appVariant);
 
-  void logUserEvent(String name);
+  void logUserEvent(String name, Map<String, String> parameters);
 
   void logOut();
 

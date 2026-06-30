@@ -435,9 +435,9 @@ class Luciq {
   /// Logged user events are going to be sent with each report, as well as at the end of a session.
   /// Optionally attach key-value [parameters] to enrich the event.
   static Future<void> logUserEvent(
-    String name, [
+    String name, {
     List<UserEventParam> parameters = const [],
-  ]) {
+  }) {
     final parametersMap = {
       for (final param in parameters) param.key: param.value,
     };

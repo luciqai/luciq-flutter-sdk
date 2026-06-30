@@ -178,7 +178,7 @@ void main() {
       UserEventParam(key: 'currency', value: 'USD'),
     ];
 
-    await Luciq.logUserEvent(event, parameters);
+    await Luciq.logUserEvent(event, parameters: parameters);
 
     verify(
       mHost.logUserEvent(event, {'item': 'Premium Plan', 'currency': 'USD'}),

@@ -14,6 +14,8 @@ class _CorePageState extends State<CorePage> {
 
   final userDataController = TextEditingController();
   final userEventController = TextEditingController();
+  final userEventParamKeyController = TextEditingController();
+  final userEventParamValueController = TextEditingController();
   final userEmailController = TextEditingController();
   final userNameController = TextEditingController();
   final userIdController = TextEditingController();
@@ -39,9 +41,19 @@ class _CorePageState extends State<CorePage> {
 
   void addUserEvent() {
     if (userEventController.text.isNotEmpty) {
-      Luciq.logUserEvent(userEventController.text);
+      final parameters = userEventParamKeyController.text.isNotEmpty
+          ? [
+              UserEventParam(
+                key: userEventParamKeyController.text,
+                value: userEventParamValueController.text,
+              ),
+            ]
+          : <UserEventParam>[];
+      Luciq.logUserEvent(userEventController.text, parameters: parameters);
     }
     userEventController.text = '';
+    userEventParamKeyController.text = '';
+    userEventParamValueController.text = '';
   }
 
   void addTag() {
@@ -104,6 +116,8 @@ class _CorePageState extends State<CorePage> {
   void dispose() {
     userDataController.dispose();
     userEventController.dispose();
+    userEventParamKeyController.dispose();
+    userEventParamValueController.dispose();
     userEmailController.dispose();
     userNameController.dispose();
     userIdController.dispose();
@@ -201,6 +215,16 @@ class _CorePageState extends State<CorePage> {
           controller: userEventController,
           label: 'Enter event name',
           symanticLabel: 'user_event_input',
+        ),
+        LuciqTextField(
+          controller: userEventParamKeyController,
+          label: 'Enter parameter key (optional)',
+          symanticLabel: 'user_event_param_key_input',
+        ),
+        LuciqTextField(
+          controller: userEventParamValueController,
+          label: 'Enter parameter value (optional)',
+          symanticLabel: 'user_event_param_value_input',
         ),
         LuciqButton(
           text: 'Log User Event',

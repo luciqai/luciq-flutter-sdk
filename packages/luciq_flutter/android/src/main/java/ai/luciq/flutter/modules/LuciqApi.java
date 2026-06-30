@@ -52,6 +52,7 @@ import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
 import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
+import ai.luciq.library.user.UserEventParam;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -243,10 +244,18 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     }
 
     @Override
-    public void logUserEvent(@NonNull String name) {
+    public void logUserEvent(@NonNull String name, @NonNull Map<String, String> parameters) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
-                "[Luciq.logUserEvent] phase=enter length=" + name.length());
-        Luciq.logUserEvent(name);
+                "[Luciq.logUserEvent] phase=enter length=" + name.length() + " parametersCount=" + parameters.size());
+        if (parameters.isEmpty()) {
+            Luciq.logUserEvent(name);
+        } else {
+            List<UserEventParam> userEventParams = new ArrayList<>();
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                userEventParams.add(new UserEventParam(entry.getKey(), entry.getValue()));
+            }
+            Luciq.logUserEvent(name, userEventParams.toArray(new UserEventParam[0]));
+        }
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.logUserEvent] phase=exit");
     }
 

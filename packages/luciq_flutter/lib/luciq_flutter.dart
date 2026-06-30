@@ -6,6 +6,7 @@ export 'src/models/feature_flag.dart';
 export 'src/models/network_data.dart';
 export 'src/models/proactive_reporting_config.dart';
 export 'src/models/theme_config.dart';
+export 'src/models/user_event_param.dart';
 export 'src/models/w3c_header.dart';
 // Modules
 export 'src/modules/apm.dart';

@@ -97,9 +97,19 @@
     NSString *name = @"sign_up";
     FlutterError *error;
 
-    [self.api logUserEventName:name error:&error];
+    [self.api logUserEventName:name parameters:@{} error:&error];
 
     OCMVerify([self.mLuciq logUserEventWithName:name]);
+}
+
+- (void)testLogUserEventWithParameters {
+    NSString *name = @"Completed Purchase";
+    NSDictionary<NSString *, NSString *> *parameters = @{@"item": @"Premium Plan"};
+    FlutterError *error;
+
+    [self.api logUserEventName:name parameters:parameters error:&error];
+
+    OCMVerify([self.mLuciq logUserEventWithName:name parameters:[OCMArg any]]);
 }
 
 - (void)testLogOut {

@@ -1,17 +1,14 @@
 // ignore_for_file: avoid_classes_with_only_static_members
 
 import 'dart:async';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:typed_data';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unused_import
 import 'package:flutter/services.dart';
@@ -22,7 +19,6 @@ import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart'

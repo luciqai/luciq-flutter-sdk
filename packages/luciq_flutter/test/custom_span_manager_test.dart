@@ -6,7 +6,6 @@ import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

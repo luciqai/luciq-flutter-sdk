@@ -7,7 +7,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/private_views/private_views_manager.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

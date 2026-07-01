@@ -8,12 +8,12 @@ import 'package:gql_http_link/gql_http_link.dart'
 import 'package:gql_link/gql_link.dart';
 import 'package:http/http.dart' show MultipartFile;
 import 'package:luciq_flutter/luciq_flutter.dart';
-// ignore: implementation_imports, invalid_use_of_internal_member
+// ignore: invalid_use_of_internal_member
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
 const _operationTypeHeader = 'x-luciq-graphql-operation-type';
 const _defaultContentType = 'application/json';
-const _logTag = 'LuciqGqlLink';
+const _logTag = 'LCQ-Flutter-GQL:';
 
 /// A `gql_link` middleware that forwards GraphQL operations to the next link
 /// while reporting them to the Luciq dashboard via [NetworkLogger].
@@ -22,7 +22,10 @@ const _logTag = 'LuciqGqlLink';
 /// `Link.from([LuciqGqlLink(endpoint: url), HttpLink(url)])`.
 class LuciqGqlLink extends Link {
   LuciqGqlLink({this.endpoint = 'graphql'}) {
-    LuciqLogger.I.v('init: endpoint="$endpoint"', tag: _logTag);
+    LuciqLogger.I.v(
+      '[LuciqGqlLink] phase=init endpoint="$endpoint"',
+      tag: _logTag,
+    );
   }
 
   /// Display label shown in the Luciq dashboard for operations going through
@@ -39,7 +42,8 @@ class LuciqGqlLink extends Link {
   ]) {
     if (forward == null) {
       LuciqLogger.I.e(
-        'forward is null; LuciqGqlLink must be placed before a terminating link',
+        '[request] phase=error reason=forwardNull; LuciqGqlLink must be '
+        'placed before a terminating link',
         tag: _logTag,
       );
       return Stream.error(
@@ -56,7 +60,7 @@ class LuciqGqlLink extends Link {
     final url = operationName != null ? '$endpoint ($operationName)' : endpoint;
 
     LuciqLogger.I.d(
-      'request: type=$operationType '
+      '[request] phase=start type=$operationType '
       'name=${operationName ?? '<anonymous>'} url=$url',
       tag: _logTag,
     );
@@ -65,6 +69,8 @@ class LuciqGqlLink extends Link {
         request.context.entry<HttpLinkHeaders>()?.headers ??
             const <String, String>{};
     final mergedHeaders = Map<String, dynamic>.from(inboundLinkHeaders);
+
+    LuciqLogger.I.v('[request] phase=enter op=fetchW3C', tag: _logTag);
 
     return Stream.fromFuture(
       // ignore: invalid_use_of_internal_member
@@ -78,13 +84,14 @@ class LuciqGqlLink extends Link {
           : null;
 
       LuciqLogger.I.v(
-        'w3c: generated=${generatedTrace != null} '
+        '[request] phase=w3c generated=${generatedTrace != null} '
         'inboundFound=${w3Header?.isW3cHeaderFound == true}',
         tag: _logTag,
       );
 
       if (generatedTrace != null) {
         mergedHeaders['traceparent'] = generatedTrace;
+        LuciqLogger.I.v('[request] phase=w3c op=inject', tag: _logTag);
       }
 
       final outgoingRequest = generatedTrace != null
@@ -108,6 +115,12 @@ class LuciqGqlLink extends Link {
       // events, not the per-event server work.
       var lastEventStart = startTime;
 
+      LuciqLogger.I.d(
+        '[request] phase=dispatch '
+        'name=${operationName ?? '<anonymous>'} url=$url',
+        tag: _logTag,
+      );
+
       return forward(outgoingRequest).map((response) {
         final endTime = DateTime.now();
         final eventStart = lastEventStart;
@@ -124,7 +137,7 @@ class LuciqGqlLink extends Link {
           w3cHeader: w3Header,
         );
         LuciqLogger.I.d(
-          'response: '
+          '[request] phase=response '
           'status=${response.context.entry<HttpLinkResponseContext>()?.statusCode} '
           'gqlErrors=${response.errors?.length ?? 0} '
           'duration=${endTime.difference(eventStart).inMicroseconds}us '
@@ -241,7 +254,7 @@ class LuciqGqlLink extends Link {
     }
 
     LuciqLogger.I.e(
-      'error: type=${error.runtimeType} status=$status '
+      '[_logError] phase=error errorType=${error.runtimeType} status=$status '
       'name=${gqlQueryName ?? '<anonymous>'}',
       tag: _logTag,
     );
@@ -300,7 +313,10 @@ class LuciqGqlLink extends Link {
       };
       return jsonEncode(body);
     } catch (e) {
-      LuciqLogger.I.e('request body encode failed: $e', tag: _logTag);
+      LuciqLogger.I.e(
+        '[_buildRequestBody] phase=error op=encode errorType=${e.runtimeType}',
+        tag: _logTag,
+      );
       return jsonEncode(<String, String>{
         '_luciq_encode_error': e.toString(),
         'fallback': request.toString(),
@@ -324,6 +340,11 @@ class LuciqGqlLink extends Link {
 
   dynamic _sanitizeValueForLog(dynamic value) {
     if (value is MultipartFile) {
+      LuciqLogger.I.v(
+        '[_sanitizeValueForLog] phase=sanitize op=multipart '
+        'field=${value.field} filename=${value.filename}',
+        tag: _logTag,
+      );
       return <String, dynamic>{
         '__luciq_multipart': true,
         'field': value.field,
@@ -362,7 +383,10 @@ class LuciqGqlLink extends Link {
       };
       return jsonEncode(body);
     } catch (e) {
-      LuciqLogger.I.e('response body encode failed: $e', tag: _logTag);
+      LuciqLogger.I.e(
+        '[_buildResponseBody] phase=error op=encode errorType=${e.runtimeType}',
+        tag: _logTag,
+      );
       return jsonEncode(<String, String>{
         '_luciq_encode_error': e.toString(),
         'fallback': response.toString(),
@@ -409,7 +433,10 @@ class LuciqGqlLink extends Link {
       final jsonString = jsonEncode(data);
       return utf8.encode(jsonString).length;
     } catch (e) {
-      LuciqLogger.I.v('body size fallback (toString): $e', tag: _logTag);
+      LuciqLogger.I.v(
+        '[_calculateBodySize] phase=warn op=fallback errorType=${e.runtimeType}',
+        tag: _logTag,
+      );
       return utf8.encode(data.toString()).length;
     }
   }

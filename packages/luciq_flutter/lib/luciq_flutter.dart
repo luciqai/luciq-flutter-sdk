@@ -19,6 +19,7 @@ export 'src/modules/replies.dart';
 export 'src/modules/session_replay.dart';
 export 'src/modules/surveys.dart';
 // Utils
+export 'src/utils/luciq_logger.dart' show LuciqLogger, Logger;
 export 'src/utils/luciq_navigator_observer.dart';
 export 'src/utils/luciq_widget.dart';
 export 'src/utils/private_views/luciq_private_view.dart';

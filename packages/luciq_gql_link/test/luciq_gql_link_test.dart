@@ -736,7 +736,7 @@ void main() {
       );
 
       final exception = HttpLinkServerException(
-        response: http.Response('', 504),
+        response: http.Response('', 504, headers: const {}),
         parsedResponse: const Response(response: {}),
       );
 
@@ -1124,8 +1124,8 @@ void main() {
 
       verify(
         mLogger.e(
-          argThat(contains('forward is null')),
-          tag: 'LuciqGqlLink',
+          argThat(contains('reason=forwardNull')),
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });
@@ -1151,21 +1151,21 @@ void main() {
       verify(
         mLogger.d(
           argThat(allOf(
-            contains('request:'),
+            contains('phase=start'),
             contains('type=query'),
             contains('name=GetUser'),
-          ),),
-          tag: 'LuciqGqlLink',
+          )),
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
       verify(
         mLogger.d(
           argThat(allOf(
-            contains('response:'),
+            contains('phase=response'),
             contains('status=200'),
             contains('gqlErrors=0'),
-          ),),
-          tag: 'LuciqGqlLink',
+          )),
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });
@@ -1199,11 +1199,11 @@ void main() {
       verify(
         mLogger.e(
           argThat(allOf(
-            contains('error:'),
+            contains('phase=error'),
             contains('status=502'),
             contains('name=GetUser'),
-          ),),
-          tag: 'LuciqGqlLink',
+          )),
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });
@@ -1228,8 +1228,8 @@ void main() {
 
       verify(
         mLogger.e(
-          argThat(contains('request body encode failed')),
-          tag: 'LuciqGqlLink',
+          argThat(contains('[_buildRequestBody]')),
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });

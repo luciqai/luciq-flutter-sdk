@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-// ignore: invalid_use_of_internal_member
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
+import 'package:luciq_flutter/luciq_flutter.dart';
 
 const String _logTag = 'LCQ-Flutter-GRPC:';
 

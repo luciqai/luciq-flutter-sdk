@@ -6,7 +6,6 @@ import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq_private_view.api.g.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/host_call.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/user_steps/widget_utils.dart';
 
 enum AutoMasking { labels, textInputs, media, webViews, none }

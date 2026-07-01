@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:grpc/grpc.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
-// ignore: invalid_use_of_internal_member
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_grpc_interceptor/src/grpc_body_codec.dart';
 import 'package:luciq_grpc_interceptor/src/grpc_status_mapper.dart';
 import 'package:luciq_grpc_interceptor/src/tapped_response_stream.dart';
@@ -13,6 +11,9 @@ export 'src/grpc_status_mapper.dart' show grpcStatusToHttpStatus;
 const int _kStreamBufferCapBytes = 64 * 1024;
 const String _logTag = 'LCQ-Flutter-GRPC:';
 
+/// A `grpc` [ClientInterceptor] that forwards unary and streaming RPCs to the
+/// Luciq network-logging pipeline, capturing bodies, metadata, status, timing,
+/// and W3C trace context alongside HTTP traffic.
 class LuciqGrpcInterceptor extends ClientInterceptor {
   final NetworkLogger _networkLogger = NetworkLogger();
 

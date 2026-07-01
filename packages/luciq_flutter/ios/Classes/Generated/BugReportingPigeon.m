@@ -45,23 +45,23 @@ NSObject<FlutterMessageCodec> *BugReportingFlutterApiGetCodec(void) {
   }
   return self;
 }
-- (void)onSdkInvokeWithCompletion:(void (^)(FlutterError *_Nullable))completion {
+- (void)onSdkInvokeCallId:(NSString *)arg_callId completion:(void (^)(FlutterError *_Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkInvoke"
       binaryMessenger:self.binaryMessenger
       codec:BugReportingFlutterApiGetCodec()];
-  [channel sendMessage:nil reply:^(id reply) {
+  [channel sendMessage:@[arg_callId ?: [NSNull null]] reply:^(id reply) {
     completion(nil);
   }];
 }
-- (void)onSdkDismissDismissType:(NSString *)arg_dismissType reportType:(NSString *)arg_reportType completion:(void (^)(FlutterError *_Nullable))completion {
+- (void)onSdkDismissCallId:(NSString *)arg_callId dismissType:(NSString *)arg_dismissType reportType:(NSString *)arg_reportType completion:(void (^)(FlutterError *_Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkDismiss"
       binaryMessenger:self.binaryMessenger
       codec:BugReportingFlutterApiGetCodec()];
-  [channel sendMessage:@[arg_dismissType ?: [NSNull null], arg_reportType ?: [NSNull null]] reply:^(id reply) {
+  [channel sendMessage:@[arg_callId ?: [NSNull null], arg_dismissType ?: [NSNull null], arg_reportType ?: [NSNull null]] reply:^(id reply) {
     completion(nil);
   }];
 }

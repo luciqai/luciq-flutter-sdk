@@ -16,7 +16,10 @@ NSObject<FlutterMessageCodec> *LuciqPrivateViewFlutterApiGetCodec(void);
 
 @interface LuciqPrivateViewFlutterApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
-- (void)getPrivateViewsWithCompletion:(void (^)(NSArray<NSNumber *> *_Nullable, FlutterError *_Nullable))completion;
+/// Native -> Dart capture callback. `callId` is minted on the native side via
+/// `LuciqFlutterLogger.nextCallId` so the resulting `phase=fire` line on Dart
+/// can be correlated with the originating `[PRIV.mask]` trace.
+- (void)getPrivateViewsCallId:(NSString *)callId completion:(void (^)(NSArray<NSNumber *> *_Nullable, FlutterError *_Nullable))completion;
 @end
 
 /// The codec used by LuciqPrivateViewHostApi.

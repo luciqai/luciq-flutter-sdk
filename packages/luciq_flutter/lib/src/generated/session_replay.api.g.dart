@@ -110,12 +110,13 @@ class SessionReplayHostApi {
     }
   }
 
-  Future<String> getSessionReplayLink() async {
+  Future<String> getSessionReplayLink(String arg_callId) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.getSessionReplayLink',
         codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_callId]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -134,6 +135,85 @@ class SessionReplayHostApi {
       );
     } else {
       return (replyList[0] as String?)!;
+    }
+  }
+
+  /// Sets when screenshots are captured.
+  /// - navigation: Capture on screen changes only (default)
+  /// - interactions: Capture on navigation and user interactions
+  /// - frequency: Capture at fixed time intervals (video-like)
+  Future<void> setScreenshotCapturingMode(String arg_mode) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotCapturingMode',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_mode]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Sets the capture interval for Frequency mode.
+  /// @param intervalMs Interval in milliseconds (min: 500, default: 1000)
+  Future<void> setScreenshotCaptureInterval(int arg_intervalMs) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotCaptureInterval',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_intervalMs]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Sets the visual quality of captured screenshots.
+  /// - high: 50% WebP compression
+  /// - normal: 25% WebP compression (default)
+  /// - greyscale: Grayscale + 25% WebP compression
+  Future<void> setScreenshotQualityMode(String arg_mode) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotQualityMode',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_mode]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
     }
   }
 }

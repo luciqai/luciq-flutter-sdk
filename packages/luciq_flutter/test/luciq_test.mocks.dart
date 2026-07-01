@@ -6,6 +6,7 @@
 import 'dart:async' as _i3;
 import 'dart:typed_data' as _i4;
 
+import 'package:luciq_flutter/src/generated/apm.api.g.dart' as _i8;
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart' as _i2;
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart' as _i5;
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart' as _i7;
@@ -563,6 +564,40 @@ class MockLuciqHostApi extends _i1.Mock implements _i2.LuciqHostApi {
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setWebViewMonitoringEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewMonitoringEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setWebViewUserInteractionsTrackingEnabled(
+          bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewUserInteractionsTrackingEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setWebViewNetworkTrackingEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewNetworkTrackingEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }
 
 /// A class which mocks [LCQBuildInfo].
@@ -639,4 +674,328 @@ class MockScreenNameMasker extends _i1.Mock implements _i7.ScreenNameMasker {
           ),
         ),
       ) as String);
+}
+
+/// A class which mocks [ApmHostApi].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockApmHostApi extends _i1.Mock implements _i8.ApmHostApi {
+  MockApmHostApi() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<void> setEnabled(bool? arg_isEnabled) => (super.noSuchMethod(
+        Invocation.method(
+          #setEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isEnabled,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setScreenLoadingEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setScreenLoadingEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isScreenLoadingEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isScreenLoadingEnabled,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setColdAppLaunchEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setColdAppLaunchEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setAutoUITraceEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setAutoUITraceEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> startFlow(String? arg_name) => (super.noSuchMethod(
+        Invocation.method(
+          #startFlow,
+          [arg_name],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setFlowAttribute(
+    String? arg_name,
+    String? arg_key,
+    String? arg_value,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setFlowAttribute,
+          [
+            arg_name,
+            arg_key,
+            arg_value,
+          ],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> endFlow(String? arg_name) => (super.noSuchMethod(
+        Invocation.method(
+          #endFlow,
+          [arg_name],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> startUITrace(String? arg_name) => (super.noSuchMethod(
+        Invocation.method(
+          #startUITrace,
+          [arg_name],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> endUITrace() => (super.noSuchMethod(
+        Invocation.method(
+          #endUITrace,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> endAppLaunch() => (super.noSuchMethod(
+        Invocation.method(
+          #endAppLaunch,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> networkLogAndroid(Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #networkLogAndroid,
+          [arg_data],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> startCpUiTrace(
+    String? arg_screenName,
+    int? arg_microTimeStamp,
+    int? arg_traceId,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #startCpUiTrace,
+          [
+            arg_screenName,
+            arg_microTimeStamp,
+            arg_traceId,
+          ],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> reportScreenLoadingCP(
+    int? arg_startTimeStampMicro,
+    int? arg_durationMicro,
+    int? arg_uiTraceId,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #reportScreenLoadingCP,
+          [
+            arg_startTimeStampMicro,
+            arg_durationMicro,
+            arg_uiTraceId,
+          ],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> reportManualScreenLoadingCP(
+    String? arg_screenName,
+    int? arg_startTimeStampMicro,
+    int? arg_durationMicro,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #reportManualScreenLoadingCP,
+          [
+            arg_screenName,
+            arg_startTimeStampMicro,
+            arg_durationMicro,
+          ],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> endScreenLoadingCP(
+    int? arg_timeStampMicro,
+    int? arg_uiTraceId,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #endScreenLoadingCP,
+          [
+            arg_timeStampMicro,
+            arg_uiTraceId,
+          ],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isEndScreenLoadingEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isEndScreenLoadingEnabled,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> isAutoUiTraceEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isAutoUiTraceEnabled,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> isScreenRenderEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isScreenRenderEnabled,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> isCustomSpanEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isCustomSpanEnabled,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<List<double?>> getDeviceRefreshRateAndTolerance() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getDeviceRefreshRateAndTolerance,
+          [],
+        ),
+        returnValue: _i3.Future<List<double?>>.value(<double?>[]),
+      ) as _i3.Future<List<double?>>);
+
+  @override
+  _i3.Future<void> setScreenRenderEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setScreenRenderEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> endScreenRenderForAutoUiTrace(
+          Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #endScreenRenderForAutoUiTrace,
+          [arg_data],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> endScreenRenderForCustomUiTrace(
+          Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #endScreenRenderForCustomUiTrace,
+          [arg_data],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> syncCustomSpan(
+    String? arg_name,
+    int? arg_startTimestamp,
+    int? arg_endTimestamp,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #syncCustomSpan,
+          [
+            arg_name,
+            arg_startTimestamp,
+            arg_endTimestamp,
+          ],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }

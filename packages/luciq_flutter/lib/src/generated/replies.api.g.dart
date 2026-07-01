@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 abstract class RepliesFlutterApi {
   static const MessageCodec<Object?> codec = StandardMessageCodec();
 
-  void onNewReply();
+  void onNewReply(String callId);
 
   static void setup(RepliesFlutterApi? api,
       {BinaryMessenger? binaryMessenger}) {
@@ -24,8 +24,13 @@ abstract class RepliesFlutterApi {
         channel.setMessageHandler(null);
       } else {
         channel.setMessageHandler((Object? message) async {
-          // ignore message
-          api.onNewReply();
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.RepliesFlutterApi.onNewReply was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_callId = (args[0] as String?);
+          assert(arg_callId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.RepliesFlutterApi.onNewReply was null, expected non-null String.');
+          api.onNewReply(arg_callId!);
           return;
         });
       }
@@ -65,11 +70,12 @@ class RepliesHostApi {
     }
   }
 
-  Future<void> show() async {
+  Future<void> show(String arg_callId) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.RepliesHostApi.show', codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_callId]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -132,12 +138,13 @@ class RepliesHostApi {
     }
   }
 
-  Future<int> getUnreadRepliesCount() async {
+  Future<int> getUnreadRepliesCount(String arg_callId) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.RepliesHostApi.getUnreadRepliesCount',
         codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_callId]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -159,11 +166,12 @@ class RepliesHostApi {
     }
   }
 
-  Future<bool> hasChats() async {
+  Future<bool> hasChats(String arg_callId) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.RepliesHostApi.hasChats', codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_callId]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',

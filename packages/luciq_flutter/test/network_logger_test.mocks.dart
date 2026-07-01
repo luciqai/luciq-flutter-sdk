@@ -3,22 +3,22 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i7;
-import 'dart:math' as _i14;
-import 'dart:typed_data' as _i9;
+import 'dart:async' as _i6;
+import 'dart:math' as _i13;
+import 'dart:typed_data' as _i8;
 
 import 'package:luciq_flutter/luciq_flutter.dart' as _i2;
-import 'package:luciq_flutter/src/generated/apm.api.g.dart' as _i6;
-import 'package:luciq_flutter/src/generated/luciq.api.g.dart' as _i8;
+import 'package:luciq_flutter/src/generated/apm.api.g.dart' as _i5;
+import 'package:luciq_flutter/src/generated/luciq.api.g.dart' as _i7;
 import 'package:luciq_flutter/src/models/generated_w3c_header.dart' as _i4;
 import 'package:luciq_flutter/src/models/trace_partial_id.dart' as _i3;
-import 'package:luciq_flutter/src/models/w3c_feature_flags.dart' as _i5;
-import 'package:luciq_flutter/src/utils/feature_flags_manager.dart' as _i15;
-import 'package:luciq_flutter/src/utils/lcq_build_info.dart' as _i10;
-import 'package:luciq_flutter/src/utils/network_manager.dart' as _i12;
-import 'package:luciq_flutter/src/utils/w3c_header_utils.dart' as _i13;
+import 'package:luciq_flutter/src/models/w3c_feature_flags.dart' as _i15;
+import 'package:luciq_flutter/src/utils/feature_flags_manager.dart' as _i14;
+import 'package:luciq_flutter/src/utils/lcq_build_info.dart' as _i9;
+import 'package:luciq_flutter/src/utils/network_manager.dart' as _i11;
+import 'package:luciq_flutter/src/utils/w3c_header_utils.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i11;
+import 'package:mockito/src/dummies.dart' as _i10;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -65,98 +65,87 @@ class _FakeGeneratedW3CHeader_2 extends _i1.SmartFake
         );
 }
 
-class _FakeW3cFeatureFlags_3 extends _i1.SmartFake
-    implements _i5.W3cFeatureFlags {
-  _FakeW3cFeatureFlags_3(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
 /// A class which mocks [ApmHostApi].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockApmHostApi extends _i1.Mock implements _i6.ApmHostApi {
+class MockApmHostApi extends _i1.Mock implements _i5.ApmHostApi {
   MockApmHostApi() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i7.Future<void> setEnabled(bool? arg_isEnabled) => (super.noSuchMethod(
+  _i6.Future<void> setEnabled(bool? arg_isEnabled) => (super.noSuchMethod(
         Invocation.method(
           #setEnabled,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<bool> isEnabled() => (super.noSuchMethod(
+  _i6.Future<bool> isEnabled() => (super.noSuchMethod(
         Invocation.method(
           #isEnabled,
           [],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
-  _i7.Future<void> setScreenLoadingEnabled(bool? arg_isEnabled) =>
+  _i6.Future<void> setScreenLoadingEnabled(bool? arg_isEnabled) =>
       (super.noSuchMethod(
         Invocation.method(
           #setScreenLoadingEnabled,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<bool> isScreenLoadingEnabled() => (super.noSuchMethod(
+  _i6.Future<bool> isScreenLoadingEnabled() => (super.noSuchMethod(
         Invocation.method(
           #isScreenLoadingEnabled,
           [],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
-  _i7.Future<void> setColdAppLaunchEnabled(bool? arg_isEnabled) =>
+  _i6.Future<void> setColdAppLaunchEnabled(bool? arg_isEnabled) =>
       (super.noSuchMethod(
         Invocation.method(
           #setColdAppLaunchEnabled,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setAutoUITraceEnabled(bool? arg_isEnabled) =>
+  _i6.Future<void> setAutoUITraceEnabled(bool? arg_isEnabled) =>
       (super.noSuchMethod(
         Invocation.method(
           #setAutoUITraceEnabled,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> startFlow(String? arg_name) => (super.noSuchMethod(
+  _i6.Future<void> startFlow(String? arg_name) => (super.noSuchMethod(
         Invocation.method(
           #startFlow,
           [arg_name],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setFlowAttribute(
+  _i6.Future<void> setFlowAttribute(
     String? arg_name,
     String? arg_key,
     String? arg_value,
@@ -170,63 +159,63 @@ class MockApmHostApi extends _i1.Mock implements _i6.ApmHostApi {
             arg_value,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> endFlow(String? arg_name) => (super.noSuchMethod(
+  _i6.Future<void> endFlow(String? arg_name) => (super.noSuchMethod(
         Invocation.method(
           #endFlow,
           [arg_name],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> startUITrace(String? arg_name) => (super.noSuchMethod(
+  _i6.Future<void> startUITrace(String? arg_name) => (super.noSuchMethod(
         Invocation.method(
           #startUITrace,
           [arg_name],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> endUITrace() => (super.noSuchMethod(
+  _i6.Future<void> endUITrace() => (super.noSuchMethod(
         Invocation.method(
           #endUITrace,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> endAppLaunch() => (super.noSuchMethod(
+  _i6.Future<void> endAppLaunch() => (super.noSuchMethod(
         Invocation.method(
           #endAppLaunch,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> networkLogAndroid(Map<String?, Object?>? arg_data) =>
+  _i6.Future<void> networkLogAndroid(Map<String?, Object?>? arg_data) =>
       (super.noSuchMethod(
         Invocation.method(
           #networkLogAndroid,
           [arg_data],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> startCpUiTrace(
+  _i6.Future<void> startCpUiTrace(
     String? arg_screenName,
     int? arg_microTimeStamp,
     int? arg_traceId,
@@ -240,12 +229,12 @@ class MockApmHostApi extends _i1.Mock implements _i6.ApmHostApi {
             arg_traceId,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> reportScreenLoadingCP(
+  _i6.Future<void> reportScreenLoadingCP(
     int? arg_startTimeStampMicro,
     int? arg_durationMicro,
     int? arg_uiTraceId,
@@ -259,12 +248,31 @@ class MockApmHostApi extends _i1.Mock implements _i6.ApmHostApi {
             arg_uiTraceId,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> endScreenLoadingCP(
+  _i6.Future<void> reportManualScreenLoadingCP(
+    String? arg_screenName,
+    int? arg_startTimeStampMicro,
+    int? arg_durationMicro,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #reportManualScreenLoadingCP,
+          [
+            arg_screenName,
+            arg_startTimeStampMicro,
+            arg_durationMicro,
+          ],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> endScreenLoadingCP(
     int? arg_timeStampMicro,
     int? arg_uiTraceId,
   ) =>
@@ -276,58 +284,149 @@ class MockApmHostApi extends _i1.Mock implements _i6.ApmHostApi {
             arg_uiTraceId,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<bool> isEndScreenLoadingEnabled() => (super.noSuchMethod(
+  _i6.Future<bool> isEndScreenLoadingEnabled() => (super.noSuchMethod(
         Invocation.method(
           #isEndScreenLoadingEnabled,
           [],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
+
+  @override
+  _i6.Future<bool> isAutoUiTraceEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isAutoUiTraceEnabled,
+          [],
+        ),
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
+
+  @override
+  _i6.Future<bool> isScreenRenderEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isScreenRenderEnabled,
+          [],
+        ),
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
+
+  @override
+  _i6.Future<bool> isCustomSpanEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isCustomSpanEnabled,
+          [],
+        ),
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
+
+  @override
+  _i6.Future<List<double?>> getDeviceRefreshRateAndTolerance() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getDeviceRefreshRateAndTolerance,
+          [],
+        ),
+        returnValue: _i6.Future<List<double?>>.value(<double?>[]),
+      ) as _i6.Future<List<double?>>);
+
+  @override
+  _i6.Future<void> setScreenRenderEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setScreenRenderEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> endScreenRenderForAutoUiTrace(
+          Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #endScreenRenderForAutoUiTrace,
+          [arg_data],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> endScreenRenderForCustomUiTrace(
+          Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #endScreenRenderForCustomUiTrace,
+          [arg_data],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> syncCustomSpan(
+    String? arg_name,
+    int? arg_startTimestamp,
+    int? arg_endTimestamp,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #syncCustomSpan,
+          [
+            arg_name,
+            arg_startTimestamp,
+            arg_endTimestamp,
+          ],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 }
 
 /// A class which mocks [LuciqHostApi].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
+class MockLuciqHostApi extends _i1.Mock implements _i7.LuciqHostApi {
   MockLuciqHostApi() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i7.Future<void> setEnabled(bool? arg_isEnabled) => (super.noSuchMethod(
+  _i6.Future<void> setEnabled(bool? arg_isEnabled) => (super.noSuchMethod(
         Invocation.method(
           #setEnabled,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<bool> isEnabled() => (super.noSuchMethod(
+  _i6.Future<bool> isEnabled() => (super.noSuchMethod(
         Invocation.method(
           #isEnabled,
           [],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
-  _i7.Future<bool> isBuilt() => (super.noSuchMethod(
+  _i6.Future<bool> isBuilt() => (super.noSuchMethod(
         Invocation.method(
           #isBuilt,
           [],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
-  _i7.Future<void> init(
+  _i6.Future<void> init(
     String? arg_token,
     List<String?>? arg_invocationEvents,
     String? arg_debugLogsLevel,
@@ -343,44 +442,44 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_appVariant,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> enableAutoMasking(List<String?>? arg_autoMasking) =>
+  _i6.Future<void> enableAutoMasking(List<String?>? arg_autoMasking) =>
       (super.noSuchMethod(
         Invocation.method(
           #enableAutoMasking,
           [arg_autoMasking],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> show() => (super.noSuchMethod(
+  _i6.Future<void> show() => (super.noSuchMethod(
         Invocation.method(
           #show,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> showWelcomeMessageWithMode(String? arg_mode) =>
+  _i6.Future<void> showWelcomeMessageWithMode(String? arg_mode) =>
       (super.noSuchMethod(
         Invocation.method(
           #showWelcomeMessageWithMode,
           [arg_mode],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> identifyUser(
+  _i6.Future<void> identifyUser(
     String? arg_email,
     String? arg_name,
     String? arg_userId,
@@ -394,63 +493,63 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_userId,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setUserData(String? arg_data) => (super.noSuchMethod(
+  _i6.Future<void> setUserData(String? arg_data) => (super.noSuchMethod(
         Invocation.method(
           #setUserData,
           [arg_data],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setAppVariant(String? arg_appVariant) => (super.noSuchMethod(
+  _i6.Future<void> setAppVariant(String? arg_appVariant) => (super.noSuchMethod(
         Invocation.method(
           #setAppVariant,
           [arg_appVariant],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> logUserEvent(String? arg_name) => (super.noSuchMethod(
+  _i6.Future<void> logUserEvent(String? arg_name) => (super.noSuchMethod(
         Invocation.method(
           #logUserEvent,
           [arg_name],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> logOut() => (super.noSuchMethod(
+  _i6.Future<void> logOut() => (super.noSuchMethod(
         Invocation.method(
           #logOut,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setEnableUserSteps(bool? arg_isEnabled) =>
+  _i6.Future<void> setEnableUserSteps(bool? arg_isEnabled) =>
       (super.noSuchMethod(
         Invocation.method(
           #setEnableUserSteps,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> logUserSteps(
+  _i6.Future<void> logUserSteps(
     String? arg_gestureType,
     String? arg_message,
     String? arg_viewName,
@@ -464,54 +563,54 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_viewName,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setLocale(String? arg_locale) => (super.noSuchMethod(
+  _i6.Future<void> setLocale(String? arg_locale) => (super.noSuchMethod(
         Invocation.method(
           #setLocale,
           [arg_locale],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setColorTheme(String? arg_theme) => (super.noSuchMethod(
+  _i6.Future<void> setColorTheme(String? arg_theme) => (super.noSuchMethod(
         Invocation.method(
           #setColorTheme,
           [arg_theme],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setWelcomeMessageMode(String? arg_mode) =>
+  _i6.Future<void> setWelcomeMessageMode(String? arg_mode) =>
       (super.noSuchMethod(
         Invocation.method(
           #setWelcomeMessageMode,
           [arg_mode],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setSessionProfilerEnabled(bool? arg_enabled) =>
+  _i6.Future<void> setSessionProfilerEnabled(bool? arg_enabled) =>
       (super.noSuchMethod(
         Invocation.method(
           #setSessionProfilerEnabled,
           [arg_enabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setValueForStringWithKey(
+  _i6.Future<void> setValueForStringWithKey(
     String? arg_value,
     String? arg_key,
   ) =>
@@ -523,74 +622,74 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_key,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> appendTags(List<String?>? arg_tags) => (super.noSuchMethod(
+  _i6.Future<void> appendTags(List<String?>? arg_tags) => (super.noSuchMethod(
         Invocation.method(
           #appendTags,
           [arg_tags],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> resetTags() => (super.noSuchMethod(
+  _i6.Future<void> resetTags() => (super.noSuchMethod(
         Invocation.method(
           #resetTags,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<List<String?>?> getTags() => (super.noSuchMethod(
+  _i6.Future<List<String?>?> getTags() => (super.noSuchMethod(
         Invocation.method(
           #getTags,
           [],
         ),
-        returnValue: _i7.Future<List<String?>?>.value(),
-      ) as _i7.Future<List<String?>?>);
+        returnValue: _i6.Future<List<String?>?>.value(),
+      ) as _i6.Future<List<String?>?>);
 
   @override
-  _i7.Future<void> addFeatureFlags(
+  _i6.Future<void> addFeatureFlags(
           Map<String?, String?>? arg_featureFlagsMap) =>
       (super.noSuchMethod(
         Invocation.method(
           #addFeatureFlags,
           [arg_featureFlagsMap],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> removeFeatureFlags(List<String?>? arg_featureFlags) =>
+  _i6.Future<void> removeFeatureFlags(List<String?>? arg_featureFlags) =>
       (super.noSuchMethod(
         Invocation.method(
           #removeFeatureFlags,
           [arg_featureFlags],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> removeAllFeatureFlags() => (super.noSuchMethod(
+  _i6.Future<void> removeAllFeatureFlags() => (super.noSuchMethod(
         Invocation.method(
           #removeAllFeatureFlags,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setUserAttribute(
+  _i6.Future<void> setUserAttribute(
     String? arg_value,
     String? arg_key,
   ) =>
@@ -602,41 +701,41 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_key,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> removeUserAttribute(String? arg_key) => (super.noSuchMethod(
+  _i6.Future<void> removeUserAttribute(String? arg_key) => (super.noSuchMethod(
         Invocation.method(
           #removeUserAttribute,
           [arg_key],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<String?> getUserAttributeForKey(String? arg_key) =>
+  _i6.Future<String?> getUserAttributeForKey(String? arg_key) =>
       (super.noSuchMethod(
         Invocation.method(
           #getUserAttributeForKey,
           [arg_key],
         ),
-        returnValue: _i7.Future<String?>.value(),
-      ) as _i7.Future<String?>);
+        returnValue: _i6.Future<String?>.value(),
+      ) as _i6.Future<String?>);
 
   @override
-  _i7.Future<Map<String?, String?>?> getUserAttributes() => (super.noSuchMethod(
+  _i6.Future<Map<String?, String?>?> getUserAttributes() => (super.noSuchMethod(
         Invocation.method(
           #getUserAttributes,
           [],
         ),
-        returnValue: _i7.Future<Map<String?, String?>?>.value(),
-      ) as _i7.Future<Map<String?, String?>?>);
+        returnValue: _i6.Future<Map<String?, String?>?>.value(),
+      ) as _i6.Future<Map<String?, String?>?>);
 
   @override
-  _i7.Future<void> setReproStepsConfig(
+  _i6.Future<void> setReproStepsConfig(
     String? arg_bugMode,
     String? arg_crashMode,
     String? arg_sessionReplayMode,
@@ -650,23 +749,23 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_sessionReplayMode,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> reportScreenChange(String? arg_screenName) =>
+  _i6.Future<void> reportScreenChange(String? arg_screenName) =>
       (super.noSuchMethod(
         Invocation.method(
           #reportScreenChange,
           [arg_screenName],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setCustomBrandingImage(
+  _i6.Future<void> setCustomBrandingImage(
     String? arg_light,
     String? arg_dark,
   ) =>
@@ -678,22 +777,22 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_dark,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setFont(String? arg_font) => (super.noSuchMethod(
+  _i6.Future<void> setFont(String? arg_font) => (super.noSuchMethod(
         Invocation.method(
           #setFont,
           [arg_font],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> addFileAttachmentWithURL(
+  _i6.Future<void> addFileAttachmentWithURL(
     String? arg_filePath,
     String? arg_fileName,
   ) =>
@@ -705,13 +804,13 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_fileName,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> addFileAttachmentWithData(
-    _i9.Uint8List? arg_data,
+  _i6.Future<void> addFileAttachmentWithData(
+    _i8.Uint8List? arg_data,
     String? arg_fileName,
   ) =>
       (super.noSuchMethod(
@@ -722,118 +821,152 @@ class MockLuciqHostApi extends _i1.Mock implements _i8.LuciqHostApi {
             arg_fileName,
           ],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> clearFileAttachments() => (super.noSuchMethod(
+  _i6.Future<void> clearFileAttachments() => (super.noSuchMethod(
         Invocation.method(
           #clearFileAttachments,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> networkLog(Map<String?, Object?>? arg_data) =>
+  _i6.Future<void> networkLog(Map<String?, Object?>? arg_data) =>
       (super.noSuchMethod(
         Invocation.method(
           #networkLog,
           [arg_data],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> registerFeatureFlagChangeListener() => (super.noSuchMethod(
+  _i6.Future<void> registerFeatureFlagChangeListener() => (super.noSuchMethod(
         Invocation.method(
           #registerFeatureFlagChangeListener,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<Map<String?, bool?>> isW3CFeatureFlagsEnabled() =>
+  _i6.Future<Map<String?, bool?>> isW3CFeatureFlagsEnabled() =>
       (super.noSuchMethod(
         Invocation.method(
           #isW3CFeatureFlagsEnabled,
           [],
         ),
-        returnValue: _i7.Future<Map<String?, bool?>>.value(<String?, bool?>{}),
-      ) as _i7.Future<Map<String?, bool?>>);
+        returnValue: _i6.Future<Map<String?, bool?>>.value(<String?, bool?>{}),
+      ) as _i6.Future<Map<String?, bool?>>);
 
   @override
-  _i7.Future<void> willRedirectToStore() => (super.noSuchMethod(
+  _i6.Future<void> willRedirectToStore() => (super.noSuchMethod(
         Invocation.method(
           #willRedirectToStore,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setNetworkLogBodyEnabled(bool? arg_isEnabled) =>
+  _i6.Future<void> setNetworkLogBodyEnabled(bool? arg_isEnabled) =>
       (super.noSuchMethod(
         Invocation.method(
           #setNetworkLogBodyEnabled,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<double?> getNetworkBodyMaxSize() => (super.noSuchMethod(
+  _i6.Future<double?> getNetworkBodyMaxSize() => (super.noSuchMethod(
         Invocation.method(
           #getNetworkBodyMaxSize,
           [],
         ),
-        returnValue: _i7.Future<double?>.value(),
-      ) as _i7.Future<double?>);
+        returnValue: _i6.Future<double?>.value(),
+      ) as _i6.Future<double?>);
 
   @override
-  _i7.Future<void> setTheme(Map<String?, Object?>? arg_themeConfig) =>
+  _i6.Future<void> setTheme(Map<String?, Object?>? arg_themeConfig) =>
       (super.noSuchMethod(
         Invocation.method(
           #setTheme,
           [arg_themeConfig],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setFullscreen(bool? arg_isEnabled) => (super.noSuchMethod(
+  _i6.Future<void> setFullscreen(bool? arg_isEnabled) => (super.noSuchMethod(
         Invocation.method(
           #setFullscreen,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i7.Future<void> setNetworkAutoMaskingEnabled(bool? arg_isEnabled) =>
+  _i6.Future<void> setNetworkAutoMaskingEnabled(bool? arg_isEnabled) =>
       (super.noSuchMethod(
         Invocation.method(
           #setNetworkAutoMaskingEnabled,
           [arg_isEnabled],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> setWebViewMonitoringEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewMonitoringEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> setWebViewUserInteractionsTrackingEnabled(
+          bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewUserInteractionsTrackingEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> setWebViewNetworkTrackingEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewNetworkTrackingEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 }
 
 /// A class which mocks [LCQBuildInfo].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLCQBuildInfo extends _i1.Mock implements _i10.LCQBuildInfo {
+class MockLCQBuildInfo extends _i1.Mock implements _i9.LCQBuildInfo {
   MockLCQBuildInfo() {
     _i1.throwOnMissingStub(this);
   }
@@ -853,7 +986,7 @@ class MockLCQBuildInfo extends _i1.Mock implements _i10.LCQBuildInfo {
   @override
   String get operatingSystem => (super.noSuchMethod(
         Invocation.getter(#operatingSystem),
-        returnValue: _i11.dummyValue<String>(
+        returnValue: _i10.dummyValue<String>(
           this,
           Invocation.getter(#operatingSystem),
         ),
@@ -875,13 +1008,13 @@ class MockLCQBuildInfo extends _i1.Mock implements _i10.LCQBuildInfo {
 /// A class which mocks [NetworkManager].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockNetworkManager extends _i1.Mock implements _i12.NetworkManager {
+class MockNetworkManager extends _i1.Mock implements _i11.NetworkManager {
   MockNetworkManager() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  void setObfuscateLogCallback(_i12.ObfuscateLogCallback? callback) =>
+  void setObfuscateLogCallback(_i11.ObfuscateLogCallback? callback) =>
       super.noSuchMethod(
         Invocation.method(
           #setObfuscateLogCallback,
@@ -891,7 +1024,7 @@ class MockNetworkManager extends _i1.Mock implements _i12.NetworkManager {
       );
 
   @override
-  void setOmitLogCallback(_i12.OmitLogCallback? callback) => super.noSuchMethod(
+  void setOmitLogCallback(_i11.OmitLogCallback? callback) => super.noSuchMethod(
         Invocation.method(
           #setOmitLogCallback,
           [callback],
@@ -900,49 +1033,49 @@ class MockNetworkManager extends _i1.Mock implements _i12.NetworkManager {
       );
 
   @override
-  _i7.FutureOr<_i2.NetworkData> obfuscateLog(_i2.NetworkData? data) =>
+  _i6.FutureOr<_i2.NetworkData> obfuscateLog(_i2.NetworkData? data) =>
       (super.noSuchMethod(
         Invocation.method(
           #obfuscateLog,
           [data],
         ),
-        returnValue: _i7.Future<_i2.NetworkData>.value(_FakeNetworkData_0(
+        returnValue: _i6.Future<_i2.NetworkData>.value(_FakeNetworkData_0(
           this,
           Invocation.method(
             #obfuscateLog,
             [data],
           ),
         )),
-      ) as _i7.FutureOr<_i2.NetworkData>);
+      ) as _i6.FutureOr<_i2.NetworkData>);
 
   @override
-  _i7.FutureOr<bool> omitLog(_i2.NetworkData? data) => (super.noSuchMethod(
+  _i6.FutureOr<bool> omitLog(_i2.NetworkData? data) => (super.noSuchMethod(
         Invocation.method(
           #omitLog,
           [data],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.FutureOr<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.FutureOr<bool>);
 
   @override
-  _i7.Future<bool> didRequestBodyExceedSizeLimit(_i2.NetworkData? data) =>
+  _i6.Future<bool> didRequestBodyExceedSizeLimit(_i2.NetworkData? data) =>
       (super.noSuchMethod(
         Invocation.method(
           #didRequestBodyExceedSizeLimit,
           [data],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
-  _i7.Future<bool> didResponseBodyExceedSizeLimit(_i2.NetworkData? data) =>
+  _i6.Future<bool> didResponseBodyExceedSizeLimit(_i2.NetworkData? data) =>
       (super.noSuchMethod(
         Invocation.method(
           #didResponseBodyExceedSizeLimit,
           [data],
         ),
-        returnValue: _i7.Future<bool>.value(false),
-      ) as _i7.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
   void clearNetworkBodyMaxSizeCache() => super.noSuchMethod(
@@ -957,13 +1090,13 @@ class MockNetworkManager extends _i1.Mock implements _i12.NetworkManager {
 /// A class which mocks [W3CHeaderUtils].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockW3CHeaderUtils extends _i1.Mock implements _i13.W3CHeaderUtils {
+class MockW3CHeaderUtils extends _i1.Mock implements _i12.W3CHeaderUtils {
   MockW3CHeaderUtils() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  void $setRandom(_i14.Random? random) => super.noSuchMethod(
+  void $setRandom(_i13.Random? random) => super.noSuchMethod(
         Invocation.method(
           #$setRandom,
           [random],
@@ -1007,14 +1140,14 @@ class MockW3CHeaderUtils extends _i1.Mock implements _i13.W3CHeaderUtils {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockFeatureFlagsManager extends _i1.Mock
-    implements _i15.FeatureFlagsManager {
+    implements _i14.FeatureFlagsManager {
   MockFeatureFlagsManager() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
   set onNetworkBodyMaxSizeChangeCallback(
-          _i15.OnNetworkBodyMaxSizeChangeCallback? callback) =>
+          _i14.OnNetworkBodyMaxSizeChangeCallback? callback) =>
       super.noSuchMethod(
         Invocation.setter(
           #onNetworkBodyMaxSizeChangeCallback,
@@ -1030,7 +1163,7 @@ class MockFeatureFlagsManager extends _i1.Mock
       ) as int);
 
   @override
-  void $setHostApi(_i8.LuciqHostApi? host) => super.noSuchMethod(
+  void $setHostApi(_i7.LuciqHostApi? host) => super.noSuchMethod(
         Invocation.method(
           #$setHostApi,
           [host],
@@ -1039,7 +1172,7 @@ class MockFeatureFlagsManager extends _i1.Mock
       );
 
   @override
-  void setFeatureFlagsManager(_i15.FeatureFlagsManager? featureFlagsManager) =>
+  void setFeatureFlagsManager(_i14.FeatureFlagsManager? featureFlagsManager) =>
       super.noSuchMethod(
         Invocation.method(
           #setFeatureFlagsManager,
@@ -1049,31 +1182,24 @@ class MockFeatureFlagsManager extends _i1.Mock
       );
 
   @override
-  _i7.Future<_i5.W3cFeatureFlags> getW3CFeatureFlagsHeader() =>
+  _i6.Future<_i15.W3cFeatureFlags?> getW3CFeatureFlagsHeader() =>
       (super.noSuchMethod(
         Invocation.method(
           #getW3CFeatureFlagsHeader,
           [],
         ),
-        returnValue:
-            _i7.Future<_i5.W3cFeatureFlags>.value(_FakeW3cFeatureFlags_3(
-          this,
-          Invocation.method(
-            #getW3CFeatureFlagsHeader,
-            [],
-          ),
-        )),
-      ) as _i7.Future<_i5.W3cFeatureFlags>);
+        returnValue: _i6.Future<_i15.W3cFeatureFlags?>.value(),
+      ) as _i6.Future<_i15.W3cFeatureFlags?>);
 
   @override
-  _i7.Future<void> registerFeatureFlagsListener() => (super.noSuchMethod(
+  _i6.Future<void> registerFeatureFlagsListener() => (super.noSuchMethod(
         Invocation.method(
           #registerFeatureFlagsListener,
           [],
         ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
   void onW3CFeatureFlagChange(
@@ -1107,7 +1233,7 @@ class MockFeatureFlagsManager extends _i1.Mock
 /// A class which mocks [Random].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockRandom extends _i1.Mock implements _i14.Random {
+class MockRandom extends _i1.Mock implements _i13.Random {
   MockRandom() {
     _i1.throwOnMissingStub(this);
   }

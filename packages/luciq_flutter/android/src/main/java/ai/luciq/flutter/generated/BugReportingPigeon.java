@@ -73,20 +73,20 @@ public class BugReportingPigeon {
     static @NonNull MessageCodec<Object> getCodec() {
       return new StandardMessageCodec();
     }
-    public void onSdkInvoke(@NonNull Reply<Void> callback) {
+    public void onSdkInvoke(@NonNull String callIdArg, @NonNull Reply<Void> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, "dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkInvoke", getCodec());
       channel.send(
-          null,
+          new ArrayList<Object>(Collections.singletonList(callIdArg)),
           channelReply -> callback.reply(null));
     }
-    public void onSdkDismiss(@NonNull String dismissTypeArg, @NonNull String reportTypeArg, @NonNull Reply<Void> callback) {
+    public void onSdkDismiss(@NonNull String callIdArg, @NonNull String dismissTypeArg, @NonNull String reportTypeArg, @NonNull Reply<Void> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, "dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkDismiss", getCodec());
       channel.send(
-          new ArrayList<Object>(Arrays.asList(dismissTypeArg, reportTypeArg)),
+          new ArrayList<Object>(Arrays.asList(callIdArg, dismissTypeArg, reportTypeArg)),
           channelReply -> callback.reply(null));
     }
   }

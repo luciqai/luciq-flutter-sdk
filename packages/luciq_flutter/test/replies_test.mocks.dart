@@ -42,10 +42,10 @@ class MockRepliesHostApi extends _i1.Mock implements _i2.RepliesHostApi {
       ) as _i3.Future<void>);
 
   @override
-  _i3.Future<void> show() => (super.noSuchMethod(
+  _i3.Future<void> show(String? arg_callId) => (super.noSuchMethod(
         Invocation.method(
           #show,
-          [],
+          [arg_callId],
         ),
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
@@ -74,19 +74,20 @@ class MockRepliesHostApi extends _i1.Mock implements _i2.RepliesHostApi {
       ) as _i3.Future<void>);
 
   @override
-  _i3.Future<int> getUnreadRepliesCount() => (super.noSuchMethod(
+  _i3.Future<int> getUnreadRepliesCount(String? arg_callId) =>
+      (super.noSuchMethod(
         Invocation.method(
           #getUnreadRepliesCount,
-          [],
+          [arg_callId],
         ),
         returnValue: _i3.Future<int>.value(0),
       ) as _i3.Future<int>);
 
   @override
-  _i3.Future<bool> hasChats() => (super.noSuchMethod(
+  _i3.Future<bool> hasChats(String? arg_callId) => (super.noSuchMethod(
         Invocation.method(
           #hasChats,
-          [],
+          [arg_callId],
         ),
         returnValue: _i3.Future<bool>.value(false),
       ) as _i3.Future<bool>);

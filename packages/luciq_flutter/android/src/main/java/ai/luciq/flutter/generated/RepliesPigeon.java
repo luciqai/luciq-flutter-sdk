@@ -80,12 +80,12 @@ public class RepliesPigeon {
     static @NonNull MessageCodec<Object> getCodec() {
       return new StandardMessageCodec();
     }
-    public void onNewReply(@NonNull Reply<Void> callback) {
+    public void onNewReply(@NonNull String callIdArg, @NonNull Reply<Void> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, "dev.flutter.pigeon.luciq_flutter.RepliesFlutterApi.onNewReply", getCodec());
       channel.send(
-          null,
+          new ArrayList<Object>(Collections.singletonList(callIdArg)),
           channelReply -> callback.reply(null));
     }
   }
@@ -94,15 +94,15 @@ public class RepliesPigeon {
 
     void setEnabled(@NonNull Boolean isEnabled);
 
-    void show();
+    void show(@NonNull String callId);
 
     void setInAppNotificationsEnabled(@NonNull Boolean isEnabled);
 
     void setInAppNotificationSound(@NonNull Boolean isEnabled);
 
-    void getUnreadRepliesCount(@NonNull Result<Long> result);
+    void getUnreadRepliesCount(@NonNull String callId, @NonNull Result<Long> result);
 
-    void hasChats(@NonNull Result<Boolean> result);
+    void hasChats(@NonNull String callId, @NonNull Result<Boolean> result);
 
     void bindOnNewReplyCallback();
 
@@ -144,8 +144,10 @@ public class RepliesPigeon {
           channel.setMessageHandler(
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String callIdArg = (String) args.get(0);
                 try {
-                  api.show();
+                  api.show(callIdArg);
                   wrapped.add(0, null);
                 }
  catch (Throwable exception) {
@@ -214,6 +216,8 @@ public class RepliesPigeon {
           channel.setMessageHandler(
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String callIdArg = (String) args.get(0);
                 Result<Long> resultCallback =
                     new Result<Long>() {
                       public void success(Long result) {
@@ -227,7 +231,7 @@ public class RepliesPigeon {
                       }
                     };
 
-                api.getUnreadRepliesCount(resultCallback);
+                api.getUnreadRepliesCount(callIdArg, resultCallback);
               });
         } else {
           channel.setMessageHandler(null);
@@ -241,6 +245,8 @@ public class RepliesPigeon {
           channel.setMessageHandler(
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String callIdArg = (String) args.get(0);
                 Result<Boolean> resultCallback =
                     new Result<Boolean>() {
                       public void success(Boolean result) {
@@ -254,7 +260,7 @@ public class RepliesPigeon {
                       }
                     };
 
-                api.hasChats(resultCallback);
+                api.hasChats(callIdArg, resultCallback);
               });
         } else {
           channel.setMessageHandler(null);

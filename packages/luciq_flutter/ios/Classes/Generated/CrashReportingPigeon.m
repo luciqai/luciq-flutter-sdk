@@ -53,11 +53,13 @@ void CrashReportingHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSOb
     }
   }
   {
+    NSObject<FlutterTaskQueue> *taskQueue = [binaryMessenger makeBackgroundTaskQueue];
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
         initWithName:@"dev.flutter.pigeon.luciq_flutter.CrashReportingHostApi.send"
         binaryMessenger:binaryMessenger
-        codec:CrashReportingHostApiGetCodec()];
+        codec:CrashReportingHostApiGetCodec()
+taskQueue:taskQueue];
     if (api) {
       NSCAssert([api respondsToSelector:@selector(sendJsonCrash:isHandled:error:)], @"CrashReportingHostApi api (%@) doesn't respond to @selector(sendJsonCrash:isHandled:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
@@ -73,11 +75,13 @@ void CrashReportingHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSOb
     }
   }
   {
+    NSObject<FlutterTaskQueue> *taskQueue = [binaryMessenger makeBackgroundTaskQueue];
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
         initWithName:@"dev.flutter.pigeon.luciq_flutter.CrashReportingHostApi.sendNonFatalError"
         binaryMessenger:binaryMessenger
-        codec:CrashReportingHostApiGetCodec()];
+        codec:CrashReportingHostApiGetCodec()
+taskQueue:taskQueue];
     if (api) {
       NSCAssert([api respondsToSelector:@selector(sendNonFatalErrorJsonCrash:userAttributes:fingerprint:nonFatalExceptionLevel:error:)], @"CrashReportingHostApi api (%@) doesn't respond to @selector(sendNonFatalErrorJsonCrash:userAttributes:fingerprint:nonFatalExceptionLevel:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {

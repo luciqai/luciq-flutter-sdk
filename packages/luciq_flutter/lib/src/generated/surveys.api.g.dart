@@ -11,9 +11,9 @@ import 'package:flutter/services.dart';
 abstract class SurveysFlutterApi {
   static const MessageCodec<Object?> codec = StandardMessageCodec();
 
-  void onShowSurvey();
+  void onShowSurvey(String callId);
 
-  void onDismissSurvey();
+  void onDismissSurvey(String callId);
 
   static void setup(SurveysFlutterApi? api,
       {BinaryMessenger? binaryMessenger}) {
@@ -26,8 +26,13 @@ abstract class SurveysFlutterApi {
         channel.setMessageHandler(null);
       } else {
         channel.setMessageHandler((Object? message) async {
-          // ignore message
-          api.onShowSurvey();
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onShowSurvey was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_callId = (args[0] as String?);
+          assert(arg_callId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onShowSurvey was null, expected non-null String.');
+          api.onShowSurvey(arg_callId!);
           return;
         });
       }
@@ -41,8 +46,13 @@ abstract class SurveysFlutterApi {
         channel.setMessageHandler(null);
       } else {
         channel.setMessageHandler((Object? message) async {
-          // ignore message
-          api.onDismissSurvey();
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onDismissSurvey was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_callId = (args[0] as String?);
+          assert(arg_callId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onDismissSurvey was null, expected non-null String.');
+          api.onDismissSurvey(arg_callId!);
           return;
         });
       }
@@ -104,12 +114,12 @@ class SurveysHostApi {
     }
   }
 
-  Future<void> showSurvey(String arg_surveyToken) async {
+  Future<void> showSurvey(String arg_callId, String arg_surveyToken) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.SurveysHostApi.showSurvey', codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_surveyToken]) as List<Object?>?;
+    final List<Object?>? replyList = await channel
+        .send(<Object?>[arg_callId, arg_surveyToken]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -195,13 +205,14 @@ class SurveysHostApi {
     }
   }
 
-  Future<bool> hasRespondedToSurvey(String arg_surveyToken) async {
+  Future<bool> hasRespondedToSurvey(
+      String arg_callId, String arg_surveyToken) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.SurveysHostApi.hasRespondedToSurvey',
         codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_surveyToken]) as List<Object?>?;
+    final List<Object?>? replyList = await channel
+        .send(<Object?>[arg_callId, arg_surveyToken]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -223,12 +234,13 @@ class SurveysHostApi {
     }
   }
 
-  Future<List<String?>> getAvailableSurveys() async {
+  Future<List<String?>> getAvailableSurveys(String arg_callId) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.SurveysHostApi.getAvailableSurveys',
         codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_callId]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',

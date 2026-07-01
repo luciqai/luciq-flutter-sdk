@@ -11,9 +11,9 @@ import 'package:flutter/services.dart';
 abstract class BugReportingFlutterApi {
   static const MessageCodec<Object?> codec = StandardMessageCodec();
 
-  void onSdkInvoke();
+  void onSdkInvoke(String callId);
 
-  void onSdkDismiss(String dismissType, String reportType);
+  void onSdkDismiss(String callId, String dismissType, String reportType);
 
   static void setup(BugReportingFlutterApi? api,
       {BinaryMessenger? binaryMessenger}) {
@@ -26,8 +26,13 @@ abstract class BugReportingFlutterApi {
         channel.setMessageHandler(null);
       } else {
         channel.setMessageHandler((Object? message) async {
-          // ignore message
-          api.onSdkInvoke();
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkInvoke was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_callId = (args[0] as String?);
+          assert(arg_callId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkInvoke was null, expected non-null String.');
+          api.onSdkInvoke(arg_callId!);
           return;
         });
       }
@@ -44,13 +49,16 @@ abstract class BugReportingFlutterApi {
           assert(message != null,
               'Argument for dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkDismiss was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final String? arg_dismissType = (args[0] as String?);
+          final String? arg_callId = (args[0] as String?);
+          assert(arg_callId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkDismiss was null, expected non-null String.');
+          final String? arg_dismissType = (args[1] as String?);
           assert(arg_dismissType != null,
               'Argument for dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkDismiss was null, expected non-null String.');
-          final String? arg_reportType = (args[1] as String?);
+          final String? arg_reportType = (args[2] as String?);
           assert(arg_reportType != null,
               'Argument for dev.flutter.pigeon.luciq_flutter.BugReportingFlutterApi.onSdkDismiss was null, expected non-null String.');
-          api.onSdkDismiss(arg_dismissType!, arg_reportType!);
+          api.onSdkDismiss(arg_callId!, arg_dismissType!, arg_reportType!);
           return;
         });
       }

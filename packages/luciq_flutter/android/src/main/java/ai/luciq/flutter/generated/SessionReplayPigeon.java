@@ -74,7 +74,26 @@ public class SessionReplayPigeon {
 
     void setUserStepsEnabled(@NonNull Boolean isEnabled);
 
-    void getSessionReplayLink(@NonNull Result<String> result);
+    void getSessionReplayLink(@NonNull String callId, @NonNull Result<String> result);
+    /**
+     * Sets when screenshots are captured.
+     * - navigation: Capture on screen changes only (default)
+     * - interactions: Capture on navigation and user interactions
+     * - frequency: Capture at fixed time intervals (video-like)
+     */
+    void setScreenshotCapturingMode(@NonNull String mode);
+    /**
+     * Sets the capture interval for Frequency mode.
+     * @param intervalMs Interval in milliseconds (min: 500, default: 1000)
+     */
+    void setScreenshotCaptureInterval(@NonNull Long intervalMs);
+    /**
+     * Sets the visual quality of captured screenshots.
+     * - high: 50% WebP compression
+     * - normal: 25% WebP compression (default)
+     * - greyscale: Grayscale + 25% WebP compression
+     */
+    void setScreenshotQualityMode(@NonNull String mode);
 
     /** The codec used by SessionReplayHostApi. */
     static @NonNull MessageCodec<Object> getCodec() {
@@ -186,6 +205,8 @@ public class SessionReplayPigeon {
           channel.setMessageHandler(
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String callIdArg = (String) args.get(0);
                 Result<String> resultCallback =
                     new Result<String>() {
                       public void success(String result) {
@@ -199,7 +220,79 @@ public class SessionReplayPigeon {
                       }
                     };
 
-                api.getSessionReplayLink(resultCallback);
+                api.getSessionReplayLink(callIdArg, resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotCapturingMode", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String modeArg = (String) args.get(0);
+                try {
+                  api.setScreenshotCapturingMode(modeArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotCaptureInterval", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Number intervalMsArg = (Number) args.get(0);
+                try {
+                  api.setScreenshotCaptureInterval((intervalMsArg == null) ? null : intervalMsArg.longValue());
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotQualityMode", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String modeArg = (String) args.get(0);
+                try {
+                  api.setScreenshotQualityMode(modeArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
               });
         } else {
           channel.setMessageHandler(null);

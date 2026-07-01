@@ -30,8 +30,17 @@ NSObject<FlutterMessageCodec> *ApmHostApiGetCodec(void);
 - (void)networkLogAndroidData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)startCpUiTraceScreenName:(NSString *)screenName microTimeStamp:(NSNumber *)microTimeStamp traceId:(NSNumber *)traceId error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)reportScreenLoadingCPStartTimeStampMicro:(NSNumber *)startTimeStampMicro durationMicro:(NSNumber *)durationMicro uiTraceId:(NSNumber *)uiTraceId error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)reportManualScreenLoadingCPScreenName:(NSString *)screenName startTimeStampMicro:(NSNumber *)startTimeStampMicro durationMicro:(NSNumber *)durationMicro error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)endScreenLoadingCPTimeStampMicro:(NSNumber *)timeStampMicro uiTraceId:(NSNumber *)uiTraceId error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)isEndScreenLoadingEnabledWithCompletion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
+- (void)isAutoUiTraceEnabledWithCompletion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
+- (void)isScreenRenderEnabledWithCompletion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
+- (void)isCustomSpanEnabledWithCompletion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
+- (void)getDeviceRefreshRateAndToleranceWithCompletion:(void (^)(NSArray<NSNumber *> *_Nullable, FlutterError *_Nullable))completion;
+- (void)setScreenRenderEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)endScreenRenderForAutoUiTraceData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)endScreenRenderForCustomUiTraceData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)syncCustomSpanName:(NSString *)name startTimestamp:(NSNumber *)startTimestamp endTimestamp:(NSNumber *)endTimestamp error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void ApmHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<ApmHostApi> *_Nullable api);

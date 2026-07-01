@@ -8,6 +8,29 @@ import 'dart:typed_data' show Float64List, Int32List, Int64List, Uint8List;
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 import 'package:flutter/services.dart';
 
+abstract class LuciqFlutterApi {
+  static const MessageCodec<Object?> codec = StandardMessageCodec();
+
+  void dispose();
+
+  static void setup(LuciqFlutterApi? api, {BinaryMessenger? binaryMessenger}) {
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.luciq_flutter.LuciqFlutterApi.dispose', codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMessageHandler(null);
+      } else {
+        channel.setMessageHandler((Object? message) async {
+          // ignore message
+          api.dispose();
+          return;
+        });
+      }
+    }
+  }
+}
+
 abstract class FeatureFlagsFlutterApi {
   static const MessageCodec<Object?> codec = StandardMessageCodec();
 
@@ -250,7 +273,7 @@ class LuciqHostApi {
   }
 
   Future<void> identifyUser(
-      String arg_email, String? arg_name, String? arg_userId) async {
+      String? arg_email, String? arg_name, String? arg_userId) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.LuciqHostApi.identifyUser', codec,
         binaryMessenger: _binaryMessenger);
@@ -1090,6 +1113,83 @@ class LuciqHostApi {
   Future<void> setNetworkAutoMaskingEnabled(bool arg_isEnabled) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setNetworkAutoMaskingEnabled',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_isEnabled]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Master switch for all WebView tracking (user interactions,
+  /// network logs and WebView screen loading in APM).
+  /// Enabled by default on the native SDK.
+  Future<void> setWebViewMonitoringEnabled(bool arg_isEnabled) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewMonitoringEnabled',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_isEnabled]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Enables capturing user interactions inside WebViews
+  /// (tap, scroll, navigation). Disabled by default.
+  Future<void> setWebViewUserInteractionsTrackingEnabled(
+      bool arg_isEnabled) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewUserInteractionsTrackingEnabled',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_isEnabled]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Enables capturing network logs (Fetch/XHR) triggered from
+  /// inside WebViews. Disabled by default.
+  Future<void> setWebViewNetworkTrackingEnabled(bool arg_isEnabled) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewNetworkTrackingEnabled',
         codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =

@@ -80,20 +80,20 @@ public class SurveysPigeon {
     static @NonNull MessageCodec<Object> getCodec() {
       return new StandardMessageCodec();
     }
-    public void onShowSurvey(@NonNull Reply<Void> callback) {
+    public void onShowSurvey(@NonNull String callIdArg, @NonNull Reply<Void> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, "dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onShowSurvey", getCodec());
       channel.send(
-          null,
+          new ArrayList<Object>(Collections.singletonList(callIdArg)),
           channelReply -> callback.reply(null));
     }
-    public void onDismissSurvey(@NonNull Reply<Void> callback) {
+    public void onDismissSurvey(@NonNull String callIdArg, @NonNull Reply<Void> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, "dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onDismissSurvey", getCodec());
       channel.send(
-          null,
+          new ArrayList<Object>(Collections.singletonList(callIdArg)),
           channelReply -> callback.reply(null));
     }
   }
@@ -104,7 +104,7 @@ public class SurveysPigeon {
 
     void showSurveyIfAvailable();
 
-    void showSurvey(@NonNull String surveyToken);
+    void showSurvey(@NonNull String callId, @NonNull String surveyToken);
 
     void setAutoShowingEnabled(@NonNull Boolean isEnabled);
 
@@ -112,9 +112,9 @@ public class SurveysPigeon {
 
     void setAppStoreURL(@NonNull String appStoreURL);
 
-    void hasRespondedToSurvey(@NonNull String surveyToken, @NonNull Result<Boolean> result);
+    void hasRespondedToSurvey(@NonNull String callId, @NonNull String surveyToken, @NonNull Result<Boolean> result);
 
-    void getAvailableSurveys(@NonNull Result<List<String>> result);
+    void getAvailableSurveys(@NonNull String callId, @NonNull Result<List<String>> result);
 
     void bindOnShowSurveyCallback();
 
@@ -181,9 +181,10 @@ public class SurveysPigeon {
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
-                String surveyTokenArg = (String) args.get(0);
+                String callIdArg = (String) args.get(0);
+                String surveyTokenArg = (String) args.get(1);
                 try {
-                  api.showSurvey(surveyTokenArg);
+                  api.showSurvey(callIdArg, surveyTokenArg);
                   wrapped.add(0, null);
                 }
  catch (Throwable exception) {
@@ -277,7 +278,8 @@ public class SurveysPigeon {
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
-                String surveyTokenArg = (String) args.get(0);
+                String callIdArg = (String) args.get(0);
+                String surveyTokenArg = (String) args.get(1);
                 Result<Boolean> resultCallback =
                     new Result<Boolean>() {
                       public void success(Boolean result) {
@@ -291,7 +293,7 @@ public class SurveysPigeon {
                       }
                     };
 
-                api.hasRespondedToSurvey(surveyTokenArg, resultCallback);
+                api.hasRespondedToSurvey(callIdArg, surveyTokenArg, resultCallback);
               });
         } else {
           channel.setMessageHandler(null);
@@ -305,6 +307,8 @@ public class SurveysPigeon {
           channel.setMessageHandler(
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String callIdArg = (String) args.get(0);
                 Result<List<String>> resultCallback =
                     new Result<List<String>>() {
                       public void success(List<String> result) {
@@ -318,7 +322,7 @@ public class SurveysPigeon {
                       }
                     };
 
-                api.getAvailableSurveys(resultCallback);
+                api.getAvailableSurveys(callIdArg, resultCallback);
               });
         } else {
           channel.setMessageHandler(null);

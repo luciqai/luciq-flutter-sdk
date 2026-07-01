@@ -11,7 +11,10 @@ import 'package:flutter/services.dart';
 abstract class LuciqPrivateViewFlutterApi {
   static const MessageCodec<Object?> codec = StandardMessageCodec();
 
-  List<double?> getPrivateViews();
+  /// Native -> Dart capture callback. `callId` is minted on the native side via
+  /// `LuciqFlutterLogger.nextCallId` so the resulting `phase=fire` line on Dart
+  /// can be correlated with the originating `[PRIV.mask]` trace.
+  List<double?> getPrivateViews(String callId);
 
   static void setup(LuciqPrivateViewFlutterApi? api,
       {BinaryMessenger? binaryMessenger}) {
@@ -24,8 +27,13 @@ abstract class LuciqPrivateViewFlutterApi {
         channel.setMessageHandler(null);
       } else {
         channel.setMessageHandler((Object? message) async {
-          // ignore message
-          final List<double?> output = api.getPrivateViews();
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.LuciqPrivateViewFlutterApi.getPrivateViews was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_callId = (args[0] as String?);
+          assert(arg_callId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.LuciqPrivateViewFlutterApi.getPrivateViews was null, expected non-null String.');
+          final List<double?> output = api.getPrivateViews(arg_callId!);
           return output;
         });
       }

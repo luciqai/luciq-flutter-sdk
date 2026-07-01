@@ -52,10 +52,17 @@ class MockSurveysHostApi extends _i1.Mock implements _i2.SurveysHostApi {
       ) as _i3.Future<void>);
 
   @override
-  _i3.Future<void> showSurvey(String? arg_surveyToken) => (super.noSuchMethod(
+  _i3.Future<void> showSurvey(
+    String? arg_callId,
+    String? arg_surveyToken,
+  ) =>
+      (super.noSuchMethod(
         Invocation.method(
           #showSurvey,
-          [arg_surveyToken],
+          [
+            arg_callId,
+            arg_surveyToken,
+          ],
         ),
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
@@ -96,20 +103,27 @@ class MockSurveysHostApi extends _i1.Mock implements _i2.SurveysHostApi {
       ) as _i3.Future<void>);
 
   @override
-  _i3.Future<bool> hasRespondedToSurvey(String? arg_surveyToken) =>
+  _i3.Future<bool> hasRespondedToSurvey(
+    String? arg_callId,
+    String? arg_surveyToken,
+  ) =>
       (super.noSuchMethod(
         Invocation.method(
           #hasRespondedToSurvey,
-          [arg_surveyToken],
+          [
+            arg_callId,
+            arg_surveyToken,
+          ],
         ),
         returnValue: _i3.Future<bool>.value(false),
       ) as _i3.Future<bool>);
 
   @override
-  _i3.Future<List<String?>> getAvailableSurveys() => (super.noSuchMethod(
+  _i3.Future<List<String?>> getAvailableSurveys(String? arg_callId) =>
+      (super.noSuchMethod(
         Invocation.method(
           #getAvailableSurveys,
-          [],
+          [arg_callId],
         ),
         returnValue: _i3.Future<List<String?>>.value(<String?>[]),
       ) as _i3.Future<List<String?>>);

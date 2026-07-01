@@ -45,13 +45,13 @@ NSObject<FlutterMessageCodec> *LuciqPrivateViewFlutterApiGetCodec(void) {
   }
   return self;
 }
-- (void)getPrivateViewsWithCompletion:(void (^)(NSArray<NSNumber *> *_Nullable, FlutterError *_Nullable))completion {
+- (void)getPrivateViewsCallId:(NSString *)arg_callId completion:(void (^)(NSArray<NSNumber *> *_Nullable, FlutterError *_Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.luciq_flutter.LuciqPrivateViewFlutterApi.getPrivateViews"
       binaryMessenger:self.binaryMessenger
       codec:LuciqPrivateViewFlutterApiGetCodec()];
-  [channel sendMessage:nil reply:^(id reply) {
+  [channel sendMessage:@[arg_callId ?: [NSNull null]] reply:^(id reply) {
     NSArray<NSNumber *> *output = reply;
     completion(output, nil);
   }];

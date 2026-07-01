@@ -16,7 +16,7 @@ NSObject<FlutterMessageCodec> *RepliesFlutterApiGetCodec(void);
 
 @interface RepliesFlutterApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
-- (void)onNewReplyWithCompletion:(void (^)(FlutterError *_Nullable))completion;
+- (void)onNewReplyCallId:(NSString *)callId completion:(void (^)(FlutterError *_Nullable))completion;
 @end
 
 /// The codec used by RepliesHostApi.
@@ -24,11 +24,11 @@ NSObject<FlutterMessageCodec> *RepliesHostApiGetCodec(void);
 
 @protocol RepliesHostApi
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)showWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)showCallId:(NSString *)callId error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setInAppNotificationsEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setInAppNotificationSoundIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)getUnreadRepliesCountWithCompletion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
-- (void)hasChatsWithCompletion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
+- (void)getUnreadRepliesCountCallId:(NSString *)callId completion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
+- (void)hasChatsCallId:(NSString *)callId completion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
 - (void)bindOnNewReplyCallbackWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end
 

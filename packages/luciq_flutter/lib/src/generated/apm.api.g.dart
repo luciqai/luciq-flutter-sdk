@@ -366,6 +366,33 @@ class ApmHostApi {
     }
   }
 
+  Future<void> reportManualScreenLoadingCP(String arg_screenName,
+      int arg_startTimeStampMicro, int arg_durationMicro) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.reportManualScreenLoadingCP',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList = await channel.send(<Object?>[
+      arg_screenName,
+      arg_startTimeStampMicro,
+      arg_durationMicro
+    ]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
   Future<void> endScreenLoadingCP(
       int arg_timeStampMicro, int arg_uiTraceId) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
@@ -413,6 +440,209 @@ class ApmHostApi {
       );
     } else {
       return (replyList[0] as bool?)!;
+    }
+  }
+
+  Future<bool> isAutoUiTraceEnabled() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.isAutoUiTraceEnabled',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else if (replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (replyList[0] as bool?)!;
+    }
+  }
+
+  Future<bool> isScreenRenderEnabled() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.isScreenRenderEnabled',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else if (replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (replyList[0] as bool?)!;
+    }
+  }
+
+  Future<bool> isCustomSpanEnabled() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.isCustomSpanEnabled',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else if (replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (replyList[0] as bool?)!;
+    }
+  }
+
+  Future<List<double?>> getDeviceRefreshRateAndTolerance() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.getDeviceRefreshRateAndTolerance',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else if (replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (replyList[0] as List<Object?>?)!.cast<double?>();
+    }
+  }
+
+  Future<void> setScreenRenderEnabled(bool arg_isEnabled) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.setScreenRenderEnabled',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_isEnabled]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> endScreenRenderForAutoUiTrace(
+      Map<String?, Object?> arg_data) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenRenderForAutoUiTrace',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_data]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> endScreenRenderForCustomUiTrace(
+      Map<String?, Object?> arg_data) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenRenderForCustomUiTrace',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_data]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> syncCustomSpan(
+      String arg_name, int arg_startTimestamp, int arg_endTimestamp) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.ApmHostApi.syncCustomSpan', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList = await channel
+            .send(<Object?>[arg_name, arg_startTimestamp, arg_endTimestamp])
+        as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
     }
   }
 }

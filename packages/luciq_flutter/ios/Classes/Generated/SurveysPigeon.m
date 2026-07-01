@@ -45,23 +45,23 @@ NSObject<FlutterMessageCodec> *SurveysFlutterApiGetCodec(void) {
   }
   return self;
 }
-- (void)onShowSurveyWithCompletion:(void (^)(FlutterError *_Nullable))completion {
+- (void)onShowSurveyCallId:(NSString *)arg_callId completion:(void (^)(FlutterError *_Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onShowSurvey"
       binaryMessenger:self.binaryMessenger
       codec:SurveysFlutterApiGetCodec()];
-  [channel sendMessage:nil reply:^(id reply) {
+  [channel sendMessage:@[arg_callId ?: [NSNull null]] reply:^(id reply) {
     completion(nil);
   }];
 }
-- (void)onDismissSurveyWithCompletion:(void (^)(FlutterError *_Nullable))completion {
+- (void)onDismissSurveyCallId:(NSString *)arg_callId completion:(void (^)(FlutterError *_Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onDismissSurvey"
       binaryMessenger:self.binaryMessenger
       codec:SurveysFlutterApiGetCodec()];
-  [channel sendMessage:nil reply:^(id reply) {
+  [channel sendMessage:@[arg_callId ?: [NSNull null]] reply:^(id reply) {
     completion(nil);
   }];
 }
@@ -117,12 +117,13 @@ void SurveysHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Su
         binaryMessenger:binaryMessenger
         codec:SurveysHostApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(showSurveySurveyToken:error:)], @"SurveysHostApi api (%@) doesn't respond to @selector(showSurveySurveyToken:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(showSurveyCallId:surveyToken:error:)], @"SurveysHostApi api (%@) doesn't respond to @selector(showSurveyCallId:surveyToken:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
-        NSString *arg_surveyToken = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_callId = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_surveyToken = GetNullableObjectAtIndex(args, 1);
         FlutterError *error;
-        [api showSurveySurveyToken:arg_surveyToken error:&error];
+        [api showSurveyCallId:arg_callId surveyToken:arg_surveyToken error:&error];
         callback(wrapResult(nil, error));
       }];
     } else {
@@ -193,11 +194,12 @@ void SurveysHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Su
         binaryMessenger:binaryMessenger
         codec:SurveysHostApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(hasRespondedToSurveySurveyToken:completion:)], @"SurveysHostApi api (%@) doesn't respond to @selector(hasRespondedToSurveySurveyToken:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(hasRespondedToSurveyCallId:surveyToken:completion:)], @"SurveysHostApi api (%@) doesn't respond to @selector(hasRespondedToSurveyCallId:surveyToken:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
-        NSString *arg_surveyToken = GetNullableObjectAtIndex(args, 0);
-        [api hasRespondedToSurveySurveyToken:arg_surveyToken completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+        NSString *arg_callId = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_surveyToken = GetNullableObjectAtIndex(args, 1);
+        [api hasRespondedToSurveyCallId:arg_callId surveyToken:arg_surveyToken completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -212,9 +214,11 @@ void SurveysHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Su
         binaryMessenger:binaryMessenger
         codec:SurveysHostApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getAvailableSurveysWithCompletion:)], @"SurveysHostApi api (%@) doesn't respond to @selector(getAvailableSurveysWithCompletion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getAvailableSurveysCallId:completion:)], @"SurveysHostApi api (%@) doesn't respond to @selector(getAvailableSurveysCallId:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        [api getAvailableSurveysWithCompletion:^(NSArray<NSString *> *_Nullable output, FlutterError *_Nullable error) {
+        NSArray *args = message;
+        NSString *arg_callId = GetNullableObjectAtIndex(args, 0);
+        [api getAvailableSurveysCallId:arg_callId completion:^(NSArray<NSString *> *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];

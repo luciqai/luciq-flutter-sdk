@@ -45,13 +45,13 @@ NSObject<FlutterMessageCodec> *RepliesFlutterApiGetCodec(void) {
   }
   return self;
 }
-- (void)onNewReplyWithCompletion:(void (^)(FlutterError *_Nullable))completion {
+- (void)onNewReplyCallId:(NSString *)arg_callId completion:(void (^)(FlutterError *_Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.luciq_flutter.RepliesFlutterApi.onNewReply"
       binaryMessenger:self.binaryMessenger
       codec:RepliesFlutterApiGetCodec()];
-  [channel sendMessage:nil reply:^(id reply) {
+  [channel sendMessage:@[arg_callId ?: [NSNull null]] reply:^(id reply) {
     completion(nil);
   }];
 }
@@ -90,10 +90,12 @@ void RepliesHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Re
         binaryMessenger:binaryMessenger
         codec:RepliesHostApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(showWithError:)], @"RepliesHostApi api (%@) doesn't respond to @selector(showWithError:)", api);
+      NSCAssert([api respondsToSelector:@selector(showCallId:error:)], @"RepliesHostApi api (%@) doesn't respond to @selector(showCallId:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_callId = GetNullableObjectAtIndex(args, 0);
         FlutterError *error;
-        [api showWithError:&error];
+        [api showCallId:arg_callId error:&error];
         callback(wrapResult(nil, error));
       }];
     } else {
@@ -145,9 +147,11 @@ void RepliesHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Re
         binaryMessenger:binaryMessenger
         codec:RepliesHostApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getUnreadRepliesCountWithCompletion:)], @"RepliesHostApi api (%@) doesn't respond to @selector(getUnreadRepliesCountWithCompletion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getUnreadRepliesCountCallId:completion:)], @"RepliesHostApi api (%@) doesn't respond to @selector(getUnreadRepliesCountCallId:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        [api getUnreadRepliesCountWithCompletion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+        NSArray *args = message;
+        NSString *arg_callId = GetNullableObjectAtIndex(args, 0);
+        [api getUnreadRepliesCountCallId:arg_callId completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -162,9 +166,11 @@ void RepliesHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Re
         binaryMessenger:binaryMessenger
         codec:RepliesHostApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(hasChatsWithCompletion:)], @"RepliesHostApi api (%@) doesn't respond to @selector(hasChatsWithCompletion:)", api);
+      NSCAssert([api respondsToSelector:@selector(hasChatsCallId:completion:)], @"RepliesHostApi api (%@) doesn't respond to @selector(hasChatsCallId:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        [api hasChatsWithCompletion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+        NSArray *args = message;
+        NSString *arg_callId = GetNullableObjectAtIndex(args, 0);
+        [api hasChatsCallId:arg_callId completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];

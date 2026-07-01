@@ -16,8 +16,8 @@ NSObject<FlutterMessageCodec> *BugReportingFlutterApiGetCodec(void);
 
 @interface BugReportingFlutterApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
-- (void)onSdkInvokeWithCompletion:(void (^)(FlutterError *_Nullable))completion;
-- (void)onSdkDismissDismissType:(NSString *)dismissType reportType:(NSString *)reportType completion:(void (^)(FlutterError *_Nullable))completion;
+- (void)onSdkInvokeCallId:(NSString *)callId completion:(void (^)(FlutterError *_Nullable))completion;
+- (void)onSdkDismissCallId:(NSString *)callId dismissType:(NSString *)dismissType reportType:(NSString *)reportType completion:(void (^)(FlutterError *_Nullable))completion;
 @end
 
 /// The codec used by BugReportingHostApi.

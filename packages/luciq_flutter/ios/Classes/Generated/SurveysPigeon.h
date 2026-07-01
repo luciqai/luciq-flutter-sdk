@@ -16,8 +16,8 @@ NSObject<FlutterMessageCodec> *SurveysFlutterApiGetCodec(void);
 
 @interface SurveysFlutterApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
-- (void)onShowSurveyWithCompletion:(void (^)(FlutterError *_Nullable))completion;
-- (void)onDismissSurveyWithCompletion:(void (^)(FlutterError *_Nullable))completion;
+- (void)onShowSurveyCallId:(NSString *)callId completion:(void (^)(FlutterError *_Nullable))completion;
+- (void)onDismissSurveyCallId:(NSString *)callId completion:(void (^)(FlutterError *_Nullable))completion;
 @end
 
 /// The codec used by SurveysHostApi.
@@ -26,12 +26,12 @@ NSObject<FlutterMessageCodec> *SurveysHostApiGetCodec(void);
 @protocol SurveysHostApi
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)showSurveyIfAvailableWithError:(FlutterError *_Nullable *_Nonnull)error;
-- (void)showSurveySurveyToken:(NSString *)surveyToken error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)showSurveyCallId:(NSString *)callId surveyToken:(NSString *)surveyToken error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setAutoShowingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setShouldShowWelcomeScreenShouldShowWelcomeScreen:(NSNumber *)shouldShowWelcomeScreen error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setAppStoreURLAppStoreURL:(NSString *)appStoreURL error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)hasRespondedToSurveySurveyToken:(NSString *)surveyToken completion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
-- (void)getAvailableSurveysWithCompletion:(void (^)(NSArray<NSString *> *_Nullable, FlutterError *_Nullable))completion;
+- (void)hasRespondedToSurveyCallId:(NSString *)callId surveyToken:(NSString *)surveyToken completion:(void (^)(NSNumber *_Nullable, FlutterError *_Nullable))completion;
+- (void)getAvailableSurveysCallId:(NSString *)callId completion:(void (^)(NSArray<NSString *> *_Nullable, FlutterError *_Nullable))completion;
 - (void)bindOnShowSurveyCallbackWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)bindOnDismissSurveyCallbackWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end

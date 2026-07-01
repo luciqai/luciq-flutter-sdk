@@ -319,6 +319,27 @@ void ApmHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<ApmHos
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.reportManualScreenLoadingCP"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(reportManualScreenLoadingCPScreenName:startTimeStampMicro:durationMicro:error:)], @"ApmHostApi api (%@) doesn't respond to @selector(reportManualScreenLoadingCPScreenName:startTimeStampMicro:durationMicro:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_screenName = GetNullableObjectAtIndex(args, 0);
+        NSNumber *arg_startTimeStampMicro = GetNullableObjectAtIndex(args, 1);
+        NSNumber *arg_durationMicro = GetNullableObjectAtIndex(args, 2);
+        FlutterError *error;
+        [api reportManualScreenLoadingCPScreenName:arg_screenName startTimeStampMicro:arg_startTimeStampMicro durationMicro:arg_durationMicro error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
         initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenLoadingCP"
         binaryMessenger:binaryMessenger
         codec:ApmHostApiGetCodec()];
@@ -348,6 +369,156 @@ void ApmHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<ApmHos
         [api isEndScreenLoadingEnabledWithCompletion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.isAutoUiTraceEnabled"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(isAutoUiTraceEnabledWithCompletion:)], @"ApmHostApi api (%@) doesn't respond to @selector(isAutoUiTraceEnabledWithCompletion:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        [api isAutoUiTraceEnabledWithCompletion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+          callback(wrapResult(output, error));
+        }];
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    NSObject<FlutterTaskQueue> *taskQueue = [binaryMessenger makeBackgroundTaskQueue];
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.isScreenRenderEnabled"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()
+taskQueue:taskQueue];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(isScreenRenderEnabledWithCompletion:)], @"ApmHostApi api (%@) doesn't respond to @selector(isScreenRenderEnabledWithCompletion:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        [api isScreenRenderEnabledWithCompletion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+          callback(wrapResult(output, error));
+        }];
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    NSObject<FlutterTaskQueue> *taskQueue = [binaryMessenger makeBackgroundTaskQueue];
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.isCustomSpanEnabled"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()
+taskQueue:taskQueue];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(isCustomSpanEnabledWithCompletion:)], @"ApmHostApi api (%@) doesn't respond to @selector(isCustomSpanEnabledWithCompletion:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        [api isCustomSpanEnabledWithCompletion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+          callback(wrapResult(output, error));
+        }];
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.getDeviceRefreshRateAndTolerance"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(getDeviceRefreshRateAndToleranceWithCompletion:)], @"ApmHostApi api (%@) doesn't respond to @selector(getDeviceRefreshRateAndToleranceWithCompletion:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        [api getDeviceRefreshRateAndToleranceWithCompletion:^(NSArray<NSNumber *> *_Nullable output, FlutterError *_Nullable error) {
+          callback(wrapResult(output, error));
+        }];
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.setScreenRenderEnabled"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setScreenRenderEnabledIsEnabled:error:)], @"ApmHostApi api (%@) doesn't respond to @selector(setScreenRenderEnabledIsEnabled:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_isEnabled = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setScreenRenderEnabledIsEnabled:arg_isEnabled error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenRenderForAutoUiTrace"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(endScreenRenderForAutoUiTraceData:error:)], @"ApmHostApi api (%@) doesn't respond to @selector(endScreenRenderForAutoUiTraceData:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSDictionary<NSString *, id> *arg_data = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api endScreenRenderForAutoUiTraceData:arg_data error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenRenderForCustomUiTrace"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(endScreenRenderForCustomUiTraceData:error:)], @"ApmHostApi api (%@) doesn't respond to @selector(endScreenRenderForCustomUiTraceData:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSDictionary<NSString *, id> *arg_data = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api endScreenRenderForCustomUiTraceData:arg_data error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.ApmHostApi.syncCustomSpan"
+        binaryMessenger:binaryMessenger
+        codec:ApmHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(syncCustomSpanName:startTimestamp:endTimestamp:error:)], @"ApmHostApi api (%@) doesn't respond to @selector(syncCustomSpanName:startTimestamp:endTimestamp:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_name = GetNullableObjectAtIndex(args, 0);
+        NSNumber *arg_startTimestamp = GetNullableObjectAtIndex(args, 1);
+        NSNumber *arg_endTimestamp = GetNullableObjectAtIndex(args, 2);
+        FlutterError *error;
+        [api syncCustomSpanName:arg_name startTimestamp:arg_startTimestamp endTimestamp:arg_endTimestamp error:&error];
+        callback(wrapResult(nil, error));
       }];
     } else {
       [channel setMessageHandler:nil];

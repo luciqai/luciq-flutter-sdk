@@ -26,6 +26,37 @@ static id GetNullableObjectAtIndex(NSArray *array, NSInteger key) {
   return (result == [NSNull null]) ? nil : result;
 }
 
+NSObject<FlutterMessageCodec> *LuciqFlutterApiGetCodec(void) {
+  static FlutterStandardMessageCodec *sSharedObject = nil;
+  sSharedObject = [FlutterStandardMessageCodec sharedInstance];
+  return sSharedObject;
+}
+
+@interface LuciqFlutterApi ()
+@property(nonatomic, strong) NSObject<FlutterBinaryMessenger> *binaryMessenger;
+@end
+
+@implementation LuciqFlutterApi
+
+- (instancetype)initWithBinaryMessenger:(NSObject<FlutterBinaryMessenger> *)binaryMessenger {
+  self = [super init];
+  if (self) {
+    _binaryMessenger = binaryMessenger;
+  }
+  return self;
+}
+- (void)disposeWithCompletion:(void (^)(FlutterError *_Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.luciq_flutter.LuciqFlutterApi.dispose"
+      binaryMessenger:self.binaryMessenger
+      codec:LuciqFlutterApiGetCodec()];
+  [channel sendMessage:nil reply:^(id reply) {
+    completion(nil);
+  }];
+}
+@end
+
 NSObject<FlutterMessageCodec> *FeatureFlagsFlutterApiGetCodec(void) {
   static FlutterStandardMessageCodec *sSharedObject = nil;
   sSharedObject = [FlutterStandardMessageCodec sharedInstance];
@@ -911,6 +942,70 @@ void LuciqHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Luci
         NSNumber *arg_isEnabled = GetNullableObjectAtIndex(args, 0);
         FlutterError *error;
         [api setNetworkAutoMaskingEnabledIsEnabled:arg_isEnabled error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  /// Master switch for all WebView tracking (user interactions,
+  /// network logs and WebView screen loading in APM).
+  /// Enabled by default on the native SDK.
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewMonitoringEnabled"
+        binaryMessenger:binaryMessenger
+        codec:LuciqHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setWebViewMonitoringEnabledIsEnabled:error:)], @"LuciqHostApi api (%@) doesn't respond to @selector(setWebViewMonitoringEnabledIsEnabled:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_isEnabled = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setWebViewMonitoringEnabledIsEnabled:arg_isEnabled error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  /// Enables capturing user interactions inside WebViews
+  /// (tap, scroll, navigation). Disabled by default.
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewUserInteractionsTrackingEnabled"
+        binaryMessenger:binaryMessenger
+        codec:LuciqHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setWebViewUserInteractionsTrackingEnabledIsEnabled:error:)], @"LuciqHostApi api (%@) doesn't respond to @selector(setWebViewUserInteractionsTrackingEnabledIsEnabled:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_isEnabled = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setWebViewUserInteractionsTrackingEnabledIsEnabled:arg_isEnabled error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  /// Enables capturing network logs (Fetch/XHR) triggered from
+  /// inside WebViews. Disabled by default.
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewNetworkTrackingEnabled"
+        binaryMessenger:binaryMessenger
+        codec:LuciqHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setWebViewNetworkTrackingEnabledIsEnabled:error:)], @"LuciqHostApi api (%@) doesn't respond to @selector(setWebViewNetworkTrackingEnabledIsEnabled:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_isEnabled = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setWebViewNetworkTrackingEnabledIsEnabled:arg_isEnabled error:&error];
         callback(wrapResult(nil, error));
       }];
     } else {

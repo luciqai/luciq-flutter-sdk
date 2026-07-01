@@ -75,17 +75,51 @@ class MockSessionReplayHostApi extends _i1.Mock
       ) as _i3.Future<void>);
 
   @override
-  _i3.Future<String> getSessionReplayLink() => (super.noSuchMethod(
+  _i3.Future<String> getSessionReplayLink(String? arg_callId) =>
+      (super.noSuchMethod(
         Invocation.method(
           #getSessionReplayLink,
-          [],
+          [arg_callId],
         ),
         returnValue: _i3.Future<String>.value(_i4.dummyValue<String>(
           this,
           Invocation.method(
             #getSessionReplayLink,
-            [],
+            [arg_callId],
           ),
         )),
       ) as _i3.Future<String>);
+
+  @override
+  _i3.Future<void> setScreenshotCapturingMode(String? arg_mode) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setScreenshotCapturingMode,
+          [arg_mode],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setScreenshotCaptureInterval(int? arg_intervalMs) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setScreenshotCaptureInterval,
+          [arg_intervalMs],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> setScreenshotQualityMode(String? arg_mode) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setScreenshotQualityMode,
+          [arg_mode],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }

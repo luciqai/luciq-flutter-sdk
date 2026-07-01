@@ -64,6 +64,32 @@ public class LuciqPigeon {
     void error(@NonNull Throwable error);
   }
   /** Generated class from Pigeon that represents Flutter messages that can be called from Java. */
+  public static class LuciqFlutterApi {
+    private final @NonNull BinaryMessenger binaryMessenger;
+
+    public LuciqFlutterApi(@NonNull BinaryMessenger argBinaryMessenger) {
+      this.binaryMessenger = argBinaryMessenger;
+    }
+
+    /** Public interface for sending reply. */ 
+    @SuppressWarnings("UnknownNullness")
+    public interface Reply<T> {
+      void reply(T reply);
+    }
+    /** The codec used by LuciqFlutterApi. */
+    static @NonNull MessageCodec<Object> getCodec() {
+      return new StandardMessageCodec();
+    }
+    public void dispose(@NonNull Reply<Void> callback) {
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(
+              binaryMessenger, "dev.flutter.pigeon.luciq_flutter.LuciqFlutterApi.dispose", getCodec());
+      channel.send(
+          null,
+          channelReply -> callback.reply(null));
+    }
+  }
+  /** Generated class from Pigeon that represents Flutter messages that can be called from Java. */
   public static class FeatureFlagsFlutterApi {
     private final @NonNull BinaryMessenger binaryMessenger;
 
@@ -116,7 +142,7 @@ public class LuciqPigeon {
 
     void showWelcomeMessageWithMode(@NonNull String mode);
 
-    void identifyUser(@NonNull String email, @Nullable String name, @Nullable String userId);
+    void identifyUser(@Nullable String email, @Nullable String name, @Nullable String userId);
 
     void setUserData(@NonNull String data);
 
@@ -192,6 +218,22 @@ public class LuciqPigeon {
     void setFullscreen(@NonNull Boolean isEnabled);
 
     void setNetworkAutoMaskingEnabled(@NonNull Boolean isEnabled);
+    /**
+     * Master switch for all WebView tracking (user interactions,
+     * network logs and WebView screen loading in APM).
+     * Enabled by default on the native SDK.
+     */
+    void setWebViewMonitoringEnabled(@NonNull Boolean isEnabled);
+    /**
+     * Enables capturing user interactions inside WebViews
+     * (tap, scroll, navigation). Disabled by default.
+     */
+    void setWebViewUserInteractionsTrackingEnabled(@NonNull Boolean isEnabled);
+    /**
+     * Enables capturing network logs (Fetch/XHR) triggered from
+     * inside WebViews. Disabled by default.
+     */
+    void setWebViewNetworkTrackingEnabled(@NonNull Boolean isEnabled);
 
     /** The codec used by LuciqHostApi. */
     static @NonNull MessageCodec<Object> getCodec() {
@@ -1275,6 +1317,78 @@ public class LuciqPigeon {
                 Boolean isEnabledArg = (Boolean) args.get(0);
                 try {
                   api.setNetworkAutoMaskingEnabled(isEnabledArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewMonitoringEnabled", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Boolean isEnabledArg = (Boolean) args.get(0);
+                try {
+                  api.setWebViewMonitoringEnabled(isEnabledArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewUserInteractionsTrackingEnabled", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Boolean isEnabledArg = (Boolean) args.get(0);
+                try {
+                  api.setWebViewUserInteractionsTrackingEnabled(isEnabledArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.LuciqHostApi.setWebViewNetworkTrackingEnabled", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Boolean isEnabledArg = (Boolean) args.get(0);
+                try {
+                  api.setWebViewNetworkTrackingEnabled(isEnabledArg);
                   wrapped.add(0, null);
                 }
  catch (Throwable exception) {

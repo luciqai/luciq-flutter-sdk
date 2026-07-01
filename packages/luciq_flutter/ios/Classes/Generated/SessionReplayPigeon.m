@@ -116,11 +116,80 @@ void SessionReplayHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObj
         binaryMessenger:binaryMessenger
         codec:SessionReplayHostApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getSessionReplayLinkWithCompletion:)], @"SessionReplayHostApi api (%@) doesn't respond to @selector(getSessionReplayLinkWithCompletion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getSessionReplayLinkCallId:completion:)], @"SessionReplayHostApi api (%@) doesn't respond to @selector(getSessionReplayLinkCallId:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        [api getSessionReplayLinkWithCompletion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
+        NSArray *args = message;
+        NSString *arg_callId = GetNullableObjectAtIndex(args, 0);
+        [api getSessionReplayLinkCallId:arg_callId completion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  /// Sets when screenshots are captured.
+  /// - navigation: Capture on screen changes only (default)
+  /// - interactions: Capture on navigation and user interactions
+  /// - frequency: Capture at fixed time intervals (video-like)
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotCapturingMode"
+        binaryMessenger:binaryMessenger
+        codec:SessionReplayHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setScreenshotCapturingModeMode:error:)], @"SessionReplayHostApi api (%@) doesn't respond to @selector(setScreenshotCapturingModeMode:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_mode = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setScreenshotCapturingModeMode:arg_mode error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  /// Sets the capture interval for Frequency mode.
+  /// @param intervalMs Interval in milliseconds (min: 500, default: 1000)
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotCaptureInterval"
+        binaryMessenger:binaryMessenger
+        codec:SessionReplayHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setScreenshotCaptureIntervalIntervalMs:error:)], @"SessionReplayHostApi api (%@) doesn't respond to @selector(setScreenshotCaptureIntervalIntervalMs:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_intervalMs = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setScreenshotCaptureIntervalIntervalMs:arg_intervalMs error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    } else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  /// Sets the visual quality of captured screenshots.
+  /// - high: 50% WebP compression
+  /// - normal: 25% WebP compression (default)
+  /// - greyscale: Grayscale + 25% WebP compression
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.luciq_flutter.SessionReplayHostApi.setScreenshotQualityMode"
+        binaryMessenger:binaryMessenger
+        codec:SessionReplayHostApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setScreenshotQualityModeMode:error:)], @"SessionReplayHostApi api (%@) doesn't respond to @selector(setScreenshotQualityModeMode:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_mode = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setScreenshotQualityModeMode:arg_mode error:&error];
+        callback(wrapResult(nil, error));
       }];
     } else {
       [channel setMessageHandler:nil];

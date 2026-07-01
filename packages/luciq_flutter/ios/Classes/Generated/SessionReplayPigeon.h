@@ -19,7 +19,20 @@ NSObject<FlutterMessageCodec> *SessionReplayHostApiGetCodec(void);
 - (void)setNetworkLogsEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setLuciqLogsEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setUserStepsEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)getSessionReplayLinkWithCompletion:(void (^)(NSString *_Nullable, FlutterError *_Nullable))completion;
+- (void)getSessionReplayLinkCallId:(NSString *)callId completion:(void (^)(NSString *_Nullable, FlutterError *_Nullable))completion;
+/// Sets when screenshots are captured.
+/// - navigation: Capture on screen changes only (default)
+/// - interactions: Capture on navigation and user interactions
+/// - frequency: Capture at fixed time intervals (video-like)
+- (void)setScreenshotCapturingModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error;
+/// Sets the capture interval for Frequency mode.
+/// @param intervalMs Interval in milliseconds (min: 500, default: 1000)
+- (void)setScreenshotCaptureIntervalIntervalMs:(NSNumber *)intervalMs error:(FlutterError *_Nullable *_Nonnull)error;
+/// Sets the visual quality of captured screenshots.
+/// - high: 50% WebP compression
+/// - normal: 25% WebP compression (default)
+/// - greyscale: Grayscale + 25% WebP compression
+- (void)setScreenshotQualityModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void SessionReplayHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<SessionReplayHostApi> *_Nullable api);

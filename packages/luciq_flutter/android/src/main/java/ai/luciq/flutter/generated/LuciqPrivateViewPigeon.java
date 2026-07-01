@@ -73,12 +73,17 @@ public class LuciqPrivateViewPigeon {
     static @NonNull MessageCodec<Object> getCodec() {
       return new StandardMessageCodec();
     }
-    public void getPrivateViews(@NonNull Reply<List<Double>> callback) {
+    /**
+     * Native -> Dart capture callback. `callId` is minted on the native side via
+     * `LuciqFlutterLogger.nextCallId` so the resulting `phase=fire` line on Dart
+     * can be correlated with the originating `[PRIV.mask]` trace.
+     */
+    public void getPrivateViews(@NonNull String callIdArg, @NonNull Reply<List<Double>> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, "dev.flutter.pigeon.luciq_flutter.LuciqPrivateViewFlutterApi.getPrivateViews", getCodec());
       channel.send(
-          null,
+          new ArrayList<Object>(Collections.singletonList(callIdArg)),
           channelReply -> {
             @SuppressWarnings("ConstantConditions")
             List<Double> output = (List<Double>) channelReply;

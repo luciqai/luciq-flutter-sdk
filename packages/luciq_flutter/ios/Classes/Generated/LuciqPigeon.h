@@ -11,6 +11,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 
+/// The codec used by LuciqFlutterApi.
+NSObject<FlutterMessageCodec> *LuciqFlutterApiGetCodec(void);
+
+@interface LuciqFlutterApi : NSObject
+- (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
+- (void)disposeWithCompletion:(void (^)(FlutterError *_Nullable))completion;
+@end
+
 /// The codec used by FeatureFlagsFlutterApi.
 NSObject<FlutterMessageCodec> *FeatureFlagsFlutterApiGetCodec(void);
 
@@ -33,7 +41,7 @@ NSObject<FlutterMessageCodec> *LuciqHostApiGetCodec(void);
 - (void)enableAutoMaskingAutoMasking:(NSArray<NSString *> *)autoMasking error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)showWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)showWelcomeMessageWithModeMode:(NSString *)mode error:(FlutterError *_Nullable *_Nonnull)error;
-- (void)identifyUserEmail:(NSString *)email name:(nullable NSString *)name userId:(nullable NSString *)userId error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)identifyUserEmail:(nullable NSString *)email name:(nullable NSString *)name userId:(nullable NSString *)userId error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setUserDataData:(NSString *)data error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setAppVariantAppVariant:(NSString *)appVariant error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)logUserEventName:(NSString *)name error:(FlutterError *_Nullable *_Nonnull)error;
@@ -72,6 +80,16 @@ NSObject<FlutterMessageCodec> *LuciqHostApiGetCodec(void);
 - (void)setThemeThemeConfig:(NSDictionary<NSString *, id> *)themeConfig error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setFullscreenIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setNetworkAutoMaskingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
+/// Master switch for all WebView tracking (user interactions,
+/// network logs and WebView screen loading in APM).
+/// Enabled by default on the native SDK.
+- (void)setWebViewMonitoringEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
+/// Enables capturing user interactions inside WebViews
+/// (tap, scroll, navigation). Disabled by default.
+- (void)setWebViewUserInteractionsTrackingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
+/// Enables capturing network logs (Fetch/XHR) triggered from
+/// inside WebViews. Disabled by default.
+- (void)setWebViewNetworkTrackingEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void LuciqHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<LuciqHostApi> *_Nullable api);

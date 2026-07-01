@@ -291,6 +291,25 @@ class MockApmHostApi extends _i1.Mock implements _i4.ApmHostApi {
       ) as _i5.Future<void>);
 
   @override
+  _i5.Future<void> reportManualScreenLoadingCP(
+    String? arg_screenName,
+    int? arg_startTimeStampMicro,
+    int? arg_durationMicro,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #reportManualScreenLoadingCP,
+          [
+            arg_screenName,
+            arg_startTimeStampMicro,
+            arg_durationMicro,
+          ],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
   _i5.Future<void> endScreenLoadingCP(
     int? arg_timeStampMicro,
     int? arg_uiTraceId,
@@ -315,6 +334,97 @@ class MockApmHostApi extends _i1.Mock implements _i4.ApmHostApi {
         ),
         returnValue: _i5.Future<bool>.value(false),
       ) as _i5.Future<bool>);
+
+  @override
+  _i5.Future<bool> isAutoUiTraceEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isAutoUiTraceEnabled,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
+  _i5.Future<bool> isScreenRenderEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isScreenRenderEnabled,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
+  _i5.Future<bool> isCustomSpanEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isCustomSpanEnabled,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
+  _i5.Future<List<double?>> getDeviceRefreshRateAndTolerance() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getDeviceRefreshRateAndTolerance,
+          [],
+        ),
+        returnValue: _i5.Future<List<double?>>.value(<double?>[]),
+      ) as _i5.Future<List<double?>>);
+
+  @override
+  _i5.Future<void> setScreenRenderEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setScreenRenderEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> endScreenRenderForAutoUiTrace(
+          Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #endScreenRenderForAutoUiTrace,
+          [arg_data],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> endScreenRenderForCustomUiTrace(
+          Map<String?, Object?>? arg_data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #endScreenRenderForCustomUiTrace,
+          [arg_data],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> syncCustomSpan(
+    String? arg_name,
+    int? arg_startTimestamp,
+    int? arg_endTimestamp,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #syncCustomSpan,
+          [
+            arg_name,
+            arg_startTimestamp,
+            arg_endTimestamp,
+          ],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }
 
 /// A class which mocks [LuciqHostApi].
@@ -855,6 +965,40 @@ class MockLuciqHostApi extends _i1.Mock implements _i6.LuciqHostApi {
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
       ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> setWebViewMonitoringEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewMonitoringEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> setWebViewUserInteractionsTrackingEnabled(
+          bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewUserInteractionsTrackingEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> setWebViewNetworkTrackingEnabled(bool? arg_isEnabled) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #setWebViewNetworkTrackingEnabled,
+          [arg_isEnabled],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }
 
 /// A class which mocks [LuciqLogger].
@@ -866,13 +1010,28 @@ class MockLuciqLogger extends _i1.Mock implements _i8.LuciqLogger {
   }
 
   @override
-  set logLevel(_i9.LogLevel? level) => super.noSuchMethod(
+  _i9.LogLevel get logLevel => (super.noSuchMethod(
+        Invocation.getter(#logLevel),
+        returnValue: _i9.LogLevel.none,
+      ) as _i9.LogLevel);
+
+  @override
+  set logLevel(_i9.LogLevel? _logLevel) => super.noSuchMethod(
         Invocation.setter(
           #logLevel,
-          level,
+          _logLevel,
         ),
         returnValueForMissingStub: null,
       );
+
+  @override
+  bool isDebugEnabled() => (super.noSuchMethod(
+        Invocation.method(
+          #isDebugEnabled,
+          [],
+        ),
+        returnValue: false,
+      ) as bool);
 
   @override
   void log(
@@ -928,6 +1087,20 @@ class MockLuciqLogger extends _i1.Mock implements _i8.LuciqLogger {
       super.noSuchMethod(
         Invocation.method(
           #v,
+          [message],
+          {#tag: tag},
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void w(
+    String? message, {
+    String? tag = r'',
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #w,
           [message],
           {#tag: tag},
         ),

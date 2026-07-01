@@ -96,9 +96,27 @@ public class ApmPigeon {
 
     void reportScreenLoadingCP(@NonNull Long startTimeStampMicro, @NonNull Long durationMicro, @NonNull Long uiTraceId);
 
+    void reportManualScreenLoadingCP(@NonNull String screenName, @NonNull Long startTimeStampMicro, @NonNull Long durationMicro);
+
     void endScreenLoadingCP(@NonNull Long timeStampMicro, @NonNull Long uiTraceId);
 
     void isEndScreenLoadingEnabled(@NonNull Result<Boolean> result);
+
+    void isAutoUiTraceEnabled(@NonNull Result<Boolean> result);
+
+    void isScreenRenderEnabled(@NonNull Result<Boolean> result);
+
+    void isCustomSpanEnabled(@NonNull Result<Boolean> result);
+
+    void getDeviceRefreshRateAndTolerance(@NonNull Result<List<Double>> result);
+
+    void setScreenRenderEnabled(@NonNull Boolean isEnabled);
+
+    void endScreenRenderForAutoUiTrace(@NonNull Map<String, Object> data);
+
+    void endScreenRenderForCustomUiTrace(@NonNull Map<String, Object> data);
+
+    void syncCustomSpan(@NonNull String name, @NonNull Long startTimestamp, @NonNull Long endTimestamp);
 
     /** The codec used by ApmHostApi. */
     static @NonNull MessageCodec<Object> getCodec() {
@@ -477,6 +495,32 @@ public class ApmPigeon {
       {
         BasicMessageChannel<Object> channel =
             new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.reportManualScreenLoadingCP", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String screenNameArg = (String) args.get(0);
+                Number startTimeStampMicroArg = (Number) args.get(1);
+                Number durationMicroArg = (Number) args.get(2);
+                try {
+                  api.reportManualScreenLoadingCP(screenNameArg, (startTimeStampMicroArg == null) ? null : startTimeStampMicroArg.longValue(), (durationMicroArg == null) ? null : durationMicroArg.longValue());
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
                 binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenLoadingCP", getCodec());
         if (api != null) {
           channel.setMessageHandler(
@@ -521,6 +565,214 @@ public class ApmPigeon {
                     };
 
                 api.isEndScreenLoadingEnabled(resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.isAutoUiTraceEnabled", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                Result<Boolean> resultCallback =
+                    new Result<Boolean>() {
+                      public void success(Boolean result) {
+                        wrapped.add(0, result);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.isAutoUiTraceEnabled(resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.isScreenRenderEnabled", getCodec(), taskQueue);
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                Result<Boolean> resultCallback =
+                    new Result<Boolean>() {
+                      public void success(Boolean result) {
+                        wrapped.add(0, result);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.isScreenRenderEnabled(resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BinaryMessenger.TaskQueue taskQueue = binaryMessenger.makeBackgroundTaskQueue();
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.isCustomSpanEnabled", getCodec(), taskQueue);
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                Result<Boolean> resultCallback =
+                    new Result<Boolean>() {
+                      public void success(Boolean result) {
+                        wrapped.add(0, result);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.isCustomSpanEnabled(resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.getDeviceRefreshRateAndTolerance", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                Result<List<Double>> resultCallback =
+                    new Result<List<Double>>() {
+                      public void success(List<Double> result) {
+                        wrapped.add(0, result);
+                        reply.reply(wrapped);
+                      }
+
+                      public void error(Throwable error) {
+                        ArrayList<Object> wrappedError = wrapError(error);
+                        reply.reply(wrappedError);
+                      }
+                    };
+
+                api.getDeviceRefreshRateAndTolerance(resultCallback);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.setScreenRenderEnabled", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Boolean isEnabledArg = (Boolean) args.get(0);
+                try {
+                  api.setScreenRenderEnabled(isEnabledArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenRenderForAutoUiTrace", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Map<String, Object> dataArg = (Map<String, Object>) args.get(0);
+                try {
+                  api.endScreenRenderForAutoUiTrace(dataArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.endScreenRenderForCustomUiTrace", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                Map<String, Object> dataArg = (Map<String, Object>) args.get(0);
+                try {
+                  api.endScreenRenderForCustomUiTrace(dataArg);
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.ApmHostApi.syncCustomSpan", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                ArrayList<Object> args = (ArrayList<Object>) message;
+                String nameArg = (String) args.get(0);
+                Number startTimestampArg = (Number) args.get(1);
+                Number endTimestampArg = (Number) args.get(2);
+                try {
+                  api.syncCustomSpan(nameArg, (startTimestampArg == null) ? null : startTimestampArg.longValue(), (endTimestampArg == null) ? null : endTimestampArg.longValue());
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
               });
         } else {
           channel.setMessageHandler(null);

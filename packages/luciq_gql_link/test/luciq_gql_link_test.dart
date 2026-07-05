@@ -11,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_gql_link/luciq_gql_link.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -736,7 +735,7 @@ void main() {
       );
 
       final exception = HttpLinkServerException(
-        response: http.Response('', 504, headers: const {}),
+        response: http.Response('', 504),
         parsedResponse: const Response(response: {}),
       );
 
@@ -1150,21 +1149,25 @@ void main() {
 
       verify(
         mLogger.d(
-          argThat(allOf(
-            contains('phase=start'),
-            contains('type=query'),
-            contains('name=GetUser'),
-          )),
+          argThat(
+            allOf(
+              contains('phase=start'),
+              contains('type=query'),
+              contains('name=GetUser'),
+            ),
+          ),
           tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
       verify(
         mLogger.d(
-          argThat(allOf(
-            contains('phase=response'),
-            contains('status=200'),
-            contains('gqlErrors=0'),
-          )),
+          argThat(
+            allOf(
+              contains('phase=response'),
+              contains('status=200'),
+              contains('gqlErrors=0'),
+            ),
+          ),
           tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
@@ -1198,11 +1201,13 @@ void main() {
 
       verify(
         mLogger.e(
-          argThat(allOf(
-            contains('phase=error'),
-            contains('status=502'),
-            contains('name=GetUser'),
-          )),
+          argThat(
+            allOf(
+              contains('phase=error'),
+              contains('status=502'),
+              contains('name=GetUser'),
+            ),
+          ),
           tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);

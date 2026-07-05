@@ -48,11 +48,12 @@ class EchoClient extends Client {
   ResponseFuture<String> unaryDeadline(
     String message, {
     Duration timeout = const Duration(milliseconds: 500),
-  }) => $createUnaryCall(
-    _unaryDeadline,
-    message,
-    options: CallOptions(timeout: timeout),
-  );
+  }) =>
+      $createUnaryCall(
+        _unaryDeadline,
+        message,
+        options: CallOptions(timeout: timeout),
+      );
 
   ResponseStream<String> serverStream(String message) =>
       $createStreamingCall(_serverStream, Stream.value(message));

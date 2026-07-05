@@ -166,9 +166,8 @@ void main() {
       );
 
       expect(result, isNull);
-      final debugLine = logger.entries
-          .lastWhere((e) => e.level == LogLevel.debug)
-          .message;
+      final debugLine =
+          logger.entries.lastWhere((e) => e.level == LogLevel.debug).message;
       // 256-char ceiling + trailing "..." marker
       expect(debugLine.contains('...'), isTrue);
       expect(debugLine.contains('x' * 257), isFalse);
@@ -209,8 +208,7 @@ void main() {
           logger.entries.firstWhere((e) => e.level == LogLevel.error);
       expect(errorLine.message, '[CORE.s] phase=error errorType=ArgumentError');
       final debugErrorLine = logger.entries.lastWhere(
-        (e) =>
-            e.level == LogLevel.debug && e.message.contains('phase=error'),
+        (e) => e.level == LogLevel.debug && e.message.contains('phase=error'),
       );
       expect(debugErrorLine.message, contains('errorMessage='));
     });

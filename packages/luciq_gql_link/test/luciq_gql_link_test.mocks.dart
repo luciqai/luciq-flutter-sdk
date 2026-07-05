@@ -6,9 +6,8 @@
 import 'dart:async' as _i3;
 import 'dart:typed_data' as _i4;
 
-import 'package:luciq_flutter/luciq_flutter.dart' as _i6;
+import 'package:luciq_flutter/luciq_flutter.dart' as _i5;
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart' as _i2;
-import 'package:luciq_flutter/src/utils/luciq_logger.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -607,13 +606,13 @@ class MockLuciqLogger extends _i1.Mock implements _i5.LuciqLogger {
   }
 
   @override
-  _i6.LogLevel get logLevel => (super.noSuchMethod(
+  _i5.LogLevel get logLevel => (super.noSuchMethod(
         Invocation.getter(#logLevel),
-        returnValue: _i6.LogLevel.none,
-      ) as _i6.LogLevel);
+        returnValue: _i5.LogLevel.none,
+      ) as _i5.LogLevel);
 
   @override
-  set logLevel(_i6.LogLevel? _logLevel) => super.noSuchMethod(
+  set logLevel(_i5.LogLevel? _logLevel) => super.noSuchMethod(
         Invocation.setter(
           #logLevel,
           _logLevel,
@@ -633,7 +632,7 @@ class MockLuciqLogger extends _i1.Mock implements _i5.LuciqLogger {
   @override
   void log(
     String? message, {
-    required _i6.LogLevel? level,
+    required _i5.LogLevel? level,
     String? tag = r'',
   }) =>
       super.noSuchMethod(

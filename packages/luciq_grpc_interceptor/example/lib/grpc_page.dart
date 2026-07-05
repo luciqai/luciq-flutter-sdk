@@ -102,152 +102,152 @@ class _GrpcPageState extends State<GrpcPage> {
   }
 
   Future<void> _unaryEcho() => _run(
-    'UnaryEcho',
-    path: '/luciq.Echo/UnaryEcho',
-    request: 'hello',
-    body: () => _client.unaryEcho('hello'),
-  );
+        'UnaryEcho',
+        path: '/luciq.Echo/UnaryEcho',
+        request: 'hello',
+        body: () => _client.unaryEcho('hello'),
+      );
 
   Future<void> _unaryNotFound() => _run(
-    'UnaryNotFound',
-    path: '/luciq.Echo/UnaryNotFound',
-    request: 'missing',
-    body: () => _client.unaryNotFound('missing'),
-  );
+        'UnaryNotFound',
+        path: '/luciq.Echo/UnaryNotFound',
+        request: 'missing',
+        body: () => _client.unaryNotFound('missing'),
+      );
 
   Future<void> _unaryUnauthenticated() => _run(
-    'UnaryUnauthenticated',
-    path: '/luciq.Echo/UnaryUnauthenticated',
-    request: 'no-token',
-    body: () => _client.unaryUnauthenticated('no-token'),
-  );
+        'UnaryUnauthenticated',
+        path: '/luciq.Echo/UnaryUnauthenticated',
+        request: 'no-token',
+        body: () => _client.unaryUnauthenticated('no-token'),
+      );
 
   Future<void> _unaryUnavailable() => _run(
-    'UnaryUnavailable',
-    path: '/luciq.Echo/UnaryUnavailable',
-    request: 'down',
-    body: () => _client.unaryUnavailable('down'),
-  );
+        'UnaryUnavailable',
+        path: '/luciq.Echo/UnaryUnavailable',
+        request: 'down',
+        body: () => _client.unaryUnavailable('down'),
+      );
 
   Future<void> _unaryInvalidArgument() => _run(
-    'UnaryInvalidArgument',
-    path: '/luciq.Echo/UnaryInvalidArgument',
-    request: 'bad',
-    body: () => _client.unaryInvalidArgument('bad'),
-  );
+        'UnaryInvalidArgument',
+        path: '/luciq.Echo/UnaryInvalidArgument',
+        request: 'bad',
+        body: () => _client.unaryInvalidArgument('bad'),
+      );
 
   Future<void> _unaryInternal() => _run(
-    'UnaryInternal',
-    path: '/luciq.Echo/UnaryInternal',
-    request: 'boom',
-    body: () => _client.unaryInternal('boom'),
-  );
+        'UnaryInternal',
+        path: '/luciq.Echo/UnaryInternal',
+        request: 'boom',
+        body: () => _client.unaryInternal('boom'),
+      );
 
   Future<void> _unaryDeadline() => _run(
-    'UnaryDeadline',
-    path: '/luciq.Echo/UnaryDeadline',
-    request: 'slow',
-    body: () => _client.unaryDeadline(
-      'slow',
-      timeout: const Duration(milliseconds: 300),
-    ),
-  );
+        'UnaryDeadline',
+        path: '/luciq.Echo/UnaryDeadline',
+        request: 'slow',
+        body: () => _client.unaryDeadline(
+          'slow',
+          timeout: const Duration(milliseconds: 300),
+        ),
+      );
 
   Future<void> _unaryWithTraceparent() => _run(
-    'UnaryWithTraceparent',
-    path: '/luciq.Echo/UnaryEcho',
-    request: 'with-traceparent',
-    body: () async {
-      const traceparent =
-          '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
-      await LuciqLog.logVerbose(
-        'gRPC traceparent metadata supplied by caller: $traceparent',
+        'UnaryWithTraceparent',
+        path: '/luciq.Echo/UnaryEcho',
+        request: 'with-traceparent',
+        body: () async {
+          const traceparent =
+              '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
+          await LuciqLog.logVerbose(
+            'gRPC traceparent metadata supplied by caller: $traceparent',
+          );
+          return _client.unaryEcho(
+            'with-traceparent',
+            options: CallOptions(metadata: {'traceparent': traceparent}),
+          );
+        },
       );
-      return _client.unaryEcho(
-        'with-traceparent',
-        options: CallOptions(metadata: {'traceparent': traceparent}),
-      );
-    },
-  );
 
   Future<void> _unaryWithoutTraceparent() => _run(
-    'UnaryWithoutTraceparent',
-    path: '/luciq.Echo/UnaryEcho',
-    request: 'no-traceparent',
-    body: () async {
-      await LuciqLog.logVerbose(
-        'gRPC no caller metadata; interceptor will generate traceparent',
+        'UnaryWithoutTraceparent',
+        path: '/luciq.Echo/UnaryEcho',
+        request: 'no-traceparent',
+        body: () async {
+          await LuciqLog.logVerbose(
+            'gRPC no caller metadata; interceptor will generate traceparent',
+          );
+          return _client.unaryEcho('no-traceparent');
+        },
       );
-      return _client.unaryEcho('no-traceparent');
-    },
-  );
 
   Future<void> _serverStream() => _run(
-    'ServerStream',
-    path: '/luciq.Echo/ServerStream',
-    request: 'stream-me',
-    body: () async {
-      final chunks = await _client.serverStream('stream-me').toList();
-      await LuciqLog.logVerbose(
-        'gRPC server-stream received ${chunks.length} chunks: '
-        '${jsonEncode(chunks)}',
+        'ServerStream',
+        path: '/luciq.Echo/ServerStream',
+        request: 'stream-me',
+        body: () async {
+          final chunks = await _client.serverStream('stream-me').toList();
+          await LuciqLog.logVerbose(
+            'gRPC server-stream received ${chunks.length} chunks: '
+            '${jsonEncode(chunks)}',
+          );
+          return 'received ${chunks.length} chunks';
+        },
       );
-      return 'received ${chunks.length} chunks';
-    },
-  );
 
   Future<void> _clientStream() => _run(
-    'ClientStream',
-    path: '/luciq.Echo/ClientStream',
-    request: '["a","b","c"]',
-    body: () => _client.clientStream(Stream.fromIterable(['a', 'b', 'c'])),
-  );
+        'ClientStream',
+        path: '/luciq.Echo/ClientStream',
+        request: '["a","b","c"]',
+        body: () => _client.clientStream(Stream.fromIterable(['a', 'b', 'c'])),
+      );
 
   Future<void> _bidiStream() => _run(
-    'BidiStream',
-    path: '/luciq.Echo/BidiStream',
-    request: '["one","two","three"]',
-    body: () async {
-      final responses = await _client
-          .bidiStream(Stream.fromIterable(['one', 'two', 'three']))
-          .toList();
-      await LuciqLog.logVerbose(
-        'gRPC bidi exchanged ${responses.length} messages: '
-        '${jsonEncode(responses)}',
+        'BidiStream',
+        path: '/luciq.Echo/BidiStream',
+        request: '["one","two","three"]',
+        body: () async {
+          final responses = await _client
+              .bidiStream(Stream.fromIterable(['one', 'two', 'three']))
+              .toList();
+          await LuciqLog.logVerbose(
+            'gRPC bidi exchanged ${responses.length} messages: '
+            '${jsonEncode(responses)}',
+          );
+          return 'echoed ${responses.length} messages';
+        },
       );
-      return 'echoed ${responses.length} messages';
-    },
-  );
 
   Future<void> _streamAborted() => _run(
-    'StreamAborted',
-    path: '/luciq.Echo/StreamAborted',
-    request: 'abort-me',
-    body: () => _client
-        .streamAborted('abort-me')
-        .toList()
-        .then((chunks) => 'received ${chunks.length} chunks before abort'),
-  );
+        'StreamAborted',
+        path: '/luciq.Echo/StreamAborted',
+        request: 'abort-me',
+        body: () => _client
+            .streamAborted('abort-me')
+            .toList()
+            .then((chunks) => 'received ${chunks.length} chunks before abort'),
+      );
 
   Future<void> _streamCancel() => _run(
-    'StreamCancel',
-    path: '/luciq.Echo/BidiStream',
-    request: '["one","two","three"]',
-    body: () async {
-      final call = _client.bidiStream(
-        Stream.fromIterable(['one', 'two', 'three']),
+        'StreamCancel',
+        path: '/luciq.Echo/BidiStream',
+        request: '["one","two","three"]',
+        body: () async {
+          final call = _client.bidiStream(
+            Stream.fromIterable(['one', 'two', 'three']),
+          );
+          final sub = call.listen((_) {}, onError: (_) {});
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          await call.cancel();
+          await sub.cancel();
+          await LuciqLog.logWarn(
+            'gRPC client cancelled bidi stream after 50ms - '
+            'interceptor will log CANCELLED(1)->http499',
+          );
+          return 'cancelled by client';
+        },
       );
-      final sub = call.listen((_) {}, onError: (_) {});
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      await call.cancel();
-      await sub.cancel();
-      await LuciqLog.logWarn(
-        'gRPC client cancelled bidi stream after 50ms - '
-        'interceptor will log CANCELLED(1)->http499',
-      );
-      return 'cancelled by client';
-    },
-  );
 
   @override
   Widget build(BuildContext context) {

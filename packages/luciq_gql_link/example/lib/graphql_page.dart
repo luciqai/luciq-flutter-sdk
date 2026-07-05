@@ -90,9 +90,8 @@ class _GraphQLPageState extends State<GraphQLPage> {
       _setStatus('$label: ok ($durationMs ms)');
     } on OperationException catch (e) {
       final durationMs = DateTime.now().difference(startedAt).inMilliseconds;
-      final gqlErrors = e.graphqlErrors
-          .map((err) => err.message)
-          .toList(growable: false);
+      final gqlErrors =
+          e.graphqlErrors.map((err) => err.message).toList(growable: false);
       await LuciqLog.logError(
         'GraphQL FAIL $label duration=${durationMs}ms '
         'errorDomain=graphql '
@@ -148,163 +147,164 @@ class _GraphQLPageState extends State<GraphQLPage> {
   }
 
   Future<void> _queryListPosts() => _run(
-    'Query.listPosts',
-    body: () async {
-      const doc = r'''
+        'Query.listPosts',
+        body: () async {
+          const doc = r'''
             query ListPosts($options: PageQueryOptions) {
               posts(options: $options) {
                 data { id title }
               }
             }
           ''';
-      final result = await _query(
-        _client,
-        doc,
-        operationName: 'ListPosts',
-        variables: const {
-          'options': {
-            'paginate': {'page': 1, 'limit': 5},
-          },
+          final result = await _query(
+            _client,
+            doc,
+            operationName: 'ListPosts',
+            variables: const {
+              'options': {
+                'paginate': {'page': 1, 'limit': 5},
+              },
+            },
+          );
+          if (result.hasException) throw result.exception!;
+          final posts = (result.data?['posts']?['data'] as List?) ?? const [];
+          return 'received ${posts.length} posts';
         },
       );
-      if (result.hasException) throw result.exception!;
-      final posts = (result.data?['posts']?['data'] as List?) ?? const [];
-      return 'received ${posts.length} posts';
-    },
-  );
 
   Future<void> _queryPostById() => _run(
-    'Query.postById',
-    body: () async {
-      const doc = r'''
+        'Query.postById',
+        body: () async {
+          const doc = r'''
             query PostById($id: ID!) {
               post(id: $id) { id title body }
             }
           ''';
-      final result = await _query(
-        _client,
-        doc,
-        operationName: 'PostById',
-        variables: const {'id': '1'},
+          final result = await _query(
+            _client,
+            doc,
+            operationName: 'PostById',
+            variables: const {'id': '1'},
+          );
+          if (result.hasException) throw result.exception!;
+          final title = result.data?['post']?['title'] as String?;
+          return 'post#1 title="${title ?? ''}"';
+        },
       );
-      if (result.hasException) throw result.exception!;
-      final title = result.data?['post']?['title'] as String?;
-      return 'post#1 title="${title ?? ''}"';
-    },
-  );
 
   Future<void> _mutationCreatePost() => _run(
-    'Mutation.createPost',
-    body: () async {
-      const doc = r'''
+        'Mutation.createPost',
+        body: () async {
+          const doc = r'''
             mutation CreatePost($input: CreatePostInput!) {
               createPost(input: $input) { id title body }
             }
           ''';
-      final result = await _mutate(
-        doc,
-        operationName: 'CreatePost',
-        variables: const {
-          'input': {
-            'title': 'Luciq says hi',
-            'body': 'Posted from luciq_gql_link example',
-          },
+          final result = await _mutate(
+            doc,
+            operationName: 'CreatePost',
+            variables: const {
+              'input': {
+                'title': 'Luciq says hi',
+                'body': 'Posted from luciq_gql_link example',
+              },
+            },
+          );
+          if (result.hasException) throw result.exception!;
+          final id = result.data?['createPost']?['id']?.toString();
+          return 'created post id=$id';
         },
       );
-      if (result.hasException) throw result.exception!;
-      final id = result.data?['createPost']?['id']?.toString();
-      return 'created post id=$id';
-    },
-  );
 
   Future<void> _queryWithTraceparent() => _run(
-    'Query.withCallerTraceparent',
-    body: () async {
-      const traceparent =
-          '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
-      await LuciqLog.logVerbose(
-        'GraphQL traceparent supplied by caller: $traceparent',
-      );
-      const doc = r'''
+        'Query.withCallerTraceparent',
+        body: () async {
+          const traceparent =
+              '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
+          await LuciqLog.logVerbose(
+            'GraphQL traceparent supplied by caller: $traceparent',
+          );
+          const doc = r'''
             query Tagged { post(id: "2") { id title } }
           ''';
-      final result = await _query(
-        _client,
-        doc,
-        operationName: 'Tagged',
-        headers: const {'traceparent': traceparent},
+          final result = await _query(
+            _client,
+            doc,
+            operationName: 'Tagged',
+            headers: const {'traceparent': traceparent},
+          );
+          if (result.hasException) throw result.exception!;
+          return 'post#2 with caller traceparent';
+        },
       );
-      if (result.hasException) throw result.exception!;
-      return 'post#2 with caller traceparent';
-    },
-  );
 
   Future<void> _queryWithoutTraceparent() => _run(
-    'Query.generatedTraceparent',
-    body: () async {
-      await LuciqLog.logVerbose(
-        'GraphQL no caller traceparent; LuciqGqlLink will generate one',
-      );
-      const doc = r'''
+        'Query.generatedTraceparent',
+        body: () async {
+          await LuciqLog.logVerbose(
+            'GraphQL no caller traceparent; LuciqGqlLink will generate one',
+          );
+          const doc = r'''
             query Untagged { post(id: "3") { id title } }
           ''';
-      final result = await _query(_client, doc, operationName: 'Untagged');
-      if (result.hasException) throw result.exception!;
-      return 'post#3 with generated traceparent';
-    },
-  );
+          final result = await _query(_client, doc, operationName: 'Untagged');
+          if (result.hasException) throw result.exception!;
+          return 'post#3 with generated traceparent';
+        },
+      );
 
   Future<void> _queryInvalidField() => _run(
-    'Query.invalidField',
-    body: () async {
-      const doc = r'''
+        'Query.invalidField',
+        body: () async {
+          const doc = r'''
             query InvalidField { post(id: "1") { id thisFieldDoesNotExist } }
           ''';
-      final result = await _query(_client, doc, operationName: 'InvalidField');
-      if (result.hasException) throw result.exception!;
-      return 'unexpected success';
-    },
-  );
+          final result =
+              await _query(_client, doc, operationName: 'InvalidField');
+          if (result.hasException) throw result.exception!;
+          return 'unexpected success';
+        },
+      );
 
   Future<void> _queryBadHost() => _run(
-    'Query.badHost',
-    body: () async {
-      const doc = r'''
+        'Query.badHost',
+        body: () async {
+          const doc = r'''
             query BadHost { post(id: "1") { id } }
           ''';
-      final result = await _query(
-        _badHostClient,
-        doc,
-        operationName: 'BadHost',
+          final result = await _query(
+            _badHostClient,
+            doc,
+            operationName: 'BadHost',
+          );
+          if (result.hasException) throw result.exception!;
+          return 'unexpected success';
+        },
       );
-      if (result.hasException) throw result.exception!;
-      return 'unexpected success';
-    },
-  );
 
   Future<void> _subscribeOnlineUsers() => _run(
-    'Subscription.onlineUsers',
-    body: () async {
-      await _subscription?.cancel();
-      _subscriptionEvents = 0;
-      const doc = r'''
+        'Subscription.onlineUsers',
+        body: () async {
+          await _subscription?.cancel();
+          _subscriptionEvents = 0;
+          const doc = r'''
             subscription OnlineUsers {
               user_online(order_by: { last_seen: desc }, limit: 10) {
                 id username last_seen
               }
             }
           ''';
-      final stream = _client.subscribe(
-        SubscriptionOptions(
-          document: gql(doc),
-          operationName: 'OnlineUsers',
-          fetchPolicy: FetchPolicy.networkOnly,
-        ),
-      );
+          final stream = _client.subscribe(
+            SubscriptionOptions(
+              document: gql(doc),
+              operationName: 'OnlineUsers',
+              fetchPolicy: FetchPolicy.networkOnly,
+            ),
+          );
 
-      final completer = Completer<int>();
+          final completer = Completer<int>();
       _subscription = stream.listen(
-        (result) {
+            (result) {
           if (result.hasException) {
             if (!completer.isCompleted) {
               completer.completeError(result.exception!);
@@ -315,7 +315,7 @@ class _GraphQLPageState extends State<GraphQLPage> {
           if (mounted) setState(() {});
           LuciqLog.logVerbose(
             'GraphQL subscription emission #$_subscriptionEvents '
-            'data=${jsonEncode(result.data ?? {})}',
+                'data=${jsonEncode(result.data ?? {})}',
           );
         },
         onError: (Object error) {
@@ -328,29 +328,29 @@ class _GraphQLPageState extends State<GraphQLPage> {
         },
       );
 
-      // Wait for the first emission (or 5s) so the button gives the user
-      // immediate feedback. The subscription itself keeps running in the
-      // background until "Cancel subscription" is pressed.
-      await Future.any<void>([
-        Future<void>.delayed(const Duration(seconds: 5)),
-        () async {
-          while (_subscriptionEvents == 0 && _subscription != null) {
-            await Future<void>.delayed(const Duration(milliseconds: 100));
-          }
-        }(),
-      ]);
+          // Wait for the first emission (or 5s) so the button gives the user
+          // immediate feedback. The subscription itself keeps running in the
+          // background until "Cancel subscription" is pressed.
+          await Future.any<void>([
+            Future<void>.delayed(const Duration(seconds: 5)),
+            () async {
+              while (_subscriptionEvents == 0 && _subscription != null) {
+                await Future<void>.delayed(const Duration(milliseconds: 100));
+              }
+            }(),
+          ]);
 
-      if (completer.isCompleted) {
+          if (completer.isCompleted) {
         // Surface the error captured above.
         throw await completer.future.then<Object>(
-          (_) => 'completed',
+              (_) => 'completed',
           onError: (Object e) => e,
         );
       }
 
-      return 'subscribed; received $_subscriptionEvents event(s) so far';
-    },
-  );
+          return 'subscribed; received $_subscriptionEvents event(s) so far';
+        },
+      );
 
   Future<void> _cancelSubscription() async {
     final hadSub = _subscription != null;

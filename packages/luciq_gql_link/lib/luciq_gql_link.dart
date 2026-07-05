@@ -8,6 +8,7 @@ import 'package:gql_http_link/gql_http_link.dart'
 import 'package:gql_link/gql_link.dart';
 import 'package:http/http.dart' show MultipartFile;
 import 'package:luciq_flutter/luciq_flutter.dart';
+
 const _operationTypeHeader = 'x-luciq-graphql-operation-type';
 const _defaultContentType = 'application/json';
 const _logTag = 'LCQ-Flutter-GQL:';

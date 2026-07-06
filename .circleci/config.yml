@@ -1,5 +1,25 @@
 version: 2.1
 
+parameters:
+  run_snapshot:
+    type: boolean
+    default: false
+  snapshot_version:
+    type: string
+    default: ""
+  snapshot_prefix:
+    type: string
+    default: "bdr-thermea"
+  snapshot_base_branch:
+    type: string
+    default: "master"
+  snapshot_android_sdk:
+    type: string
+    default: ""
+  snapshot_ios_sdk:
+    type: string
+    default: ""
+
 orbs:
   android: circleci/android@2.5.0
   flutter: circleci/flutter@2.1.0
@@ -533,6 +553,34 @@ jobs:
           working_directory: packages/luciq_flutter
           command: Escape flutter publish-monorepo-luciq
 
+  create_release_snapshot:
+    executor: flutter-executor
+    steps:
+      - advanced-checkout/shallow-checkout
+      - generate_luciq_github_app_token
+      - setup_flutter
+      - run:
+          name: Configure git for push
+          command: |
+            git config user.name "luciq-ci[bot]"
+            git config user.email "luciq-ci@luciq.ai"
+            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/luciqai/luciq-flutter-sdk.git"
+      - run:
+          name: Create and push release snapshot
+          command: |
+            VERSION="<< pipeline.parameters.snapshot_version >>"
+            if [ -z "$VERSION" ]; then
+              echo "snapshot_version pipeline parameter is required" >&2
+              exit 1
+            fi
+            # Generation already ran via setup_flutter, so skip it in the script (-s).
+            ARGS="-s -v $VERSION -p << pipeline.parameters.snapshot_prefix >> -b << pipeline.parameters.snapshot_base_branch >>"
+            ANDROID_SDK="<< pipeline.parameters.snapshot_android_sdk >>"
+            IOS_SDK="<< pipeline.parameters.snapshot_ios_sdk >>"
+            [ -n "$ANDROID_SDK" ] && ARGS="$ARGS --android-sdk $ANDROID_SDK"
+            [ -n "$IOS_SDK" ] && ARGS="$ARGS --ios-sdk $IOS_SDK"
+            bash scripts/release-snapshot.sh $ARGS
+
   release_slack_notification:
     parameters:
       channel:
@@ -547,7 +595,13 @@ jobs:
 
 workflows:
   version: 2
+  release-snapshot:
+    when: << pipeline.parameters.run_snapshot >>
+    jobs:
+      - create_release_snapshot
+
   build-test-and-approval-deploy:
+    unless: << pipeline.parameters.run_snapshot >>
     jobs:
       - test_android
       - danger:

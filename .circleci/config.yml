@@ -1,22 +1,31 @@
 version: 2.1
 
 parameters:
-  run_snapshot:
+  # --- Task: generate a generic snapshot (scripts/snapshot.sh) ---
+  run_generate_snapshot:
     type: boolean
     default: false
-  snapshot_version:
+  snapshot_ticket:
     type: string
     default: ""
-  snapshot_prefix:
+
+  # --- Task: release a bdr-thermea release (scripts/release-snapshot.sh) ---
+  run_release:
+    type: boolean
+    default: false
+  release_version:
+    type: string
+    default: ""
+  release_prefix:
     type: string
     default: "bdr-thermea"
-  snapshot_base_branch:
+  release_base_branch:
     type: string
     default: "master"
-  snapshot_android_sdk:
+  release_android_sdk:
     type: string
     default: ""
-  snapshot_ios_sdk:
+  release_ios_sdk:
     type: string
     default: ""
 
@@ -553,7 +562,8 @@ jobs:
           working_directory: packages/luciq_flutter
           command: Escape flutter publish-monorepo-luciq
 
-  create_release_snapshot:
+  # Task: generate a generic snapshot branch (snapshot/<version>-<ticket>).
+  generate_snapshot:
     executor: flutter-executor
     steps:
       - advanced-checkout/shallow-checkout
@@ -566,17 +576,41 @@ jobs:
             git config user.email "luciq-ci@luciq.ai"
             git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/luciqai/luciq-flutter-sdk.git"
       - run:
-          name: Create and push release snapshot
+          name: Generate and push snapshot
           command: |
-            VERSION="<< pipeline.parameters.snapshot_version >>"
+            TICKET="<< pipeline.parameters.snapshot_ticket >>"
+            if [ -z "$TICKET" ]; then
+              echo "snapshot_ticket pipeline parameter is required" >&2
+              exit 1
+            fi
+            # Generation already ran via setup_flutter, so skip pigeon in the script (-s).
+            bash scripts/snapshot.sh -s -t "$TICKET"
+
+  # Task: cut a bdr-thermea release branch (release/<prefix>-<version>).
+  release_bdr_thermea:
+    executor: flutter-executor
+    steps:
+      - advanced-checkout/shallow-checkout
+      - generate_luciq_github_app_token
+      - setup_flutter
+      - run:
+          name: Configure git for push
+          command: |
+            git config user.name "luciq-ci[bot]"
+            git config user.email "luciq-ci@luciq.ai"
+            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/luciqai/luciq-flutter-sdk.git"
+      - run:
+          name: Create and push release
+          command: |
+            VERSION="<< pipeline.parameters.release_version >>"
             if [ -z "$VERSION" ]; then
-              echo "snapshot_version pipeline parameter is required" >&2
+              echo "release_version pipeline parameter is required" >&2
               exit 1
             fi
             # Generation already ran via setup_flutter, so skip it in the script (-s).
-            ARGS="-s -v $VERSION -p << pipeline.parameters.snapshot_prefix >> -b << pipeline.parameters.snapshot_base_branch >>"
-            ANDROID_SDK="<< pipeline.parameters.snapshot_android_sdk >>"
-            IOS_SDK="<< pipeline.parameters.snapshot_ios_sdk >>"
+            ARGS="-s -v $VERSION -p << pipeline.parameters.release_prefix >> -b << pipeline.parameters.release_base_branch >>"
+            ANDROID_SDK="<< pipeline.parameters.release_android_sdk >>"
+            IOS_SDK="<< pipeline.parameters.release_ios_sdk >>"
             [ -n "$ANDROID_SDK" ] && ARGS="$ARGS --android-sdk $ANDROID_SDK"
             [ -n "$IOS_SDK" ] && ARGS="$ARGS --ios-sdk $IOS_SDK"
             bash scripts/release-snapshot.sh $ARGS
@@ -595,13 +629,21 @@ jobs:
 
 workflows:
   version: 2
-  release-snapshot:
-    when: << pipeline.parameters.run_snapshot >>
+  generate-snapshot:
+    when: << pipeline.parameters.run_generate_snapshot >>
     jobs:
-      - create_release_snapshot
+      - generate_snapshot
+
+  release-bdr-thermea:
+    when: << pipeline.parameters.run_release >>
+    jobs:
+      - release_bdr_thermea
 
   build-test-and-approval-deploy:
-    unless: << pipeline.parameters.run_snapshot >>
+    unless:
+      or:
+        - << pipeline.parameters.run_generate_snapshot >>
+        - << pipeline.parameters.run_release >>
     jobs:
       - test_android
       - danger:

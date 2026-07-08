@@ -55,10 +55,9 @@ usage() {
   cat <<EOF
 Usage: $(basename "$0") -v VERSION [OPTIONS]
 
-Required:
-  -v, --version VERSION      Flutter package version for this release (e.g. 19.9.0)
-
 Options:
+  -v, --version VERSION      Flutter package version for this release (e.g. 19.9.0).
+                             Defaults to the version already in pubspec.yaml.
   -p, --prefix PREFIX        Branch prefix / customer (default: bdr-thermea)
                              Branch becomes release/<PREFIX>-<VERSION>
   -b, --base BRANCH          Base branch to branch from (default: current branch).
@@ -101,7 +100,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -z "$VERSION" ]] && error "Version is required. Use -v/--version VERSION"
+# Fall back to the version already declared in pubspec.yaml when -v is omitted.
+if [[ -z "$VERSION" ]]; then
+  VERSION=$(grep -m1 '^version:' "$PUBSPEC" | awk '{print $2}')
+  [[ -z "$VERSION" ]] && error "No version given (-v) and none found in $PUBSPEC"
+  info "No -v given; using pubspec version: $VERSION"
+fi
 [[ -z "$ANDROID_SDK" ]] && ANDROID_SDK="$VERSION"
 [[ -z "$IOS_SDK" ]] && IOS_SDK="$VERSION"
 [[ -z "$BASE_BRANCH" ]] && BASE_BRANCH="$(git rev-parse --abbrev-ref HEAD)"

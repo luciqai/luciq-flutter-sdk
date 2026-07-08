@@ -566,7 +566,7 @@ jobs:
         default: "bdr-thermea"
       base_branch:
         type: string
-        default: "master"
+        default: ""
       android_sdk:
         type: string
         default: ""
@@ -587,12 +587,16 @@ jobs:
       - run:
           name: Create and push release
           # Version defaults to the version already in pubspec.yaml when left empty.
+          # Base branch defaults to the branch this pipeline runs on ($CIRCLE_BRANCH).
           # Generation already ran via setup_flutter, so skip it in the script (-s).
           command: |
-            ARGS="-s -p << parameters.prefix >> -b << parameters.base_branch >>"
+            ARGS="-s -p << parameters.prefix >>"
             VERSION="<< parameters.version >>"
+            BASE="<< parameters.base_branch >>"
             ANDROID_SDK="<< parameters.android_sdk >>"
             IOS_SDK="<< parameters.ios_sdk >>"
+            [ -z "$BASE" ] && BASE="$CIRCLE_BRANCH"
+            ARGS="$ARGS -b $BASE"
             [ -n "$VERSION" ] && ARGS="$ARGS -v $VERSION"
             [ -n "$ANDROID_SDK" ] && ARGS="$ARGS --android-sdk $ANDROID_SDK"
             [ -n "$IOS_SDK" ] && ARGS="$ARGS --ios-sdk $IOS_SDK"
@@ -755,20 +759,15 @@ workflows:
               only: master
       # Manual switch: approve to cut a bdr-thermea release branch.
       # Leave version empty to use the version already in pubspec.yaml.
+      # Base branch defaults to the branch this pipeline runs on.
       - hold_release_bdr_thermea:
           type: approval
-          filters:
-            branches:
-              only: master
       - release_bdr_thermea:
           version: ""
           prefix: "bdr-thermea"
-          base_branch: "master"
+          base_branch: ""
           requires:
             - hold_release_bdr_thermea
-          filters:
-            branches:
-              only: master
 
   send-release-notes-to-test-channel:
     jobs:

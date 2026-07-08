@@ -141,7 +141,9 @@ success "Branch '$BRANCH_NAME' created."
 # -----------------------------------------------------------------------------
 info "Bumping version in $BUILD_GRADLE..."
 sed_inplace -E "s/^version '.*'/version '${VERSION}'/" "$BUILD_GRADLE"
-sed_inplace -E "s#(ai\.luciq\.library:luciq:)[^']*#\1${ANDROID_SDK}#" "$BUILD_GRADLE"
+# Matches both the public group (ai.luciq.library:luciq) and the customer group
+# (e.g. ai.luciq.library-bdrthermea:luciq) used on customer release branches.
+sed_inplace -E "s#(ai\.luciq\.library[^:]*:luciq:)[^']*#\1${ANDROID_SDK}#" "$BUILD_GRADLE"
 
 info "Bumping version in $PODSPEC..."
 sed_inplace -E "s/(s\.version[[:space:]]*=[[:space:]]*)'[^']*'/\1'${VERSION}'/" "$PODSPEC"

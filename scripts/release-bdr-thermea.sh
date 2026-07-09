@@ -52,10 +52,10 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-info()    { echo -e "${CYAN}[INFO]${NC} $1"; }
-success() { echo -e "${GREEN}[OK]${NC} $1"; }
-warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
-error()   { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
+info()    { printf "${CYAN}[INFO]${NC} %s\n" "$1"; }
+success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
+warn()    { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
+error()   { printf "${RED}[ERROR]${NC} %s\n" "$1"; exit 1; }
 
 # -----------------------------------------------------------------------------
 # Parse arguments
@@ -260,9 +260,16 @@ info "Deriving locale customizations from: $REF_BRANCH"
 
 # -----------------------------------------------------------------------------
 # Step 2: Derive version & branch name from the base branch
+# When basing off the current branch, read the working-tree pubspec so an
+# uncommitted version bump (the release state that gets carried onto the new
+# branch via the stash) is what names the branch.
 # -----------------------------------------------------------------------------
-SDK_VERSION=$(git show "$BASE_BRANCH:$PUBSPEC" | grep -m1 '^version:' | awk '{print $2}')
-[[ -z "$SDK_VERSION" ]] && error "Could not extract SDK version from $BASE_BRANCH:$PUBSPEC"
+if [[ "$BASE_BRANCH" == "$(git rev-parse --abbrev-ref HEAD)" ]]; then
+  SDK_VERSION=$(grep -m1 '^version:' "$PUBSPEC" | awk '{print $2}')
+else
+  SDK_VERSION=$(git show "$BASE_BRANCH:$PUBSPEC" | grep -m1 '^version:' | awk '{print $2}')
+fi
+[[ -z "$SDK_VERSION" ]] && error "Could not extract SDK version from $PUBSPEC"
 
 BRANCH_NAME="release/bdr-thermea-${SDK_VERSION}"
 info "SDK version: $SDK_VERSION"

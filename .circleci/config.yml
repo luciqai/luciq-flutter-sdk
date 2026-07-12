@@ -533,6 +533,26 @@ jobs:
           working_directory: packages/luciq_flutter
           command: Escape flutter publish-monorepo-luciq
 
+  release_bdr_thermea:
+    executor: flutter-executor
+    working_directory: "~/project"
+    steps:
+      # Full checkout (not shallow): the script needs history and existing
+      # release/bdr-thermea-* refs to derive locale customizations and to push.
+      - checkout
+      - setup_flutter
+      - generate_luciq_github_app_token
+      - run:
+          name: Configure git for push
+          command: |
+            git config user.email "flutter-ci@luciq.ai"
+            git config user.name "Luciq CI"
+            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/luciqai/luciq-flutter-sdk.git"
+      - run:
+          name: Create bdr-thermea release branch
+          # setup_flutter already ran pigeon + build_runner, so skip regeneration.
+          command: ./scripts/release-bdr-thermea.sh --base "$CIRCLE_BRANCH" --skip-pigeon
+
   release_slack_notification:
     parameters:
       channel:
@@ -667,6 +687,19 @@ workflows:
       - release_luciq_flutter:
           requires:
             - hold_release_luciq_flutter
+          filters:
+            branches:
+              only: master
+      - hold_release_bdr_thermea:
+          type: approval
+          requires:
+            - release_luciq_flutter
+          filters:
+            branches:
+              only: master
+      - release_bdr_thermea:
+          requires:
+            - hold_release_bdr_thermea
           filters:
             branches:
               only: master

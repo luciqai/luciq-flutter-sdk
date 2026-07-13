@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
+import 'package:luciq_flutter/src/utils/app_launch/app_launch_manager.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
@@ -26,6 +27,7 @@ import 'apm_test.mocks.dart';
   LuciqLogger,
   LuciqMonotonicClock,
   ScreenLoadingManager,
+  AppLaunchManager,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -176,6 +178,37 @@ void main() {
 
     verify(
       mHost.endAppLaunch(),
+    ).called(1);
+  });
+
+  test('[endAppLaunch] delegates to AppLaunchManager', () async {
+    final mManager = MockAppLaunchManager();
+    when(mManager.reportStagesOnEndAppLaunch()).thenAnswer((_) async {});
+    AppLaunchManager.setInstance(mManager);
+    addTearDown(AppLaunchManager.resetInstance);
+
+    await APM.endAppLaunch();
+
+    verify(mManager.reportStagesOnEndAppLaunch()).called(1);
+  });
+
+  test('[reportAppLaunchStages] should call host method', () async {
+    const dartEntryMicros = 1000;
+    const uiRenderDurationMicros = 2000;
+    const interactiveDurationMicros = 5000;
+
+    await APM.reportAppLaunchStages(
+      dartEntryMicros,
+      uiRenderDurationMicros,
+      interactiveDurationMicros,
+    );
+
+    verify(
+      mHost.reportAppLaunchStages(
+        dartEntryMicros,
+        uiRenderDurationMicros,
+        interactiveDurationMicros,
+      ),
     ).called(1);
   });
 

@@ -1,6 +1,7 @@
 # Staged Cold App Launch Capture - Design
 
 Date: 2026-07-07
+Revised: 2026-07-08 (gating moved native-side; binding/ordering caveats)
 Branch: feat/app-launch-stages
 Status: Approved for implementation planning
 
@@ -33,6 +34,11 @@ changing the public `endAppLaunch()` contract.
   `endAppLaunch()` trigger).
 - Stage count: 3 stages.
 - Launch types: cold only. Warm/hot are out of scope.
+- Gating: no Flutter-side gating. Flutter always captures timestamps and
+  reports stages; native discards the staged report when cold launch capture
+  is disabled. Rationale: `ApmHostApi` exposes only the setter
+  `setColdAppLaunchEnabled` (no getter), and an async enabled check cannot
+  gate the synchronous T1 capture at the top of `Luciq.init` anyway.
 - Pigeon contract: primitive args (no data class), mirroring
   `reportScreenLoadingCP`.
 - Native receiving API + backend schema: built in parallel against the agreed
@@ -95,10 +101,16 @@ New `AppLaunchManager` singleton, following the established manager pattern
 - Holds a `$setHostApi(ApmHostApi)` seam, wired from `APM.$setHostApi`
   (`lib/src/modules/apm.dart` line 28) the same way `CustomSpanManager` is.
 - Responsibilities:
-  - `markDartEntry()` - captures T1 (epoch + monotonic). Called once at the top
-    of `Luciq.init` (`lib/src/modules/luciq.dart` line 217).
-  - registers a one-shot `WidgetsBinding.instance.addPostFrameCallback` to
-    capture T2 monotonic and compute Stage 2 duration.
+    - `markDartEntry()` - captures T1 (epoch + monotonic). Called once in
+      `Luciq.init` (`lib/src/modules/luciq.dart` line 217), immediately after
+      `$setup()` (which wires the host APIs), before the async host call.
+    - registers a one-shot post-frame callback via the null-aware
+      `WidgetsBinding.instance?.addPostFrameCallback` (same guard as
+      `luciq_capture_screen_loading.dart` line 101) to capture T2 monotonic and
+      compute Stage 2 duration. If the binding is not initialized when
+      `Luciq.init` runs (host called it before
+      `WidgetsFlutterBinding.ensureInitialized()`), T2 is never captured and
+      the launch degrades to bulk-only.
   - `reportStagesOnEndAppLaunch()` - on `endAppLaunch()`, captures T3, computes
     Stage 3 duration, and calls the new host method, then the existing
     `endAppLaunch()`.
@@ -150,9 +162,10 @@ launch-stage enum later (not in this scope).
 
 ## Data flow
 
-1. Host calls `Luciq.init(...)`. First line calls
+1. Host calls `Luciq.init(...)`. Right after `$setup()`,
    `AppLaunchManager.I.markDartEntry()` -> stores T1 epoch + T1 monotonic and
-   registers the one-shot post-frame callback.
+   registers the one-shot post-frame callback (null-aware; skipped if the
+   binding is not initialized).
 2. First frame renders -> post-frame callback fires -> store T2 monotonic ->
    Stage 2 duration = T2mono - T1mono.
 3. Host calls `APM.endAppLaunch()` -> `AppLaunchManager` captures T3 monotonic
@@ -166,10 +179,14 @@ launch-stage enum later (not in this scope).
 
 - `endAppLaunch()` fired before the first frame (T2 missing): skip the staged
   report; native falls back to today's single bulk duration.
+- `Luciq.init` called before `WidgetsFlutterBinding.ensureInitialized()`
+  (binding not initialized): post-frame callback is skipped via the null-aware
+  call, T2 is never captured, staged report is skipped. Bulk-only.
 - Host never calls `endAppLaunch()`: native auto-ends as today; no staged data
   sent. Bulk-only.
 - Cold launch capture disabled (`setColdAppLaunchEnabled(false)`) or feature
-  flag off: manager is a no-op; no post-frame callback registered.
+  flag off: Flutter still captures timestamps (cheap) and sends the staged
+  report; native discards it. No Flutter-side gating - see Gating.
 - `markDartEntry()` called more than once (hot restart, re-init): only the
   first launch window is tracked; subsequent calls are ignored/logged.
 - All host calls go through `hostCall` (never throw into the host app) and log
@@ -177,12 +194,21 @@ launch-stage enum later (not in this scope).
 
 ## Gating
 
-- Respect the existing cold-launch enable toggle
-  (`setColdAppLaunchEnabled`). Staging only runs when cold launch is enabled.
-- If a remote feature flag is desired, mirror `FlagsConfig.screenLoading`
-  (add `FlagsConfig.appLaunch`). Confirm with the platform team whether a
-  dedicated flag is needed or the cold-launch enable is sufficient. Default
-  assumption: reuse cold-launch enable, no new remote flag.
+Decision: gating is native-side only. No Flutter-side gating.
+
+- Flutter cannot read the cold-launch enabled state: `ApmHostApi` exposes only
+  the setter `setColdAppLaunchEnabled` (`pigeons/apm.api.dart` line 11) - no
+  getter - and `FlagsConfig` has no appLaunch entry.
+- Even with a getter, an async enabled check could not gate the synchronous
+  T1 capture / callback registration at the top of `Luciq.init` (the SDK is
+  not built yet at that point).
+- So: Flutter always captures timestamps and always sends
+  `reportAppLaunchStages` on `endAppLaunch()` (when boundaries are present).
+  Native discards the staged report when cold launch capture is disabled or
+  the feature flag is off - the same place it already gates the bulk
+  duration.
+- No new Pigeon getter, no `FlagsConfig.appLaunch`, no new remote flag on the
+  Flutter side.
 
 ## Testing
 
@@ -191,8 +217,10 @@ launch-stage enum later (not in this scope).
   callback and `endAppLaunch()`; assert the exact
   `reportAppLaunchStages(dartEntryMicros, uiRenderDurationMicros,
   interactiveDurationMicros)` arguments.
-- Edge cases: endAppLaunch before first frame (no report), disabled cold
-  launch (no report), double markDartEntry (single window).
+- Edge cases: endAppLaunch before first frame (no report), binding not
+  initialized at markDartEntry (no T2, no report), double markDartEntry
+  (single window). No disabled-toggle test on the Flutter side - gating is
+  native-only.
 - Extend `test/apm_test.dart` for the new `APM.reportAppLaunchStages` host
   passthrough and the `endAppLaunch` -> manager delegation.
 - Mockito with `@GenerateMocks`; run `melos generate --no-select` after adding
@@ -202,7 +230,9 @@ launch-stage enum later (not in this scope).
 
 1. Native receiving API - the load-bearing dependency. Neither platform
    exposes a staged launch API today (`endAppLaunch` is arg-less on both;
-   Android record model stores a single duration long).
+   Android record model stores a single duration long). The staged API must
+   also own gating: discard the staged report when cold launch capture is
+   disabled or the feature flag is off (Flutter sends unconditionally).
    - iOS: `ios/Classes/Modules/ApmApi.m` implements the generated selector and
      calls a new `LCQAPM` staged API. Timestamps as microseconds
      (`LCQMicroSecondsTimeInterval`), matching `startCpUiTrace` /

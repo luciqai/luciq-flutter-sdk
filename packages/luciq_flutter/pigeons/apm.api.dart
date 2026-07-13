@@ -35,6 +35,12 @@ abstract class ApmHostApi {
 
   void endScreenLoadingCP(int timeStampMicro, int uiTraceId);
 
+  void reportAppLaunchStages(
+    int dartEntryMicros,
+    int uiRenderDurationMicros,
+    int interactiveDurationMicros,
+  );
+
   @async
   bool isEndScreenLoadingEnabled();
 

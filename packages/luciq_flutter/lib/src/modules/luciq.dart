@@ -1,23 +1,21 @@
 // ignore_for_file: avoid_classes_with_only_static_members
 
 import 'dart:async';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:typed_data';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unnecessary_import
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
 // to maintain supported versions prior to Flutter 3.3
 // ignore: unused_import
 import 'package:flutter/services.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
+import 'package:luciq_flutter/src/utils/app_launch/app_launch_manager.dart';
 import 'package:luciq_flutter/src/utils/enum_converter.dart';
 import 'package:luciq_flutter/src/utils/feature_flags_manager.dart';
 import 'package:luciq_flutter/src/utils/host_call.dart';
@@ -221,6 +219,10 @@ class Luciq {
     String? appVariant,
   }) {
     $setup();
+    // Capture the Dart-entry boundary (T1) for cold app launch staging,
+    // immediately after $setup() wires the host APIs and before the async
+    // host call. See AppLaunchManager.
+    AppLaunchManager.I.markDartEntry();
     LuciqLogger.I.logLevel = debugLogsLevel;
     return hostCall<void>(
       'Luciq.init',
@@ -790,7 +792,6 @@ class Luciq {
     );
     PrivateViewsManager.I.addAutoMasking(types);
   }
-
 
   /// Enables and disables manual invocation and prompt options for bug and feedback.
   /// [boolean] isEnabled

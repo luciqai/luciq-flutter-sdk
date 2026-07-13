@@ -139,6 +139,33 @@ NSMutableDictionary *traces;
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmAppLaunch] format:@"[APM.endAppLaunch] phase=exit"];
 }
 
+// Reports the cold app launch stage durations from Dart to iOS. It takes three parameters:
+// 1. `dartEntryMicros`: the wall-clock epoch of the Luciq.init call (T1), the anchor native
+//    aligns stage 1 to against the process-start time it owns (T0).
+// 2. `uiRenderDurationMicros`: stage 2 duration in microseconds (T1 -> first frame).
+// 3. `interactiveDurationMicros`: stage 3 duration in microseconds (first frame -> endAppLaunch).
+- (void)reportAppLaunchStagesDartEntryMicros:(nonnull NSNumber
+
+*)
+dartEntryMicros uiRenderDurationMicros
+:(
+nonnull NSNumber
+*)
+uiRenderDurationMicros interactiveDurationMicros
+:(
+nonnull NSNumber
+*)
+interactiveDurationMicros error
+:(
+FlutterError *_Nullable
+__autoreleasing * _Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmAppLaunch] format:@"[APM.reportAppLaunchStages] phase=enter dartEntryMicros=%@ uiRenderDurationMicros=%@ interactiveDurationMicros=%@", dartEntryMicros, uiRenderDurationMicros, interactiveDurationMicros];
+    // TODO: delegate to the LCQAPM staged app-launch API once it ships. The native
+    // API also owns gating: it must discard this report when cold launch capture is
+    // disabled or the feature flag is off (Flutter sends unconditionally).
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmAppLaunch] format:@"[APM.reportAppLaunchStages] phase=exit"];
+}
+
 - (void)networkLogAndroidData:(NSDictionary<NSString *, id> *)data error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags apmNetwork] format:@"[APM.networkLogAndroid] phase=enter platform=iOS noop=true"];
     // Android Only

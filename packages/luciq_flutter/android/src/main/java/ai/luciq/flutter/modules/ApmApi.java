@@ -241,6 +241,32 @@ public class ApmApi implements ApmPigeon.ApmHostApi {
         }
     }
 
+    /**
+     * Reports the cold app launch stage durations from Dart to Android.
+     *
+     * @param dartEntryMicros           wall-clock epoch of the Luciq.init call (T1); the anchor
+     *                                  native aligns stage 1 to against the process-start time (T0).
+     * @param uiRenderDurationMicros    stage 2 duration in microseconds (T1 -> first frame).
+     * @param interactiveDurationMicros stage 3 duration in microseconds (first frame -> endAppLaunch).
+     */
+    @Override
+    public void reportAppLaunchStages(@NonNull Long dartEntryMicros, @NonNull Long uiRenderDurationMicros, @NonNull Long interactiveDurationMicros) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_APP_LAUNCH,
+                "[APM.reportAppLaunchStages] phase=enter dartEntryMicros=" + dartEntryMicros
+                        + " uiRenderDurationMicros=" + uiRenderDurationMicros
+                        + " interactiveDurationMicros=" + interactiveDurationMicros);
+        try {
+            // TODO: delegate to the ai.luciq.apm.APM staged app-launch API once it ships. The
+            // native API also owns gating: it must discard this report when cold launch capture is
+            // disabled or the feature flag is off (Flutter sends unconditionally).
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.APM_APP_LAUNCH, "[APM.reportAppLaunchStages] phase=exit");
+        } catch (Exception e) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.APM_APP_LAUNCH,
+                    "[APM.reportAppLaunchStages] phase=error errorType=" + e.getClass().getSimpleName(),
+                    e);
+        }
+    }
+
 
     /**
      * logs network-related information

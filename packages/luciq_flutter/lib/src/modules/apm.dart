@@ -8,6 +8,7 @@ import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/models/custom_span.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/models/network_data.dart';
+import 'package:luciq_flutter/src/utils/app_launch/app_launch_manager.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/host_call.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
@@ -29,6 +30,8 @@ class APM {
     _host = host;
     // Also set the host for CustomSpanManager
     CustomSpanManager.I.$setHostApi(host);
+    // Also set the host for AppLaunchManager
+    AppLaunchManager.I.$setHostApi(host);
   }
 
   // ============================================================
@@ -304,12 +307,48 @@ class APM {
   /// such as when it's intractable, use the end app launch API.
   /// You can then view this data with the automatic cold and hot app launches.
   ///
+  /// Reports the captured cold-launch stage durations (when available) via
+  /// [AppLaunchManager] before ending the launch on native.
+  ///
   /// Returns:
   ///   The method is returning a `Future<void>`.
-  static Future<void> endAppLaunch() => hostCall(
-        'APM.endAppLaunch',
-        () => _host.endAppLaunch(),
+  static Future<void> endAppLaunch() =>
+      AppLaunchManager.I.reportStagesOnEndAppLaunch();
+
+  /// Reports the cold app launch stage durations to native.
+  ///
+  /// Args:
+  ///   dartEntryMicros (int): The [dartEntryMicros] parameter is the wall-clock
+  /// epoch of the `Luciq.init` call (T1), used by native as the anchor to
+  /// compute stage 1 against the process-start time it owns (T0).
+  ///   uiRenderDurationMicros (int): The [uiRenderDurationMicros] parameter is
+  /// the stage 2 duration in microseconds, measured monotonically from
+  /// `Luciq.init` (T1) to the first rendered frame (T2).
+  ///   interactiveDurationMicros (int): The [interactiveDurationMicros]
+  /// parameter is the stage 3 duration in microseconds, measured monotonically
+  /// from the first rendered frame (T2) to `endAppLaunch()` (T3).
+  ///
+  /// Returns:
+  ///   The method is returning a `Future<void>`.
+  @internal
+  static Future<void> reportAppLaunchStages(
+    int dartEntryMicros,
+    int uiRenderDurationMicros,
+    int interactiveDurationMicros,
+  ) =>
+      hostCall(
+        'APM.reportAppLaunchStages',
+        () => _host.reportAppLaunchStages(
+          dartEntryMicros,
+          uiRenderDurationMicros,
+          interactiveDurationMicros,
+        ),
         tag: DebugTags.apmAppLaunch,
+        args: {
+          'dartEntryMicros': dartEntryMicros,
+          'uiRenderDurationMicros': uiRenderDurationMicros,
+          'interactiveDurationMicros': interactiveDurationMicros,
+        },
       );
 
   // ============================================================

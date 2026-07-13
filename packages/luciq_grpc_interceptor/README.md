@@ -73,7 +73,7 @@ For every RPC the dashboard receives:
 ## Debug logging
 
 The interceptor emits structured logs via the SDK's internal `LuciqLogger` under the tag
-`LuciqGrpcInterceptor`. Logs are gated by the SDK's log level (set via `Luciq.setSdkLogLevel`):
+`LCQ-Flutter-GRPC:`. Logs are gated by the SDK's log level (set via `Luciq.setSdkLogLevel`):
 
 - `debug`: call lifecycle (start, success, failure, cancellation, trailer-status non-OK).
 - `error`: callback failures, W3C provider failures, and any internal logging failure.

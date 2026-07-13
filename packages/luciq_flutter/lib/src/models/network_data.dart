@@ -20,7 +20,6 @@ class NetworkData {
     this.errorDomain = '',
     this.errorName,
     this.gqlQueryName,
-    this.gRPCMethod,
     this.serverErrorMessage,
     W3CHeader? w3cHeader,
   }) {
@@ -45,7 +44,6 @@ class NetworkData {
   final String errorDomain;
   final String? errorName;
   final String? gqlQueryName;
-  final String? gRPCMethod;
   final String? serverErrorMessage;
   W3CHeader? _w3cHeader;
 
@@ -72,7 +70,6 @@ class NetworkData {
           errorDomain == other.errorDomain &&
           errorName == other.errorName &&
           gqlQueryName == other.gqlQueryName &&
-          gRPCMethod == other.gRPCMethod &&
           serverErrorMessage == other.serverErrorMessage &&
           _w3cHeader == other._w3cHeader;
 
@@ -96,7 +93,6 @@ class NetworkData {
       errorDomain.hashCode ^
       errorName.hashCode ^
       gqlQueryName.hashCode ^
-      gRPCMethod.hashCode ^
       serverErrorMessage.hashCode ^
       _w3cHeader.hashCode;
 
@@ -119,7 +115,6 @@ class NetworkData {
     String? errorDomain,
     String? errorName,
     String? gqlQueryName,
-    String? gRPCMethod,
     String? serverErrorMessage,
     W3CHeader? w3cHeader,
   }) {
@@ -142,7 +137,6 @@ class NetworkData {
       errorDomain: errorDomain ?? this.errorDomain,
       errorName: errorName ?? this.errorName,
       gqlQueryName: gqlQueryName ?? this.gqlQueryName,
-      gRPCMethod: gRPCMethod ?? this.gRPCMethod,
       serverErrorMessage: serverErrorMessage ?? this.serverErrorMessage,
       w3cHeader: w3cHeader ?? _w3cHeader,
     );
@@ -169,7 +163,6 @@ class NetworkData {
       'errorCode': errorCode,
       'errorName': errorName,
       'gqlQueryName': gqlQueryName,
-      'gRPCMethod': gRPCMethod,
       'serverErrorMessage': serverErrorMessage,
       "isW3cHeaderFound": _w3cHeader?.isW3cHeaderFound,
       "partialId": _w3cHeader?.partialId,

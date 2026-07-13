@@ -298,7 +298,10 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
       final requestBody = parseGrpcBody(request);
       final responseBody = parseGrpcBody(response);
 
-      _networkLogger.networkLog(
+      // The W3C header is generated and injected on the wire by the metadata
+      // provider, so call the internal path directly to avoid regenerating it.
+      // ignore: invalid_use_of_internal_member
+      _networkLogger.networkLogInternal(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -314,7 +317,6 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           responseContentType: 'application/grpc',
           endTime: endTime,
           duration: endTime.difference(startTime).inMicroseconds,
-          gRPCMethod: method.path,
           w3cHeader: ctx.w3cHeader,
         ),
       );
@@ -353,7 +355,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           ? (trailers['grpc-message'] ?? resCapture.body())
           : resCapture.body();
 
-      _networkLogger.networkLog(
+      // ignore: invalid_use_of_internal_member
+      _networkLogger.networkLogInternal(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -371,7 +374,6 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           errorDomain: isError ? 'grpc' : '',
           endTime: endTime,
           duration: endTime.difference(startTime).inMicroseconds,
-          gRPCMethod: method.path,
           serverErrorMessage: isError ? trailers['grpc-message'] : null,
           w3cHeader: ctx.w3cHeader,
         ),
@@ -433,7 +435,8 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
         _annotateStreamMetrics(responseHeaders, resCapture, startTime);
       }
 
-      _networkLogger.networkLog(
+      // ignore: invalid_use_of_internal_member
+      _networkLogger.networkLogInternal(
         NetworkData(
           startTime: startTime,
           url: _buildUrl(method, ctx.authority),
@@ -452,7 +455,6 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
           responseContentType: 'application/grpc',
           endTime: endTime,
           duration: endTime.difference(startTime).inMicroseconds,
-          gRPCMethod: method.path,
           serverErrorMessage: errorMessage,
           w3cHeader: ctx.w3cHeader,
         ),
@@ -475,7 +477,13 @@ class LuciqGrpcInterceptor extends ClientInterceptor {
   String _buildUrl<Q, R>(ClientMethod<Q, R> method, String? authority) {
     final path = method.path.isEmpty ? '/unknown' : method.path;
     if (authority == null || authority.isEmpty) return path;
-    return 'grpc://$authority$path';
+    // grpc passes `scheme://authority/audiencePath` here, so extract the bare
+    // authority to avoid a doubled scheme and a repeated service segment.
+    final parsed = Uri.tryParse(authority);
+    final host = (parsed != null && parsed.authority.isNotEmpty)
+        ? parsed.authority
+        : authority;
+    return 'grpc://$host$path';
   }
 
   int? _readGrpcStatus(Map<String, String> trailers) {

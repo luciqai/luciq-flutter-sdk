@@ -272,7 +272,7 @@ void main() {
       final captured = await completer.future;
       expect(
         captured['url'],
-        'grpc://http://localhost:50051/test.Service/test.Service/GetData',
+        'grpc://localhost:50051/test.Service/GetData',
       );
       expect(
         captured['requestHeaders'],

@@ -93,17 +93,12 @@ void main() {
     expect(withQuery.toJson()['gqlQueryName'], 'GetUser');
   });
 
-  test('[gRPCMethod] should round-trip through copyWith and toJson', () async {
-    const grpcMethod = '/foo.Service/Method';
+  test('[serverErrorMessage] should round-trip through copyWith and toJson',
+      () async {
     const serverErrorMessage = 'internal error';
-    final grpcData = data.copyWith(
-      gRPCMethod: grpcMethod,
-      serverErrorMessage: serverErrorMessage,
-    );
+    final grpcData = data.copyWith(serverErrorMessage: serverErrorMessage);
 
-    expect(grpcData.gRPCMethod, grpcMethod);
     expect(grpcData.serverErrorMessage, serverErrorMessage);
-    expect(grpcData.toJson()['gRPCMethod'], grpcMethod);
     expect(grpcData.toJson()['serverErrorMessage'], serverErrorMessage);
   });
 }

@@ -111,17 +111,18 @@ class NetworkManager {
 
   /// Gets the network body max size from native SDK, with caching
   Future<int?> _getNetworkBodyMaxSize() async {
-    if (_cachedNetworkBodyMaxSize != null) {
-      return _cachedNetworkBodyMaxSize;
+    // if (_cachedNetworkBodyMaxSize != null) {
+    //   return _cachedNetworkBodyMaxSize;
+    // }
+
+    if (LCQBuildInfo.instance.isAndroid) {
+      final ffmNetworkBodyLimit = FeatureFlagsManager().networkBodyMaxSize;
+
+      if (ffmNetworkBodyLimit > 0) {
+        _cachedNetworkBodyMaxSize = ffmNetworkBodyLimit;
+        return ffmNetworkBodyLimit;
+      }
     }
-
-    final ffmNetworkBodyLimit = FeatureFlagsManager().networkBodyMaxSize;
-
-    if (ffmNetworkBodyLimit > 0) {
-      _cachedNetworkBodyMaxSize = ffmNetworkBodyLimit;
-      return ffmNetworkBodyLimit;
-    }
-
     try {
       final limit = await _host.getNetworkBodyMaxSize();
       _cachedNetworkBodyMaxSize = limit?.toInt();
@@ -131,7 +132,6 @@ class NetworkManager {
         '[NET._getNetworkBodyMaxSize] phase=error errorType=${error.runtimeType} fallbackBytes=$_defaultNetworkBodyMaxSize',
         tag: DebugTags.network,
       );
-      _cachedNetworkBodyMaxSize = _defaultNetworkBodyMaxSize;
       return _defaultNetworkBodyMaxSize;
     }
   }

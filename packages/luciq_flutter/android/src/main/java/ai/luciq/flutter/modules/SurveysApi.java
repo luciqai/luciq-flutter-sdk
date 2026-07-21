@@ -10,7 +10,10 @@ import ai.luciq.library.Feature;
 import ai.luciq.survey.Survey;
 import ai.luciq.survey.Surveys;
 import ai.luciq.survey.callbacks.OnDismissCallback;
+import ai.luciq.survey.callbacks.OnFinishCallback;
 import ai.luciq.survey.callbacks.OnShowCallback;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,6 +180,31 @@ public class SurveysApi implements SurveysPigeon.SurveysHostApi {
                         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS,
                                 "[SUR.onDismissSurvey] #" + callId + " phase=fire");
                         flutterApi.onDismissSurvey(callId, new SurveysPigeon.SurveysFlutterApi.Reply<Void>() {
+                            @Override
+                            public void reply(Void reply) {
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public void bindOnFinishSurveyCallback() {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS,
+                "[SUR.bindOnFinishSurveyCallback] phase=enter");
+        Surveys.setOnFinishCallback(new OnFinishCallback() {
+            @Override
+            public void onFinish(String surveyId, String state, JSONObject response) {
+                ThreadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String callId = LuciqFlutterLogger.nextCallId();
+                        String info = response != null ? response.toString() : "{}";
+                        LuciqFlutterLogger.d(LuciqFlutterDebugTags.SURVEYS,
+                                "[SUR.onFinishSurvey] #" + callId + " phase=fire state=" + state);
+                        flutterApi.onFinishSurvey(callId, state, surveyId != null ? surveyId : "", info, new SurveysPigeon.SurveysFlutterApi.Reply<Void>() {
                             @Override
                             public void reply(Void reply) {
                             }

@@ -791,7 +791,6 @@ class Luciq {
     PrivateViewsManager.I.addAutoMasking(types);
   }
 
-
   /// Enables and disables manual invocation and prompt options for bug and feedback.
   /// [boolean] isEnabled
   static Future<void> logUserSteps(

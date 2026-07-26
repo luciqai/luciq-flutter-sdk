@@ -1,6 +1,12 @@
 # Changelog
 
 
+## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.8.0...dev)
+
+### Added
+
+- Add support for logging user events with key-value parameters using `UserEventParam`. ([#70](https://github.com/luciqai/luciq-flutter-sdk/pull/70))
+
 ## [19.8.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.8.0...19.7.0)
 
 ### Add

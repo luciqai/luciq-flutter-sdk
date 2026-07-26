@@ -126,9 +126,17 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setUserData] phase=exit"];
 }
 
-- (void)logUserEventName:(NSString *)name error:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=enter nameLength=%lu", (unsigned long)name.length];
-    [Luciq logUserEventWithName:name];
+- (void)logUserEventName:(NSString *)name parameters:(NSDictionary<NSString *, NSString *> *)parameters error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=enter nameLength=%lu parametersCount=%lu", (unsigned long)name.length, (unsigned long)parameters.count];
+    if (parameters.count == 0) {
+        [Luciq logUserEventWithName:name];
+    } else {
+        NSMutableArray<LCQUserEventParam *> *userEventParams = [NSMutableArray arrayWithCapacity:parameters.count];
+        [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
+            [userEventParams addObject:[[LCQUserEventParam alloc] initWithKey:key value:value]];
+        }];
+        [Luciq logUserEventWithName:name parameters:userEventParams];
+    }
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=exit"];
 }
 

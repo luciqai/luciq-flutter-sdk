@@ -59,6 +59,7 @@ import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
 import ai.luciq.library.screenshot.ScreenshotCaptor;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
+import ai.luciq.library.user.UserEventParam;
 import ai.luciq.survey.Surveys;
 import ai.luciq.survey.callbacks.OnShowCallback;
 
@@ -259,9 +260,20 @@ public class LuciqApiTest {
     public void testLogUserEvent() {
         String event = "sign_up";
 
-        api.logUserEvent(event);
+        api.logUserEvent(event, Collections.emptyMap());
 
         mLuciq.verify(() -> Luciq.logUserEvent(event));
+    }
+
+    @Test
+    public void testLogUserEventWithParameters() {
+        String event = "Completed Purchase";
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("item", "Premium Plan");
+
+        api.logUserEvent(event, parameters);
+
+        mLuciq.verify(() -> Luciq.logUserEvent(eq(event), any(UserEventParam.class)));
     }
 
     @Test

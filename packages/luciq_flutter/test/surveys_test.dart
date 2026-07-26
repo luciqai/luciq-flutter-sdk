@@ -124,4 +124,46 @@ void main() {
       mHost.bindOnDismissSurveyCallback(),
     ).called(1);
   });
+
+  test('[bindOnFinishSurveyCallback] should call host method', () async {
+    await Surveys.setOnFinishCallback((_, __, ___) {});
+
+    verify(
+      mHost.bindOnFinishSurveyCallback(),
+    ).called(1);
+  });
+
+  test('[onFinishSurvey] should forward parsed state, id and info', () async {
+    SurveyFinishState? state;
+    String? id;
+    Map<String, dynamic>? info;
+
+    await Surveys.setOnFinishCallback((s, i, inf) {
+      state = s;
+      id = i;
+      info = inf;
+    });
+
+    Surveys().onFinishSurvey(
+      'call-1',
+      'SUBMITTED',
+      'survey-token',
+      '{"rating":5}',
+    );
+
+    expect(state, SurveyFinishState.submitted);
+    expect(id, 'survey-token');
+    expect(info, {'rating': 5});
+  });
+
+  test('[onFinishSurvey] should default to empty info on invalid json',
+      () async {
+    Map<String, dynamic>? info;
+
+    await Surveys.setOnFinishCallback((_, __, inf) => info = inf);
+
+    Surveys().onFinishSurvey('call-2', 'ENDED', 'token', 'not-json');
+
+    expect(info, <String, dynamic>{});
+  });
 }

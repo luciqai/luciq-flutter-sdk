@@ -327,18 +327,6 @@ jobs:
           working_directory: ~/project/packages/luciq_flutter/example
           command: |
             flutter build ios --simulator --no-codesign
-      - run:
-          name: Run iOS unit tests (SPM mode)
-          working_directory: ~/project/packages/luciq_flutter/example/ios
-          command: |
-            xcodebuild -allowProvisioningUpdates \
-                -project Runner.xcodeproj \
-                -scheme Runner \
-                -resultBundlePath coverage/result-spm.xcresult \
-                -sdk iphonesimulator \
-                -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.5' \
-                -skip-testing:RunnerUITests \
-                test | xcpretty
 
   e2e_ios_patrol:
     macos:

@@ -1,7 +1,7 @@
 #import "LuciqSDK/LuciqSDK.h"
 #import "LuciqLogApi.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern void InitLuciqLogApi(id<FlutterBinaryMessenger> messenger) {
     LuciqLogApi *api = [[LuciqLogApi alloc] init];

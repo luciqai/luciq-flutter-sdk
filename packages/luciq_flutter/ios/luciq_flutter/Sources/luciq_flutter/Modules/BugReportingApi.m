@@ -2,8 +2,8 @@
 #import "LuciqSDK/LuciqSDK.h"
 #import "BugReportingApi.h"
 #import "ArgsRegistry.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern void InitBugReportingApi(id<FlutterBinaryMessenger> messenger) {
     BugReportingFlutterApi *flutterApi = [[BugReportingFlutterApi alloc] initWithBinaryMessenger:messenger];

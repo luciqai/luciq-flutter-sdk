@@ -1,7 +1,7 @@
 #import "PrivateViewApi.h"
-#import "../Util/FlutterPluginRegistrar+FlutterEngine.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "FlutterPluginRegistrar+FlutterEngine.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern PrivateViewApi* InitPrivateViewApi(
     id<FlutterBinaryMessenger> messenger,

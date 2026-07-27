@@ -13,6 +13,8 @@ import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.model.ScreenshotResult;
 import ai.luciq.flutter.modules.capturing.CaptureManager;
 import ai.luciq.flutter.modules.capturing.ScreenshotResultCallback;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
 
@@ -57,7 +59,8 @@ public class PrivateViewManager {
 
 
     public void mask(ScreenshotCaptor.CapturingCallback capturingCallback) {
-        if (activity != null) {
+        final Activity captureActivity = activity;
+        if (isActivityValid(captureActivity)) {
             CountDownLatch latch = new CountDownLatch(1);
             AtomicReference<List<Double>> privateViews = new AtomicReference<>();
             final ScreenshotResultCallback boundryScreenshotResult = new ScreenshotResultCallback() {
@@ -75,10 +78,13 @@ public class PrivateViewManager {
             };
 
             try {
+                final String callId = LuciqFlutterLogger.nextCallId();
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        luciqPrivateViewApi.getPrivateViews(result -> {
+                        LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                                "[PRIV.capture] #" + callId + " phase=fire");
+                        luciqPrivateViewApi.getPrivateViews(callId, result -> {
                             privateViews.set(result);
                             latch.countDown();
                         });
@@ -96,25 +102,34 @@ public class PrivateViewManager {
 
                         @Override
                         public void onError() {
-                            boundryScreenshotCaptor.capture(activity, boundryScreenshotResult);
+                            if (isActivityValid(captureActivity)) {
+                                boundryScreenshotCaptor.capture(captureActivity, boundryScreenshotResult);
+                            } else {
+                                capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
+                            }
 
                         }
                     };
 
-                    windowPixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
+                    windowPixelCopyScreenshotCaptor.capture(captureActivity, new ScreenshotResultCallback() {
                         @Override
                         public void onScreenshotResult(ScreenshotResult result) {
-                            processScreenshot(result, privateViews, latch, capturingCallback);
+                          processScreenshot(result, privateViews, latch, capturingCallback);
                         }
 
                         @Override
                         public void onError() {
-                            pixelCopyScreenshotCaptor.capture(activity, pixelCopyScreenshotResult);
+                          if (isActivityValid(captureActivity)) {
+                            pixelCopyScreenshotCaptor.capture(captureActivity, pixelCopyScreenshotResult);
+                          } else {
+                            capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
+                          }
 
                         }
-                    });
+                      });
+
                 } else {
-                    boundryScreenshotCaptor.capture(activity, boundryScreenshotResult);
+                    boundryScreenshotCaptor.capture(captureActivity, boundryScreenshotResult);
                 }
 
             } catch (Exception e) {
@@ -123,6 +138,14 @@ public class PrivateViewManager {
         } else {
             capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
         }
+    }
+
+    private boolean isActivityValid(Activity activity) {
+        if (activity == null || activity.getWindow() == null || activity.isFinishing()) {
+            return false;
+        }
+
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || !activity.isDestroyed();
     }
 
 
@@ -160,7 +183,8 @@ public class PrivateViewManager {
                 canvas.drawRect(left, top, right, bottom, paint);  // Mask private view
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                    "[PRIV.capture.mask] phase=error errorType=" + e.getClass().getSimpleName(), e);
         }
     }
 }

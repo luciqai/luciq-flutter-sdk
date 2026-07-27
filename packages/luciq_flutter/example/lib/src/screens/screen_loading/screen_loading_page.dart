@@ -34,7 +34,7 @@ class _ScreenLoadingPageState extends State<ScreenLoadingPage> {
 
   void _extendScreenLoadingTesting() async {
     final isEnabled = await APM.isScreenLoadingEnabled();
-    if (!isEnabled) {
+    if (isEnabled != true) {
       debugPrint(
         'Screen loading monitoring is disabled, skipping extend.',
       );
@@ -42,9 +42,8 @@ class _ScreenLoadingPageState extends State<ScreenLoadingPage> {
     }
     final currentUiTrace = ScreenLoadingManager.I.currentUiTrace;
     final currentTrace = ScreenLoadingManager.I.currentScreenLoadingTrace;
-    final extendedEndTime =
-        (currentTrace?.endTimeInMicroseconds ?? 0) +
-            (int.tryParse(_durationController.text) ?? 0);
+    final extendedEndTime = (currentTrace?.endTimeInMicroseconds ?? 0) +
+        (int.tryParse(_durationController.text) ?? 0);
     APM.endScreenLoadingCP(
       extendedEndTime,
       currentUiTrace?.traceId ?? 0,

@@ -2,8 +2,8 @@ import 'package:pigeon/pigeon.dart';
 
 @FlutterApi()
 abstract class BugReportingFlutterApi {
-  void onSdkInvoke();
-  void onSdkDismiss(String dismissType, String reportType);
+  void onSdkInvoke(String callId);
+  void onSdkDismiss(String callId, String dismissType, String reportType);
 }
 
 @HostApi()

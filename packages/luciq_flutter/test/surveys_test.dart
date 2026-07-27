@@ -48,7 +48,7 @@ void main() {
     await Surveys.showSurvey(token);
 
     verify(
-      mHost.showSurvey(token),
+      mHost.showSurvey(any, token),
     ).called(1);
   });
 
@@ -86,25 +86,26 @@ void main() {
   test('[hasRespondedToSurvey] should call host method', () async {
     const token = "ZAKSlVz98QdPyOx1wIt8BA";
     const responded = true;
-    when(mHost.hasRespondedToSurvey(token)).thenAnswer((_) async => responded);
+    when(mHost.hasRespondedToSurvey(any, token))
+        .thenAnswer((_) async => responded);
 
     final result = await Surveys.hasRespondedToSurvey(token);
 
     expect(result, responded);
     verify(
-      mHost.hasRespondedToSurvey(token),
+      mHost.hasRespondedToSurvey(any, token),
     ).called(1);
   });
 
   test('[getAvailableSurveys] should call host method', () async {
     const surveys = ["survey-1", "survey-2"];
-    when(mHost.getAvailableSurveys()).thenAnswer((_) async => surveys);
+    when(mHost.getAvailableSurveys(any)).thenAnswer((_) async => surveys);
 
     final result = await Surveys.getAvailableSurveys();
 
     expect(result, surveys);
     verify(
-      mHost.getAvailableSurveys(),
+      mHost.getAvailableSurveys(any),
     ).called(1);
   });
 
@@ -122,5 +123,47 @@ void main() {
     verify(
       mHost.bindOnDismissSurveyCallback(),
     ).called(1);
+  });
+
+  test('[bindOnFinishSurveyCallback] should call host method', () async {
+    await Surveys.setOnFinishCallback((_, __, ___) {});
+
+    verify(
+      mHost.bindOnFinishSurveyCallback(),
+    ).called(1);
+  });
+
+  test('[onFinishSurvey] should forward parsed state, id and info', () async {
+    SurveyFinishState? state;
+    String? id;
+    Map<String, dynamic>? info;
+
+    await Surveys.setOnFinishCallback((s, i, inf) {
+      state = s;
+      id = i;
+      info = inf;
+    });
+
+    Surveys().onFinishSurvey(
+      'call-1',
+      'SUBMITTED',
+      'survey-token',
+      '{"rating":5}',
+    );
+
+    expect(state, SurveyFinishState.submitted);
+    expect(id, 'survey-token');
+    expect(info, {'rating': 5});
+  });
+
+  test('[onFinishSurvey] should default to empty info on invalid json',
+      () async {
+    Map<String, dynamic>? info;
+
+    await Surveys.setOnFinishCallback((_, __, inf) => info = inf);
+
+    Surveys().onFinishSurvey('call-2', 'ENDED', 'token', 'not-json');
+
+    expect(info, <String, dynamic>{});
   });
 }

@@ -37,15 +37,19 @@ public class WindowPixelCopyCaptureManager implements CaptureManager {
 
         try {
             PixelCopy.request(activity.getWindow(), null, bitmap, copyResult -> {
-                if (copyResult == PixelCopy.SUCCESS) {
-                    if (isInvalidWindowCapture(bitmap)) {
+                try {
+                    if (copyResult == PixelCopy.SUCCESS) {
+                        if (isInvalidWindowCapture(bitmap)) {
+                            screenshotResultCallback.onError();
+                            return;
+                        }
+                        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
+                        float[] flutterViewOffset = getFlutterViewOffset(activity, rootView, displayMetrics.density);
+                        screenshotResultCallback.onScreenshotResult(new ScreenshotResult(displayMetrics.density, bitmap, flutterViewOffset[0], flutterViewOffset[1]));
+                    } else {
                         screenshotResultCallback.onError();
-                        return;
                     }
-                    DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
-                    float[] flutterViewOffset = getFlutterViewOffset(activity, rootView, displayMetrics.density);
-                    screenshotResultCallback.onScreenshotResult(new ScreenshotResult(displayMetrics.density, bitmap, flutterViewOffset[0], flutterViewOffset[1]));
-                } else {
+                } catch (Exception e) {
                     screenshotResultCallback.onError();
                 }
             }, new Handler(Looper.getMainLooper()));

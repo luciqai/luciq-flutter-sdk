@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void getCurrentSessionReplaylink() async {
     final result = await SessionReplay.getSessionReplayLink();
     final snackBar = SnackBar(
-      content: Text(result),
+      content: Text(result ?? '(unavailable)'),
     );
     ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(snackBar);
   }

@@ -2,10 +2,6 @@
 class LuciqConstants {
   LuciqConstants._();
 
-  // Network logging constants
-  static const String networkLoggerTag = 'NetworkLogger';
-  static const String networkManagerTag = 'NetworkManager';
-
   // Network body replacement messages
   static const String requestBodyReplacedPrefix = '[REQUEST_BODY_REPLACED]';
   static const String responseBodyReplacedPrefix = '[RESPONSE_BODY_REPLACED]';

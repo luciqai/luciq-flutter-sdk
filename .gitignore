@@ -72,6 +72,7 @@ android/gradlew.bat
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
+**/ios/Flutter/ephemeral/
 **/ios/Flutter/flutter_assets/
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
@@ -88,7 +89,7 @@ android/gradlew.bat
 # NOTE: Package.resolved (the SPM lockfile) is INTENTIONALLY tracked.
 # Do not add it to this ignore list - committing it keeps SPM resolution
 # reproducible across teammates and CI on a fresh checkout.
-
+#packages/luciq_flutter/ios/luciq_flutter/
 # Project specific
 /PRDs/
 

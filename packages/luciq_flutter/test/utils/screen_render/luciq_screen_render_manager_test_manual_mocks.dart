@@ -886,4 +886,10 @@ class MockLuciqLogger extends _i1.Mock implements _i15.LuciqLogger {
   void v(String? message, {String? tag = r''}) =>
       super.noSuchMethod(Invocation.method(#v, [message], {#tag: tag}),
           returnValueForMissingStub: null);
+  @override
+  bool isDebugEnabled() => (super.noSuchMethod(
+        Invocation.method(#isDebugEnabled, []),
+        returnValue: false,
+        returnValueForMissingStub: false,
+      ) as bool);
 }

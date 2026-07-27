@@ -10,16 +10,22 @@ abstract class Logger {
     required LogLevel level,
     required String tag,
   });
+
+  void d(String message, {String tag = ''});
+  void e(String message, {String tag = ''});
+  void w(String message, {String tag = ''});
+  void v(String message, {String tag = ''});
+
+  /// Whether the current threshold admits debug-level emissions. Use to gate
+  /// expensive payload construction in hot paths.
+  bool isDebugEnabled();
 }
 
 class LuciqLogger implements Logger {
   LuciqLogger._();
 
   static LuciqLogger _instance = LuciqLogger._();
-
   static LuciqLogger get instance => _instance;
-
-  /// Shorthand for [instance]
   static LuciqLogger get I => instance;
 
   @visibleForTesting
@@ -28,12 +34,16 @@ class LuciqLogger implements Logger {
     _instance = instance;
   }
 
-  LogLevel _logLevel = LogLevel.error;
+  LogLevel logLevel = LogLevel.error;
 
-  // ignore: avoid_setters_without_getters
-  set logLevel(LogLevel level) {
-    _logLevel = level;
-  }
+  /// Returns true when the current level is at debug or verbose. Use to gate
+  /// expensive payload construction:
+  ///
+  ///   if (LuciqLogger.I.isDebugEnabled()) {
+  ///     LuciqLogger.I.d('big payload: ' + buildPayload(), tag: DebugTags.network);
+  ///   }
+  @override
+  bool isDebugEnabled() => logLevel.getValue() <= LogLevel.debug.getValue();
 
   @override
   void log(
@@ -41,7 +51,7 @@ class LuciqLogger implements Logger {
     required LogLevel level,
     String tag = '',
   }) {
-    if (level.getValue() >= _logLevel.getValue()) {
+    if (level.getValue() >= logLevel.getValue()) {
       developer.log(
         message,
         name: tag,
@@ -51,33 +61,28 @@ class LuciqLogger implements Logger {
     }
   }
 
-  void e(
-    String message, {
-    String tag = '',
-  }) {
-    log(message, tag: tag, level: LogLevel.error);
-  }
+  @override
+  void e(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.error);
 
-  void d(
-    String message, {
-    String tag = '',
-  }) {
-    log(message, tag: tag, level: LogLevel.debug);
-  }
+  @override
+  void d(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.debug);
 
-  void v(
-    String message, {
-    String tag = '',
-  }) {
-    log(message, tag: tag, level: LogLevel.verbose);
-  }
+  @override
+  void v(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.verbose);
+
+  /// Warning log. Mirrors RN's `Logger.warn`, gated at the debug threshold
+  /// (warnings only surface when debug logs are on).
+  @override
+  void w(String message, {String tag = ''}) =>
+      log(message, tag: tag, level: LogLevel.debug);
 }
 
 extension LogLevelExtension on LogLevel {
-  /// Returns the severity level to be used in the `developer.log` function.
-  ///
-  /// The severity level is a value between 0 and 2000.
-  /// The values used here are based on the `package:logging` `Level` class.
+  /// Severity level used by `developer.log`. Larger = more severe.
+  /// Based on the `package:logging` `Level` class.
   int getValue() {
     switch (this) {
       case LogLevel.none:

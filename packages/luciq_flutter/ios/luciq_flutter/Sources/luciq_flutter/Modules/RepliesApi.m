@@ -1,5 +1,7 @@
 #import "LuciqSDK/LuciqSDK.h"
 #import "RepliesApi.h"
+#import "../Util/LuciqFlutterLogger.h"
+#import "../Util/LuciqFlutterDebugTags.h"
 
 extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
     RepliesFlutterApi *flutterApi = [[RepliesFlutterApi alloc] initWithBinaryMessenger:messenger];
@@ -16,36 +18,69 @@ extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
 }
 
 - (void)setEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.setEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     BOOL boolValue = [isEnabled boolValue];
     LCQReplies.enabled = boolValue;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.setEnabled] phase=exit"];
 }
 
-- (void)showWithError:(FlutterError *_Nullable *_Nonnull)error {
+- (void)showCallId:(NSString *)callId error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.show] #%@ phase=enter", callId];
     [LCQReplies show];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.show] #%@ phase=exit", callId];
 }
 
 - (void)setInAppNotificationsEnabledIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.setInAppNotificationsEnabled] phase=enter isEnabled=%@",
+        ([isEnabled boolValue] ? @"true" : @"false")];
     BOOL boolValue = [isEnabled boolValue];
     LCQReplies.inAppNotificationsEnabled = boolValue;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.setInAppNotificationsEnabled] phase=exit"];
 }
 
 - (void)setInAppNotificationSoundIsEnabled:(NSNumber *)isEnabled error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.setInAppNotificationSound] phase=enter platform=iOS noop=true"];
     // Android Only
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.setInAppNotificationSound] phase=exit"];
 }
 
-- (void)getUnreadRepliesCountWithCompletion:(nonnull void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion {
-    completion([NSNumber numberWithLong:LCQReplies.unreadRepliesCount], nil);
+- (void)getUnreadRepliesCountCallId:(NSString *)callId completion:(nonnull void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.getUnreadRepliesCount] #%@ phase=enter", callId];
+    NSInteger count = LCQReplies.unreadRepliesCount;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.getUnreadRepliesCount] #%@ phase=exit result=%ld",
+        callId, (long)count];
+    completion([NSNumber numberWithLong:count], nil);
 }
 
-- (void)hasChatsWithCompletion:(nonnull void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion {
-    completion([NSNumber numberWithBool:LCQReplies.hasChats], nil);
+- (void)hasChatsCallId:(NSString *)callId completion:(nonnull void (^)(NSNumber * _Nullable, FlutterError * _Nullable))completion {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.hasChats] #%@ phase=enter", callId];
+    BOOL hasChats = LCQReplies.hasChats;
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.hasChats] #%@ phase=exit result=%@",
+        callId,
+        (hasChats ? @"true" : @"false")];
+    completion([NSNumber numberWithBool:hasChats], nil);
 }
 
 - (void)bindOnNewReplyCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                   format:@"[REP.bindOnNewReplyCallback] phase=enter"];
     LCQReplies.didReceiveReplyHandler = ^{
-      [self->_flutterApi onNewReplyWithCompletion:^(FlutterError *_Nullable _){
+      NSString *callId = [LuciqFlutterLogger nextCallId];
+      [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies]
+                     format:@"[REP.onNewReply] #%@ phase=fire", callId];
+      [self->_flutterApi onNewReplyCallId:callId completion:^(FlutterError *_Nullable _){
       }];
     };
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags replies] format:@"[REP.bindOnNewReplyCallback] phase=exit"];
 }
 
 @end

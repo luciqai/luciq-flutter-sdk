@@ -167,7 +167,21 @@ void main() {
     await Luciq.logUserEvent(event);
 
     verify(
-      mHost.logUserEvent(event),
+      mHost.logUserEvent(event, {}),
+    ).called(1);
+  });
+
+  test('[logUserEvent] should call host method with parameters', () async {
+    const event = "Completed Purchase";
+    final parameters = [
+      UserEventParam(key: 'item', value: 'Premium Plan'),
+      UserEventParam(key: 'currency', value: 'USD'),
+    ];
+
+    await Luciq.logUserEvent(event, parameters: parameters);
+
+    verify(
+      mHost.logUserEvent(event, {'item': 'Premium Plan', 'currency': 'USD'}),
     ).called(1);
   });
 
@@ -491,8 +505,7 @@ void main() {
       verify(mHost.setWebViewMonitoringEnabled(false)).called(1);
     });
 
-    test(
-        '[setWebViewUserInteractionsTrackingEnabled] should call host method',
+    test('[setWebViewUserInteractionsTrackingEnabled] should call host method',
         () async {
       await Luciq.setWebViewUserInteractionsTrackingEnabled(true);
 

@@ -13,17 +13,17 @@ extension FeatureExtensions on FlagsConfig {
   Future<bool> isEnabled() async {
     switch (this) {
       case FlagsConfig.apm:
-        return APM.isEnabled();
+        return (await APM.isEnabled()) ?? false;
       case FlagsConfig.uiTrace:
-        return APM.isAutoUiTraceEnabled();
+        return (await APM.isAutoUiTraceEnabled()) ?? false;
       case FlagsConfig.screenLoading:
-        return APM.isScreenLoadingEnabled();
+        return (await APM.isScreenLoadingEnabled()) ?? false;
       case FlagsConfig.endScreenLoading:
-        return APM.isEndScreenLoadingEnabled();
+        return (await APM.isEndScreenLoadingEnabled()) ?? false;
       case FlagsConfig.screenRendering:
-        return APM.isScreenRenderEnabled();
+        return (await APM.isScreenRenderEnabled()) ?? false;
       case FlagsConfig.customSpan:
-        return APM.isCustomSpanEnabled();
+        return (await APM.isCustomSpanEnabled()) ?? false;
       default:
         return false;
     }

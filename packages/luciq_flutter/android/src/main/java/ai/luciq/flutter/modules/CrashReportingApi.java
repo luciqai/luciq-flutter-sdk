@@ -9,6 +9,8 @@ import ai.luciq.crash.CrashReporting;
 import ai.luciq.crash.models.LuciqNonFatalException;
 import ai.luciq.flutter.generated.CrashReportingPigeon;
 import ai.luciq.flutter.util.ArgsRegistry;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.Reflection;
 import ai.luciq.library.Feature;
 
@@ -29,29 +31,47 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
 
     @Override
     public void setEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[CR.setEnabled] phase=enter isEnabled=" + isEnabled);
         if (isEnabled) {
             CrashReporting.setState(Feature.State.ENABLED);
         } else {
             CrashReporting.setState(Feature.State.DISABLED);
         }
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[CR.setEnabled] phase=exit");
     }
 
     @Override
     public void send(@NonNull String jsonCrash, @NonNull Boolean isHandled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[CR.send] phase=enter jsonCrashLength=" + jsonCrash.length()
+                        + " isHandled=" + isHandled);
         try {
             final JSONObject exceptionObject = new JSONObject(jsonCrash);
             Method method = Reflection.getMethod(Class.forName("ai.luciq.crash.CrashReporting"), "reportException",
                     JSONObject.class, boolean.class);
-            if (method != null) {
-                method.invoke(null, exceptionObject, isHandled);
+            if (method == null) {
+                LuciqFlutterLogger.e(LuciqFlutterDebugTags.CRASH_REPORTING,
+                        "[CR.send] phase=error errorType=ReflectionMissing method=reportException");
+                return;
             }
+            method.invoke(null, exceptionObject, isHandled);
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                    "[CR.send] phase=exit");
         } catch (Exception e) {
-            e.printStackTrace();
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CRASH_REPORTING,
+                    "[CR.send] phase=error errorType=" + e.getClass().getSimpleName(), e);
         }
     }
 
     @Override
     public void sendNonFatalError(@NonNull String jsonCrash, @Nullable Map<String, String> userAttributes, @Nullable String fingerprint, @NonNull String nonFatalExceptionLevel) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[CR.sendNonFatalError] phase=enter jsonCrashLength=" + jsonCrash.length()
+                        + " userAttributesPresent=" + (userAttributes != null)
+                        + " fingerprintPresent=" + (fingerprint != null)
+                        + " nonFatalExceptionLevel=" + nonFatalExceptionLevel);
         try {
             Method method = Reflection.getMethod(Class.forName("ai.luciq.crash.CrashReporting"), "reportException", JSONObject.class, boolean.class,
                     Map.class, JSONObject.class, LuciqNonFatalException.Level.class);
@@ -62,21 +82,36 @@ public class CrashReportingApi implements CrashReportingPigeon.CrashReportingHos
                 fingerprintObj = getFingerprintObject(fingerprint);
             }
             LuciqNonFatalException.Level nonFatalExceptionLevelType = ArgsRegistry.nonFatalExceptionLevel.get(nonFatalExceptionLevel);
-            if (method != null) {
-                method.invoke(null, exceptionObject, true, userAttributes, fingerprintObj, nonFatalExceptionLevelType);
+            if (nonFatalExceptionLevelType == null) {
+                LuciqFlutterLogger.w(LuciqFlutterDebugTags.CRASH_REPORTING,
+                        "[CR.sendNonFatalError] phase=warn errorType=UnknownEnum nonFatalExceptionLevel="
+                                + nonFatalExceptionLevel);
             }
+            if (method == null) {
+                LuciqFlutterLogger.e(LuciqFlutterDebugTags.CRASH_REPORTING,
+                        "[CR.sendNonFatalError] phase=error errorType=ReflectionMissing method=reportException");
+                return;
+            }
+            method.invoke(null, exceptionObject, true, userAttributes, fingerprintObj, nonFatalExceptionLevelType);
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                    "[CR.sendNonFatalError] phase=exit");
         } catch (Exception e) {
-            e.printStackTrace();
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CRASH_REPORTING,
+                    "[CR.sendNonFatalError] phase=error errorType=" + e.getClass().getSimpleName(), e);
         }
     }
 
     @Override
     public void setNDKEnabled(@NonNull Boolean isEnabled) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[CR.setNDKEnabled] phase=enter isEnabled=" + isEnabled);
         if (isEnabled) {
             CrashReporting.setNDKCrashesState(Feature.State.ENABLED);
         } else {
             CrashReporting.setNDKCrashesState(Feature.State.DISABLED);
         }
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CRASH_REPORTING,
+                "[CR.setNDKEnabled] phase=exit");
     }
 
 }

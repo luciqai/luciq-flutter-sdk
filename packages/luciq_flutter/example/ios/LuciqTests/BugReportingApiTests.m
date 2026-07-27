@@ -131,7 +131,7 @@
     LCQBugReporting.willInvokeHandler();
 
     OCMVerify([self.mBugReporting setWillInvokeHandler:[OCMArg any]]);
-    OCMVerify([self.mFlutterApi onSdkInvokeWithCompletion:[OCMArg invokeBlock]]);
+    OCMVerify([self.mFlutterApi onSdkInvokeCallId:[OCMArg any] completion:[OCMArg invokeBlock]]);
 }
 
 - (void)testBindOnDismissCallback {
@@ -143,7 +143,7 @@
     LCQBugReporting.didDismissHandler(dismissType, reportType);
 
     OCMVerify([self.mBugReporting setDidDismissHandler:[OCMArg any]]);
-    OCMVerify([self.mFlutterApi onSdkDismissDismissType:@"SUBMIT" reportType:@"BUG" completion:[OCMArg invokeBlock]]);
+    OCMVerify([self.mFlutterApi onSdkDismissCallId:[OCMArg any] dismissType:@"SUBMIT" reportType:@"BUG" completion:[OCMArg invokeBlock]]);
 }
 
 - (void)testSetDisclaimerText {

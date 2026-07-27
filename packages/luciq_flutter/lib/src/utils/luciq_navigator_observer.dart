@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/models/luciq_route.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/repro_steps_constants.dart';
@@ -19,6 +20,10 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   final List<LuciqRoute> _steps = [];
 
   void screenChanged(Route newRoute) {
+    LuciqLogger.I.d(
+      '[SCREEN.screenChanged] phase=enter screenNameLength=${newRoute.settings.name?.length ?? 0}',
+      tag: DebugTags.screenTracking,
+    );
     try {
       final rawScreenName = newRoute.settings.name.toString().trim();
       final screenName = rawScreenName.isEmpty
@@ -63,15 +68,26 @@ class LuciqNavigatorObserver extends NavigatorObserver {
               _steps.remove(route);
             }
           } catch (e) {
-            LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
-            LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
+            // Sub-labelled to keep it from looking like a terminal failure on
+            // the outer [SCREEN.screenChanged] call, which already logged
+            // phase=exit by the time this deferred task runs.
+            LuciqLogger.I.e(
+              '[SCREEN.screenChanged.deferred] phase=error errorType=${e.runtimeType}',
+              tag: DebugTags.screenTracking,
+            );
           }
         },
         Priority.idle,
       );
+      LuciqLogger.I.d(
+        '[SCREEN.screenChanged] phase=exit',
+        tag: DebugTags.screenTracking,
+      );
     } catch (e) {
-      LuciqLogger.I.e('Screen change handling failed:', tag: Luciq.tag);
-      LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
+      LuciqLogger.I.e(
+        '[SCREEN.screenChanged] phase=error errorType=${e.runtimeType}',
+        tag: DebugTags.screenTracking,
+      );
     }
   }
 

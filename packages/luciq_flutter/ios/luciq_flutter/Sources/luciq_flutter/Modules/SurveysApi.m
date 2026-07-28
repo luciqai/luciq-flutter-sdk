@@ -1,8 +1,8 @@
 #import <Flutter/Flutter.h>
 #import "LuciqSDK/LuciqSDK.h"
 #import "SurveysApi.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern void InitSurveysApi(id<FlutterBinaryMessenger> messenger) {
     SurveysFlutterApi *flutterApi = [[SurveysFlutterApi alloc] initWithBinaryMessenger:messenger];

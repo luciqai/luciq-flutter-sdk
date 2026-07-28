@@ -5,11 +5,11 @@
 #import "LCQNetworkLogger+CP.h"
 #import "LuciqApi.h"
 #import "ArgsRegistry.h"
-#import "../Util/LCQAPM+PrivateAPIs.h"
+#import "LCQAPM+PrivateAPIs.h"
 
-#import "../Util/Luciq+CP.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "Luciq+CP.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
 
 extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {

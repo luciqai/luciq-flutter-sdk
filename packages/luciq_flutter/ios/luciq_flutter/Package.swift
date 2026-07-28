@@ -18,7 +18,7 @@ let package = Package(
         .library(name: "luciq-flutter", targets: ["luciq_flutter"])
     ],
     dependencies: [
-        .package(url: "https://github.com/luciqai/luciq-ios-sdk", exact: "19.8.1")
+        .package(url: "https://github.com/luciqai/luciq-ios-sdk", exact: "19.9.3")
     ],
     targets: [
         .target(

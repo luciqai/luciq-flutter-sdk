@@ -35,10 +35,10 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - Luciq (19.8.1)
-  - luciq_flutter (19.8.0):
+  - Luciq (19.9.3)
+  - luciq_flutter (19.9.3):
     - Flutter
-    - Luciq (= 19.8.1)
+    - Luciq (= 19.9.3)
   - OCMock (3.6)
   - patrol (0.0.1):
     - CocoaAsyncSocket (~> 7.6)
@@ -88,8 +88,8 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Luciq: 118cb8fea1a7430468b790d949b62251b4f144a1
-  luciq_flutter: 85cd6d919c8d2a6cb00d8d474787d416b3c6c2df
+  Luciq: d146b37c0410b48c892f5bac24bcede836b967ed
+  luciq_flutter: a0f0a0a32779d6e7fe3ed84699de4d4cfc511be9
   OCMock: 5ea90566be239f179ba766fd9fbae5885040b992
   patrol: 51b76cc7c11a2933ee3e72482d930c75b9d4ec73
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf

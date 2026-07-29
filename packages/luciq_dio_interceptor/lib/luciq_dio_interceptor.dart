@@ -168,16 +168,31 @@ class LuciqDioInterceptor extends Interceptor {
 }
 
 const _sensitiveKeys = [
+  // Credentials and tokens
   'password',
   'currentPassword',
   'client_secret',
   'access_token',
   'refresh_token',
+  // Contact details
   'phone',
   'msisdn',
   'mobilenumber',
   'mobile_number',
+  'email',
+  // Identity: name and date of birth
+  'firstName',
+  'lastName',
+  'fullName',
+  'birthDate',
+  'dateOfBirth',
+  'birthday',
 ];
+
+// Deliberately left visible, since none of them identify a customer on their
+// own and all of them are needed to debug from a report: `gender` (coded int),
+// `tags` (backend segmentation codes, also used as display labels on
+// purchasable items) and `customerId`/`customerReference` (internal ids).
 
 /// Redacts sensitive fields (passwords, tokens, phone numbers, etc.) from
 /// network request/response bodies before they're sent to network logging.

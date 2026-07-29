@@ -145,7 +145,8 @@ void main() {
         'profile': <String, dynamic>{'phoneNumber': '+15551234567'},
       });
 
-      expect(body, contains('"email":"user@example.com"'));
+      expect(body, contains('"email":"***REDACTED***"'));
+      expect(body, isNot(contains('user@example.com')));
       expect(body, isNot(contains('+15551234567')));
     });
 

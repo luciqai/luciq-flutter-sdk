@@ -1,28 +1,15 @@
 PODS:
   - Flutter (1.0.0)
-  - Luciq (19.8.1)
-  - luciq_flutter (19.8.0):
-    - Flutter
-    - Luciq (= 19.8.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - luciq_flutter (from `.symlinks/plugins/luciq_flutter/ios`)
-
-SPEC REPOS:
-  trunk:
-    - Luciq
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  luciq_flutter:
-    :path: ".symlinks/plugins/luciq_flutter/ios"
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  Luciq: 118cb8fea1a7430468b790d949b62251b4f144a1
-  luciq_flutter: 85cd6d919c8d2a6cb00d8d474787d416b3c6c2df
 
 PODFILE CHECKSUM: 94f53e8d6b63b5d45710485b9afa0e55e8e7e4fb
 

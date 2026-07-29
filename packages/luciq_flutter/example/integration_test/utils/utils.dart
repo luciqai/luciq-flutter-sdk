@@ -57,6 +57,40 @@ Future<GetNativeViewsResult> getFAB(PatrolIntegrationTester $,
       waitUntilVisible: waitUntilVisible);
 }
 
+/// Taps "Show Manual Survey" and returns the native survey dialog once visible,
+/// retrying the whole cycle.
+///
+/// `Surveys.showSurvey(token)` is a no-op until the survey is fetched from the
+/// backend, so the first tap can silently do nothing. Retrying re-invokes it
+/// after the fetch lands, which keeps the E2E from flaking on a slow fetch.
+Future<GetNativeViewsResult> showManualSurveyUntilVisible(
+  PatrolIntegrationTester $, {
+  int maxAttempts = 5,
+}) async {
+  final surveyDialog = NativeSelector(
+    ios: IOSSelector(identifier: 'SurveyNavigationVC'),
+    android: AndroidSelector(
+      resourceName:
+          'ai.luciq.flutter.example:id/instabug_survey_dialog_container',
+    ),
+  );
+
+  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+    await $('Show Manual Survey').scrollTo().tap();
+    try {
+      await $.native2.waitUntilVisible(
+        surveyDialog,
+        timeout: const Duration(seconds: 8),
+      );
+      return await $.native2.getNativeViews(surveyDialog);
+    } on PatrolActionException {
+      if (attempt == maxAttempts) rethrow;
+      await wait(second: 2);
+    }
+  }
+  throw StateError('Survey dialog did not appear after $maxAttempts attempts');
+}
+
 bool get isAndroid {
   return defaultTargetPlatform == TargetPlatform.android;
 }

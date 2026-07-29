@@ -12,13 +12,7 @@ void main() {
 
         await wait(second: 2);
 
-        await $('Show Manual Survey').scrollTo().tap();
-
-        await wait(second: 2);
-
-        final title = await getNativeView($,
-            ios: 'SurveyNavigationVC',
-            android: 'instabug_survey_dialog_container');
+        final title = await showManualSurveyUntilVisible($);
 
         expect(isAndroid ? title.androidViews.length : title.iosViews.length,
             equals(1));

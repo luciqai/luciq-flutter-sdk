@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_classes_with_only_static_members
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
 
 import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/generated/surveys.api.g.dart';
@@ -12,6 +14,23 @@ import 'package:meta/meta.dart';
 
 typedef OnShowSurveyCallback = void Function();
 typedef OnDismissSurveyCallback = void Function();
+typedef OnFinishSurveyCallback = void Function(
+  SurveyFinishState state,
+  String id,
+  Map<String, dynamic> info,
+);
+
+/// The state a survey ended in when it finishes.
+enum SurveyFinishState {
+  /// All questions were answered and the survey was submitted.
+  submitted,
+
+  /// The survey was dismissed midway after one or more answers.
+  ended,
+
+  /// The survey was dismissed at the start with no answers.
+  dismissed,
+}
 
 class Surveys implements SurveysFlutterApi {
   static var _host = SurveysHostApi();
@@ -19,6 +38,7 @@ class Surveys implements SurveysFlutterApi {
 
   static OnShowSurveyCallback? _onShowCallback;
   static OnDismissSurveyCallback? _onDismissCallback;
+  static OnFinishSurveyCallback? _onFinishCallback;
 
   /// @nodoc
   @visibleForTesting
@@ -57,6 +77,52 @@ class Surveys implements SurveysFlutterApi {
       args: {'callbackPresent': _onDismissCallback != null},
     );
     _onDismissCallback?.call();
+  }
+
+  /// @nodoc
+  @internal
+  @override
+  void onFinishSurvey(
+    String callId,
+    String state,
+    String surveyId,
+    String info,
+  ) {
+    logCallbackFire(
+      'SUR.onFinishSurvey',
+      tag: DebugTags.surveys,
+      callId: callId,
+      args: {'callbackPresent': _onFinishCallback != null, 'state': state},
+    );
+    _onFinishCallback?.call(
+      _parseFinishState(state),
+      surveyId,
+      _parseInfo(info),
+    );
+  }
+
+  static SurveyFinishState _parseFinishState(String state) {
+    switch (state) {
+      case 'SUBMITTED':
+        return SurveyFinishState.submitted;
+      case 'ENDED':
+        return SurveyFinishState.ended;
+      case 'DISMISSED':
+        return SurveyFinishState.dismissed;
+      default:
+        return SurveyFinishState.dismissed;
+    }
+  }
+
+  static Map<String, dynamic> _parseInfo(String info) {
+    if (info.isEmpty) return <String, dynamic>{};
+    try {
+      final decoded = jsonDecode(info);
+      return decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
+    } catch (e) {
+      log('Failed to parse survey info: $e', name: DebugTags.surveys);
+      return <String, dynamic>{};
+    }
   }
 
   /// @summary Sets whether surveys are enabled or not.
@@ -125,6 +191,21 @@ class Surveys implements SurveysFlutterApi {
     return hostCall(
       'SUR.setOnDismissCallback',
       () => _host.bindOnDismissSurveyCallback(),
+      tag: DebugTags.surveys,
+    );
+  }
+
+  /// Sets a block of code to be executed when a survey finishes, whether it was
+  /// submitted, ended midway, or dismissed at the start.
+  /// [callback] A callback that receives the survey's finish [SurveyFinishState],
+  /// the survey identifier, and a map carrying the survey and question responses.
+  static Future<void> setOnFinishCallback(
+    OnFinishSurveyCallback callback,
+  ) {
+    _onFinishCallback = callback;
+    return hostCall(
+      'SUR.setOnFinishCallback',
+      () => _host.bindOnFinishSurveyCallback(),
       tag: DebugTags.surveys,
     );
   }

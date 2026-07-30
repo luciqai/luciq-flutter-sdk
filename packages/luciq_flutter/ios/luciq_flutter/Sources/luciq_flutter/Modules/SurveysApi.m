@@ -1,14 +1,19 @@
 #import <Flutter/Flutter.h>
 #import "LuciqSDK/LuciqSDK.h"
 #import "SurveysApi.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern void InitSurveysApi(id<FlutterBinaryMessenger> messenger) {
     SurveysFlutterApi *flutterApi = [[SurveysFlutterApi alloc] initWithBinaryMessenger:messenger];
     SurveysApi *api = [[SurveysApi alloc] initWithFlutterApi:flutterApi];
     SurveysHostApiSetup(messenger, api);
 }
+
+@interface SurveysApi ()
+- (NSString *)stringFromFinishedState:(LCQSurveyFinishedState)state;
+- (NSString *)jsonStringFromDictionary:(NSDictionary *)dictionary;
+@end
 
 @implementation SurveysApi
 
@@ -127,6 +132,49 @@ extern void InitSurveysApi(id<FlutterBinaryMessenger> messenger) {
       }];
     };
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[SUR.bindOnDismissSurveyCallback] phase=exit"];
+}
+
+- (void)bindOnFinishSurveyCallbackWithError:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                   format:@"[SUR.bindOnFinishSurveyCallback] phase=enter"];
+    LCQSurveys.didFinishSurveyHandler = ^(LCQSurveyFinishedState state, NSDictionary *info, NSString *identifier) {
+      NSString *callId = [LuciqFlutterLogger nextCallId];
+      NSString *stateString = [self stringFromFinishedState:state];
+      NSString *infoJson = [self jsonStringFromDictionary:info];
+      [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys]
+                     format:@"[SUR.onFinishSurvey] #%@ phase=fire state=%@", callId, stateString];
+      [self->_flutterApi onFinishSurveyCallId:callId
+                                        state:stateString
+                                     surveyId:(identifier ?: @"")
+                                         info:infoJson
+                                   completion:^(FlutterError *_Nullable _){
+                                   }];
+    };
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags surveys] format:@"[SUR.bindOnFinishSurveyCallback] phase=exit"];
+}
+
+- (NSString *)stringFromFinishedState:(LCQSurveyFinishedState)state {
+    switch (state) {
+        case LCQSurveyFinishedStateSubmitted:
+            return @"SUBMITTED";
+        case LCQSurveyFinishedStateEnded:
+            return @"ENDED";
+        case LCQSurveyFinishedStateDismissed:
+            return @"DISMISSED";
+    }
+    return @"DISMISSED";
+}
+
+- (NSString *)jsonStringFromDictionary:(NSDictionary *)dictionary {
+    if (dictionary == nil || ![NSJSONSerialization isValidJSONObject:dictionary]) {
+        return @"{}";
+    }
+    NSError *jsonError = nil;
+    NSData *data = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&jsonError];
+    if (data == nil || jsonError != nil) {
+        return @"{}";
+    }
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
 
 @end

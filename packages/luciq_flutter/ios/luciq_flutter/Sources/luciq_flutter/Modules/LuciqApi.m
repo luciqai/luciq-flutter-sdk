@@ -5,11 +5,11 @@
 #import "LCQNetworkLogger+CP.h"
 #import "LuciqApi.h"
 #import "ArgsRegistry.h"
-#import "../Util/LCQAPM+PrivateAPIs.h"
+#import "LCQAPM+PrivateAPIs.h"
 
-#import "../Util/Luciq+CP.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "Luciq+CP.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
 
 extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
@@ -126,9 +126,17 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setUserData] phase=exit"];
 }
 
-- (void)logUserEventName:(NSString *)name error:(FlutterError *_Nullable *_Nonnull)error {
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=enter nameLength=%lu", (unsigned long)name.length];
-    [Luciq logUserEventWithName:name];
+- (void)logUserEventName:(NSString *)name parameters:(NSDictionary<NSString *, NSString *> *)parameters error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=enter nameLength=%lu parametersCount=%lu", (unsigned long)name.length, (unsigned long)parameters.count];
+    if (parameters.count == 0) {
+        [Luciq logUserEventWithName:name];
+    } else {
+        NSMutableArray<LCQUserEventParam *> *userEventParams = [NSMutableArray arrayWithCapacity:parameters.count];
+        [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
+            [userEventParams addObject:[[LCQUserEventParam alloc] initWithKey:key value:value]];
+        }];
+        [Luciq logUserEventWithName:name parameters:userEventParams];
+    }
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.logUserEvent] phase=exit"];
 }
 

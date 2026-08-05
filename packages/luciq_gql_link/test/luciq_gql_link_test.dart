@@ -1150,21 +1150,25 @@ void main() {
 
       verify(
         mLogger.d(
-          argThat(allOf(
-            contains('request:'),
-            contains('type=query'),
-            contains('name=GetUser'),
-          ),),
+          argThat(
+            allOf(
+              contains('request:'),
+              contains('type=query'),
+              contains('name=GetUser'),
+            ),
+          ),
           tag: 'LuciqGqlLink',
         ),
       ).called(1);
       verify(
         mLogger.d(
-          argThat(allOf(
-            contains('response:'),
-            contains('status=200'),
-            contains('gqlErrors=0'),
-          ),),
+          argThat(
+            allOf(
+              contains('response:'),
+              contains('status=200'),
+              contains('gqlErrors=0'),
+            ),
+          ),
           tag: 'LuciqGqlLink',
         ),
       ).called(1);
@@ -1198,11 +1202,13 @@ void main() {
 
       verify(
         mLogger.e(
-          argThat(allOf(
-            contains('error:'),
-            contains('status=502'),
-            contains('name=GetUser'),
-          ),),
+          argThat(
+            allOf(
+              contains('error:'),
+              contains('status=502'),
+              contains('name=GetUser'),
+            ),
+          ),
           tag: 'LuciqGqlLink',
         ),
       ).called(1);

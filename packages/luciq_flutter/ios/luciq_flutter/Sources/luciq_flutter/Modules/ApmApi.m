@@ -3,8 +3,8 @@
 #import "ArgsRegistry.h"
 #import "LCQAPM+PrivateAPIs.h"
 #import "LCQTimeIntervalUnits.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 void InitApmApi(id<FlutterBinaryMessenger> messenger) {
     ApmApi *api = [[ApmApi alloc] init];

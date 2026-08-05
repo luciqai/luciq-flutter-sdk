@@ -1,8 +1,8 @@
 #import "LuciqSDK/LuciqSDK.h"
 #import "FeatureRequestsApi.h"
 #import "ArgsRegistry.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern void InitFeatureRequestsApi(id<FlutterBinaryMessenger> messenger) {
     FeatureRequestsApi *api = [[FeatureRequestsApi alloc] init];

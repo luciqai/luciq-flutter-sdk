@@ -1,5 +1,25 @@
 # Changelog
 
+## [19.9.3](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.3...v19.8.0)
+
+### Added
+
+- Add support for logging user events with key-value parameters using `UserEventParam`. ([#70](https://github.com/luciqai/luciq-flutter-sdk/pull/70))
+
+- Adds a new `Surveys.setOnFinishCallbac`k API that notifies the host app when a survey finishes,
+  whether it was submitted, ended midway, or dismissed at the
+  start. ([#74](https://github.com/luciqai/luciq-flutter-sdk/pull/74))
+
+- Add support for Swift-Package-Manager (
+  SPM) ([#76](https://github.com/luciqai/luciq-flutter-sdk/pull/76))
+
+### Changed
+
+- Bump Luciq iOS SDK to
+  v19.9.3 ([#77](https://github.com/luciqai/luciq-flutter-sdk/pull/77)). [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.9.3).
+
+- Bump Luciq Android SDK to
+  v19.10.0 ([#77](https://github.com/luciqai/luciq-flutter-sdk/pull/77)). [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.10.0).
 
 ## [19.8.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.8.0...19.7.0)
 

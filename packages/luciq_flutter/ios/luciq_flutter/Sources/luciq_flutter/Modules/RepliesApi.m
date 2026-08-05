@@ -1,7 +1,7 @@
 #import "LuciqSDK/LuciqSDK.h"
 #import "RepliesApi.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern void InitRepliesApi(id<FlutterBinaryMessenger> messenger) {
     RepliesFlutterApi *flutterApi = [[RepliesFlutterApi alloc] initWithBinaryMessenger:messenger];

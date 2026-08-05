@@ -16,6 +16,7 @@ import ai.luciq.library.Feature;
 import ai.luciq.survey.Survey;
 import ai.luciq.survey.Surveys;
 import ai.luciq.survey.callbacks.OnDismissCallback;
+import ai.luciq.survey.callbacks.OnFinishCallback;
 import ai.luciq.survey.callbacks.OnShowCallback;
 
 import org.junit.After;
@@ -149,5 +150,12 @@ public class SurveysApiTest {
         api.bindOnDismissSurveyCallback();
 
         mSurveys.verify(() -> Surveys.setOnDismissCallback(any(OnDismissCallback.class)));
+    }
+
+    @Test
+    public void testBindOnFinishSurveyCallback() {
+        api.bindOnFinishSurveyCallback();
+
+        mSurveys.verify(() -> Surveys.setOnFinishCallback(any(OnFinishCallback.class)));
     }
 }

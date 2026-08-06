@@ -118,4 +118,18 @@
     OCMVerify([self.mFlutterApi onDismissSurveyCallId:[OCMArg any] completion:[OCMArg invokeBlock]]);
 }
 
+- (void)testBindOnFinishSurveyCallback {
+    FlutterError *error;
+
+    [self.api bindOnFinishSurveyCallbackWithError:&error];
+    LCQSurveys.didFinishSurveyHandler(LCQSurveyFinishedStateSubmitted, @{@"rating": @5}, @"survey-token");
+
+    OCMVerify([self.mSurveys setDidFinishSurveyHandler:[OCMArg any]]);
+    OCMVerify([self.mFlutterApi onFinishSurveyCallId:[OCMArg any]
+                                               state:@"SUBMITTED"
+                                            surveyId:@"survey-token"
+                                                info:[OCMArg any]
+                                          completion:[OCMArg invokeBlock]]);
+}
+
 @end

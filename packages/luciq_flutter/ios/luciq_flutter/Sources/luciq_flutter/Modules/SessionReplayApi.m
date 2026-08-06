@@ -3,8 +3,8 @@
 #import <LuciqSDK/LCQSessionReplay.h>
 #import "SessionReplayApi.h"
 #import "ArgsRegistry.h"
-#import "../Util/LuciqFlutterLogger.h"
-#import "../Util/LuciqFlutterDebugTags.h"
+#import "LuciqFlutterLogger.h"
+#import "LuciqFlutterDebugTags.h"
 
 extern void InitSessionReplayApi(id<FlutterBinaryMessenger> messenger) {
     SessionReplayApi *api = [[SessionReplayApi alloc] init];

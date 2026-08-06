@@ -48,6 +48,20 @@ commands:
           name: Install Pods
           working_directory: packages/luciq_flutter/example/ios
           command: pod install --repo-update
+  setup_ios_spm:
+    steps:
+      - ios/install-rosetta
+      - setup_flutter
+      - run:
+          name: Enable Swift Package Manager
+          command: flutter config --enable-swift-package-manager
+      - run:
+          name: Resolve plugins (SPM)
+          working_directory: packages/luciq_flutter/example
+          command: |
+            rm -rf ios/Pods ios/Podfile.lock ios/Runner.xcworkspace
+            flutter clean
+            flutter pub get
   setup_patrol:
     steps:
       - run:
@@ -190,6 +204,16 @@ commands:
               ]
             }
 
+  update_public_docs_changelog:
+    steps:
+      - run:
+          name: Sync Flutter changelog to public docs (luciq-docs)
+          command: |
+            RELEASE_OWNER=$(./scripts/releases/get_job_approver_username.sh 2>/dev/null || true)
+            echo "Release owner (docs PR reviewer): ${RELEASE_OWNER:-<none>}"
+            # Non-fatal: docs sync must never break a release.
+            DOCS_PR_REVIEWER="$RELEASE_OWNER" ./scripts/releases/update-public-docs-changelog.sh || echo "Docs changelog sync failed (non-fatal)"
+
 jobs:
   danger:
     executor:
@@ -298,6 +322,21 @@ jobs:
                 -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.5' \
                 -skip-testing:RunnerUITests \
                 test | xcpretty
+
+  test_ios_spm:
+    macos:
+      xcode: 16.4.0
+    resource_class: m4pro.medium
+    environment:
+      luciq_SOURCEMAPS_UPLOAD_DISABLE: true
+    steps:
+      - advanced-checkout/shallow-checkout
+      - setup_ios_spm
+      - run:
+          name: Build for simulator (SPM mode)
+          working_directory: ~/project/packages/luciq_flutter/example
+          command: |
+            flutter build ios --simulator --no-codesign
 
   e2e_ios_patrol:
     macos:
@@ -545,6 +584,13 @@ jobs:
       - notify_slack_with_release:
           channel: <<parameters.channel>>
 
+  sync_public_docs_changelog:
+    executor: flutter-executor
+    steps:
+      - advanced-checkout/shallow-checkout
+      - generate_luciq_github_app_token
+      - update_public_docs_changelog
+
 workflows:
   version: 2
   build-test-and-approval-deploy:
@@ -561,6 +607,7 @@ workflows:
           app-dir: "~/project/packages/luciq_flutter/"
       - e2e_android_patrol
       - test_ios
+      - test_ios_spm
       - e2e_ios_patrol
       - format_flutter
       - lint_flutter:
@@ -667,6 +714,12 @@ workflows:
       - release_luciq_flutter:
           requires:
             - hold_release_luciq_flutter
+          filters:
+            branches:
+              only: master
+      - sync_public_docs_changelog:
+          requires:
+            - release_luciq_flutter
           filters:
             branches:
               only: master

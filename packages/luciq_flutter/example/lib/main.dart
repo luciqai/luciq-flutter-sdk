@@ -66,7 +66,6 @@ void main() {
       Luciq.setValueForStringWithKey('text you want',
           CustomTextPlaceHolderKey.commentFieldHintForBugReport);
 
-
       BugReporting.setProactiveReportingConfigurations(
         const ProactiveReportingConfigs(
           enabled: true,
@@ -75,6 +74,10 @@ void main() {
         ),
       );
 
+      Surveys.setOnFinishCallback((type,String,data){
+
+        print(type);
+      });
       CrashReporting.setNDKEnabled(true);
       // APM.setScreenRenderingEnabled(true);
       // APM.setAutoUITraceEnabled(false);
@@ -96,7 +99,6 @@ void main() {
     CrashReporting.reportCrash,
   );
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);

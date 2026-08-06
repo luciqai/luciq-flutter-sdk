@@ -69,7 +69,7 @@ scripts:
       concurrency: 1
       orderDependents: true
     packageFilters:
-      fileExists: 'ios/PodFile'
+      fileExists: 'ios/Podfile'
   score:
     run: dart run pana --no-warning --exit-code-threshold 0
     exec:

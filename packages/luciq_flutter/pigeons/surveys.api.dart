@@ -4,6 +4,12 @@ import 'package:pigeon/pigeon.dart';
 abstract class SurveysFlutterApi {
   void onShowSurvey(String callId);
   void onDismissSurvey(String callId);
+  void onFinishSurvey(
+    String callId,
+    String state,
+    String surveyId,
+    String info,
+  );
 }
 
 @HostApi()
@@ -23,4 +29,5 @@ abstract class SurveysHostApi {
 
   void bindOnShowSurveyCallback();
   void bindOnDismissSurveyCallback();
+  void bindOnFinishSurveyCallback();
 }

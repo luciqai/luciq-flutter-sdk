@@ -148,7 +148,7 @@ public class LuciqPigeon {
 
     void setAppVariant(@NonNull String appVariant);
 
-    void logUserEvent(@NonNull String name);
+    void logUserEvent(@NonNull String name, @NonNull Map<String, String> parameters);
 
     void logOut();
 
@@ -490,8 +490,9 @@ public class LuciqPigeon {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
                 String nameArg = (String) args.get(0);
+                Map<String, String> parametersArg = (Map<String, String>) args.get(1);
                 try {
-                  api.logUserEvent(nameArg);
+                  api.logUserEvent(nameArg, parametersArg);
                   wrapped.add(0, null);
                 }
  catch (Throwable exception) {

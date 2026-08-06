@@ -339,12 +339,13 @@ class LuciqHostApi {
     }
   }
 
-  Future<void> logUserEvent(String arg_name) async {
+  Future<void> logUserEvent(
+      String arg_name, Map<String?, String?> arg_parameters) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.LuciqHostApi.logUserEvent', codec,
         binaryMessenger: _binaryMessenger);
-    final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_name]) as List<Object?>?;
+    final List<Object?>? replyList = await channel
+        .send(<Object?>[arg_name, arg_parameters]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',

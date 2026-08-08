@@ -147,6 +147,16 @@ class MockSurveysHostApi extends _i1.Mock implements _i2.SurveysHostApi {
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> bindOnFinishSurveyCallback() => (super.noSuchMethod(
+        Invocation.method(
+          #bindOnFinishSurveyCallback,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }
 
 /// A class which mocks [LCQBuildInfo].

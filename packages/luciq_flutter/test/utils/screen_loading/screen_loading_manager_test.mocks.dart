@@ -556,10 +556,17 @@ class MockLuciqHostApi extends _i1.Mock implements _i6.LuciqHostApi {
       ) as _i5.Future<void>);
 
   @override
-  _i5.Future<void> logUserEvent(String? arg_name) => (super.noSuchMethod(
+  _i5.Future<void> logUserEvent(
+    String? arg_name,
+    Map<String?, String?>? arg_parameters,
+  ) =>
+      (super.noSuchMethod(
         Invocation.method(
           #logUserEvent,
-          [arg_name],
+          [
+            arg_name,
+            arg_parameters,
+          ],
         ),
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),

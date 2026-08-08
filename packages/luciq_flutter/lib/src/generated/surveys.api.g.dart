@@ -15,6 +15,9 @@ abstract class SurveysFlutterApi {
 
   void onDismissSurvey(String callId);
 
+  void onFinishSurvey(
+      String callId, String state, String surveyId, String info);
+
   static void setup(SurveysFlutterApi? api,
       {BinaryMessenger? binaryMessenger}) {
     {
@@ -53,6 +56,35 @@ abstract class SurveysFlutterApi {
           assert(arg_callId != null,
               'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onDismissSurvey was null, expected non-null String.');
           api.onDismissSurvey(arg_callId!);
+          return;
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onFinishSurvey',
+          codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMessageHandler(null);
+      } else {
+        channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onFinishSurvey was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_callId = (args[0] as String?);
+          assert(arg_callId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onFinishSurvey was null, expected non-null String.');
+          final String? arg_state = (args[1] as String?);
+          assert(arg_state != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onFinishSurvey was null, expected non-null String.');
+          final String? arg_surveyId = (args[2] as String?);
+          assert(arg_surveyId != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onFinishSurvey was null, expected non-null String.');
+          final String? arg_info = (args[3] as String?);
+          assert(arg_info != null,
+              'Argument for dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onFinishSurvey was null, expected non-null String.');
+          api.onFinishSurvey(arg_callId!, arg_state!, arg_surveyId!, arg_info!);
           return;
         });
       }
@@ -287,6 +319,28 @@ class SurveysHostApi {
   Future<void> bindOnDismissSurveyCallback() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.luciq_flutter.SurveysHostApi.bindOnDismissSurveyCallback',
+        codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList = await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> bindOnFinishSurveyCallback() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.luciq_flutter.SurveysHostApi.bindOnFinishSurveyCallback',
         codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList = await channel.send(null) as List<Object?>?;

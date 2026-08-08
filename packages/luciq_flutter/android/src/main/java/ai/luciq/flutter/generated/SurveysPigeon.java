@@ -96,6 +96,14 @@ public class SurveysPigeon {
           new ArrayList<Object>(Collections.singletonList(callIdArg)),
           channelReply -> callback.reply(null));
     }
+    public void onFinishSurvey(@NonNull String callIdArg, @NonNull String stateArg, @NonNull String surveyIdArg, @NonNull String infoArg, @NonNull Reply<Void> callback) {
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(
+              binaryMessenger, "dev.flutter.pigeon.luciq_flutter.SurveysFlutterApi.onFinishSurvey", getCodec());
+      channel.send(
+          new ArrayList<Object>(Arrays.asList(callIdArg, stateArg, surveyIdArg, infoArg)),
+          channelReply -> callback.reply(null));
+    }
   }
   /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
   public interface SurveysHostApi {
@@ -119,6 +127,8 @@ public class SurveysPigeon {
     void bindOnShowSurveyCallback();
 
     void bindOnDismissSurveyCallback();
+
+    void bindOnFinishSurveyCallback();
 
     /** The codec used by SurveysHostApi. */
     static @NonNull MessageCodec<Object> getCodec() {
@@ -360,6 +370,28 @@ public class SurveysPigeon {
                 ArrayList<Object> wrapped = new ArrayList<Object>();
                 try {
                   api.bindOnDismissSurveyCallback();
+                  wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  ArrayList<Object> wrappedError = wrapError(exception);
+                  wrapped = wrappedError;
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.luciq_flutter.SurveysHostApi.bindOnFinishSurveyCallback", getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<Object>();
+                try {
+                  api.bindOnFinishSurveyCallback();
                   wrapped.add(0, null);
                 }
  catch (Throwable exception) {

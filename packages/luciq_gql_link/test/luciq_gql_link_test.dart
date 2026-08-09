@@ -11,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_gql_link/luciq_gql_link.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -1124,8 +1123,8 @@ void main() {
 
       verify(
         mLogger.e(
-          argThat(contains('forward is null')),
-          tag: 'LuciqGqlLink',
+          argThat(contains('reason=forwardNull')),
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });
@@ -1152,24 +1151,24 @@ void main() {
         mLogger.d(
           argThat(
             allOf(
-              contains('request:'),
+              contains('phase=start'),
               contains('type=query'),
               contains('name=GetUser'),
             ),
           ),
-          tag: 'LuciqGqlLink',
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
       verify(
         mLogger.d(
           argThat(
             allOf(
-              contains('response:'),
+              contains('phase=response'),
               contains('status=200'),
               contains('gqlErrors=0'),
             ),
           ),
-          tag: 'LuciqGqlLink',
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });
@@ -1204,12 +1203,12 @@ void main() {
         mLogger.e(
           argThat(
             allOf(
-              contains('error:'),
+              contains('phase=error'),
               contains('status=502'),
               contains('name=GetUser'),
             ),
           ),
-          tag: 'LuciqGqlLink',
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });
@@ -1234,8 +1233,8 @@ void main() {
 
       verify(
         mLogger.e(
-          argThat(contains('request body encode failed')),
-          tag: 'LuciqGqlLink',
+          argThat(contains('[_buildRequestBody]')),
+          tag: 'LCQ-Flutter-GQL:',
         ),
       ).called(1);
     });

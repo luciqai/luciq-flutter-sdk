@@ -303,30 +303,30 @@ class _GraphQLPageState extends State<GraphQLPage> {
           );
 
           final completer = Completer<int>();
-          _subscription = stream.listen(
+      _subscription = stream.listen(
             (result) {
-              if (result.hasException) {
-                if (!completer.isCompleted) {
-                  completer.completeError(result.exception!);
-                }
-                return;
-              }
-              _subscriptionEvents += 1;
-              if (mounted) setState(() {});
-              LuciqLog.logVerbose(
-                'GraphQL subscription emission #$_subscriptionEvents '
+          if (result.hasException) {
+            if (!completer.isCompleted) {
+              completer.completeError(result.exception!);
+            }
+            return;
+          }
+          _subscriptionEvents += 1;
+          if (mounted) setState(() {});
+          LuciqLog.logVerbose(
+            'GraphQL subscription emission #$_subscriptionEvents '
                 'data=${jsonEncode(result.data ?? {})}',
-              );
-            },
-            onError: (Object error) {
-              if (!completer.isCompleted) completer.completeError(error);
-            },
-            onDone: () {
-              if (!completer.isCompleted) {
-                completer.complete(_subscriptionEvents);
-              }
-            },
           );
+        },
+        onError: (Object error) {
+          if (!completer.isCompleted) completer.completeError(error);
+        },
+        onDone: () {
+          if (!completer.isCompleted) {
+            completer.complete(_subscriptionEvents);
+          }
+        },
+      );
 
           // Wait for the first emission (or 5s) so the button gives the user
           // immediate feedback. The subscription itself keeps running in the
@@ -341,12 +341,12 @@ class _GraphQLPageState extends State<GraphQLPage> {
           ]);
 
           if (completer.isCompleted) {
-            // Surface the error captured above.
-            throw await completer.future.then<Object>(
+        // Surface the error captured above.
+        throw await completer.future.then<Object>(
               (_) => 'completed',
-              onError: (Object e) => e,
-            );
-          }
+          onError: (Object e) => e,
+        );
+      }
 
           return 'subscribed; received $_subscriptionEvents event(s) so far';
         },

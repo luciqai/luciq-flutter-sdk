@@ -811,5 +811,4 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setWebViewNetworkTrackingEnabled] phase=exit"];
 }
 
-
 @end

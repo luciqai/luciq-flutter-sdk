@@ -1028,5 +1028,4 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                     e);
         }
     }
-
 }

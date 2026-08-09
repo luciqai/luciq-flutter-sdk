@@ -1,0 +1,33 @@
+name: grpc_interceptor_example
+description: Demonstrates how to use the luciq_grpc_interceptor package.
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  luciq_flutter:
+    path: ../../luciq_flutter
+  luciq_grpc_interceptor:
+    path: ../
+  grpc: ^4.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+dependency_overrides:
+  luciq_flutter:
+    path: ../../luciq_flutter
+  luciq_grpc_interceptor:
+    path: ../
+
+flutter:
+  uses-material-design: true

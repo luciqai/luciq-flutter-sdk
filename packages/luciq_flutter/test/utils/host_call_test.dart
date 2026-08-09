@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
 import 'package:luciq_flutter/src/utils/host_call.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 
 class _RecordedLog {
   _RecordedLog(this.level, this.tag, this.message);

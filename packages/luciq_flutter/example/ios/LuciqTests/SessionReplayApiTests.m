@@ -63,7 +63,7 @@
     };
 
     OCMStub([self.mSessionReplay sessionReplayLink]).andReturn(link);
-    [self.api getSessionReplayLinkWithCompletion:result];
+    [self.api getSessionReplayLinkCallId:@"callId" completion:result];
     OCMVerify([self.mSessionReplay sessionReplayLink]);
 
 }

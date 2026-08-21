@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "luciq-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/luciqai/luciq-ios-sdk",
+      "state" : {
+        "revision" : "6d8b21ef2ba323ff4cb31d929bcfb2c25c2f6d3b",
+        "version" : "19.8.1"
+      }
+    }
+  ],
+  "version" : 2
+}

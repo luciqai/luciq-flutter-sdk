@@ -18,6 +18,9 @@ class NetworkData {
     required this.startTime,
     this.errorCode = 0,
     this.errorDomain = '',
+    this.errorName,
+    this.gqlQueryName,
+    this.serverErrorMessage,
     W3CHeader? w3cHeader,
   }) {
     _w3cHeader = w3cHeader;
@@ -39,6 +42,9 @@ class NetworkData {
   final DateTime startTime;
   final int errorCode;
   final String errorDomain;
+  final String? errorName;
+  final String? gqlQueryName;
+  final String? serverErrorMessage;
   W3CHeader? _w3cHeader;
 
   @override
@@ -62,6 +68,9 @@ class NetworkData {
           startTime == other.startTime &&
           errorCode == other.errorCode &&
           errorDomain == other.errorDomain &&
+          errorName == other.errorName &&
+          gqlQueryName == other.gqlQueryName &&
+          serverErrorMessage == other.serverErrorMessage &&
           _w3cHeader == other._w3cHeader;
 
   @override
@@ -82,6 +91,9 @@ class NetworkData {
       startTime.hashCode ^
       errorCode.hashCode ^
       errorDomain.hashCode ^
+      errorName.hashCode ^
+      gqlQueryName.hashCode ^
+      serverErrorMessage.hashCode ^
       _w3cHeader.hashCode;
 
   NetworkData copyWith({
@@ -101,6 +113,9 @@ class NetworkData {
     DateTime? startTime,
     int? errorCode,
     String? errorDomain,
+    String? errorName,
+    String? gqlQueryName,
+    String? serverErrorMessage,
     W3CHeader? w3cHeader,
   }) {
     return NetworkData(
@@ -120,6 +135,9 @@ class NetworkData {
       startTime: startTime ?? this.startTime,
       errorCode: errorCode ?? this.errorCode,
       errorDomain: errorDomain ?? this.errorDomain,
+      errorName: errorName ?? this.errorName,
+      gqlQueryName: gqlQueryName ?? this.gqlQueryName,
+      serverErrorMessage: serverErrorMessage ?? this.serverErrorMessage,
       w3cHeader: w3cHeader ?? _w3cHeader,
     );
   }
@@ -143,6 +161,9 @@ class NetworkData {
       'responseBodySize': responseBodySize,
       'errorDomain': errorDomain,
       'errorCode': errorCode,
+      'errorName': errorName,
+      'gqlQueryName': gqlQueryName,
+      'serverErrorMessage': serverErrorMessage,
       "isW3cHeaderFound": _w3cHeader?.isW3cHeaderFound,
       "partialId": _w3cHeader?.partialId,
       "networkStartTimeInSeconds": _w3cHeader?.networkStartTimeInSeconds,

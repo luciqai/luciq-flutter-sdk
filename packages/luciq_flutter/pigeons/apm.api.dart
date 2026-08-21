@@ -27,6 +27,12 @@ abstract class ApmHostApi {
     int uiTraceId,
   );
 
+  void reportManualScreenLoadingCP(
+    String screenName,
+    int startTimeStampMicro,
+    int durationMicro,
+  );
+
   void endScreenLoadingCP(int timeStampMicro, int uiTraceId);
 
   @async
@@ -36,9 +42,11 @@ abstract class ApmHostApi {
   bool isAutoUiTraceEnabled();
 
   @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   bool isScreenRenderEnabled();
 
   @async
+  @TaskQueue(type: TaskQueueType.serialBackgroundThread)
   bool isCustomSpanEnabled();
 
   @async

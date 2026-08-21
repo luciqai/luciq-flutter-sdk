@@ -104,7 +104,7 @@ void main() {
         ),
       );
 
-      final privateViews = manager.getPrivateViews();
+      final privateViews = manager.getPrivateViews('test');
       expect(
         privateViews.length % 4,
         0,

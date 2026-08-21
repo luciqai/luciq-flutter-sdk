@@ -6,7 +6,6 @@ import 'package:luciq_flutter/src/generated/luciq.api.g.dart';
 import 'package:luciq_flutter/src/utils/custom_span/custom_span_manager.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/lcq_date_time.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/luciq_montonic_clock.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
 import 'package:mockito/annotations.dart';
@@ -25,6 +24,7 @@ import 'apm_test.mocks.dart';
   LuciqScreenRenderManager,
   LuciqLogger,
   LuciqMonotonicClock,
+  ScreenLoadingManager,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +45,10 @@ void main() {
     LCQBuildInfo.setInstance(mBuildInfo);
     LuciqLogger.setInstance(mLuciqLogger);
     LuciqMonotonicClock.setInstance(mMonotonicClock);
+  });
+
+  setUp(() {
+    when(mLuciqLogger.isDebugEnabled()).thenReturn(false);
   });
 
   test('[setEnabled] should call host method', () async {
@@ -366,6 +370,7 @@ void main() {
       reset(mLuciqHost);
       reset(mHost);
       reset(mLuciqLogger);
+      when(mLuciqLogger.isDebugEnabled()).thenReturn(false);
       // Clear active spans before each test
       CustomSpanManager.I.$clearActiveSpans();
     });
@@ -398,6 +403,113 @@ void main() {
           end.microsecondsSinceEpoch,
         ),
       ).called(1);
+    });
+  });
+
+  group('Screen loading API delegation tests', () {
+    late MockScreenLoadingManager mScreenLoadingManager;
+
+    setUp(() {
+      mScreenLoadingManager = MockScreenLoadingManager();
+      ScreenLoadingManager.setInstance(mScreenLoadingManager);
+    });
+
+    tearDown(() {
+      reset(mHost);
+      reset(mScreenLoadingManager);
+    });
+
+    test('[reportManualScreenLoadingCP] should call host method', () async {
+      const screenName = 'manual-screen';
+      final startTimeStampMicro = DateTime.now().microsecondsSinceEpoch;
+      const durationMicro = 5000;
+
+      await APM.reportManualScreenLoadingCP(
+        screenName,
+        startTimeStampMicro,
+        durationMicro,
+      );
+
+      verify(
+        mHost.reportManualScreenLoadingCP(
+          screenName,
+          startTimeStampMicro,
+          durationMicro,
+        ),
+      ).called(1);
+    });
+
+    test(
+        '[endScreenLoading] should delegate to ScreenLoadingManager.endScreenLoading',
+        () async {
+      when(mScreenLoadingManager.endScreenLoading())
+          .thenAnswer((_) async => {});
+
+      await APM.endScreenLoading();
+
+      verify(mScreenLoadingManager.endScreenLoading()).called(1);
+    });
+
+    test('[wrapRoutes] should delegate to ScreenLoadingManager.wrapRoutes', () {
+      final routes = <String, WidgetBuilder>{
+        '/home': (context) => const SizedBox(),
+        '/settings': (context) => const SizedBox(),
+      };
+
+      final wrappedRoutes = APM.wrapRoutes(routes);
+
+      expect(wrappedRoutes.length, equals(routes.length));
+      for (final entry in wrappedRoutes.entries) {
+        expect(routes.containsKey(entry.key), isTrue);
+      }
+    });
+
+    test('[wrapRoutes] with exclude should not wrap excluded routes', () {
+      final routes = <String, WidgetBuilder>{
+        '/home': (context) => const SizedBox(),
+        '/settings': (context) => const SizedBox(),
+      };
+
+      final wrappedRoutes = APM.wrapRoutes(routes, exclude: ['/home']);
+
+      expect(wrappedRoutes['/home'], equals(routes['/home']));
+    });
+  });
+
+  group('Edge case tests', () {
+    tearDown(() {
+      reset(mHost);
+      reset(mBuildInfo);
+    });
+
+    test('[startFlow] with empty name should not call host method', () async {
+      await APM.startFlow('');
+
+      verifyNever(mHost.startFlow(any));
+    });
+
+    test('[startFlow] should trim name before calling host method', () async {
+      const flowName = '  flow-name  ';
+
+      await APM.startFlow(flowName);
+
+      verify(mHost.startFlow('flow-name')).called(1);
+    });
+
+    test(
+        '[networkLogAndroid] should not call host method on non-Android platform',
+        () async {
+      final data = NetworkData(
+        url: 'https://example.com',
+        method: 'GET',
+        startTime: DateTime.now(),
+      );
+
+      when(mBuildInfo.isAndroid).thenReturn(false);
+
+      await APM.networkLogAndroid(data);
+
+      verifyNever(mHost.networkLogAndroid(any));
     });
   });
 }

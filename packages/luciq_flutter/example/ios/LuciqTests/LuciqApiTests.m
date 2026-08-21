@@ -97,9 +97,19 @@
     NSString *name = @"sign_up";
     FlutterError *error;
 
-    [self.api logUserEventName:name error:&error];
+    [self.api logUserEventName:name parameters:@{} error:&error];
 
     OCMVerify([self.mLuciq logUserEventWithName:name]);
+}
+
+- (void)testLogUserEventWithParameters {
+    NSString *name = @"Completed Purchase";
+    NSDictionary<NSString *, NSString *> *parameters = @{@"item": @"Premium Plan"};
+    FlutterError *error;
+
+    [self.api logUserEventName:name parameters:parameters error:&error];
+
+    OCMVerify([self.mLuciq logUserEventWithName:name parameters:[OCMArg any]]);
 }
 
 - (void)testLogOut {
@@ -672,6 +682,69 @@
     [self.api setNetworkAutoMaskingEnabledIsEnabled:isEnabled error:&error];
 
     OCMVerify([self.mNetworkLogger setAutoMaskingEnabled:YES]);
+}
+
+- (void)testSetWebViewMonitoringEnabledWhenTrue {
+    NSNumber *isEnabled = @1;
+    FlutterError *error;
+
+    [self.api setWebViewMonitoringEnabledIsEnabled:isEnabled error:&error];
+
+    OCMVerify([self.mLuciq setWebViewMonitoringEnabled:YES]);
+}
+
+- (void)testSetWebViewMonitoringEnabledWhenFalse {
+    NSNumber *isEnabled = @0;
+    FlutterError *error;
+
+    [self.api setWebViewMonitoringEnabledIsEnabled:isEnabled error:&error];
+
+    OCMVerify([self.mLuciq setWebViewMonitoringEnabled:NO]);
+}
+
+- (void)testSetWebViewUserInteractionsTrackingEnabledWhenTrue {
+    NSNumber *isEnabled = @1;
+    FlutterError *error;
+
+    [self.api setWebViewUserInteractionsTrackingEnabledIsEnabled:isEnabled error:&error];
+
+    OCMVerify([self.mLuciq setWebViewUserInteractionsTrackingEnabled:YES]);
+}
+
+- (void)testSetWebViewUserInteractionsTrackingEnabledWhenFalse {
+    NSNumber *isEnabled = @0;
+    FlutterError *error;
+
+    [self.api setWebViewUserInteractionsTrackingEnabledIsEnabled:isEnabled error:&error];
+
+    OCMVerify([self.mLuciq setWebViewUserInteractionsTrackingEnabled:NO]);
+}
+
+- (void)testSetWebViewNetworkTrackingEnabledWhenTrue {
+    NSNumber *isEnabled = @1;
+    FlutterError *error;
+
+    [self.api setWebViewNetworkTrackingEnabledIsEnabled:isEnabled error:&error];
+
+    OCMVerify([self.mLuciq setWebViewNetworkTrackingEnabled:YES]);
+}
+
+- (void)testSetWebViewNetworkTrackingEnabledWhenFalse {
+    NSNumber *isEnabled = @0;
+    FlutterError *error;
+
+    [self.api setWebViewNetworkTrackingEnabledIsEnabled:isEnabled error:&error];
+
+    OCMVerify([self.mLuciq setWebViewNetworkTrackingEnabled:NO]);
+}
+
+- (void)testAutoMaskingIncludesWebViews {
+    NSArray<NSString *> *autoMaskingTypes = @[@"AutoMasking.webViews"];
+    FlutterError *error;
+
+    [self.api enableAutoMaskingAutoMasking:autoMaskingTypes error:&error];
+
+    OCMVerify([self.mLuciq setAutoMaskScreenshots:LCQAutoMaskScreenshotOptionWebViews]);
 }
 
 @end

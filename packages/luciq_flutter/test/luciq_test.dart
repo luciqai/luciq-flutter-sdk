@@ -167,7 +167,21 @@ void main() {
     await Luciq.logUserEvent(event);
 
     verify(
-      mHost.logUserEvent(event),
+      mHost.logUserEvent(event, {}),
+    ).called(1);
+  });
+
+  test('[logUserEvent] should call host method with parameters', () async {
+    const event = "Completed Purchase";
+    final parameters = [
+      UserEventParam(key: 'item', value: 'Premium Plan'),
+      UserEventParam(key: 'currency', value: 'USD'),
+    ];
+
+    await Luciq.logUserEvent(event, parameters: parameters);
+
+    verify(
+      mHost.logUserEvent(event, {'item': 'Premium Plan', 'currency': 'USD'}),
     ).called(1);
   });
 
@@ -528,6 +542,42 @@ void main() {
     verify(
       mHost.clearLogs(),
     ).called(1);
+  });
+
+  group('WebView tracking', () {
+    test('[setWebViewMonitoringEnabled] should call host method (true)',
+        () async {
+      await Luciq.setWebViewMonitoringEnabled(true);
+
+      verify(mHost.setWebViewMonitoringEnabled(true)).called(1);
+    });
+
+    test('[setWebViewMonitoringEnabled] should call host method (false)',
+        () async {
+      await Luciq.setWebViewMonitoringEnabled(false);
+
+      verify(mHost.setWebViewMonitoringEnabled(false)).called(1);
+    });
+
+    test('[setWebViewUserInteractionsTrackingEnabled] should call host method',
+        () async {
+      await Luciq.setWebViewUserInteractionsTrackingEnabled(true);
+
+      verify(mHost.setWebViewUserInteractionsTrackingEnabled(true)).called(1);
+    });
+
+    test('[setWebViewNetworkTrackingEnabled] should call host method',
+        () async {
+      await Luciq.setWebViewNetworkTrackingEnabled(true);
+
+      verify(mHost.setWebViewNetworkTrackingEnabled(true)).called(1);
+    });
+
+    test('AutoMasking enum exposes a webViews value', () {
+      // WebView masking is handled natively by the SDK; the Flutter-level enum
+      // just needs to surface a dedicated value that maps to the native option.
+      expect(AutoMasking.values, contains(AutoMasking.webViews));
+    });
   });
 
   group('Disposal Manager', () {

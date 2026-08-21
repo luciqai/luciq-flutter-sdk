@@ -95,7 +95,7 @@ public class SessionReplayApiTest {
                     callback.onSessionReplayLinkReady(link);
                     return callback;
                 });
-        api.getSessionReplayLink(result);
+        api.getSessionReplayLink("callId", result);
 
 
         mSessionReplay.verify(() -> SessionReplay.getSessionReplayLink(any()));

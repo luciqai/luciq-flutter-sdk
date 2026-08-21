@@ -59,6 +59,7 @@ import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
 import ai.luciq.library.screenshot.ScreenshotCaptor;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
+import ai.luciq.library.user.UserEventParam;
 import ai.luciq.survey.Surveys;
 import ai.luciq.survey.callbacks.OnShowCallback;
 
@@ -262,9 +263,20 @@ public class LuciqApiTest {
     public void testLogUserEvent() {
         String event = "sign_up";
 
-        api.logUserEvent(event);
+        api.logUserEvent(event, Collections.emptyMap());
 
         mLuciq.verify(() -> Luciq.logUserEvent(event));
+    }
+
+    @Test
+    public void testLogUserEventWithParameters() {
+        String event = "Completed Purchase";
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("item", "Premium Plan");
+
+        api.logUserEvent(event, parameters);
+
+        mLuciq.verify(() -> Luciq.logUserEvent(eq(event), any(UserEventParam.class)));
     }
 
     @Test
@@ -471,7 +483,7 @@ public class LuciqApiTest {
 
         api.reportScreenChange(screenName);
 
-        reflected.verify(() -> MockReflected.reportScreenChange(null, screenName));
+        reflected.verify(() -> MockReflected.reportScreenChange(null, screenName, null));
         reflected.verify(() -> MockReflected.reportCurrentViewChange(screenName));
     }
 
@@ -806,6 +818,55 @@ public class LuciqApiTest {
 
         api.setNetworkAutoMaskingEnabled(isEnabled);
         mLuciq.verify(() -> Luciq.setNetworkAutoMaskingState(Feature.State.ENABLED));
+    }
+
+    @Test
+    public void testSetWebViewMonitoringEnabledGivenTrue() {
+        api.setWebViewMonitoringEnabled(true);
+
+        mLuciq.verify(() -> Luciq.setWebViewMonitoringEnabled(true));
+    }
+
+    @Test
+    public void testSetWebViewMonitoringEnabledGivenFalse() {
+        api.setWebViewMonitoringEnabled(false);
+
+        mLuciq.verify(() -> Luciq.setWebViewMonitoringEnabled(false));
+    }
+
+    @Test
+    public void testSetWebViewUserInteractionsTrackingEnabledGivenTrue() {
+        api.setWebViewUserInteractionsTrackingEnabled(true);
+
+        mLuciq.verify(() -> Luciq.setWebViewUserInteractionsTrackingEnabled(true));
+    }
+
+    @Test
+    public void testSetWebViewUserInteractionsTrackingEnabledGivenFalse() {
+        api.setWebViewUserInteractionsTrackingEnabled(false);
+
+        mLuciq.verify(() -> Luciq.setWebViewUserInteractionsTrackingEnabled(false));
+    }
+
+    @Test
+    public void testSetWebViewNetworkTrackingEnabledGivenTrue() {
+        api.setWebViewNetworkTrackingEnabled(true);
+
+        mLuciq.verify(() -> Luciq.setWebViewNetworkTrackingEnabled(true));
+    }
+
+    @Test
+    public void testSetWebViewNetworkTrackingEnabledGivenFalse() {
+        api.setWebViewNetworkTrackingEnabled(false);
+
+        mLuciq.verify(() -> Luciq.setWebViewNetworkTrackingEnabled(false));
+    }
+
+    @Test
+    public void testAutoMaskingIncludesWebViews() {
+        api.enableAutoMasking(List.of("AutoMasking.webViews"));
+
+        mLuciq.verify(() -> Luciq.setAutoMaskScreenshotsTypes(MaskingType.WEB_VIEWS));
     }
 
     @Test

@@ -16,6 +16,7 @@ import ai.luciq.library.Feature;
 import ai.luciq.survey.Survey;
 import ai.luciq.survey.Surveys;
 import ai.luciq.survey.callbacks.OnDismissCallback;
+import ai.luciq.survey.callbacks.OnFinishCallback;
 import ai.luciq.survey.callbacks.OnShowCallback;
 
 import org.junit.After;
@@ -86,7 +87,7 @@ public class SurveysApiTest {
     public void testShowSurvey() {
         String token = "survey-token";
 
-        api.showSurvey(token);
+        api.showSurvey("callId", token);
 
         mSurveys.verify(() -> Surveys.showSurvey(token));
     }
@@ -117,7 +118,7 @@ public class SurveysApiTest {
 
         mSurveys.when(() -> Surveys.hasRespondToSurvey(token)).thenReturn(expected);
 
-        api.hasRespondedToSurvey(token, result);
+        api.hasRespondedToSurvey("callId", token, result);
 
         verify(result).success(expected);
         mSurveys.verify(() -> Surveys.hasRespondToSurvey(token));
@@ -131,7 +132,7 @@ public class SurveysApiTest {
 
         mSurveys.when(Surveys::getAvailableSurveys).thenReturn(surveys);
 
-        api.getAvailableSurveys(result);
+        api.getAvailableSurveys("callId", result);
 
         verify(result).success(expected);
         mSurveys.verify(Surveys::getAvailableSurveys);
@@ -149,5 +150,12 @@ public class SurveysApiTest {
         api.bindOnDismissSurveyCallback();
 
         mSurveys.verify(() -> Surveys.setOnDismissCallback(any(OnDismissCallback.class)));
+    }
+
+    @Test
+    public void testBindOnFinishSurveyCallback() {
+        api.bindOnFinishSurveyCallback();
+
+        mSurveys.verify(() -> Surveys.setOnFinishCallback(any(OnFinishCallback.class)));
     }
 }

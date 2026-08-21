@@ -125,6 +125,25 @@ bool isMedia(Widget widget) {
   return isImageWidget(widget) || isVideoPlayerWidget(widget);
 }
 
+bool isWebViewWidget(Widget widget) {
+  const webViewPlatformViewTypes = {
+    'plugins.flutter.io/webview',
+    'com.pichillilorenzo/flutter_inappwebview',
+  };
+
+  if (widget is AndroidView) {
+    return webViewPlatformViewTypes.contains(widget.viewType);
+  }
+  if (widget is UiKitView) {
+    return webViewPlatformViewTypes.contains(widget.viewType);
+  }
+  if (widget is PlatformViewLink) {
+    return webViewPlatformViewTypes.contains(widget.viewType);
+  }
+
+  return false;
+}
+
 /// Checks if a widget is toggleable (e.g., switch, checkbox, etc.).
 bool isToggleableWidget(Widget widget) {
   return widget is Checkbox ||

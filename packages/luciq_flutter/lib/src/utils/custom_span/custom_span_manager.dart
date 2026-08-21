@@ -1,3 +1,4 @@
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/constants/strings.dart';
 import 'package:luciq_flutter/src/generated/apm.api.g.dart';
 import 'package:luciq_flutter/src/models/custom_span.dart';
@@ -39,7 +40,7 @@ class CustomSpanManager {
   ApmHostApi _host = ApmHostApi();
 
   /// Log tag for custom span operations.
-  static const String tag = 'Luciq - CustomSpan';
+  static const String tag = DebugTags.apmCustomSpan;
 
   /// Maximum number of concurrent custom spans allowed.
   static const int maxConcurrentSpans = 100;
@@ -112,7 +113,7 @@ class CustomSpanManager {
     }
 
     // Check if SDK is initialized
-    final isSDKInitialized = await Luciq.isBuilt();
+    final isSDKInitialized = (await Luciq.isBuilt()) ?? false;
     if (!isSDKInitialized) {
       LuciqLogger.I.e(
         LuciqStrings.customSpanSDKNotInitializedMessage,
@@ -198,7 +199,7 @@ class CustomSpanManager {
     }
 
     // Check if SDK is initialized
-    final isSDKInitialized = await Luciq.isBuilt();
+    final isSDKInitialized = (await Luciq.isBuilt()) ?? false;
     if (!isSDKInitialized) {
       LuciqLogger.I.e(
         LuciqStrings.customSpanSDKNotInitializedMessage,

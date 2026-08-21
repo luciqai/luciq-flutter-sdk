@@ -13,6 +13,8 @@ import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
 import ai.luciq.flutter.model.ScreenshotResult;
 import ai.luciq.flutter.modules.capturing.CaptureManager;
 import ai.luciq.flutter.modules.capturing.ScreenshotResultCallback;
+import ai.luciq.flutter.util.LuciqFlutterDebugTags;
+import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.ThreadManager;
 import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
 
@@ -34,11 +36,17 @@ public class PrivateViewManager {
 
     private final LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi luciqPrivateViewApi;
     private Activity activity;
+    final CaptureManager windowPixelCopyScreenshotCaptor;
     final CaptureManager pixelCopyScreenshotCaptor;
     final CaptureManager boundryScreenshotCaptor;
 
     public PrivateViewManager(@NonNull LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi luciqPrivateViewApi, CaptureManager pixelCopyCaptureManager, CaptureManager boundryCaptureManager) {
+        this(luciqPrivateViewApi, pixelCopyCaptureManager, pixelCopyCaptureManager, boundryCaptureManager);
+    }
+
+    public PrivateViewManager(@NonNull LuciqPrivateViewPigeon.LuciqPrivateViewFlutterApi luciqPrivateViewApi, CaptureManager windowPixelCopyCaptureManager, CaptureManager pixelCopyCaptureManager, CaptureManager boundryCaptureManager) {
         this.luciqPrivateViewApi = luciqPrivateViewApi;
+        this.windowPixelCopyScreenshotCaptor = windowPixelCopyCaptureManager;
         this.pixelCopyScreenshotCaptor = pixelCopyCaptureManager;
         this.boundryScreenshotCaptor = boundryCaptureManager;
 
@@ -51,7 +59,8 @@ public class PrivateViewManager {
 
 
     public void mask(ScreenshotCaptor.CapturingCallback capturingCallback) {
-        if (activity != null) {
+        final Activity captureActivity = activity;
+        if (isActivityValid(captureActivity)) {
             CountDownLatch latch = new CountDownLatch(1);
             AtomicReference<List<Double>> privateViews = new AtomicReference<>();
             final ScreenshotResultCallback boundryScreenshotResult = new ScreenshotResultCallback() {
@@ -69,10 +78,13 @@ public class PrivateViewManager {
             };
 
             try {
+                final String callId = LuciqFlutterLogger.nextCallId();
                 ThreadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        luciqPrivateViewApi.getPrivateViews(result -> {
+                        LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                                "[PRIV.capture] #" + callId + " phase=fire");
+                        luciqPrivateViewApi.getPrivateViews(callId, result -> {
                             privateViews.set(result);
                             latch.countDown();
                         });
@@ -81,7 +93,7 @@ public class PrivateViewManager {
 
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    pixelCopyScreenshotCaptor.capture(activity, new ScreenshotResultCallback() {
+                    ScreenshotResultCallback pixelCopyScreenshotResult = new ScreenshotResultCallback() {
                         @Override
                         public void onScreenshotResult(ScreenshotResult result) {
                             processScreenshot(result, privateViews, latch, capturingCallback);
@@ -90,12 +102,33 @@ public class PrivateViewManager {
 
                         @Override
                         public void onError() {
-                            boundryScreenshotCaptor.capture(activity, boundryScreenshotResult);
+                            if (isActivityValid(captureActivity)) {
+                                boundryScreenshotCaptor.capture(captureActivity, boundryScreenshotResult);
+                            } else {
+                                capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
+                            }
+
+                        }
+                    };
+
+                    windowPixelCopyScreenshotCaptor.capture(captureActivity, new ScreenshotResultCallback() {
+                        @Override
+                        public void onScreenshotResult(ScreenshotResult result) {
+                            processScreenshot(result, privateViews, latch, capturingCallback);
+                        }
+
+                        @Override
+                        public void onError() {
+                            if (isActivityValid(captureActivity)) {
+                                pixelCopyScreenshotCaptor.capture(captureActivity, pixelCopyScreenshotResult);
+                            } else {
+                                capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
+                            }
 
                         }
                     });
                 } else {
-                    boundryScreenshotCaptor.capture(activity, boundryScreenshotResult);
+                    boundryScreenshotCaptor.capture(captureActivity, boundryScreenshotResult);
                 }
 
             } catch (Exception e) {
@@ -104,6 +137,14 @@ public class PrivateViewManager {
         } else {
             capturingCallback.onCapturingFailure(new Exception(EXCEPTION_MESSAGE));
         }
+    }
+
+    private boolean isActivityValid(Activity activity) {
+        if (activity == null || activity.getWindow() == null || activity.isFinishing()) {
+            return false;
+        }
+
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || !activity.isDestroyed();
     }
 
 
@@ -134,14 +175,15 @@ public class PrivateViewManager {
             Paint paint = new Paint();  // Default color is black
 
             for (int i = 0; i < privateViews.size(); i += 4) {
-                float left = privateViews.get(i).floatValue() * pixelRatio;
-                float top = privateViews.get(i + 1).floatValue() * pixelRatio;
-                float right = privateViews.get(i + 2).floatValue() * pixelRatio;
-                float bottom = privateViews.get(i + 3).floatValue() * pixelRatio;
+                float left = (privateViews.get(i).floatValue() + result.getOffsetX()) * pixelRatio;
+                float top = (privateViews.get(i + 1).floatValue() + result.getOffsetY()) * pixelRatio;
+                float right = (privateViews.get(i + 2).floatValue() + result.getOffsetX()) * pixelRatio;
+                float bottom = (privateViews.get(i + 3).floatValue() + result.getOffsetY()) * pixelRatio;
                 canvas.drawRect(left, top, right, bottom, paint);  // Mask private view
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                    "[PRIV.capture.mask] phase=error errorType=" + e.getClass().getSimpleName(), e);
         }
     }
 }

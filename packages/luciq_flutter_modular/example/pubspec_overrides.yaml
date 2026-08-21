@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: luciq_flutter,luciq_flutter_modular
+dependency_overrides:
+  luciq_flutter:
+    path: ../../luciq_flutter
+  luciq_flutter_modular:
+    path: ..

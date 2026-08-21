@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:luciq_flutter/luciq_flutter.dart';
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/models/luciq_route.dart';
-import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/repro_steps_constants.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_screen_render_manager.dart';
@@ -19,58 +19,75 @@ class LuciqNavigatorObserver extends NavigatorObserver {
   final List<LuciqRoute> _steps = [];
 
   void screenChanged(Route newRoute) {
-    //// ignore: invalid_null_aware_operator
-    SchedulerBinding.instance?.scheduleTask(
-      () async {
-        try {
-          final rawScreenName = newRoute.settings.name.toString().trim();
-          final screenName = rawScreenName.isEmpty
-              ? ReproStepsConstants.emptyScreenFallback
-              : rawScreenName;
-          final maskedScreenName = ScreenNameMasker.I.mask(screenName);
-
-          final route = LuciqRoute(
-            route: newRoute,
-            name: maskedScreenName,
-          );
-
-          //Ends the last screen rendering collector if exists.
-          LuciqScreenRenderManager.I.endScreenRenderCollector();
-
-          // Synchronously prepares the UI trace so the widget can find it immediately.
-          ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
-
-          // Start screen render collector after UI trace validation completes and the new screen is mounted.
-          final uiTrace = ScreenLoadingManager.I.currentUiTrace;
-          uiTrace?.whenValidated.then((isValid) {
-            if (isValid) {
-              _startScreenRenderCollector(uiTrace.traceId);
-            }
-          });
-
-          // If there is a step that hasn't been pushed yet
-          final pendingStep = _steps.isNotEmpty ? _steps.last : null;
-          if (pendingStep != null) {
-            await reportScreenChange(pendingStep.name);
-            // Remove the specific pending step regardless of current ordering
-            _steps.remove(pendingStep);
-          }
-
-          // Add the new step to the list
-          _steps.add(route);
-
-          // If this route is in the array, report it and remove it from the list
-          if (_steps.contains(route)) {
-            await reportScreenChange(route.name);
-            _steps.remove(route);
-          }
-        } catch (e) {
-          LuciqLogger.I.e('Reporting screen change failed:', tag: Luciq.tag);
-          LuciqLogger.I.e(e.toString(), tag: Luciq.tag);
-        }
-      },
-      Priority.idle,
+    LuciqLogger.I.d(
+      '[SCREEN.screenChanged] phase=enter screenNameLength=${newRoute.settings.name?.length ?? 0}',
+      tag: DebugTags.screenTracking,
     );
+    try {
+      final rawScreenName = newRoute.settings.name.toString().trim();
+      final screenName = rawScreenName.isEmpty
+          ? ReproStepsConstants.emptyScreenFallback
+          : rawScreenName;
+      final maskedScreenName = ScreenNameMasker.I.mask(screenName);
+
+      final route = LuciqRoute(
+        route: newRoute,
+        name: maskedScreenName,
+      );
+
+      // Must run synchronously — the new route's widget tree mounts on the
+      // very next frame and its initState calls startScreenLoadingTrace,
+      // which needs currentUiTrace to already reflect the new screen.
+      LuciqScreenRenderManager.I.endScreenRenderCollector();
+      ScreenLoadingManager.I.prepareUiTrace(maskedScreenName, screenName);
+
+      final uiTrace = ScreenLoadingManager.I.currentUiTrace;
+      uiTrace?.whenValidated.then((isValid) {
+        if (isValid) {
+          _startScreenRenderCollector(uiTrace.traceId);
+        }
+      });
+
+      // Repro-steps reporting has its own animation delay, so defer it to
+      // avoid blocking the navigation frame.
+      //// ignore: invalid_null_aware_operator
+      SchedulerBinding.instance?.scheduleTask(
+        () async {
+          try {
+            final pendingStep = _steps.isNotEmpty ? _steps.last : null;
+            if (pendingStep != null) {
+              await reportScreenChange(pendingStep.name);
+              _steps.remove(pendingStep);
+            }
+
+            _steps.add(route);
+
+            if (_steps.contains(route)) {
+              await reportScreenChange(route.name);
+              _steps.remove(route);
+            }
+          } catch (e) {
+            // Sub-labelled to keep it from looking like a terminal failure on
+            // the outer [SCREEN.screenChanged] call, which already logged
+            // phase=exit by the time this deferred task runs.
+            LuciqLogger.I.e(
+              '[SCREEN.screenChanged.deferred] phase=error errorType=${e.runtimeType}',
+              tag: DebugTags.screenTracking,
+            );
+          }
+        },
+        Priority.idle,
+      );
+      LuciqLogger.I.d(
+        '[SCREEN.screenChanged] phase=exit',
+        tag: DebugTags.screenTracking,
+      );
+    } catch (e) {
+      LuciqLogger.I.e(
+        '[SCREEN.screenChanged] phase=error errorType=${e.runtimeType}',
+        tag: DebugTags.screenTracking,
+      );
+    }
   }
 
   Future<void> reportScreenChange(String name) async {

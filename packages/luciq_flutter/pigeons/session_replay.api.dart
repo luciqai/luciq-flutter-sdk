@@ -8,7 +8,7 @@ abstract class SessionReplayHostApi {
   void setUserStepsEnabled(bool isEnabled);
 
   @async
-  String getSessionReplayLink();
+  String getSessionReplayLink(String callId);
 
   /// Sets when screenshots are captured.
   /// - navigation: Capture on screen changes only (default)

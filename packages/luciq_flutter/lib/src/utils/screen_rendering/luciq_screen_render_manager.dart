@@ -3,12 +3,16 @@ import 'dart:ui' show TimingsCallback, FrameTiming, FramePhase;
 
 import 'package:flutter/widgets.dart';
 import 'package:luciq_flutter/luciq_flutter.dart' show CrashReporting;
+import 'package:luciq_flutter/src/constants/debug_tags.dart';
 import 'package:luciq_flutter/src/models/luciq_frame_data.dart';
 import 'package:luciq_flutter/src/models/luciq_screen_render_data.dart';
 import 'package:luciq_flutter/src/modules/apm.dart';
 import 'package:luciq_flutter/src/utils/luciq_logger.dart';
 import 'package:luciq_flutter/src/utils/screen_rendering/luciq_widget_binding_observer.dart';
 import 'package:meta/meta.dart';
+
+/// Maximum characters of an exception message kept in a debug log line.
+const int _maxErrorMessageLength = 256;
 
 @internal
 enum UiTraceType {
@@ -51,7 +55,7 @@ class LuciqScreenRenderManager {
   static LuciqScreenRenderManager get I => instance;
 
   /// Logging tag for debugging purposes.
-  static const tag = "ScreenRenderManager";
+  static const tag = DebugTags.apmScreenRendering;
 
   /// setup function for [LuciqScreenRenderManager]
   @internal
@@ -232,7 +236,7 @@ class LuciqScreenRenderManager {
       1 / displayRefreshRate * 1000;
 
   /// Get device refresh rate from native side.
-  Future<List<double?>> get _getDeviceRefreshRateAndToleranceFromNative =>
+  Future<List<double?>?> get _getDeviceRefreshRateAndToleranceFromNative =>
       APM.getDeviceRefreshRateAndTolerance();
 
   /// add new [WidgetsBindingObserver] to track app lifecycle.
@@ -274,10 +278,15 @@ class LuciqScreenRenderManager {
 
   Future<double> get _getSlowFrameThresholdMs async {
     final deviceRefreshRateAndTolerance =
-        await _getDeviceRefreshRateAndToleranceFromNative;
-    final deviceRefreshRate = deviceRefreshRateAndTolerance[0] ??
+        await _getDeviceRefreshRateAndToleranceFromNative ?? const <double?>[];
+    final deviceRefreshRate = (deviceRefreshRateAndTolerance.isNotEmpty
+            ? deviceRefreshRateAndTolerance[0]
+            : null) ??
         60; // default to 60 FPS if not available
-    final toleranceMs = (deviceRefreshRateAndTolerance[1] ?? 10) /
+    final toleranceMs = ((deviceRefreshRateAndTolerance.length > 1
+                ? deviceRefreshRateAndTolerance[1]
+                : null) ??
+            10) /
         1000; // convert the tolerance from microseconds to milliseconds
     final targetMsPerFrame = _targetMsPerFrame(deviceRefreshRate);
     return double.parse(
@@ -400,14 +409,23 @@ class LuciqScreenRenderManager {
 
   /// @nodoc
   void _logExceptionErrorAndStackTrace(Object error, StackTrace stackTrace) {
-    //Log the crash details to the user.
-    LuciqLogger.I.e(
-      '[Error]:$error \n'
-      '[StackTrace]: $stackTrace',
-      tag: tag,
-    );
-
-    //Report nonfatal for the crash details.
+    // `init()` and `dispose()` catch failures from internal work that never
+    // crosses `hostCall`, so we emit the canonical error line here. Only the
+    // type goes to the error-level path (always on); the truncated message
+    // and stack trace are debug-gated to avoid leaking paths/route names.
+    final type = error.runtimeType.toString();
+    LuciqLogger.I.e('[ScreenRender] phase=error errorType=$type', tag: tag);
+    if (LuciqLogger.I.isDebugEnabled()) {
+      final msg = error.toString();
+      final truncated = msg.length > _maxErrorMessageLength
+          ? '${msg.substring(0, _maxErrorMessageLength)}...'
+          : msg;
+      LuciqLogger.I.d(
+        '[ScreenRender] phase=error errorType=$type '
+        'errorMessage=$truncated stackTrace=$stackTrace',
+        tag: tag,
+      );
+    }
     CrashReporting.reportHandledCrash(
       error,
       stackTrace,

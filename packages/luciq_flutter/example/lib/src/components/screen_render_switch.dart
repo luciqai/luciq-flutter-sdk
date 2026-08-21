@@ -12,7 +12,7 @@ class _ScreenRenderSwitchState extends State<ScreenRenderSwitch> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
+    return FutureBuilder<bool?>(
         future: APM.isScreenRenderEnabled(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {

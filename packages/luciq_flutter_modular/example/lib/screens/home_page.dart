@@ -14,9 +14,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    _luciq = await Luciq.isEnabled();
-    _apm = await APM.isEnabled();
-    _screenLoading = await APM.isScreenLoadingEnabled();
+    _luciq = (await Luciq.isEnabled()) ?? false;
+    _apm = (await APM.isEnabled()) ?? false;
+    _screenLoading = (await APM.isScreenLoadingEnabled()) ?? false;
   }
 
   @override

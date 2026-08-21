@@ -1037,11 +1037,24 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     @Override
     public void clearLogs() {
-        ThreadManager.runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                LuciqLog.clearLogs();
-            }
-        });
+
+      ThreadManager.runOnMainThread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+              "[Luciq.clearLogs] phase=enter");
+            LuciqLog.clearLogs();
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.clearLogs] phase=exit");
+
+          } catch (Exception e) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
+              "[Luciq.clearLogs] phase=error errorType=" + e.getClass().getSimpleName(),
+              e);
+          }
+        }
+      });
+
+
     }
 }

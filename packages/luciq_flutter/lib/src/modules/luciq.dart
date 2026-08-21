@@ -826,17 +826,27 @@ class Luciq {
           'viewNamePresent': viewName != null,
         },
       );
+
   /// Sets whether `LCQLog` messages are also printed to Xcode's console on iOS.
   /// iOS-only; no-op on Android.
   /// [printsToConsole] Whether logs print to the console.
   static Future<void> setLCQLogPrintsToConsole(bool printsToConsole) async {
     if (LCQBuildInfo.instance.isIOS) {
-      return _host.setLCQLogPrintsToConsole(printsToConsole);
+      return hostCall(
+        'Luciq.setLCQLogPrintsToConsole',
+        () => _host.setLCQLogPrintsToConsole(printsToConsole),
+        tag: DebugTags.core,
+        args: {'printsToConsole': printsToConsole},
+      );
     }
   }
 
   /// Clears all Luciq logs, console logs, network logs and user steps.
   static Future<void> clearLogs() async {
-    return _host.clearLogs();
+    return hostCall(
+      'Luciq.clearLogs',
+      () => _host.clearLogs(),
+      tag: DebugTags.core,
+    );
   }
 }

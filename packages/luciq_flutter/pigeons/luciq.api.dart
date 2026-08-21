@@ -135,4 +135,6 @@ abstract class LuciqHostApi {
   /// Enables capturing network logs (Fetch/XHR) triggered from
   /// inside WebViews. Disabled by default.
   void setWebViewNetworkTrackingEnabled(bool isEnabled);
+  void setLCQLogPrintsToConsole(bool printsToConsole);
+  void clearLogs();
 }

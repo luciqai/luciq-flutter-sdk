@@ -74,8 +74,7 @@ void main() {
         ),
       );
 
-      Surveys.setOnFinishCallback((type,String,data){
-
+      Surveys.setOnFinishCallback((type, String, data) {
         print(type);
       });
       CrashReporting.setNDKEnabled(true);

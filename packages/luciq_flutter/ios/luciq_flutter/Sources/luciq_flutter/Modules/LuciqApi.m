@@ -811,4 +811,19 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags network] format:@"[Luciq.setWebViewNetworkTrackingEnabled] phase=exit"];
 }
 
+- (void)setLCQLogPrintsToConsolePrintsToConsole:(NSNumber *)printsToConsole error:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setLCQLogPrintsToConsolePrintsToConsole] phase=enter isEnabled=%@", ([printsToConsole boolValue] ? @"true" : @"false")];
+    LCQLog.printsToConsole = [printsToConsole boolValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setLCQLogPrintsToConsolePrintsToConsole] phase=exit"];
+
+}
+
+- (void)clearLogsWithError:(FlutterError *_Nullable *_Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.clearLogsWithError] phase=enter"];
+
+    [LCQLog clearAllLogs];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.clearLogsWithError] phase=exit"];
+
+}
+
 @end

@@ -31,7 +31,7 @@ set -e
 GH_TOKEN="${GH_TOKEN:?Error: GH_TOKEN environment variable is required}"
 
 # ----- Configuration --------------------------------------------------------
-PUBLIC_REPO="luciqai/luciq-docs"
+PUBLIC_REPO="instabug/luciq-docs"
 DOCS_FILE="changelog/flutter-sdk.md"   # path inside the docs repo
 BASE_BRANCH="main"                      # docs repo default branch (NOT master)
 PR_BRANCH_PREFIX="update-flutter-docs-changelog-v"

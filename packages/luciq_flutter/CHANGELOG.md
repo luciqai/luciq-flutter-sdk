@@ -1,5 +1,13 @@
 # Changelog
 
+## [19.9.4](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...v19.9.3)
+
+### Fixed
+
+- Remove the internal Sonatype snapshot and Luciq Nexus Maven repositories from the Android build
+  configuration, which broke Android builds for apps that don't have internal repository
+  credentials. ([#82](https://github.com/luciqai/luciq-flutter-sdk/pull/82))
+
 ## [19.9.3](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.3...v19.8.0)
 
 ### Added

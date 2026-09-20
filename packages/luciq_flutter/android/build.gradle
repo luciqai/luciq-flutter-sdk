@@ -1,5 +1,5 @@
 group 'ai.luciq.flutter'
-version '19.9.3'
+version '19.9.4'
 apply from: './upload_symbols.gradle'
 
 buildscript {
@@ -17,16 +17,6 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots'
-        }
-        maven {
-            url 'https://mvn.luciq.ai/nexus/repository/luciq-internal/'
-            credentials {
-                username 'luciq'
-                password System.getenv('LUCIQ_REPOSITORY_PASSWORD')
-            }
-        }
     }
 }
 

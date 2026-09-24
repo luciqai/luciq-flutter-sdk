@@ -367,6 +367,11 @@ class Luciq {
         args: {'count': featureFlags.length},
       );
 
+  /// Adds a single feature flag to the next report.
+  static Future<void> addFeatureFlag(FeatureFlag featureFlag) async {
+    return addFeatureFlags([featureFlag]);
+  }
+
   /// Removes certain feature flags from the next report.
   static Future<void> removeFeatureFlags(List<String> featureFlags) => hostCall(
         'Luciq.removeFeatureFlags',
@@ -374,6 +379,11 @@ class Luciq {
         tag: DebugTags.featureFlags,
         args: {'count': featureFlags.length},
       );
+
+  /// Removes a single feature flag by [name] from the next report.
+  static Future<void> removeFeatureFlag(String name) async {
+    return removeFeatureFlags([name]);
+  }
 
   /// Clears all feature flags from the next report.
   static Future<void> clearAllFeatureFlags() => hostCall(
@@ -816,4 +826,27 @@ class Luciq {
           'viewNamePresent': viewName != null,
         },
       );
+
+  /// Sets whether `LCQLog` messages are also printed to Xcode's console on iOS.
+  /// iOS-only; no-op on Android.
+  /// [printsToConsole] Whether logs print to the console.
+  static Future<void> setLCQLogPrintsToConsole(bool printsToConsole) async {
+    if (LCQBuildInfo.instance.isIOS) {
+      return hostCall(
+        'Luciq.setLCQLogPrintsToConsole',
+        () => _host.setLCQLogPrintsToConsole(printsToConsole),
+        tag: DebugTags.core,
+        args: {'printsToConsole': printsToConsole},
+      );
+    }
+  }
+
+  /// Clears all Luciq logs, console logs, network logs and user steps.
+  static Future<void> clearLogs() async {
+    return hostCall(
+      'Luciq.clearLogs',
+      () => _host.clearLogs(),
+      tag: DebugTags.core,
+    );
+  }
 }

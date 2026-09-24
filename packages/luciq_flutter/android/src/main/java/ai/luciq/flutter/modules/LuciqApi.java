@@ -49,6 +49,7 @@ import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
 import ai.luciq.library.internal.crossplatform.InternalCore;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
+import ai.luciq.library.logging.LuciqLog;
 import ai.luciq.library.model.NetworkLog;
 import ai.luciq.library.screenshot.instacapture.ScreenshotRequest;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
@@ -1027,5 +1028,33 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                     "[Luciq.setWebViewNetworkTrackingEnabled] phase=error errorType=" + e.getClass().getSimpleName(),
                     e);
         }
+    }
+
+    @Override
+    public void setLCQLogPrintsToConsole(@NonNull Boolean printsToConsole) {
+        // iOS Only
+    }
+
+    @Override
+    public void clearLogs() {
+
+      ThreadManager.runOnMainThread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+              "[Luciq.clearLogs] phase=enter");
+            LuciqLog.clearLogs();
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.clearLogs] phase=exit");
+
+          } catch (Exception e) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
+              "[Luciq.clearLogs] phase=error errorType=" + e.getClass().getSimpleName(),
+              e);
+          }
+        }
+      });
+
+
     }
 }

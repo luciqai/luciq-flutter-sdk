@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:luciq_dio_interceptor/luciq_dio_interceptor.dart';
+import 'package:luciq_http_client/src/network_body_redactor.dart';
 
 void main() {
   group('redactNetworkBody', () {

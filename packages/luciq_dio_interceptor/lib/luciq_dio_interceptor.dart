@@ -168,31 +168,37 @@ class LuciqDioInterceptor extends Interceptor {
 }
 
 const _sensitiveKeys = [
-  // Credentials and tokens
+  // Credentials and tokens. `token` alone also catches `wunderTokenV3`/
+  // `wunderTokenV4` (RIDER-5636) — those don't share a compound word with
+  // `access_token`/`refresh_token`, and `wunderTokenV3`'s value isn't
+  // JWT-shaped so it isn't caught by `_isStripeToken`'s value check either.
   'password',
   'currentPassword',
   'client_secret',
   'access_token',
   'refresh_token',
+  'token',
   // Contact details
   'phone',
   'msisdn',
   'mobilenumber',
   'mobile_number',
   'email',
-  // Identity: name and date of birth
+  // Identity: name, date of birth, age and gender (RIDER-5636)
   'firstName',
   'lastName',
   'fullName',
   'birthDate',
   'dateOfBirth',
   'birthday',
+  'age',
+  'gender',
 ];
 
-// Deliberately left visible, since none of them identify a customer on their
-// own and all of them are needed to debug from a report: `gender` (coded int),
-// `tags` (backend segmentation codes, also used as display labels on
-// purchasable items) and `customerId`/`customerReference` (internal ids).
+// Deliberately left visible, since neither identifies a customer on their
+// own and both are needed to debug from a report: `tags` (backend
+// segmentation codes, also used as display labels on purchasable items) and
+// `customerId`/`customerReference` (internal ids).
 
 /// Redacts sensitive fields (passwords, tokens, phone numbers, etc.) from
 /// network request/response bodies before they're sent to network logging.
@@ -249,9 +255,33 @@ bool _matchesSensitiveKey(String key) {
   );
 }
 
+// A bare `code` field is ambiguous across this API: it's the OTP/SMS
+// verification code on auth endpoints (RIDER-5636), but also a plain
+// (non-secret) plan identifier on subscription/bundle responses, e.g.
+// `{"code": "25", "title": "Forest Flex"}`. Rather than keying off the
+// request URL (the acceptance criteria calls for one rule, not a list of
+// screens), redact a bare `code` only when it's sent alongside a phone or
+// email — every verification/sign-in call pairs `code` with one of those
+// (`phone`, `number`, or `email`), while plan/bundle/promo-code payloads
+// never do.
+bool _isVerificationCode(String key, Map<String, dynamic> siblings) {
+  if (_wordsOf(key).join('_') != 'code') return false;
+  return siblings.entries.any((entry) {
+    if (entry.key == key) return false;
+    final words = _wordsOf(entry.key);
+    if (words.contains('phone') ||
+        words.contains('number') ||
+        words.contains('email')) {
+      return true;
+    }
+    final value = entry.value;
+    return value is String && _isPhoneNumber(value);
+  });
+}
+
 void _removeSensitiveFields(Map<String, dynamic> map) {
   map.forEach((key, value) {
-    if (_matchesSensitiveKey(key)) {
+    if (_matchesSensitiveKey(key) || _isVerificationCode(key, map)) {
       map[key] = '***REDACTED***';
     } else if (value is String &&
         (_isStripeToken(value) || _isPhoneNumber(value))) {

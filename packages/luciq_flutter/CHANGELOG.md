@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...dev)
+
+### Fixed
+
+- Detect `LuciqPrivateView` and `LuciqSliverPrivateView` by type instead of by `runtimeType` name
+  when recording user steps. In builds made with `--obfuscate` the names didn't match, so tapping a
+  text field inside a private view logged the text typed into it.
+
 ## [19.9.4](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...v19.9.3)
 
 ### Fixed

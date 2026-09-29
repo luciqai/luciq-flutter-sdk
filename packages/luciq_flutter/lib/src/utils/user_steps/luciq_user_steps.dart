@@ -162,8 +162,10 @@ class LuciqUserStepsState extends State<LuciqUserSteps> {
         if (paintBounds.contains(_pointerDownLocation!)) {
           final widget = visitedElement.widget;
           if (!isPrivate) {
-            isPrivate = widget.runtimeType.toString() == 'LuciqPrivateView' ||
-                widget.runtimeType.toString() == 'LuciqSliverPrivateView';
+            // Type checks, not runtimeType names: names are obfuscated in
+            // release builds built with --obfuscate.
+            isPrivate =
+                widget is LuciqPrivateView || widget is LuciqSliverPrivateView;
           }
           if (_isTargetWidget(widget, gestureType)) {
             tappedElement = visitedElement;

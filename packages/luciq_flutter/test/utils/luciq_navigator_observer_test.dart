@@ -132,6 +132,40 @@ void main() {
     });
   });
 
+  test('should report screen change when a route is replaced', () {
+    fakeAsync((async) {
+      observer.didReplace(newRoute: route, oldRoute: previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verify(
+        mScreenLoadingManager.prepareUiTrace(screen, screen),
+      ).called(1);
+
+      verify(
+        mHost.reportScreenChange(screen),
+      ).called(1);
+    });
+  });
+
+  test('should not report screen change when the replacing route is null', () {
+    fakeAsync((async) {
+      observer.didReplace(oldRoute: previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verifyNever(
+        mScreenLoadingManager.prepareUiTrace(any, any),
+      );
+
+      verifyNever(
+        mHost.reportScreenChange(any),
+      );
+    });
+  });
+
   test('should fallback to "N/A" when the screen name is empty', () {
     fakeAsync((async) {
       final route = createRoute('');

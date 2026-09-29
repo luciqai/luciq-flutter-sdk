@@ -110,6 +110,13 @@ class LuciqNavigatorObserver extends NavigatorObserver {
     screenChanged(route);
   }
 
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    if (newRoute != null) {
+      screenChanged(newRoute);
+    }
+  }
+
   FutureOr<void> _startScreenRenderCollector(int? uiTraceId) async {
     if (uiTraceId == null) return;
     final isScreenRenderEnabled = await FlagsConfig.screenRendering.isEnabled();

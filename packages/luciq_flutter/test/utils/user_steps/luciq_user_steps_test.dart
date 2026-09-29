@@ -294,5 +294,75 @@ void main() {
         );
       });
     });
+
+    group('Private views', () {
+      const typedValue = '29001011234567';
+
+      Future<String?> tapTextFieldAndCaptureMessage(
+        WidgetTester tester,
+        Widget Function(Widget field) wrap,
+      ) async {
+        final controller = TextEditingController(text: typedValue);
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          buildTestWidget(
+            Scaffold(body: wrap(TextField(controller: controller))),
+          ),
+        );
+
+        await tester.tap(find.byType(TextField));
+        await tester.pumpAndSettle();
+
+        final captured = verify(
+          mockLuciqHostApi.logUserSteps(
+            GestureType.tap.toString(),
+            captureAny,
+            any,
+          ),
+        ).captured;
+        expect(captured, hasLength(1));
+        return captured.single as String?;
+      }
+
+      testWidgets('logs the typed text of a TextField outside a private view',
+          (tester) async {
+        final message = await tapTextFieldAndCaptureMessage(
+          tester,
+          (field) => field,
+        );
+
+        expect(message, contains(typedValue));
+      });
+
+      testWidgets(
+          'does not log the typed text of a TextField inside LuciqPrivateView',
+          (tester) async {
+        final message = await tapTextFieldAndCaptureMessage(
+          tester,
+          (field) => LuciqPrivateView(child: field),
+        );
+
+        expect(message, isNot(contains(typedValue)));
+      });
+
+      // A subclass has a different runtimeType name, like an obfuscated
+      // release build, so this fails if detection goes back to comparing
+      // runtimeType.toString() against 'LuciqPrivateView'.
+      testWidgets(
+          'does not log the typed text when the private view type name differs',
+          (tester) async {
+        final message = await tapTextFieldAndCaptureMessage(
+          tester,
+          (field) => _RenamedPrivateView(child: field),
+        );
+
+        expect(message, isNot(contains(typedValue)));
+      });
+    });
   });
+}
+
+class _RenamedPrivateView extends LuciqPrivateView {
+  const _RenamedPrivateView({required Widget child}) : super(child: child);
 }

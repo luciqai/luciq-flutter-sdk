@@ -4,6 +4,18 @@
 # E2E tests
 e2e/
 
+# Repo-only dev tooling: CI (Danger, Ruby/Node toolchains), code generation
+# inputs and unit tests. Apps depending on luciq_flutter don't need these.
+/dangerfile.ts
+/package.json
+/yarn.lock
+node_modules/
+/Gemfile
+/Gemfile.lock
+/scripts/
+/pigeons/
+/test/
+
 # Miscellaneous
 *.class
 *.log

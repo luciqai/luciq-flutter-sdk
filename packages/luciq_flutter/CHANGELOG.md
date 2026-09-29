@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...dev)
+
+### Fixed
+
+- Log a one-time debug-mode warning when `LuciqPrivateView` or `LuciqSliverPrivateView` is built
+  without a `LuciqWidget` ancestor, or with `LuciqWidget.enablePrivateViews` set to `false`. In
+  that setup the view isn't masked in screenshots or Session Replay. Release behaviour is unchanged.
+
 ## [19.9.4](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...v19.9.3)
 
 ### Fixed

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Report screen changes on route replacement (`pushReplacement`), so crashes no longer carry the
+  previous screen or `N/A` as the current view.
+
 ## [19.9.4](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...v19.9.3)
 
 ### Fixed

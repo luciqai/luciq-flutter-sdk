@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:luciq_flutter/src/utils/private_views/private_view_debug_check.dart';
 
 class LuciqSliverPrivateView extends StatelessWidget {
   final Widget sliver;
@@ -9,6 +10,7 @@ class LuciqSliverPrivateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugCheckPrivateViewSetup(context, 'LuciqSliverPrivateView');
     return sliver;
   }
 }

@@ -18,7 +18,7 @@ let package = Package(
         .library(name: "luciq-flutter", targets: ["luciq_flutter"])
     ],
     dependencies: [
-        .package(url: "https://github.com/luciqai/luciq-ios-sdk", branch: "release/rebase-bdr-thma/19.10.0")
+        .package(url: "https://github.com/luciqai/luciq-ios-sdk", branch: "release/rebase-bdr-therma/19.10.0")
     ],
     targets: [
         .target(

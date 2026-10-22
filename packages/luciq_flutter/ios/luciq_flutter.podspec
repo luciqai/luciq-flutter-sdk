@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name              = 'luciq_flutter'
-  s.version           = '19.9.3'
+  s.version           = '19.10.0'
   s.summary           = 'Flutter plugin for integrating the Luciq SDK.'
   s.author            = 'Luciq'
   s.homepage          = 'https://www.luciq.ai/platforms/flutter'

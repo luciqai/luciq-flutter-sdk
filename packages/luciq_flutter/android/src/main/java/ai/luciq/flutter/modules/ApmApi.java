@@ -19,7 +19,7 @@ import ai.luciq.apm.configuration.cp.APMFeature;
 import ai.luciq.apm.configuration.cp.FeatureAvailabilityCallback;
 import ai.luciq.apm.configuration.cp.ToleranceValueCallback;
 import ai.luciq.apm.networking.APMNetworkLogger;
-import ai.luciq.apm.networkinterception.cp.APMCPNetworkLog;
+import ai.luciq.apm.networklogs.cp.APMCPNetworkLog;
 import ai.luciq.apm.screenrendering.models.cp.LuciqFrameData;
 import ai.luciq.apm.screenrendering.models.cp.LuciqScreenRenderingData;
 import ai.luciq.flutter.generated.ApmPigeon;

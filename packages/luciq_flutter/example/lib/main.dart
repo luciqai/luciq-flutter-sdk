@@ -52,19 +52,15 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
-        token: 'ed6f659591566da19b67857e1b9d40ab',
+        token: 'd86cc87abc937f7665fad688826b6825',
         invocationEvents: [InvocationEvent.floatingButton],
         debugLogsLevel: LogLevel.verbose,
-        appVariant: 'variant 1',
       );
       Luciq.setAutoMaskScreenshotTypes([AutoMasking.webViews]);
 
       Luciq.setWebViewMonitoringEnabled(true);
       Luciq.setWebViewUserInteractionsTrackingEnabled(true);
       Luciq.setWebViewNetworkTrackingEnabled(true);
-
-      Luciq.setValueForStringWithKey('text you want',
-          CustomTextPlaceHolderKey.commentFieldHintForBugReport);
 
       BugReporting.setProactiveReportingConfigurations(
         const ProactiveReportingConfigs(
@@ -74,10 +70,6 @@ void main() {
         ),
       );
 
-      Surveys.setOnFinishCallback((type,String,data){
-
-        print(type);
-      });
       CrashReporting.setNDKEnabled(true);
       // APM.setScreenRenderingEnabled(true);
       // APM.setAutoUITraceEnabled(false);

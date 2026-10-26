@@ -62,13 +62,6 @@ void main() {
       Luciq.setWebViewUserInteractionsTrackingEnabled(true);
       Luciq.setWebViewNetworkTrackingEnabled(true);
 
-      BugReporting.setProactiveReportingConfigurations(
-        const ProactiveReportingConfigs(
-          enabled: true,
-          gapBetweenModals: 2, //time in seconds
-          modalDelayAfterDetection: 2, //time in seconds
-        ),
-      );
 
       CrashReporting.setNDKEnabled(true);
       // APM.setScreenRenderingEnabled(true);

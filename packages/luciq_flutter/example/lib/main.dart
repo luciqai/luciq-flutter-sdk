@@ -62,7 +62,6 @@ void main() {
       Luciq.setWebViewUserInteractionsTrackingEnabled(true);
       Luciq.setWebViewNetworkTrackingEnabled(true);
 
-
       CrashReporting.setNDKEnabled(true);
       // APM.setScreenRenderingEnabled(true);
       // APM.setAutoUITraceEnabled(false);

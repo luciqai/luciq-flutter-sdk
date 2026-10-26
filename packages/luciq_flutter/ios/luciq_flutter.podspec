@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name              = 'luciq_flutter'
-  s.version           = '19.12.0'
+  s.version           = '19.13.0'
   s.summary           = 'Flutter plugin for integrating the Luciq SDK.'
   s.author            = 'Luciq'
   s.homepage          = 'https://www.luciq.ai/platforms/flutter'
@@ -20,6 +20,6 @@ Pod::Spec.new do |s|
   }
 
   s.dependency 'Flutter'
-  s.dependency 'Luciq', '19.12.0'
+  s.dependency 'Luciq', '19.13.0'
 end
 

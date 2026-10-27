@@ -73,6 +73,7 @@ class LuciqLog {
       );
 
   /// Clears Luciq internal log
+  @Deprecated('Scheduled for removal with no replacement.')
   static Future<void> clearAllLogs() => hostCall(
         'LOG.clearAllLogs',
         () => _host.clearAllLogs(),

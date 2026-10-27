@@ -1,5 +1,21 @@
 # Changelog
 
+## [19.13.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.13.0...v19.9.4)
+
+### Changed
+
+- Bump Luciq iOS SDK to
+  v19.13.0. [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.13.0).
+
+- Bump Luciq Android SDK to
+  v19.14.0. [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.14.0).
+
+### Deprecated
+
+- Deprecate `Luciq.getTags`. Use `Luciq.appendTags` to add tags.
+
+- Deprecate `LuciqLog.clearAllLogs` with no replacement.
+
 ## [19.9.4](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...v19.9.3)
 
 ### Fixed

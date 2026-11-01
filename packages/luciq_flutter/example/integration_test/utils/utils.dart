@@ -5,7 +5,7 @@ import 'package:patrol/patrol.dart';
 
 Future<void> init(PatrolIntegrationTester $) async {
   Luciq.init(
-    token: 'd86cc87abc937f7665fad688826b6825',
+    token: '0174a800719ebdebf7b248fa6ae2ef17',
     invocationEvents: [InvocationEvent.floatingButton],
     debugLogsLevel: LogLevel.verbose,
   );

@@ -52,7 +52,7 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       Luciq.init(
-        token: '0174a800719ebdebf7b248fa6ae2ef17',
+        token: 'd86cc87abc937f7665fad688826b6825',
         invocationEvents: [InvocationEvent.floatingButton],
         debugLogsLevel: LogLevel.verbose,
         appVariant: 'variant 1',

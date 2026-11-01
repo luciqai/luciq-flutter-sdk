@@ -8,7 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
-import ai.luciq.apm.networkinterception.cp.APMCPNetworkLog;
+import ai.luciq.apm.networklogs.cp.APMCPNetworkLog;
 import ai.luciq.crash.models.LuciqNonFatalException;
 
 import org.json.JSONObject;

@@ -17,6 +17,13 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url 'https://mvn.luciq.ai/nexus/repository/luciq-internal/'
+            credentials {
+                username 'luciq'
+                password System.getenv('LUCIQ_REPOSITORY_PASSWORD')
+            }
+        }
     }
 }
 
@@ -45,7 +52,7 @@ android {
 }
 
 dependencies {
-    api 'ai.luciq.library:luciq:19.14.0'
+    api 'ai.luciq.library:luciq:19.14.1.9039814-SNAPSHOT'
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.mockito:mockito-inline:3.12.1"
     testImplementation "io.mockk:mockk:1.13.13"

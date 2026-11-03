@@ -62,6 +62,21 @@ void main() {
       Luciq.setWebViewUserInteractionsTrackingEnabled(true);
       Luciq.setWebViewNetworkTrackingEnabled(true);
 
+      Luciq.setValueForStringWithKey('text you want',
+          CustomTextPlaceHolderKey.commentFieldHintForBugReport);
+
+      BugReporting.setProactiveReportingConfigurations(
+        const ProactiveReportingConfigs(
+          enabled: true,
+          gapBetweenModals: 2, //time in seconds
+          modalDelayAfterDetection: 2, //time in seconds
+        ),
+      );
+
+      Surveys.setOnFinishCallback((state, id, info) {
+        print('$state $id ${info['responses']}');
+      });
+
       CrashReporting.setNDKEnabled(true);
       // APM.setScreenRenderingEnabled(true);
       // APM.setAutoUITraceEnabled(false);

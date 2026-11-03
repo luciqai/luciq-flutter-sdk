@@ -199,6 +199,8 @@ class Surveys implements SurveysFlutterApi {
   /// submitted, ended midway, or dismissed at the start.
   /// [callback] A callback that receives the survey's finish [SurveyFinishState],
   /// the survey identifier, and a map carrying the survey and question responses.
+  /// Each entry in `responses` carries `response_index`: the selected MCQ
+  /// option's 0-based index, or `-1` for other question types.
   static Future<void> setOnFinishCallback(
     OnFinishSurveyCallback callback,
   ) {

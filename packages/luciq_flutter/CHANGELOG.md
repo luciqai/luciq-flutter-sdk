@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...dev)
+
+### Added
+
+- Each MCQ response in the `Surveys.setOnFinishCallback` payload now carries `response_index`,
+  the selected option's 0-based index, or `-1` for other question types. Lets apps branch on
+  the answer without mapping localized option text.
+
+### Changed
+
+- Bump Luciq iOS SDK to
+  v19.13.0. [See release notes](https://github.com/luciqai/luciq-ios-sdk/releases/tag/19.13.0).
+
+- Bump Luciq Android SDK to
+  v19.15.0. [See release notes](https://github.com/luciqai/luciq-android-sdk/releases/tag/v19.15.0).
+
 ## [19.9.4](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.9.4...v19.9.3)
 
 ### Fixed

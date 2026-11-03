@@ -166,4 +166,22 @@ void main() {
 
     expect(info, <String, dynamic>{});
   });
+
+  test('[onFinishSurvey] should forward response_index for each response',
+      () async {
+    Map<String, dynamic>? info;
+
+    await Surveys.setOnFinishCallback((_, __, inf) => info = inf);
+
+    Surveys().onFinishSurvey(
+      'call-3',
+      'SUBMITTED',
+      'token',
+      '{"responses":[{"response_value":"Ja","response_index":0}]}',
+    );
+
+    expect(info?['responses'], [
+      {'response_value': 'Ja', 'response_index': 0},
+    ]);
+  });
 }

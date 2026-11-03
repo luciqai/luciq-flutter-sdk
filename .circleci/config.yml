@@ -218,6 +218,8 @@ jobs:
   danger:
     executor:
       name: node/default
+      # buffer-equal-constant-time (via danger -> jsonwebtoken) uses SlowBuffer, removed in Node 26
+      tag: '22.14'
     steps:
       - advanced-checkout/shallow-checkout
       - node/install-packages:

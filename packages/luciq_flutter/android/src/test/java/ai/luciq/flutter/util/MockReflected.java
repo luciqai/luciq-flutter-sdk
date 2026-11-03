@@ -3,7 +3,7 @@ package ai.luciq.flutter.util;
 import android.graphics.Bitmap;
 import androidx.annotation.Nullable;
 
-import ai.luciq.apm.networkinterception.cp.APMCPNetworkLog;
+import ai.luciq.apm.networklogs.cp.APMCPNetworkLog;
 import ai.luciq.crash.models.LuciqNonFatalException;
 import ai.luciq.library.model.StepType;
 

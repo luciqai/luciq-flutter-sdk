@@ -74,9 +74,8 @@ void main() {
         ),
       );
 
-      Surveys.setOnFinishCallback((type,String,data){
-
-        print(type);
+      Surveys.setOnFinishCallback((state, id, info) {
+        print('$state $id ${info['responses']}');
       });
       CrashReporting.setNDKEnabled(true);
       // APM.setScreenRenderingEnabled(true);

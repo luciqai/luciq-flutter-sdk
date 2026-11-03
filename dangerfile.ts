@@ -2,12 +2,17 @@ import { danger, fail, schedule, warn } from 'danger';
 import collectCoverage, {ReportOptions, ReportType} from '@instabug/danger-plugin-coverage';
 import * as fs from 'fs';
 
-const hasSourceChanges = danger.git.modified_files.some((file) =>
-  file.startsWith('lib/')
+// Packages (under packages/<name>/) whose lib/ sources changed in this PR.
+const packagesWithSourceChanges = Array.from(
+  new Set(
+    danger.git.modified_files
+      .map((file) => file.match(/^packages\/([^/]+)\/lib\//)?.[1])
+      .filter((name): name is string => !!name)
+  )
 );
-const declaredTrivial =
-  !hasSourceChanges ||
-  danger.github.issue.labels.some((label) => label.name === 'trivial');
+const declaredTrivial = danger.github.issue.labels.some(
+  (label) => label.name === 'trivial'
+);
 
 // Make sure PR has a description.
 async function hasDescription() {
@@ -21,10 +26,13 @@ async function hasDescription() {
     );
   }
 
-  if (!danger.git.modified_files.includes('packages/luciq-Flutter/CHANGELOG.md') && !declaredTrivial) {
-    warn(
-      'You have not included a CHANGELOG entry! \nYou can find it at [CHANGELOG.md](https://github.com/luciqai/luciq-flutter-sdk/blob/master/CHANGELOG.md).'
-    );
+  for (const pkg of packagesWithSourceChanges) {
+    const changelog = `packages/${pkg}/CHANGELOG.md`;
+    if (!danger.git.modified_files.includes(changelog) && !declaredTrivial) {
+      warn(
+        `You have not included a CHANGELOG entry for ${pkg}! \nYou can find it at [${changelog}](https://github.com/luciqai/luciq-flutter-sdk/blob/master/${changelog}).`
+      );
+    }
   }
 }
 

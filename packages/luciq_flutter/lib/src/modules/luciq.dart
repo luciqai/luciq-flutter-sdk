@@ -347,6 +347,9 @@ class Luciq {
       );
 
   /// Gets all tags of reported feedback, bug or crash. Returns the list of tags.
+  @Deprecated(
+    'Scheduled for removal. To add tags, use Luciq.appendTags.',
+  )
   static Future<List<String>?> getTags() => hostCall<List<String>?>(
         'Luciq.getTags',
         () async {

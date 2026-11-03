@@ -55,7 +55,6 @@ void main() {
         token: '0174a800719ebdebf7b248fa6ae2ef17',
         invocationEvents: [InvocationEvent.floatingButton],
         debugLogsLevel: LogLevel.verbose,
-        appVariant: 'variant 1',
       );
       Luciq.setAutoMaskScreenshotTypes([AutoMasking.webViews]);
 
@@ -77,6 +76,7 @@ void main() {
       Surveys.setOnFinishCallback((state, id, info) {
         print('$state $id ${info['responses']}');
       });
+
       CrashReporting.setNDKEnabled(true);
       // APM.setScreenRenderingEnabled(true);
       // APM.setAutoUITraceEnabled(false);

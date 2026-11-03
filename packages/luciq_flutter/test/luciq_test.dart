@@ -266,6 +266,7 @@ void main() {
     const tags = ["tag-1", "tag-2"];
     when(mHost.getTags()).thenAnswer((_) async => tags);
 
+    // ignore: deprecated_member_use_from_same_package
     final result = await Luciq.getTags();
 
     expect(result, tags);

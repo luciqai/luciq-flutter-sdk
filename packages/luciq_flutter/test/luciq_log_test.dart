@@ -71,6 +71,7 @@ void main() {
   });
 
   test('[clearAllLogs] should call host method', () async {
+    // ignore: deprecated_member_use_from_same_package
     await LuciqLog.clearAllLogs();
 
     verify(

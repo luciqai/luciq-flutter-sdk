@@ -35,6 +35,16 @@ dependencies:
 flutter packages get
 ```
 
+3. (iOS only) Set your app's minimum iOS deployment target to 15.4 or later, which Luciq requires. New Flutter projects target an older version, and `pod install` then fails with CocoaPods' generic "required a higher minimum deployment target" error.
+
+   In `ios/Podfile`:
+
+```ruby
+platform :ios, '15.4'
+```
+
+   Then, in Xcode, set **iOS Deployment Target** (`IPHONEOS_DEPLOYMENT_TARGET`) to `15.4` for the `Runner` target.
+
 ### Initializing Luciq
 
 Initialize the SDK in your `main` function. This starts the SDK with the default behavior and sets it to be shown when the device is shaken.

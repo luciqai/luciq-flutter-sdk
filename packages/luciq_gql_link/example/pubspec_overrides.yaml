@@ -1,6 +1,0 @@
-# melos_managed_dependency_overrides: luciq_flutter,luciq_gql_link
-dependency_overrides:
-  luciq_flutter:
-    path: ../../luciq_flutter
-  luciq_gql_link:
-    path: ../

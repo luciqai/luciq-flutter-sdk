@@ -1,5 +1,9 @@
 package ai.luciq.flutter;
 
+
+
+
+
 import static ai.luciq.flutter.util.GlobalMocks.reflected;
 import static ai.luciq.flutter.util.MockResult.makeResult;
 import static org.junit.Assert.assertEquals;
@@ -745,6 +749,32 @@ public class LuciqApiTest {
 
         LuciqApi.setScreenshotCaptor(any(), internalCore);
         verify(internalCore)._setScreenshotCaptor(any(ScreenshotCaptor.class));
+    }
+
+    @Test
+    public void testAttachToNativeAppDoesNotStartOrReconfigureTheSdk() {
+        mLuciq.when(Luciq::isBuilt).thenReturn(true);
+        MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class);
+
+        api.attachToNativeApp("LogLevel.debug");
+
+        assertEquals(0, mLuciqBuilder.constructed().size());
+        mLuciq.verify(() -> Luciq.setScreenshotProvider(any()), never());
+        reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
+        mLuciqBuilder.close();
+    }
+
+    @Test
+    public void testAttachToNativeAppWhenTheNativeAppDidNotStartLuciq() {
+        mLuciq.when(Luciq::isBuilt).thenReturn(false);
+        MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class);
+
+        api.attachToNativeApp("LogLevel.error");
+
+        assertEquals(0, mLuciqBuilder.constructed().size());
+        mLuciq.verify(() -> Luciq.setScreenshotProvider(any()), never());
+        reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
+        mLuciqBuilder.close();
     }
 
     @Test

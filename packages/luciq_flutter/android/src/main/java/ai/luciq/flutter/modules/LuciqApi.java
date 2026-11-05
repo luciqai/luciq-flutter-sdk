@@ -180,6 +180,33 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.init] phase=exit");
     }
 
+    /**
+     * Connects Flutter to the SDK the native app already started (hybrid apps).
+     * <p>
+     * Unlike {@link #init}, it never builds the SDK, so it leaves the native app's configuration
+     * alone: no second {@code Luciq.Builder}, no process-wide {@code setCurrentPlatform}, no
+     * process-wide screenshot provider, and native user steps stay on for native screens.
+     *
+     * @param debugLogsLevel the Flutter plugin's own log level. It does not change the native SDK's.
+     */
+    @Override
+    public void attachToNativeApp(@NonNull String debugLogsLevel) {
+        int parsedLogLevel = LogLevel.ERROR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            parsedLogLevel = ArgsRegistry.sdkLogLevels.getOrDefault(debugLogsLevel, LogLevel.ERROR);
+        }
+        LuciqFlutterLogger.setLevel(parsedLogLevel);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[Luciq.attachToNativeApp] phase=enter debugLogsLevel=" + debugLogsLevel);
+        if (!Luciq.isBuilt()) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
+                    "[Luciq.attachToNativeApp] Luciq isn't running in the native app. Start it with "
+                            + "Luciq.Builder in Application.onCreate, before the Flutter engine starts.");
+            return;
+        }
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.attachToNativeApp] phase=exit");
+    }
+
     @Override
     public void enableAutoMasking(@NonNull List<String> autoMasking) {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,

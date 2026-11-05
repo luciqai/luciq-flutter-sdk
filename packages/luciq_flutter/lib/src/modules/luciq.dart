@@ -165,6 +165,16 @@ class Luciq {
 
   static const tag = 'Luciq';
 
+  /// Which Dart entry point started the SDK, so [init] and [attachToNativeApp]
+  /// never both apply.
+  static String? _startMode;
+
+  /// @nodoc
+  @visibleForTesting
+  static void $resetStartMode() {
+    _startMode = null;
+  }
+
   /// @nodoc
   @visibleForTesting
   // ignore: use_setters_to_change_properties
@@ -220,6 +230,9 @@ class Luciq {
     LogLevel debugLogsLevel = LogLevel.error,
     String? appVariant,
   }) {
+    if (!_claimStartMode('init')) {
+      return Future.value();
+    }
     $setup();
     LuciqLogger.I.logLevel = debugLogsLevel;
     return hostCall<void>(
@@ -241,6 +254,66 @@ class Luciq {
         'appVariantPresent': appVariant != null,
       },
     );
+  }
+
+  /// Connects Flutter to the Luciq SDK that the native app already started.
+  ///
+  /// Use this instead of [init] in a hybrid app: a native Android or iOS app
+  /// that starts Luciq itself (for example in `Application.onCreate` or the
+  /// `AppDelegate`) and embeds a Flutter module. It sets up the Flutter side
+  /// of the SDK and leaves the native app's Luciq configuration untouched: no
+  /// token, no second SDK start, and no change to its invocation events, app
+  /// variant, log level, platform or native user steps.
+  ///
+  /// Call it once in the Flutter module's `main`, before `runApp`. The native
+  /// app must start Luciq before the Flutter engine starts; otherwise this
+  /// call logs an error and does nothing on the native side.
+  ///
+  /// To label the Flutter screens of the app as Flutter, and keep their user
+  /// steps and screenshots apart from the native screens, declare the
+  /// Activities and view controllers that host Flutter with
+  /// `registerCrossPlatformHosts` in the native Luciq setup.
+  ///
+  /// Do not call both [init] and [attachToNativeApp] in the same app: the
+  /// second call is ignored.
+  ///
+  /// The [debugLogsLevel] sets the verbosity of the Flutter plugin's own logs.
+  /// It does not change the native SDK's log level, which the native app sets.
+  static Future<void> attachToNativeApp({
+    LogLevel debugLogsLevel = LogLevel.error,
+  }) {
+    if (!_claimStartMode('attachToNativeApp')) {
+      return Future.value();
+    }
+    $setup();
+    LuciqLogger.I.logLevel = debugLogsLevel;
+    return hostCall<void>(
+      'Luciq.attachToNativeApp',
+      () async {
+        await _host.attachToNativeApp(debugLogsLevel.toString());
+        return FeatureFlagsManager().registerFeatureFlagsListener();
+      },
+      tag: DebugTags.core,
+      args: {'debugLogsLevel': debugLogsLevel},
+    );
+  }
+
+  /// Records how the SDK was started from Dart. Returns false, after logging
+  /// an error, when the other entry point already ran. Repeating the same entry
+  /// point is allowed, as [init] always was.
+  static bool _claimStartMode(String mode) {
+    final current = _startMode;
+    if (current != null && current != mode) {
+      LuciqLogger.I.e(
+        '$mode() ignored: Luciq was already started from Dart with '
+        '$current(). Use init() in Flutter apps and '
+        'attachToNativeApp() in native apps that embed Flutter.',
+        tag: DebugTags.core,
+      );
+      return false;
+    }
+    _startMode = mode;
+    return true;
   }
 
   /// Changes the Dart-side debug log verbosity at runtime.

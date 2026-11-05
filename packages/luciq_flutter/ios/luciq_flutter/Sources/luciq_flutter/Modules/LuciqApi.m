@@ -97,6 +97,20 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.init] phase=exit"];
 }
 
+// Connects Flutter to the SDK the native app already started (hybrid apps). Unlike init, it never
+// starts the SDK, sets the platform for the whole app or changes the app variant, the SDK log level,
+// automatic network capturing or event swizzling: those stay as the native app configured them.
+// It only sets the Flutter plugin's own log level.
+- (void)attachToNativeAppDebugLogsLevel:(nonnull NSString *)debugLogsLevel error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    NSNumber *resolvedLogLevelNumber = ArgsRegistry.sdkLogLevels[debugLogsLevel];
+    LCQSDKDebugLogsLevel resolvedLogLevel = resolvedLogLevelNumber
+        ? resolvedLogLevelNumber.integerValue
+        : LCQSDKDebugLogsLevelError;
+    [LuciqFlutterLogger setLevel:resolvedLogLevel];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
+                   format:@"[Luciq.attachToNativeApp] phase=exit debugLogsLevel=%ld", (long)resolvedLogLevel];
+}
+
 - (void)showWithError:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.show] phase=enter"];
     [Luciq show];

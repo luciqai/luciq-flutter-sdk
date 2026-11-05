@@ -100,6 +100,57 @@ void main() {
     ).called(1);
   });
 
+  group('[attachToNativeApp]', () {
+    const token = "068ba9a8c3615035e163dc5f829c73be";
+    const events = [InvocationEvent.shake];
+
+    setUp(() {
+      Luciq.$resetStartMode();
+      clearInteractions(mHost);
+      when(mHost.isW3CFeatureFlagsEnabled()).thenAnswer((_) async => {});
+      when(mHost.getNetworkBodyMaxSize()).thenAnswer((_) async => 10240);
+    });
+
+    tearDown(Luciq.$resetStartMode);
+
+    test('attaches to the native SDK without starting it', () async {
+      await Luciq.attachToNativeApp(debugLogsLevel: LogLevel.debug);
+
+      verify(mHost.attachToNativeApp(LogLevel.debug.toString())).called(1);
+      verifyNever(mHost.init(any, any, any, any));
+    });
+
+    test('reads the native feature flags, like init', () async {
+      await Luciq.attachToNativeApp();
+
+      verify(mHost.attachToNativeApp(LogLevel.error.toString())).called(1);
+      verify(mHost.getNetworkBodyMaxSize()).called(1);
+      verify(mHost.registerFeatureFlagChangeListener()).called(1);
+    });
+
+    test('ignores init after attachToNativeApp', () async {
+      await Luciq.attachToNativeApp();
+      await Luciq.init(token: token, invocationEvents: events);
+
+      verifyNever(mHost.init(any, any, any, any));
+    });
+
+    test('ignores attachToNativeApp after init', () async {
+      await Luciq.init(token: token, invocationEvents: events);
+      await Luciq.attachToNativeApp();
+
+      verify(mHost.init(token, events.mapToString(), any, null)).called(1);
+      verifyNever(mHost.attachToNativeApp(any));
+    });
+
+    test('allows calling init twice, as before', () async {
+      await Luciq.init(token: token, invocationEvents: events);
+      await Luciq.init(token: token, invocationEvents: events);
+
+      verify(mHost.init(token, events.mapToString(), any, null)).called(2);
+    });
+  });
+
   test(
       '[setScreenNameMaskingCallback] should set masking callback on screen name masker',
       () async {

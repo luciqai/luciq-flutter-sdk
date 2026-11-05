@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Hybrid apps**: Add `Luciq.attachToNativeApp({debugLogsLevel})` for native Android and iOS
+  apps that start Luciq themselves and embed a Flutter module. It sets up the Flutter side of
+  the SDK without starting it a second time, so the native app's token, invocation events, app
+  variant, log level, platform and native user steps stay untouched, and no token is needed in
+  Dart. Use it instead of `Luciq.init`; calling both is ignored with an error log.
+
 ## [19.13.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.13.0...v19.9.4)
 
 ### Added

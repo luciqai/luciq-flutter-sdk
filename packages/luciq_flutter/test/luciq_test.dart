@@ -96,7 +96,61 @@ void main() {
     );
 
     verify(
-      mHost.init(token, events.mapToString(), LogLevel.error.toString(), null),
+      mHost.init(
+        token,
+        events.mapToString(),
+        LogLevel.error.toString(),
+        null,
+        null,
+        null,
+      ),
+    ).called(1);
+  });
+
+  test('[init] should pass over-air version to host', () async {
+    const token = "068ba9a8c3615035e163dc5f829c73be";
+    const events = [InvocationEvent.shake, InvocationEvent.screenshot];
+    when(mHost.isW3CFeatureFlagsEnabled()).thenAnswer(
+      (_) => Future.value({
+        "isW3cExternalTraceIDEnabled": true,
+        "isW3cExternalGeneratedHeaderEnabled": true,
+        "isW3cCaughtHeaderEnabled": true,
+      }),
+    );
+    when(mHost.getNetworkBodyMaxSize()).thenAnswer((_) async => 10240);
+    when(mApmHost.isScreenRenderEnabled()).thenAnswer((_) async => false);
+
+    await Luciq.init(
+      token: token,
+      invocationEvents: events,
+      overAirVersion: const OverAirUpdate(
+        service: OverAirUpdateService.shorebird,
+        version: '3',
+      ),
+    );
+
+    verify(
+      mHost.init(
+        token,
+        events.mapToString(),
+        LogLevel.error.toString(),
+        null,
+        'OverAirUpdateService.shorebird',
+        '3',
+      ),
+    ).called(1);
+  });
+
+  test('[setOverAirVersion] should call host method', () async {
+    await Luciq.setOverAirVersion(
+      const OverAirUpdate(
+        service: OverAirUpdateService.shorebird,
+        version: '3',
+      ),
+    );
+
+    verify(
+      mHost.setOverAirVersion('OverAirUpdateService.shorebird', '3'),
     ).called(1);
   });
 

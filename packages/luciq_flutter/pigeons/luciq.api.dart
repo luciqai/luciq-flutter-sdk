@@ -29,6 +29,8 @@ abstract class LuciqHostApi {
     List<String> invocationEvents,
     String debugLogsLevel,
     String? appVariant,
+    String? overAirService,
+    String? overAirVersion,
   );
 
   void enableAutoMasking(List<String> autoMasking);
@@ -42,6 +44,8 @@ abstract class LuciqHostApi {
   void setUserData(String data);
 
   void setAppVariant(String appVariant);
+
+  void setOverAirVersion(String service, String version);
 
   void logUserEvent(String name, Map<String, String> parameters);
 

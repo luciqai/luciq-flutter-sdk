@@ -76,7 +76,7 @@
 - (void)testSetOverAirVersionWithUnknownServiceDoesNothing {
     FlutterError *error;
 
-    OCMReject([self.mLuciq setOverAirVersion:[OCMArg any] withType:LCQOverAirTypeShorebird]);
+    OCMReject([self.mLuciq setOverAirVersion:OCMOCK_ANY withType:(LCQOverAirType)OCMOCK_ANY]);
 
     [self.api setOverAirVersionService:@"OverAirUpdateService.unknown" version:@"3" error:&error];
 }

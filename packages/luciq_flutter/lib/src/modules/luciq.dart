@@ -694,8 +694,11 @@ class Luciq {
 
   /// Tags the session with the over-air (code-push) patch the app runs.
   ///
-  /// Call this when the patch changes after [init], so issues are attributed
-  /// to the right release. See [OverAirUpdate].
+  /// The version must be the patch that is RUNNING (Shorebird's
+  /// `readCurrentPatch()`), never a downloaded or next patch, which only runs
+  /// after a restart. Use this when [init] ran before the async
+  /// `readCurrentPatch()` resolved, so issues are attributed to the right
+  /// release. See [OverAirUpdate].
   static Future<void> setOverAirVersion(OverAirUpdate overAirVersion) =>
       hostCall(
         'Luciq.setOverAirVersion',

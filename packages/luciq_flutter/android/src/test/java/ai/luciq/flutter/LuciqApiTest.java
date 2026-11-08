@@ -189,7 +189,7 @@ public class LuciqApiTest {
 
         // Sets current platform
         reflected.verify(() -> MockReflected.setCurrentPlatform(Platform.FLUTTER));
-    
+
         mLuciqBuilder.close();
     }
 
@@ -207,7 +207,7 @@ public class LuciqApiTest {
         Luciq.Builder builder = mLuciqBuilder.constructed().get(0);
         verify(builder).setOverAirVersion("3", OverAirVersionType.SHOREBIRD);
         verify(builder).build();
-    
+
         mLuciqBuilder.close();
     }
 
@@ -224,7 +224,7 @@ public class LuciqApiTest {
         Luciq.Builder builder = mLuciqBuilder.constructed().get(0);
         verify(builder, never()).setOverAirVersion(any(), anyInt());
         verify(builder).build();
-    
+
         mLuciqBuilder.close();
     }
 

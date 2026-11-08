@@ -12,6 +12,10 @@ class OverAirUpdate {
   /// The service that delivered the patch.
   final OverAirUpdateService service;
 
-  /// The patch version, e.g. the number from Shorebird's `readCurrentPatch()`.
+  /// The version of the patch that is running now, e.g. the number from
+  /// Shorebird's `readCurrentPatch()`.
+  ///
+  /// Never pass a downloaded or next patch (`readNextPatch()`): it only runs
+  /// after a restart, so the current session would be mislabeled.
   final String version;
 }

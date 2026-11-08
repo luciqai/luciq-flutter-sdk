@@ -20,6 +20,7 @@ import ai.luciq.library.invocation.util.LuciqVideoRecordingButtonPosition;
 import ai.luciq.library.model.StepType;
 import ai.luciq.library.sessionreplay.CapturingMode;
 import ai.luciq.library.sessionreplay.ScreenshotQuality;
+import ai.luciq.library.util.overairversion.OverAirVersionType;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
 
 import java.util.HashMap;
@@ -246,5 +247,9 @@ public final class ArgsRegistry {
         put("GestureType.pinch", StepType.PINCH);
         put("GestureType.longPress", StepType.LONG_PRESS);
         put("GestureType.doubleTap", StepType.DOUBLE_TAP);
+    }};
+
+    public static final ArgsMap<Integer> overAirServices = new ArgsMap<Integer>() {{
+        put("OverAirUpdateService.shorebird", OverAirVersionType.SHOREBIRD);
     }};
 }

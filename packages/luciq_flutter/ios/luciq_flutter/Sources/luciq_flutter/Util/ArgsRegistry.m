@@ -247,6 +247,12 @@
     };
 }
 
++ (ArgsDictionary *)overAirServices {
+    return @{
+        @"OverAirUpdateService.shorebird": @(LCQOverAirTypeShorebird),
+    };
+}
+
 + (ArgsDictionary *) userStepsGesture {
     return @{
         @"GestureType.swipe" : @(LCQUIEventTypeSwipe),

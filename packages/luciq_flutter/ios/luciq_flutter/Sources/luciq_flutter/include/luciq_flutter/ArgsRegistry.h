@@ -28,5 +28,6 @@ typedef NSDictionary<NSString *, NSNumber *> ArgsDictionary;
 
 + (NSDictionary<NSString *, NSString *> *)placeholders;
 + (ArgsDictionary *) userConsentActionTypes;
++ (ArgsDictionary *)overAirServices;
 
 @end

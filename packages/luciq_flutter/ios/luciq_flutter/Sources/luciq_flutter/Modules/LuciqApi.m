@@ -41,7 +41,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     return result;
 }
 
-- (void)initToken:(nonnull NSString *)token invocationEvents:(nonnull NSArray<NSString *> *)invocationEvents debugLogsLevel:(nonnull NSString *)debugLogsLevel appVariant:(nullable NSString *)appVariant error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (void)initToken:(nonnull NSString *)token invocationEvents:(nonnull NSArray<NSString *> *)invocationEvents debugLogsLevel:(nonnull NSString *)debugLogsLevel appVariant:(nullable NSString *)appVariant overAirService:(nullable NSString *)overAirService overAirVersion:(nullable NSString *)overAirVersion error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     // Resolve the debug log level first so the gate is correct for any log
     // emitted during init (including the enter line itself). Defaulting to
     // Error on unknown input avoids quietly turning on max verbosity in prod
@@ -53,11 +53,12 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger setLevel:resolvedLogLevel];
 
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
-                   format:@"[Luciq.init] phase=enter tokenPresent=%@ invocationEventsCount=%lu debugLogsLevel=%ld appVariantPresent=%@",
+                   format:@"[Luciq.init] phase=enter tokenPresent=%@ invocationEventsCount=%lu debugLogsLevel=%ld appVariantPresent=%@ overAirVersionPresent=%@",
         (token.length > 0 ? @"true" : @"false"),
         (unsigned long)invocationEvents.count,
         (long)resolvedLogLevel,
-        (appVariant != nil ? @"true" : @"false")];
+        (appVariant != nil ? @"true" : @"false"),
+        (overAirVersion != nil ? @"true" : @"false")];
 
     if (ArgsRegistry.sdkLogLevels[debugLogsLevel] == nil) {
         [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
@@ -66,6 +67,16 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
     if(appVariant != nil){
         Luciq.appVariant = appVariant;
+    }
+
+    if (overAirService != nil) {
+        NSNumber *overAirType = ArgsRegistry.overAirServices[overAirService];
+        if (overAirType == nil) {
+            [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                           format:@"[Luciq.init] phase=warn errorType=UnknownEnum overAirService=%@", overAirService];
+        } else if (overAirVersion != nil) {
+            [Luciq setOverAirVersion:overAirVersion withType:overAirType.integerValue];
+        }
     }
 
     SEL setPrivateApiSEL = NSSelectorFromString(@"setCurrentPlatform:");
@@ -601,6 +612,18 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setAppVariant] phase=enter appVariantLength=%lu", (unsigned long)appVariant.length];
     Luciq.appVariant = appVariant;
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setAppVariant] phase=exit"];
+}
+
+- (void)setOverAirVersionService:(nonnull NSString *)service version:(nonnull NSString *)version error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setOverAirVersion] phase=enter versionLength=%lu", (unsigned long)version.length];
+    NSNumber *overAirType = ArgsRegistry.overAirServices[service];
+    if (overAirType == nil) {
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                       format:@"[Luciq.setOverAirVersion] phase=warn errorType=UnknownEnum service=%@", service];
+        return;
+    }
+    [Luciq setOverAirVersion:version withType:overAirType.integerValue];
+    [LuciqFlutterLogger d:[LuciqFlutterDebugTags core] format:@"[Luciq.setOverAirVersion] phase=exit"];
 }
 
 

@@ -9,6 +9,8 @@
   the SDK without starting it a second time, so the native app's token, invocation events, app
   variant, log level, platform and native user steps stay untouched, and no token is needed in
   Dart. Use it instead of `Luciq.init`; calling both is ignored with an error log.
+  On iOS, a Flutter screen that reappears no longer restarts its APM UI trace from Dart: the
+  native SDK reopens it, so each route is traced once.
 
 ## [19.13.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.13.0...v19.9.4)
 

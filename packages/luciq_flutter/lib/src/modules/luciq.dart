@@ -177,6 +177,18 @@ class Luciq {
 
   /// @nodoc
   @visibleForTesting
+  static void $markAttachedToNativeApp() {
+    _startMode = 'attachToNativeApp';
+  }
+
+  /// @nodoc
+  /// True once [attachToNativeApp] ran: Flutter is embedded in a native app
+  /// that owns the SDK, and the native side tracks its screens' lifecycle.
+  @internal
+  static bool get isAttachedToNativeApp => _startMode == 'attachToNativeApp';
+
+  /// @nodoc
+  @visibleForTesting
   // ignore: use_setters_to_change_properties
   static void $setHostApi(LuciqHostApi host) {
     _host = host;

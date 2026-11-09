@@ -4,6 +4,7 @@ export 'src/models/custom_span.dart' show CustomSpan;
 export 'src/models/exception_data.dart';
 export 'src/models/feature_flag.dart';
 export 'src/models/network_data.dart';
+export 'src/models/over_air_update.dart';
 export 'src/models/proactive_reporting_config.dart';
 export 'src/models/theme_config.dart';
 export 'src/models/user_event_param.dart';

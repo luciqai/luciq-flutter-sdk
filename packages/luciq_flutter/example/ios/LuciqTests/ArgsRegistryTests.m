@@ -275,4 +275,8 @@
     }
 }
 
+- (void)testOverAirServices {
+    XCTAssertEqualObjects(ArgsRegistry.overAirServices[@"OverAirUpdateService.shorebird"], @(LCQOverAirTypeShorebird));
+}
+
 @end

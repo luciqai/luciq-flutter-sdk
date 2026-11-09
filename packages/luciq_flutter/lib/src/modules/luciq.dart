@@ -210,11 +210,16 @@ class Luciq {
   /// The [invocationEvents] are the events that invoke the SDK's UI.
   /// The [debugLogsLevel] used to debug Luciq's SDK.
   /// The [appVariant] used to set current App variant name.
+  /// The [overAirVersion] tags the session with the over-air (code-push)
+  /// patch the app is running, so issues can be attributed to it. It is
+  /// typically built from Shorebird's `readCurrentPatch()` and is omitted
+  /// when no patch is installed.
   static Future<void> init({
     required String token,
     required List<InvocationEvent> invocationEvents,
     LogLevel debugLogsLevel = LogLevel.error,
     String? appVariant,
+    OverAirUpdate? overAirVersion,
   }) {
     $setup();
     LuciqLogger.I.logLevel = debugLogsLevel;
@@ -226,6 +231,8 @@ class Luciq {
           invocationEvents.mapToString(),
           debugLogsLevel.toString(),
           appVariant,
+          overAirVersion?.service.toString(),
+          overAirVersion?.version,
         );
         return FeatureFlagsManager().registerFeatureFlagsListener();
       },
@@ -235,6 +242,7 @@ class Luciq {
         'invocationEventsCount': invocationEvents.length,
         'debugLogsLevel': debugLogsLevel,
         'appVariantPresent': appVariant != null,
+        'overAirVersionPresent': overAirVersion != null,
       },
     );
   }
@@ -682,6 +690,27 @@ class Luciq {
         () => _host.setAppVariant(appVariant),
         tag: DebugTags.core,
         args: {'appVariantLength': appVariant.length},
+      );
+
+  /// Tags the session with the over-air (code-push) patch the app runs.
+  ///
+  /// The version must be the patch that is RUNNING (Shorebird's
+  /// `readCurrentPatch()`), never a downloaded or next patch, which only runs
+  /// after a restart. Use this when [init] ran before the async
+  /// `readCurrentPatch()` resolved, so issues are attributed to the right
+  /// release. See [OverAirUpdate].
+  static Future<void> setOverAirVersion(OverAirUpdate overAirVersion) =>
+      hostCall(
+        'Luciq.setOverAirVersion',
+        () => _host.setOverAirVersion(
+          overAirVersion.service.toString(),
+          overAirVersion.version,
+        ),
+        tag: DebugTags.core,
+        args: {
+          'service': overAirVersion.service,
+          'versionLength': overAirVersion.version.length,
+        },
       );
 
   /// Sets a custom theme for Luciq UI elements.

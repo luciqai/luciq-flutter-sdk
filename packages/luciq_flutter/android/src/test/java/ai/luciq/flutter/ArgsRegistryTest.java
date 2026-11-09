@@ -19,6 +19,7 @@ import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.invocation.util.LuciqFloatingButtonEdge;
 import ai.luciq.library.invocation.util.LuciqVideoRecordingButtonPosition;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
+import ai.luciq.library.util.overairversion.OverAirVersionType;
 
 import org.junit.Test;
 
@@ -189,6 +190,17 @@ public class ArgsRegistryTest {
                 Integer.valueOf(MaskingType.WEB_VIEWS),
                 ArgsRegistry.autoMasking.get("AutoMasking.webViews")
         );
+    }
+
+    @Test
+    public void testOverAirServices() {
+        Integer[] values = {
+                OverAirVersionType.SHOREBIRD,
+        };
+
+        for (Integer value : values) {
+            assertTrue(ArgsRegistry.overAirServices.containsValue(value));
+        }
     }
 
     @Test

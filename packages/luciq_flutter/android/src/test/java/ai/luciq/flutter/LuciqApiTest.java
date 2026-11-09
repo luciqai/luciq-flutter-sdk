@@ -59,6 +59,7 @@ import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
 import ai.luciq.library.screenshot.ScreenshotCaptor;
 import ai.luciq.library.ui.onboarding.WelcomeMessage;
+import ai.luciq.library.util.overairversion.OverAirVersionType;
 import ai.luciq.library.user.UserEventParam;
 import ai.luciq.survey.Surveys;
 import ai.luciq.survey.callbacks.OnShowCallback;
@@ -166,7 +167,7 @@ public class LuciqApiTest {
             when(mock.setSdkDebugLogsLevel(anyInt())).thenReturn(mock);
         });
 
-        api.init(token, invocationEvents, logLevel,appVariant);
+        api.init(token, invocationEvents, logLevel, appVariant, null, null);
 
         Luciq.Builder builder = mLuciqBuilder.constructed().get(0);
 
@@ -179,6 +180,7 @@ public class LuciqApiTest {
         verify(builder).setInvocationEvents(LuciqInvocationEvent.FLOATING_BUTTON);
         verify(builder).setSdkDebugLogsLevel(LogLevel.ERROR);
         verify(builder).setAppVariant(appVariant);
+        verify(builder, never()).setOverAirVersion(any(), anyInt());
 
         verify(builder).build();
 
@@ -187,6 +189,57 @@ public class LuciqApiTest {
 
         // Sets current platform
         reflected.verify(() -> MockReflected.setCurrentPlatform(Platform.FLUTTER));
+
+        mLuciqBuilder.close();
+    }
+
+    @Test
+    public void testSdkInitWithOverAirVersion() {
+        MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class, (mock, context) -> {
+            when(mock.setInvocationEvents(any())).thenReturn(mock);
+            when(mock.setSdkDebugLogsLevel(anyInt())).thenReturn(mock);
+            when(mock.setOverAirVersion(any(), anyInt())).thenReturn(mock);
+        });
+
+        api.init("app-token", Collections.singletonList("InvocationEvent.floatingButton"), "LogLevel.error",
+                null, "OverAirUpdateService.shorebird", "3");
+
+        Luciq.Builder builder = mLuciqBuilder.constructed().get(0);
+        verify(builder).setOverAirVersion("3", OverAirVersionType.SHOREBIRD);
+        verify(builder).build();
+
+        mLuciqBuilder.close();
+    }
+
+    @Test
+    public void testSdkInitWithUnknownOverAirServiceDoesNotThrow() {
+        MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class, (mock, context) -> {
+            when(mock.setInvocationEvents(any())).thenReturn(mock);
+            when(mock.setSdkDebugLogsLevel(anyInt())).thenReturn(mock);
+        });
+
+        api.init("app-token", Collections.singletonList("InvocationEvent.floatingButton"), "LogLevel.error",
+                null, "OverAirUpdateService.unknown", "3");
+
+        Luciq.Builder builder = mLuciqBuilder.constructed().get(0);
+        verify(builder, never()).setOverAirVersion(any(), anyInt());
+        verify(builder).build();
+
+        mLuciqBuilder.close();
+    }
+
+    @Test
+    public void testSetOverAirVersion() {
+        api.setOverAirVersion("OverAirUpdateService.shorebird", "3");
+
+        mLuciq.verify(() -> Luciq.setOverAirVersion("3", OverAirVersionType.SHOREBIRD));
+    }
+
+    @Test
+    public void testSetOverAirVersionWithUnknownServiceDoesNothing() {
+        api.setOverAirVersion("OverAirUpdateService.unknown", "3");
+
+        mLuciq.verify(() -> Luciq.setOverAirVersion(any(), anyInt()), never());
     }
 
     @Test

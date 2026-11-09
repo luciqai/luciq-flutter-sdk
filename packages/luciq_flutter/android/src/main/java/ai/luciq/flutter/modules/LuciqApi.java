@@ -132,7 +132,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
     }
 
     @Override
-    public void init(@NonNull String token, @NonNull List<String> invocationEvents, @NonNull String debugLogsLevel, @Nullable String appVariant) {
+    public void init(@NonNull String token, @NonNull List<String> invocationEvents, @NonNull String debugLogsLevel, @Nullable String appVariant, @Nullable String overAirService, @Nullable String overAirVersion) {
         final Application application = (Application) context;
         // HashMap.getOrDefault bypasses ArgsMap's NonNull-checking get override,
         // so an unrecognized debugLogsLevel string falls back to ERROR instead
@@ -146,7 +146,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 "[Luciq.init] phase=enter tokenPresent=" + (token != null && !token.isEmpty())
                         + " invocationEventsCount=" + invocationEvents.size()
                         + " debugLogsLevel=" + debugLogsLevel
-                        + " appVariantPresent=" + (appVariant != null));
+                        + " appVariantPresent=" + (appVariant != null)
+                        + " overAirVersionPresent=" + (overAirVersion != null));
 
         setCurrentPlatform();
 
@@ -161,6 +162,14 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                 .setSdkDebugLogsLevel(parsedLogLevel);
         if (appVariant != null) {
             builder.setAppVariant(appVariant);
+        }
+        if (overAirService != null && overAirVersion != null) {
+            if (ArgsRegistry.overAirServices.containsKey(overAirService)) {
+                builder.setOverAirVersion(overAirVersion, ArgsRegistry.overAirServices.get(overAirService));
+            } else {
+                LuciqFlutterLogger.w(LuciqFlutterDebugTags.CORE,
+                        "[Luciq.init] phase=skip reason=unknownOverAirService service=" + overAirService);
+            }
         }
 
         builder.build();
@@ -241,6 +250,25 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                     e);
         }
 
+    }
+
+    @Override
+    public void setOverAirVersion(@NonNull String service, @NonNull String version) {
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[Luciq.setOverAirVersion] phase=enter service=" + service + " length=" + version.length());
+        try {
+            if (!ArgsRegistry.overAirServices.containsKey(service)) {
+                LuciqFlutterLogger.w(LuciqFlutterDebugTags.CORE,
+                        "[Luciq.setOverAirVersion] phase=skip reason=unknownOverAirService service=" + service);
+                return;
+            }
+            Luciq.setOverAirVersion(version, ArgsRegistry.overAirServices.get(service));
+            LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.setOverAirVersion] phase=exit");
+        } catch (Exception e) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
+                    "[Luciq.setOverAirVersion] phase=error errorType=" + e.getClass().getSimpleName(),
+                    e);
+        }
     }
 
     @Override

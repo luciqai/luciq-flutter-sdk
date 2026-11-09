@@ -44,7 +44,7 @@
     NSString *logLevel = @"LogLevel.error";
     FlutterError *error;
     
-    [self.api initToken:token invocationEvents:invocationEvents debugLogsLevel:logLevel appVariant:appVariant error:&error];
+    [self.api initToken:token invocationEvents:invocationEvents debugLogsLevel:logLevel appVariant:appVariant overAirService:nil overAirVersion:nil error:&error];
 
     OCMVerify([self.mLuciq setCurrentPlatform:LCQPlatformFlutter]);
 
@@ -54,6 +54,31 @@
 
     XCTAssertEqual(Luciq.appVariant, appVariant);
 
+}
+
+- (void)testInitWithOverAirVersion {
+    NSArray<NSString *> *invocationEvents = @[@"InvocationEvent.floatingButton"];
+    FlutterError *error;
+
+    [self.api initToken:@"token" invocationEvents:invocationEvents debugLogsLevel:@"LogLevel.error" appVariant:nil overAirService:@"OverAirUpdateService.shorebird" overAirVersion:@"3" error:&error];
+
+    OCMVerify([self.mLuciq setOverAirVersion:@"3" withType:LCQOverAirTypeShorebird]);
+}
+
+- (void)testSetOverAirVersion {
+    FlutterError *error;
+
+    [self.api setOverAirVersionService:@"OverAirUpdateService.shorebird" version:@"3" error:&error];
+
+    OCMVerify([self.mLuciq setOverAirVersion:@"3" withType:LCQOverAirTypeShorebird]);
+}
+
+- (void)testSetOverAirVersionWithUnknownServiceDoesNothing {
+    FlutterError *error;
+
+    OCMReject([self.mLuciq setOverAirVersion:OCMOCK_ANY withType:(LCQOverAirType)OCMOCK_ANY]);
+
+    [self.api setOverAirVersionService:@"OverAirUpdateService.unknown" version:@"3" error:&error];
 }
 
 - (void)testShow {

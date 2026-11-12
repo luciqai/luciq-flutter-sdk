@@ -215,7 +215,7 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         // FlutterFragment makes its native Activity show Flutter while it is visible. Dart routes,
         // user steps and screenshots then belong to Flutter there.
         InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class);
-        InternalCore._registerCrossPlatformHostFragments(FlutterFragment.class);
+        InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class);
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.attachToNativeApp] phase=exit");
     }
 

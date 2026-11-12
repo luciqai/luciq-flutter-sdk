@@ -767,7 +767,7 @@ public class LuciqApiTest {
         reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
         mInternalCore.verify(InternalCore::_enableHybridMode);
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class));
-        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(FlutterFragment.class));
+        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class));
         mInternalCore.close();
         mLuciqBuilder.close();
     }
@@ -785,7 +785,7 @@ public class LuciqApiTest {
         mLuciq.verify(() -> Luciq.setScreenshotProvider(any()), never());
         reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
         mInternalCore.verify(InternalCore::_enableHybridMode, never());
-        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(any()), never());
+        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(anyInt(), any()), never());
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHosts(anyInt(), any()), never());
         mInternalCore.close();
         mLuciqBuilder.close();

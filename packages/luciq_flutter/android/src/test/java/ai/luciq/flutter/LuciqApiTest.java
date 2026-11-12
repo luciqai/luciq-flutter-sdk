@@ -756,11 +756,15 @@ public class LuciqApiTest {
         mLuciq.when(Luciq::isBuilt).thenReturn(true);
         MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class);
 
+        MockedStatic<InternalCore> mInternalCore = mockStatic(InternalCore.class);
+
         api.attachToNativeApp("LogLevel.debug");
 
         assertEquals(0, mLuciqBuilder.constructed().size());
         mLuciq.verify(() -> Luciq.setScreenshotProvider(any()), never());
         reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
+        mInternalCore.verify(InternalCore::_enableHybridMode);
+        mInternalCore.close();
         mLuciqBuilder.close();
     }
 
@@ -769,11 +773,15 @@ public class LuciqApiTest {
         mLuciq.when(Luciq::isBuilt).thenReturn(false);
         MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class);
 
+        MockedStatic<InternalCore> mInternalCore = mockStatic(InternalCore.class);
+
         api.attachToNativeApp("LogLevel.error");
 
         assertEquals(0, mLuciqBuilder.constructed().size());
         mLuciq.verify(() -> Luciq.setScreenshotProvider(any()), never());
         reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
+        mInternalCore.verify(InternalCore::_enableHybridMode, never());
+        mInternalCore.close();
         mLuciqBuilder.close();
     }
 

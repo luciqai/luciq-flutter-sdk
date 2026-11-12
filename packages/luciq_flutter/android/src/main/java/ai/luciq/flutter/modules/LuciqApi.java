@@ -204,6 +204,10 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                             + "Luciq.Builder in Application.onCreate, before the Flutter engine starts.");
             return;
         }
+        // The native app owns its Activities, so Flutter content may sit inside a native Activity
+        // (a FlutterFragment) that it cannot register as a host. Hybrid mode keeps every
+        // unregistered Activity native: captured with native masking plus Flutter's own masks.
+        InternalCore._enableHybridMode();
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.attachToNativeApp] phase=exit");
     }
 

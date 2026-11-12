@@ -19,6 +19,7 @@
 @property (nonatomic, strong) id mockRegistrar;
 @property (nonatomic, strong) id mockFlutterViewController;
 @property (nonatomic, strong) id mockEngine;
+@property (nonatomic, strong) UIWindow *testWindow;
 
 @end
 
@@ -78,7 +79,7 @@
     NSArray<NSNumber *> *rectangles = @[@10, @20, @30, @40];
     UIView *mockView = [[UIView alloc] initWithFrame:CGRectMake(10, 20, 30, 40)];
     
-    OCMStub([self.mockFlutterApi getPrivateViewsWithCompletion:([OCMArg invokeBlockWithArgs:rectangles, [NSNull null], nil])]);
+    OCMStub([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY completion:([OCMArg invokeBlockWithArgs:rectangles, [NSNull null], nil])]);
     
         
   
@@ -167,7 +168,7 @@
     NSArray<NSNumber *> *rectangles = @[@10, @20, @30, @40];
     
     
-    OCMStub([self.mockFlutterApi getPrivateViewsWithCompletion:([OCMArg invokeBlockWithArgs:rectangles, [NSNull null], nil])]);
+    OCMStub([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY completion:([OCMArg invokeBlockWithArgs:rectangles, [NSNull null], nil])]);
     
     
     dispatch_group_t group = dispatch_group_create();
@@ -186,6 +187,100 @@
     });
     
     [self waitForExpectationsWithTimeout:2 handler:nil];
+}
+
+#pragma mark - Flutter view visibility
+
+- (UIView *)flutterViewInWindowWithFrame:(CGRect)frame {
+    UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 400, 800)];
+    UIView *flutterView = [[UIView alloc] initWithFrame:frame];
+    [window addSubview:flutterView];
+    window.hidden = NO;
+    self.testWindow = window;
+    OCMStub([self.mockFlutterViewController isViewLoaded]).andReturn(YES);
+    OCMStub([self.mockFlutterViewController view]).andReturn(flutterView);
+    return flutterView;
+}
+
+- (void)testIsFlutterViewVisible_whenOnScreen_returnsYes {
+    [self flutterViewInWindowWithFrame:CGRectMake(0, 0, 400, 700)];
+
+    XCTAssertTrue([self.api isFlutterViewVisible]);
+}
+
+- (void)testIsFlutterViewVisible_whenNotInWindow_returnsNo {
+    // A hidden tab or a screen under a pushed one: UIKit removes its view from the window.
+    OCMStub([self.mockFlutterViewController isViewLoaded]).andReturn(YES);
+    OCMStub([self.mockFlutterViewController view]).andReturn([[UIView alloc] initWithFrame:CGRectMake(0, 0, 400, 700)]);
+
+    XCTAssertFalse([self.api isFlutterViewVisible]);
+}
+
+- (void)testIsFlutterViewVisible_whenViewNotLoaded_returnsNo {
+    OCMStub([self.mockFlutterViewController isViewLoaded]).andReturn(NO);
+
+    XCTAssertFalse([self.api isFlutterViewVisible]);
+}
+
+- (void)testIsFlutterViewVisible_whenAnAncestorIsHidden_returnsNo {
+    UIView *flutterView = [self flutterViewInWindowWithFrame:CGRectMake(0, 0, 400, 700)];
+    UIView *container = [[UIView alloc] initWithFrame:self.testWindow.bounds];
+    [self.testWindow addSubview:container];
+    [container addSubview:flutterView];
+    container.hidden = YES;
+
+    XCTAssertFalse([self.api isFlutterViewVisible]);
+}
+
+- (void)testIsFlutterViewVisible_whenTransparent_returnsNo {
+    UIView *flutterView = [self flutterViewInWindowWithFrame:CGRectMake(0, 0, 400, 700)];
+    flutterView.alpha = 0;
+
+    XCTAssertFalse([self.api isFlutterViewVisible]);
+}
+
+- (void)testIsFlutterViewVisible_whenOutsideTheWindow_returnsNo {
+    [self flutterViewInWindowWithFrame:CGRectMake(400, 0, 400, 700)];
+
+    XCTAssertFalse([self.api isFlutterViewVisible]);
+}
+
+- (void)testIsFlutterViewVisible_whenNoViewController_returnsNo {
+    id engine = OCMClassMock([FlutterEngine class]);
+    id registrar = OCMPartialMock([[MockFlutterPluginRegistrar alloc] init]);
+    OCMStub([registrar flutterEngine]).andReturn(engine);
+    PrivateViewApi *api = [[PrivateViewApi alloc] initWithFlutterApi:self.mockFlutterApi registrar:registrar];
+
+    XCTAssertFalse([api isFlutterViewVisible]);
+}
+
+- (void)testMask_whenFlutterViewIsNotVisible_returnsTheScreenshotWithoutAskingDart {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"completion"];
+    UIImage *screenshot = [[UIImage alloc] init];
+    OCMStub([self.mockFlutterViewController isViewLoaded]).andReturn(NO);
+    OCMReject([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY completion:OCMOCK_ANY]);
+
+    [self.api mask:screenshot completion:^(UIImage *result) {
+        XCTAssertEqual(result, screenshot);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
+- (void)testMask_whenFlutterViewIsVisible_asksDartForPrivateViews {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"completion"];
+    [self flutterViewInWindowWithFrame:CGRectMake(0, 0, 400, 700)];
+    OCMStub([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY
+                                            completion:([OCMArg invokeBlockWithArgs:@[@10, @20, @30, @40], [NSNull null], nil])]);
+
+    [self.api mask:[[UIImage alloc] init] completion:^(UIImage *result) {
+        XCTAssertNotNil(result);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+    OCMVerify([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY completion:OCMOCK_ANY]);
 }
 
 @end

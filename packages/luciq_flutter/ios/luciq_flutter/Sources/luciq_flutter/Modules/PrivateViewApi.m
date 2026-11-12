@@ -33,6 +33,15 @@ static long long currentTimeMillis;
                    format:@"[PRIV.mask] #%@ phase=enter screenshotWidth=%.0f screenshotHeight=%.0f",
         callId, screenshot.size.width, screenshot.size.height];
 
+    // A Flutter view that is not on screen (a hidden tab, or under a pushed native screen) still
+    // reports the private views of its last route. Masking them would black out native content.
+    if (![self isFlutterViewVisible]) {
+        [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                       format:@"[PRIV.mask] #%@ phase=exit skipped=flutterViewNotVisible", callId];
+        completion(screenshot);
+        return;
+    }
+
     __weak typeof(self) weakSelf = self;
     // Wait for the Cupertino animation to complete
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -40,6 +49,13 @@ static long long currentTimeMillis;
                    format:@"[PRIV.capture] #%@ phase=fire", callId];
     [self.flutterApi getPrivateViewsCallId:callId completion:^(NSArray<NSNumber *> *rectangles, FlutterError *error) {
         UIImage *capturedScreenshot = [self captureScreenshot];
+        // The Flutter view may have left the screen during the delay (a tab switch or a push).
+        if (![weakSelf isFlutterViewVisible]) {
+            [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                           format:@"[PRIV.mask] #%@ phase=exit skipped=flutterViewNotVisible", callId];
+            completion(capturedScreenshot);
+            return;
+        }
             [weakSelf handlePrivateViewsResult:rectangles
                                          error:error
                                     screenshot:capturedScreenshot
@@ -131,6 +147,27 @@ static long long currentTimeMillis;
     } @finally {
         UIGraphicsEndImageContext();
     }
+}
+
+// Whether the engine's Flutter view is in a window, not hidden and at least partly on screen.
+// UIKit removes the views of unselected tabs and of screens under a pushed one from the window.
+- (BOOL)isFlutterViewVisible {
+    UIViewController *flutterVC = self.flutterEngineRegistrar.flutterEngine.viewController;
+    if (flutterVC == nil || !flutterVC.isViewLoaded) {
+        return NO;
+    }
+    UIView *flutterView = flutterVC.view;
+    UIWindow *window = flutterView.window;
+    if (window == nil) {
+        return NO;
+    }
+    for (UIView *view = flutterView; view != nil; view = view.superview) {
+        if (view.hidden || view.alpha <= 0.01) {
+            return NO;
+        }
+    }
+    CGRect frameInWindow = [flutterView convertRect:flutterView.bounds toView:window];
+    return CGRectIntersectsRect(frameInWindow, window.bounds);
 }
 
 // Retrieve the origin point of the Flutter view

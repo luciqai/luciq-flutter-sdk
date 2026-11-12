@@ -100,13 +100,16 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 // Connects Flutter to the SDK the native app already started (hybrid apps). Unlike init, it never
 // starts the SDK, sets the platform for the whole app or changes the app variant, the SDK log level,
 // automatic network capturing or event swizzling: those stay as the native app configured them.
-// It only sets the Flutter plugin's own log level.
+// It sets the Flutter plugin's own log level and declares FlutterViewController as the Flutter host,
+// so a screen showing it (pushed, a tab, or embedded in a native or SwiftUI screen) is tracked as
+// Flutter and every other screen as native.
 - (void)attachToNativeAppDebugLogsLevel:(nonnull NSString *)debugLogsLevel error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     NSNumber *resolvedLogLevelNumber = ArgsRegistry.sdkLogLevels[debugLogsLevel];
     LCQSDKDebugLogsLevel resolvedLogLevel = resolvedLogLevelNumber
         ? resolvedLogLevelNumber.integerValue
         : LCQSDKDebugLogsLevelError;
     [LuciqFlutterLogger setLevel:resolvedLogLevel];
+    [LuciqApi registerFlutterHosts];
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
                    format:@"[Luciq.attachToNativeApp] phase=exit debugLogsLevel=%ld", (long)resolvedLogLevel];
 }
@@ -599,6 +602,26 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [Luciq setAutoMaskScreenshots: resolvedEvents];
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView] format:@"[Luciq.enableAutoMasking] phase=exit"];
 }
+// Declares FlutterViewController as the Flutter host. Calls accumulate and a class already declared
+// as a Flutter host is ignored, so a native app that registers it itself is unaffected. Called by
+// selector because Luciq SDK versions before cross-platform hosts don't have the API.
++ (void)registerFlutterHosts {
+    SEL selector = NSSelectorFromString(@"registerCrossPlatformHosts:platform:");
+    if (![[Luciq class] respondsToSelector:selector]) {
+        [LuciqFlutterLogger w:[LuciqFlutterDebugTags core]
+                       format:@"[Luciq.attachToNativeApp] phase=warn errorType=Unsupported registerCrossPlatformHosts"];
+        return;
+    }
+    NSArray<Class> *hosts = @[[FlutterViewController class]];
+    NSInteger platform = LCQPlatformFlutter;
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[[Luciq class] methodSignatureForSelector:selector]];
+    [invocation setSelector:selector];
+    [invocation setTarget:[Luciq class]];
+    [invocation setArgument:&hosts atIndex:2];
+    [invocation setArgument:&platform atIndex:3];
+    [invocation invoke];
+}
+
 + (void)setScreenshotMaskingHandler:(nullable void (^)(UIImage * _Nonnull __strong, void (^ _Nonnull __strong)(UIImage * _Nonnull __strong)))maskingHandler {
     [Luciq setScreenshotMaskingHandler:maskingHandler];
 }

@@ -21,6 +21,7 @@
 
 - (UIImage *)drawMaskedImage:(UIImage *)screenshot withPrivateViews:(NSArray<NSValue *> *)privateViews;
 - (CGPoint)getFlutterViewOrigin;
+- (BOOL)isFlutterViewVisible;
 
 - (void)logError:(FlutterError *)error;
 

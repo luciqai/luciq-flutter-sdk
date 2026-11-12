@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "OCMock/OCMock.h"
+#import <objc/runtime.h>
 #import "LuciqApi.h"
 #import "LuciqSDK/LuciqSDK.h"
 #import "Util/Luciq+Test.h"
@@ -745,6 +746,36 @@
     [self.api enableAutoMaskingAutoMasking:autoMaskingTypes error:&error];
 
     OCMVerify([self.mLuciq setAutoMaskScreenshots:LCQAutoMaskScreenshotOptionWebViews]);
+}
+
+// Luciq SDK versions before cross-platform hosts don't declare registerCrossPlatformHosts:platform:,
+// so the plugin calls it by selector. The test adds a recording implementation to Luciq.
+static NSArray<Class> *recordedHosts;
+static NSInteger recordedPlatform = -1;
+
+- (void)givenLuciqSupportsCrossPlatformHosts {
+    SEL selector = NSSelectorFromString(@"registerCrossPlatformHosts:platform:");
+    Class metaclass = object_getClass([Luciq class]);
+    IMP recorder = imp_implementationWithBlock(^(id _self, NSArray<Class> *hosts, NSInteger platform) {
+        recordedHosts = hosts;
+        recordedPlatform = platform;
+    });
+    if (!class_addMethod(metaclass, selector, recorder, "v@:@q")) {
+        method_setImplementation(class_getClassMethod([Luciq class], selector), recorder);
+    }
+    recordedHosts = nil;
+    recordedPlatform = -1;
+}
+
+- (void)testAttachToNativeApp_registersFlutterViewControllerAsFlutterHost {
+    [self.mLuciq stopMocking];
+    [self givenLuciqSupportsCrossPlatformHosts];
+    FlutterError *error;
+
+    [self.api attachToNativeAppDebugLogsLevel:@"LogLevel.error" error:&error];
+
+    XCTAssertEqualObjects(recordedHosts, @[[FlutterViewController class]]);
+    XCTAssertEqual(recordedPlatform, LCQPlatformFlutter);
 }
 
 @end

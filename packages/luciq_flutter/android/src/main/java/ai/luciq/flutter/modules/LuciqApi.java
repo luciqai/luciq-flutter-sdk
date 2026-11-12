@@ -47,6 +47,8 @@ import ai.luciq.library.internal.crossplatform.CoreFeature;
 import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
 import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
 import ai.luciq.library.internal.crossplatform.InternalCore;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragment;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
@@ -208,6 +210,12 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         // (a FlutterFragment) that it cannot register as a host. Hybrid mode keeps every
         // unregistered Activity native: captured with native masking plus Flutter's own masks.
         InternalCore._enableHybridMode();
+        // Flutter's own containers show Flutter content, so they are hosts without the app
+        // declaring them (subclasses included): a FlutterActivity is a Flutter screen, and a
+        // FlutterFragment makes its native Activity show Flutter while it is visible. Dart routes,
+        // user steps and screenshots then belong to Flutter there.
+        InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class);
+        InternalCore._registerCrossPlatformHostFragments(FlutterFragment.class);
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.attachToNativeApp] phase=exit");
     }
 

@@ -340,10 +340,16 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
 
 - (void)reportScreenChangeScreenName:(NSString *)screenName error:(FlutterError *_Nullable *_Nonnull)error {
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags screenTracking] format:@"[Luciq.reportScreenChange] phase=enter screenNameLength=%lu", (unsigned long)screenName.length];
-    SEL setPrivateApiSEL = NSSelectorFromString(@"logViewDidAppearEvent:");
-    if ([[Luciq class] respondsToSelector:setPrivateApiSEL]) {
-        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[[Luciq class] methodSignatureForSelector:setPrivateApiSEL]];
-        [inv setSelector:setPrivateApiSEL];
+    // The cross-platform entry tells the SDK the screen comes from this module, so a hybrid app holds
+    // back a route reported behind a native screen, and no second APM trace starts for a route this
+    // module already traces. SDKs without it get the public API.
+    SEL screenChangeSEL = NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:");
+    if (![[Luciq class] respondsToSelector:screenChangeSEL]) {
+        screenChangeSEL = NSSelectorFromString(@"logViewDidAppearEvent:");
+    }
+    if ([[Luciq class] respondsToSelector:screenChangeSEL]) {
+        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[[Luciq class] methodSignatureForSelector:screenChangeSEL]];
+        [inv setSelector:screenChangeSEL];
         [inv setTarget:[Luciq class]];
         [inv setArgument:&(screenName) atIndex:2];
         [inv invoke];

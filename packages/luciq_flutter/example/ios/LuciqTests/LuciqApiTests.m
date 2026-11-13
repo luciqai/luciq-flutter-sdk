@@ -315,12 +315,42 @@
 }
 
 - (void)testReportScreenChange {
+    // Runs against SDKs without the cross-platform entry; the test below adds it to the class.
+    if ([Luciq respondsToSelector:NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:")]) {
+        XCTSkip(@"The linked SDK has the cross-platform entry, covered by testReportScreenChange_prefersTheCrossPlatformEntry");
+    }
     NSString *screenName = @"HomeScreen";
     FlutterError *error;
 
     [self.api reportScreenChangeScreenName:screenName error:&error];
 
     OCMVerify([self.mLuciq logViewDidAppearEvent:screenName]);
+}
+
+- (void)testReportScreenChange_prefersTheCrossPlatformEntry {
+    // Record calls to the cross-platform entry, whether or not the linked SDK has it. An added method
+    // stays on the class, so testReportScreenChange skips once this has run; a replaced one is restored.
+    SEL crossPlatformSEL = NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:");
+    Class metaclass = object_getClass([Luciq class]);
+    __block NSString *reportedName = nil;
+    IMP recordingIMP = imp_implementationWithBlock(^(id _self, NSString *viewName) {
+        reportedName = viewName;
+    });
+    Method existing = class_getClassMethod([Luciq class], crossPlatformSEL);
+    if (existing != NULL) {
+        IMP originalIMP = method_setImplementation(existing, recordingIMP);
+        [self addTeardownBlock:^{
+            method_setImplementation(existing, originalIMP);
+        }];
+    } else {
+        class_addMethod(metaclass, crossPlatformSEL, recordingIMP, "v@:@");
+    }
+    OCMReject([self.mLuciq logViewDidAppearEvent:OCMOCK_ANY]);
+    FlutterError *error;
+
+    [self.api reportScreenChangeScreenName:@"HomeScreen" error:&error];
+
+    XCTAssertEqualObjects(reportedName, @"HomeScreen");
 }
 
 - (void)testSetCustomBrandingImage {

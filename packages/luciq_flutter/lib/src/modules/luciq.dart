@@ -236,12 +236,21 @@ class Luciq {
   /// The [invocationEvents] are the events that invoke the SDK's UI.
   /// The [debugLogsLevel] used to debug Luciq's SDK.
   /// The [appVariant] used to set current App variant name.
+  ///
+  /// Set [isHybridApp] to true in a native app that embeds Flutter and starts
+  /// Luciq natively. The call then behaves as [attachToNativeApp]: [token],
+  /// [invocationEvents] and [appVariant] are ignored, and [debugLogsLevel]
+  /// only sets the Flutter plugin's log level.
   static Future<void> init({
     required String token,
     required List<InvocationEvent> invocationEvents,
     LogLevel debugLogsLevel = LogLevel.error,
     String? appVariant,
+    bool isHybridApp = false,
   }) {
+    if (isHybridApp) {
+      return attachToNativeApp(debugLogsLevel: debugLogsLevel);
+    }
     if (!_claimStartMode('init')) {
       return Future.value();
     }

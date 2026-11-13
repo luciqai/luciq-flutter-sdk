@@ -128,6 +128,19 @@ void main() {
       verify(mHost.registerFeatureFlagChangeListener()).called(1);
     });
 
+    test('init with isHybridApp attaches instead of starting', () async {
+      await Luciq.init(
+        token: token,
+        invocationEvents: events,
+        debugLogsLevel: LogLevel.debug,
+        isHybridApp: true,
+      );
+
+      verify(mHost.attachToNativeApp(LogLevel.debug.toString())).called(1);
+      verifyNever(mHost.init(any, any, any, any));
+      expect(Luciq.isAttachedToNativeApp, isTrue);
+    });
+
     test('ignores init after attachToNativeApp', () async {
       await Luciq.attachToNativeApp();
       await Luciq.init(token: token, invocationEvents: events);

@@ -139,11 +139,21 @@ done
 info "Force-adding generated files..."
 # Pigeon generated files (Android Java, iOS ObjC, Dart)
 git add -f packages/luciq_flutter/android/src/main/java/ai/luciq/flutter/generated/*.java 2>/dev/null || true
-git add -f packages/luciq_flutter/ios/Classes/Generated/*.h 2>/dev/null || true
-git add -f packages/luciq_flutter/ios/Classes/Generated/*.m 2>/dev/null || true
+IOS_SOURCES="packages/luciq_flutter/ios/luciq_flutter/Sources/luciq_flutter"
+git add -f "$IOS_SOURCES"/Generated/*.m 2>/dev/null || true
+git add -f "$IOS_SOURCES"/include/luciq_flutter/*Pigeon.h 2>/dev/null || true
 git add -f packages/luciq_flutter/lib/src/generated/*.g.dart 2>/dev/null || true
 # Mockito generated files
 git add -f packages/luciq_flutter/test/**/*.mocks.dart 2>/dev/null || true
+
+# A snapshot without Pigeon output doesn't compile, so stop instead of pushing it.
+for generated in \
+  "packages/luciq_flutter/android/src/main/java/ai/luciq/flutter/generated/*.java" \
+  "$IOS_SOURCES/Generated/*.m" \
+  "$IOS_SOURCES/include/luciq_flutter/*Pigeon.h" \
+  "packages/luciq_flutter/lib/src/generated/*.g.dart"; do
+  [[ -n "$(git ls-files --cached -- "$generated")" ]] || error "No generated files staged for $generated. Run without --skip-pigeon."
+done
 success "Generated files added."
 
 # -----------------------------------------------------------------------------

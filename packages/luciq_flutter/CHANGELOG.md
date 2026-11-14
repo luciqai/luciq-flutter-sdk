@@ -12,6 +12,13 @@
   On iOS, a Flutter screen that reappears no longer restarts its APM UI trace from Dart: the
   native SDK reopens it, so each route is traced once.
 
+### Fixed
+
+- **Android**: Fix the Gradle configuration failure (`Project with path ':app' could not be
+  found`) in native apps that include the Flutter module from source and name their app module
+  something other than `app`. The Dart symbols upload task now follows
+  `flutter.hostAppProjectName`, like the Flutter Gradle plugin.
+
 ## [19.13.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.13.0...v19.9.4)
 
 ### Added

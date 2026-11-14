@@ -53,6 +53,7 @@
     [self.mockRegistrar stopMocking];
     [self.mockFlutterViewController stopMocking];
     [self.mockEngine stopMocking];
+    PrivateViewApi.masksHostScreenshot = NO;
 
     self.api = nil;
     
@@ -281,6 +282,71 @@
 
     [self waitForExpectationsWithTimeout:1 handler:nil];
     OCMVerify([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY completion:OCMOCK_ANY]);
+}
+
+#pragma mark - Hybrid apps
+
+- (UIImage *)solidImageOfSize:(CGSize)size color:(UIColor *)color {
+    UIGraphicsImageRendererFormat *format = [UIGraphicsImageRendererFormat defaultFormat];
+    format.scale = 1;
+    return [[[UIGraphicsImageRenderer alloc] initWithSize:size format:format]
+        imageWithActions:^(UIGraphicsImageRendererContext *context) {
+            [color setFill];
+            [context fillRect:CGRectMake(0, 0, size.width, size.height)];
+        }];
+}
+
+- (UIColor *)colorOfImage:(UIImage *)image atPoint:(CGPoint)point {
+    CGImageRef cgImage = image.CGImage;
+    CGFloat scale = image.scale;
+    unsigned char pixel[4] = {0};
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(pixel, 1, 1, 8, 4, colorSpace,
+                                                 kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+    CGContextTranslateCTM(context, -point.x * scale, -(CGImageGetHeight(cgImage) - point.y * scale - 1));
+    CGContextDrawImage(context, CGRectMake(0, 0, CGImageGetWidth(cgImage), CGImageGetHeight(cgImage)), cgImage);
+    CGContextRelease(context);
+    CGColorSpaceRelease(colorSpace);
+    return [UIColor colorWithRed:pixel[0] / 255.0 green:pixel[1] / 255.0 blue:pixel[2] / 255.0 alpha:pixel[3] / 255.0];
+}
+
+- (void)testMask_whenAttachedToNativeApp_drawsTheDartMasksOnTheNativelyMaskedCapture {
+    PrivateViewApi.masksHostScreenshot = YES;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"completion"];
+    [self flutterViewInWindowWithFrame:CGRectMake(0, 0, 400, 700)];
+    // Stands in for the SDK's natively masked capture: a plain capture of the window would not be red.
+    UIImage *nativelyMasked = [self solidImageOfSize:CGSizeMake(400, 700) color:UIColor.redColor];
+    OCMStub([(PrivateViewApi *)self.api captureNativelyMaskedScreenshot]).andReturn(nativelyMasked);
+    OCMStub([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY
+                                            completion:([OCMArg invokeBlockWithArgs:@[@10, @20, @30, @40], [NSNull null], nil])]);
+
+    __block UIImage *masked;
+    [self.api mask:[[UIImage alloc] init] completion:^(UIImage *result) {
+        masked = result;
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+    XCTAssertEqualObjects([self colorOfImage:masked atPoint:CGPointMake(15, 25)], [UIColor colorWithRed:0 green:0 blue:0 alpha:1]);
+    XCTAssertEqualObjects([self colorOfImage:masked atPoint:CGPointMake(200, 300)], [UIColor colorWithRed:1 green:0 blue:0 alpha:1]);
+}
+
+- (void)testMask_whenAttachedToNativeAppWithoutTheSDKCapturer_usesTheGivenScreenshot {
+    PrivateViewApi.masksHostScreenshot = YES;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"completion"];
+    [self flutterViewInWindowWithFrame:CGRectMake(0, 0, 400, 700)];
+    UIImage *screenshot = [self solidImageOfSize:CGSizeMake(400, 700) color:UIColor.redColor];
+    OCMStub([(PrivateViewApi *)self.api captureNativelyMaskedScreenshot]).andReturn(nil);
+    FlutterError *error = [FlutterError errorWithCode:@"error" message:nil details:nil];
+    OCMStub([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY
+                                            completion:([OCMArg invokeBlockWithArgs:[NSNull null], error, nil])]);
+
+    [self.api mask:screenshot completion:^(UIImage *result) {
+        XCTAssertEqual(result, screenshot);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
 @end

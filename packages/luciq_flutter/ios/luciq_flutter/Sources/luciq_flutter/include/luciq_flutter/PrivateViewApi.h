@@ -8,6 +8,10 @@
 @property (nonatomic, strong) LuciqPrivateViewFlutterApi *flutterApi;
 @property (nonatomic, strong) NSObject<FlutterPluginRegistrar> * flutterEngineRegistrar;
 
+// YES once Flutter is attached to a native app that started Luciq (hybrid app). mask: then draws the
+// Dart masks on a natively masked capture, so native private views and auto-masked views stay masked.
+@property (class, nonatomic, assign) BOOL masksHostScreenshot;
+
 - (instancetype)initWithFlutterApi:(LuciqPrivateViewFlutterApi *)api
                          registrar:(NSObject<FlutterPluginRegistrar> *)registrar;
 
@@ -22,6 +26,7 @@
 - (UIImage *)drawMaskedImage:(UIImage *)screenshot withPrivateViews:(NSArray<NSValue *> *)privateViews;
 - (CGPoint)getFlutterViewOrigin;
 - (BOOL)isFlutterViewVisible;
+- (nullable UIImage *)captureNativelyMaskedScreenshot;
 
 - (void)logError:(FlutterError *)error;
 

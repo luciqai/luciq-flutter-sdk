@@ -2,6 +2,7 @@
 #import "FlutterPluginRegistrar+FlutterEngine.h"
 #import "LuciqFlutterLogger.h"
 #import "LuciqFlutterDebugTags.h"
+#import <objc/message.h>
 
 extern PrivateViewApi* InitPrivateViewApi(
     id<FlutterBinaryMessenger> messenger,
@@ -12,6 +13,16 @@ extern PrivateViewApi* InitPrivateViewApi(
 }
 
 @implementation PrivateViewApi
+
+static BOOL _masksHostScreenshot = NO;
+
++ (BOOL)masksHostScreenshot {
+    return _masksHostScreenshot;
+}
+
++ (void)setMasksHostScreenshot:(BOOL)masksHostScreenshot {
+    _masksHostScreenshot = masksHostScreenshot;
+}
 
 // Initializer with proper memory management
 - (instancetype)initWithFlutterApi:(LuciqPrivateViewFlutterApi *)api
@@ -48,7 +59,12 @@ static long long currentTimeMillis;
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
                    format:@"[PRIV.capture] #%@ phase=fire", callId];
     [self.flutterApi getPrivateViewsCallId:callId completion:^(NSArray<NSNumber *> *rectangles, FlutterError *error) {
-        UIImage *capturedScreenshot = [self captureScreenshot];
+        // In a hybrid app the capture must keep the native masks (native private views and
+        // auto-masked native views): the SDK takes it. The screenshot the SDK passed in has them
+        // too, but may predate the Flutter view's first frame.
+        UIImage *capturedScreenshot = PrivateViewApi.masksHostScreenshot
+            ? ([weakSelf captureNativelyMaskedScreenshot] ?: screenshot)
+            : [self captureScreenshot];
         // The Flutter view may have left the screen during the delay (a tab switch or a push).
         if (![weakSelf isFlutterViewVisible]) {
             [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
@@ -66,6 +82,31 @@ static long long currentTimeMillis;
 }
 
 #pragma mark - Private Methods
+
+// A screenshot taken by the SDK's own capturer with its native masking rules applied. The capturer
+// is not public, so it is reached by name; returns nil when the SDK doesn't have it.
+- (nullable UIImage *)captureNativelyMaskedScreenshot {
+    Class capturerClass = NSClassFromString(@"InstabugScreenCapturer");
+    SEL instanceSelector = NSSelectorFromString(@"getInstance");
+    SEL captureSelector = NSSelectorFromString(@"takeScreenshotWithAnnotator:shouldUseRenderInContext:lastTouchedPoints:shouldApplyMaskingRules:");
+    if (![capturerClass respondsToSelector:instanceSelector]) {
+        return nil;
+    }
+    id capturer = ((id (*)(id, SEL))objc_msgSend)(capturerClass, instanceSelector);
+    if (![capturer respondsToSelector:captureSelector]) {
+        return nil;
+    }
+    // The SDK captures without waiting for screen updates, so a Flutter view that just appeared
+    // would still be blank. Drawing its window once after screen updates commits the pending frame.
+    UIWindow *window = self.flutterEngineRegistrar.flutterEngine.viewController.view.window;
+    if (window != nil) {
+        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:window.bounds.size];
+        [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+            [window drawViewHierarchyInRect:window.bounds afterScreenUpdates:YES];
+        }];
+    }
+    return ((UIImage *(*)(id, SEL, id, BOOL, id, BOOL))objc_msgSend)(capturer, captureSelector, nil, NO, nil, YES);
+}
 
 // Method to capture a screenshot of the app's main window
 - (UIImage *)captureScreenshot {

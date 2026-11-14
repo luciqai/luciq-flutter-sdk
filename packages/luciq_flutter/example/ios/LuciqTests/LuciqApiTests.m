@@ -3,6 +3,7 @@
 #import "OCMock/OCMock.h"
 #import <objc/runtime.h>
 #import "LuciqApi.h"
+#import "PrivateViewApi.h"
 #import "LuciqSDK/LuciqSDK.h"
 #import "Util/Luciq+Test.h"
 #import "LCQNetworkLogger+CP.h"
@@ -806,6 +807,16 @@ static NSInteger recordedPlatform = -1;
 
     XCTAssertEqualObjects(recordedHosts, @[[FlutterViewController class]]);
     XCTAssertEqual(recordedPlatform, LCQPlatformFlutter);
+}
+
+- (void)testAttachToNativeApp_masksTheScreenshotTheSDKPasses {
+    PrivateViewApi.masksHostScreenshot = NO;
+    FlutterError *error;
+
+    [self.api attachToNativeAppDebugLogsLevel:@"LogLevel.error" error:&error];
+
+    XCTAssertTrue(PrivateViewApi.masksHostScreenshot);
+    PrivateViewApi.masksHostScreenshot = NO;
 }
 
 @end

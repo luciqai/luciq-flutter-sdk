@@ -10,6 +10,7 @@
 #import "Luciq+CP.h"
 #import "LuciqFlutterLogger.h"
 #import "LuciqFlutterDebugTags.h"
+#import "PrivateViewApi.h"
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
 
 extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
@@ -110,6 +111,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
         : LCQSDKDebugLogsLevelError;
     [LuciqFlutterLogger setLevel:resolvedLogLevel];
     [LuciqApi registerFlutterHosts];
+    PrivateViewApi.masksHostScreenshot = YES;
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
                    format:@"[Luciq.attachToNativeApp] phase=exit debugLogsLevel=%ld", (long)resolvedLogLevel];
 }

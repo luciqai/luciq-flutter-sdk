@@ -14,6 +14,10 @@
 
 ### Fixed
 
+- **iOS hybrid apps**: Keep native masking in screenshots taken while a Flutter view is on
+  screen. With `attachToNativeApp`, Dart's private views and auto-masked widgets are drawn on the
+  SDK's natively masked capture, so native private views and auto-masked native views next to or
+  over the Flutter view stay masked, and Luciq's own windows stay out of the screenshot.
 - **Android**: Fix the Gradle configuration failure (`Project with path ':app' could not be
   found`) in native apps that include the Flutter module from source and name their app module
   something other than `app`. The Dart symbols upload task now follows

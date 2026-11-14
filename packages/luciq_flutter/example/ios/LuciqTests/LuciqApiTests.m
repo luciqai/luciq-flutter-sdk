@@ -1,7 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import "OCMock/OCMock.h"
+#import <objc/runtime.h>
 #import "LuciqApi.h"
+#import "PrivateViewApi.h"
 #import "LuciqSDK/LuciqSDK.h"
 #import "Util/Luciq+Test.h"
 #import "LCQNetworkLogger+CP.h"
@@ -314,12 +316,42 @@
 }
 
 - (void)testReportScreenChange {
+    // Runs against SDKs without the cross-platform entry; the test below adds it to the class.
+    if ([Luciq respondsToSelector:NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:")]) {
+        XCTSkip(@"The linked SDK has the cross-platform entry, covered by testReportScreenChange_prefersTheCrossPlatformEntry");
+    }
     NSString *screenName = @"HomeScreen";
     FlutterError *error;
 
     [self.api reportScreenChangeScreenName:screenName error:&error];
 
     OCMVerify([self.mLuciq logViewDidAppearEvent:screenName]);
+}
+
+- (void)testReportScreenChange_prefersTheCrossPlatformEntry {
+    // Record calls to the cross-platform entry, whether or not the linked SDK has it. An added method
+    // stays on the class, so testReportScreenChange skips once this has run; a replaced one is restored.
+    SEL crossPlatformSEL = NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:");
+    Class metaclass = object_getClass([Luciq class]);
+    __block NSString *reportedName = nil;
+    IMP recordingIMP = imp_implementationWithBlock(^(id _self, NSString *viewName) {
+        reportedName = viewName;
+    });
+    Method existing = class_getClassMethod([Luciq class], crossPlatformSEL);
+    if (existing != NULL) {
+        IMP originalIMP = method_setImplementation(existing, recordingIMP);
+        [self addTeardownBlock:^{
+            method_setImplementation(existing, originalIMP);
+        }];
+    } else {
+        class_addMethod(metaclass, crossPlatformSEL, recordingIMP, "v@:@");
+    }
+    OCMReject([self.mLuciq logViewDidAppearEvent:OCMOCK_ANY]);
+    FlutterError *error;
+
+    [self.api reportScreenChangeScreenName:@"HomeScreen" error:&error];
+
+    XCTAssertEqualObjects(reportedName, @"HomeScreen");
 }
 
 - (void)testSetCustomBrandingImage {
@@ -745,6 +777,46 @@
     [self.api enableAutoMaskingAutoMasking:autoMaskingTypes error:&error];
 
     OCMVerify([self.mLuciq setAutoMaskScreenshots:LCQAutoMaskScreenshotOptionWebViews]);
+}
+
+// Luciq SDK versions before cross-platform hosts don't declare registerCrossPlatformHosts:platform:,
+// so the plugin calls it by selector. The test adds a recording implementation to Luciq.
+static NSArray<Class> *recordedHosts;
+static NSInteger recordedPlatform = -1;
+
+- (void)givenLuciqSupportsCrossPlatformHosts {
+    SEL selector = NSSelectorFromString(@"registerCrossPlatformHosts:platform:");
+    Class metaclass = object_getClass([Luciq class]);
+    IMP recorder = imp_implementationWithBlock(^(id _self, NSArray<Class> *hosts, NSInteger platform) {
+        recordedHosts = hosts;
+        recordedPlatform = platform;
+    });
+    if (!class_addMethod(metaclass, selector, recorder, "v@:@q")) {
+        method_setImplementation(class_getClassMethod([Luciq class], selector), recorder);
+    }
+    recordedHosts = nil;
+    recordedPlatform = -1;
+}
+
+- (void)testAttachToNativeApp_registersFlutterViewControllerAsFlutterHost {
+    [self.mLuciq stopMocking];
+    [self givenLuciqSupportsCrossPlatformHosts];
+    FlutterError *error;
+
+    [self.api attachToNativeAppDebugLogsLevel:@"LogLevel.error" error:&error];
+
+    XCTAssertEqualObjects(recordedHosts, @[[FlutterViewController class]]);
+    XCTAssertEqual(recordedPlatform, LCQPlatformFlutter);
+}
+
+- (void)testAttachToNativeApp_masksTheScreenshotTheSDKPasses {
+    PrivateViewApi.masksHostScreenshot = NO;
+    FlutterError *error;
+
+    [self.api attachToNativeAppDebugLogsLevel:@"LogLevel.error" error:&error];
+
+    XCTAssertTrue(PrivateViewApi.masksHostScreenshot);
+    PrivateViewApi.masksHostScreenshot = NO;
 }
 
 @end

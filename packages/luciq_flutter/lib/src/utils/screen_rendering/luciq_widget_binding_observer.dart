@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:luciq_flutter/src/modules/luciq.dart';
 import 'package:luciq_flutter/src/utils/lcq_build_info.dart';
 import 'package:luciq_flutter/src/utils/screen_loading/screen_loading_manager.dart';
 import 'package:luciq_flutter/src/utils/screen_name_masker.dart';
@@ -22,6 +23,13 @@ class LuciqWidgetsBindingObserver extends WidgetsBindingObserver {
   static const tag = "LuciqWidgetsBindingObserver";
 
   void _handleResumedState() {
+    // In a native iOS app that embeds Flutter, a FlutterViewController reports
+    // `resumed` each time it appears, not only when the app returns from the
+    // background. The native SDK already reopens the route's UI trace when the
+    // host reappears, so restarting it here traced the route twice and ended
+    // the new trace right away. Android hybrid apps still need the restart.
+    if (Luciq.isAttachedToNativeApp && LCQBuildInfo.I.isIOS) return;
+
     final lastUiTrace = ScreenLoadingManager.I.currentUiTrace;
 
     if (lastUiTrace == null) return;

@@ -71,22 +71,14 @@ info "SDK version: $SDK_VERSION"
 info "Branch name: $BRANCH_NAME"
 
 # -----------------------------------------------------------------------------
-# Step 1: Create snapshot branch from latest master
+# Step 1: Create snapshot branch from the current branch
 # -----------------------------------------------------------------------------
-info "Fetching latest master..."
-git fetch origin master
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-info "Stashing local changes..."
-git stash --include-untracked
-STASHED=true
-
-info "Creating branch '$BRANCH_NAME' from origin/master..."
-git checkout -b "$BRANCH_NAME" origin/master
+# Local changes carry over to the new branch automatically.
+info "Creating branch '$BRANCH_NAME' from '$CURRENT_BRANCH'..."
+git checkout -b "$BRANCH_NAME"
 success "Branch '$BRANCH_NAME' created."
-
-info "Restoring stashed changes..."
-git stash pop || warn "Nothing to restore from stash."
-STASHED=false
 
 # -----------------------------------------------------------------------------
 # Step 2: Remove all packages except luciq_flutter to reduce size
@@ -147,11 +139,21 @@ done
 info "Force-adding generated files..."
 # Pigeon generated files (Android Java, iOS ObjC, Dart)
 git add -f packages/luciq_flutter/android/src/main/java/ai/luciq/flutter/generated/*.java 2>/dev/null || true
-git add -f packages/luciq_flutter/ios/Classes/Generated/*.h 2>/dev/null || true
-git add -f packages/luciq_flutter/ios/Classes/Generated/*.m 2>/dev/null || true
+IOS_SOURCES="packages/luciq_flutter/ios/luciq_flutter/Sources/luciq_flutter"
+git add -f "$IOS_SOURCES"/Generated/*.m 2>/dev/null || true
+git add -f "$IOS_SOURCES"/include/luciq_flutter/*Pigeon.h 2>/dev/null || true
 git add -f packages/luciq_flutter/lib/src/generated/*.g.dart 2>/dev/null || true
 # Mockito generated files
 git add -f packages/luciq_flutter/test/**/*.mocks.dart 2>/dev/null || true
+
+# A snapshot without Pigeon output doesn't compile, so stop instead of pushing it.
+for generated in \
+  "packages/luciq_flutter/android/src/main/java/ai/luciq/flutter/generated/*.java" \
+  "$IOS_SOURCES/Generated/*.m" \
+  "$IOS_SOURCES/include/luciq_flutter/*Pigeon.h" \
+  "packages/luciq_flutter/lib/src/generated/*.g.dart"; do
+  [[ -n "$(git ls-files --cached -- "$generated")" ]] || error "No generated files staged for $generated. Run without --skip-pigeon."
+done
 success "Generated files added."
 
 # -----------------------------------------------------------------------------

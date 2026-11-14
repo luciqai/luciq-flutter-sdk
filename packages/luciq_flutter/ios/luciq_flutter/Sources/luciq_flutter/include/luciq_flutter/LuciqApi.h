@@ -6,6 +6,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger);
 
 - (UIImage *)getImageForAsset:(NSString *)assetName;
 - (UIFont *)getFontForAsset:(NSString *)assetName  error:(FlutterError *_Nullable *_Nonnull)error;
++ (void)registerFlutterHosts;
 + (void)setScreenshotMaskingHandler:(nullable void (^)(UIImage *_Nonnull, void (^_Nonnull)(UIImage *_Nonnull)))maskingHandler;
 
 @end

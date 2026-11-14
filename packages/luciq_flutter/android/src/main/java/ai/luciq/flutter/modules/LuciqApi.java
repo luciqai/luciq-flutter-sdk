@@ -47,6 +47,8 @@ import ai.luciq.library.internal.crossplatform.CoreFeature;
 import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
 import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
 import ai.luciq.library.internal.crossplatform.InternalCore;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragment;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
@@ -178,6 +180,43 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                     e);
         }
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.init] phase=exit");
+    }
+
+    /**
+     * Connects Flutter to the SDK the native app already started (hybrid apps).
+     * <p>
+     * Unlike {@link #init}, it never builds the SDK, so it leaves the native app's configuration
+     * alone: no second {@code Luciq.Builder}, no process-wide {@code setCurrentPlatform}, no
+     * process-wide screenshot provider, and native user steps stay on for native screens.
+     *
+     * @param debugLogsLevel the Flutter plugin's own log level. It does not change the native SDK's.
+     */
+    @Override
+    public void attachToNativeApp(@NonNull String debugLogsLevel) {
+        int parsedLogLevel = LogLevel.ERROR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            parsedLogLevel = ArgsRegistry.sdkLogLevels.getOrDefault(debugLogsLevel, LogLevel.ERROR);
+        }
+        LuciqFlutterLogger.setLevel(parsedLogLevel);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[Luciq.attachToNativeApp] phase=enter debugLogsLevel=" + debugLogsLevel);
+        if (!Luciq.isBuilt()) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
+                    "[Luciq.attachToNativeApp] Luciq isn't running in the native app. Start it with "
+                            + "Luciq.Builder in Application.onCreate, before the Flutter engine starts.");
+            return;
+        }
+        // The native app owns its Activities, so Flutter content may sit inside a native Activity
+        // (a FlutterFragment) that it cannot register as a host. Hybrid mode keeps every
+        // unregistered Activity native: captured with native masking plus Flutter's own masks.
+        InternalCore._enableHybridMode();
+        // Flutter's own containers show Flutter content, so they are hosts without the app
+        // declaring them (subclasses included): a FlutterActivity is a Flutter screen, and a
+        // FlutterFragment makes its native Activity show Flutter while it is visible. Dart routes,
+        // user steps and screenshots then belong to Flutter there.
+        InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class);
+        InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.attachToNativeApp] phase=exit");
     }
 
     @Override

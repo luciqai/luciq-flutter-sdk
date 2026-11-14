@@ -1,5 +1,28 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Hybrid apps**: Add `Luciq.attachToNativeApp({debugLogsLevel})` for native Android and iOS
+  apps that start Luciq themselves and embed a Flutter module. It sets up the Flutter side of
+  the SDK without starting it a second time, so the native app's token, invocation events, app
+  variant, log level, platform and native user steps stay untouched, and no token is needed in
+  Dart. Use it instead of `Luciq.init`; calling both is ignored with an error log.
+  On iOS, a Flutter screen that reappears no longer restarts its APM UI trace from Dart: the
+  native SDK reopens it, so each route is traced once.
+
+### Fixed
+
+- **iOS hybrid apps**: Keep native masking in screenshots taken while a Flutter view is on
+  screen. With `attachToNativeApp`, Dart's private views and auto-masked widgets are drawn on the
+  SDK's natively masked capture, so native private views and auto-masked native views next to or
+  over the Flutter view stay masked, and Luciq's own windows stay out of the screenshot.
+- **Android**: Fix the Gradle configuration failure (`Project with path ':app' could not be
+  found`) in native apps that include the Flutter module from source and name their app module
+  something other than `app`. The Dart symbols upload task now follows
+  `flutter.hostAppProjectName`, like the Flutter Gradle plugin.
+
 ## [19.13.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.13.0...v19.9.4)
 
 ### Added

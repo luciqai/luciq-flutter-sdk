@@ -22,6 +22,11 @@
   found`) in native apps that include the Flutter module from source and name their app module
   something other than `app`. The Dart symbols upload task now follows
   `flutter.hostAppProjectName`, like the Flutter Gradle plugin.
+- **Hybrid apps with several Flutter engines**: Each engine's routes now name only that engine's
+  screens. A route an engine reports while a native screen or another engine's screen is in front
+  is kept for that engine, instead of naming whichever Flutter screen appears next. Needs the
+  native SDK versions that accept the engine with each route; older versions keep the previous
+  behavior.
 
 ## [19.13.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.13.0...v19.9.4)
 

@@ -8,6 +8,7 @@ import static ai.luciq.flutter.util.GlobalMocks.reflected;
 import static ai.luciq.flutter.util.MockResult.makeResult;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -491,6 +492,38 @@ public class LuciqApiTest {
     }
 
     @Test
+    public void testReportScreenChangeWithAnEngineTheSdkRecordsItUnderSendsTheEngine() {
+        String screenName = "/scenarios";
+        Object engine = new Object();
+        api.setScreenSource(engine);
+        reflected.when(() -> MockReflected.reportScreenChange(null, screenName, null, engine)).thenReturn(true);
+
+        api.reportScreenChange(screenName);
+
+        reflected.verify(() -> MockReflected.reportScreenChange(null, screenName, null, engine));
+        reflected.verify(() -> MockReflected.reportScreenChange(any(), any(), any()), never());
+        reflected.verify(() -> MockReflected.reportCurrentViewChange(screenName));
+    }
+
+    @Test
+    public void testReportScreenChangeWithAnEngineTheSdkHoldsIsNotTheCurrentView() {
+        String screenName = "/statement";
+        Object engine = new Object();
+        api.setScreenSource(engine);
+        reflected.when(() -> MockReflected.reportScreenChange(null, screenName, null, engine)).thenReturn(false);
+
+        api.reportScreenChange(screenName);
+
+        reflected.verify(() -> MockReflected.reportCurrentViewChange(any()), never());
+    }
+
+    @Test
+    public void testEngineOfHostIsNullForAnObjectThatIsNotAFlutterHost() {
+        assertNull(LuciqApi.engineOfHost(new Object()));
+        assertNull(LuciqApi.engineOfHost(null));
+    }
+
+    @Test
     public void testSetCustomBrandingImageGivenLightAndDark() {
         String light = "images/light_logo.png";
         String dark = "images/dark_logo.png";
@@ -768,6 +801,7 @@ public class LuciqApiTest {
         mInternalCore.verify(InternalCore::_enableHybridMode);
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class));
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class));
+        reflected.verify(() -> MockReflected.setCrossPlatformSourceResolver(any()));
         mInternalCore.close();
         mLuciqBuilder.close();
     }

@@ -8,6 +8,7 @@
 #import "Util/Luciq+Test.h"
 #import "LCQNetworkLogger+CP.h"
 #import "Flutter/Flutter.h"
+#import "FlutterPluginRegistrar+FlutterEngine.h"
 #import "luciq_flutter/LCQAPM+PrivateAPIs.h"
 #import "luciq_flutter/LCQNetworkLogger+CP.h"
 
@@ -352,6 +353,35 @@
     [self.api reportScreenChangeScreenName:@"HomeScreen" error:&error];
 
     XCTAssertEqualObjects(reportedName, @"HomeScreen");
+}
+
+- (void)testReportScreenChange_withAnEngine_sendsTheEngineAsTheSource {
+    SEL sourcedSEL = NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:source:");
+    __block NSString *reportedName = nil;
+    __block id reportedSource = nil;
+    IMP recordingIMP = imp_implementationWithBlock(^(id _self, NSString *viewName, id source) {
+        reportedName = viewName;
+        reportedSource = source;
+    });
+    Method existing = class_getClassMethod([Luciq class], sourcedSEL);
+    if (existing != NULL) {
+        IMP originalIMP = method_setImplementation(existing, recordingIMP);
+        [self addTeardownBlock:^{
+            method_setImplementation(existing, originalIMP);
+        }];
+    } else {
+        class_addMethod(object_getClass([Luciq class]), sourcedSEL, recordingIMP, "v@:@@");
+    }
+    id engine = OCMClassMock([FlutterEngine class]);
+    id registrar = OCMPartialMock([NSObject new]);
+    OCMStub([registrar flutterEngine]).andReturn(engine);
+    self.api.flutterEngineRegistrar = (NSObject<FlutterPluginRegistrar> *)registrar;
+    FlutterError *error;
+
+    [self.api reportScreenChangeScreenName:@"/statement" error:&error];
+
+    XCTAssertEqualObjects(reportedName, @"/statement");
+    XCTAssertEqual(reportedSource, engine);
 }
 
 - (void)testSetCustomBrandingImage {

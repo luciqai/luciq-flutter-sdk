@@ -11,10 +11,13 @@
 #import "LuciqFlutterLogger.h"
 #import "LuciqFlutterDebugTags.h"
 #import "PrivateViewApi.h"
+#import "FlutterPluginRegistrar+FlutterEngine.h"
+#import <objc/message.h>
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:((float)((rgbValue & 0xFF000000) >> 24)) / 255.0];
 
-extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
+extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger, NSObject<FlutterPluginRegistrar> *registrar) {
     LuciqApi *api = [[LuciqApi alloc] init];
+    api.flutterEngineRegistrar = registrar;
     LuciqHostApiSetup(messenger, api);
 }
 
@@ -111,6 +114,7 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
         : LCQSDKDebugLogsLevelError;
     [LuciqFlutterLogger setLevel:resolvedLogLevel];
     [LuciqApi registerFlutterHosts];
+    [LuciqApi registerFlutterSourceResolver];
     PrivateViewApi.masksHostScreenshot = YES;
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags core]
                    format:@"[Luciq.attachToNativeApp] phase=exit debugLogsLevel=%ld", (long)resolvedLogLevel];
@@ -345,6 +349,15 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     // The cross-platform entry tells the SDK the screen comes from this module, so a hybrid app holds
     // back a route reported behind a native screen, and no second APM trace starts for a route this
     // module already traces. SDKs without it get the public API.
+    // With this engine as the source, a route reported while another engine's host is on top is
+    // held for this engine instead of naming that host.
+    FlutterEngine *source = self.flutterEngineRegistrar.flutterEngine;
+    SEL sourcedSEL = NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:source:");
+    if (source != nil && [[Luciq class] respondsToSelector:sourcedSEL]) {
+        ((void (*)(id, SEL, NSString *, id))objc_msgSend)([Luciq class], sourcedSEL, screenName, source);
+        [LuciqFlutterLogger d:[LuciqFlutterDebugTags screenTracking] format:@"[Luciq.reportScreenChange] phase=exit"];
+        return;
+    }
     SEL screenChangeSEL = NSSelectorFromString(@"logCrossPlatformViewDidAppearEvent:");
     if (![[Luciq class] respondsToSelector:screenChangeSEL]) {
         screenChangeSEL = NSSelectorFromString(@"logViewDidAppearEvent:");
@@ -628,6 +641,19 @@ extern void InitLuciqApi(id<FlutterBinaryMessenger> messenger) {
     [invocation setArgument:&hosts atIndex:2];
     [invocation setArgument:&platform atIndex:3];
     [invocation invoke];
+}
+
+// Tells the SDK which engine a FlutterViewController shows, so each engine's routes (reported with
+// the engine as their source) name only its own hosts. Older SDKs lack it and keep one route for all.
++ (void)registerFlutterSourceResolver {
+    SEL selector = NSSelectorFromString(@"setCrossPlatformSourceResolver:");
+    if (![[Luciq class] respondsToSelector:selector]) {
+        return;
+    }
+    id _Nullable (^resolver)(UIViewController *) = ^id _Nullable(UIViewController *host) {
+        return [host isKindOfClass:[FlutterViewController class]] ? ((FlutterViewController *)host).engine : nil;
+    };
+    ((void (*)(id, SEL, id))objc_msgSend)([Luciq class], selector, resolver);
 }
 
 + (void)setScreenshotMaskingHandler:(nullable void (^)(UIImage * _Nonnull __strong, void (^ _Nonnull __strong)(UIImage * _Nonnull __strong)))maskingHandler {

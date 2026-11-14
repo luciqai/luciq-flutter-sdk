@@ -57,6 +57,20 @@ public class GlobalMocks {
                         Bitmap.class, String.class, Long.class))
                 .thenReturn(mReportScreenChange);
 
+        Method mReportSourcedScreenChange = MockReflected.class.getDeclaredMethod("reportScreenChange", Bitmap.class, String.class, Long.class, Object.class);
+        mReportSourcedScreenChange.setAccessible(true);
+        reflection
+                .when(() -> Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportScreenChange",
+                        Bitmap.class, String.class, Long.class, Object.class))
+                .thenReturn(mReportSourcedScreenChange);
+
+        Method mSetSourceResolver = MockReflected.class.getDeclaredMethod("setCrossPlatformSourceResolver", kotlin.jvm.functions.Function1.class);
+        mSetSourceResolver.setAccessible(true);
+        reflection
+                .when(() -> Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "setCrossPlatformSourceResolver",
+                        kotlin.jvm.functions.Function1.class))
+                .thenReturn(mSetSourceResolver);
+
         Method mReportCurrentViewChange= MockReflected.class.getDeclaredMethod("reportCurrentViewChange", String.class);
         mReportCurrentViewChange.setAccessible(true);
         reflection

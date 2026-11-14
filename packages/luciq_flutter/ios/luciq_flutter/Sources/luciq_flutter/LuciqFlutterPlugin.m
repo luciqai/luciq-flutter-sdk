@@ -19,7 +19,7 @@
     InitBugReportingApi([registrar messenger]);
     InitCrashReportingApi([registrar messenger]);
     InitFeatureRequestsApi([registrar messenger]);
-    InitLuciqApi([registrar messenger]);
+    InitLuciqApi([registrar messenger], registrar);
     InitLuciqLogApi([registrar messenger]);
     InitRepliesApi([registrar messenger]);
     InitSessionReplayApi([registrar messenger]);

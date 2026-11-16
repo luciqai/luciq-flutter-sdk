@@ -25,7 +25,8 @@ class LuciqNavigatorObserver extends NavigatorObserver {
       tag: DebugTags.screenTracking,
     );
     try {
-      final rawScreenName = newRoute.settings.name.toString().trim();
+      // `?? ''`, not `toString()`: a route with no name would become the screen "null".
+      final rawScreenName = (newRoute.settings.name ?? '').trim();
       final screenName = rawScreenName.isEmpty
           ? ReproStepsConstants.emptyScreenFallback
           : rawScreenName;
@@ -98,16 +99,27 @@ class LuciqNavigatorObserver extends NavigatorObserver {
     Luciq.reportScreenChange(name);
   }
 
+  /// An unnamed [PopupRoute] (a dialog, bottom sheet or menu) is an overlay on the
+  /// screen below it, not a screen: it would otherwise become the current screen
+  /// (a nameless "N/A" step, UI trace and crash `current_view`) until the screen
+  /// below is reported again after it closes, a delay a crash right after closing
+  /// it falls into. A named popup route is still reported.
+  static bool _isScreen(Route route) =>
+      route is! PopupRoute || route.settings.name != null;
+
   @override
   void didPop(Route route, Route? previousRoute) {
-    if (previousRoute != null) {
+    // Closing an overlay leaves the screen below current: it was never replaced.
+    if (previousRoute != null && _isScreen(route)) {
       screenChanged(previousRoute);
     }
   }
 
   @override
   void didPush(Route route, Route? previousRoute) {
-    screenChanged(route);
+    if (_isScreen(route)) {
+      screenChanged(route);
+    }
   }
 
   FutureOr<void> _startScreenRenderCollector(int? uiTraceId) async {

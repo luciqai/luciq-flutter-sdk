@@ -34,12 +34,12 @@ static BOOL _masksHostScreenshot = NO;
     return self;
 }
 
-static long long currentTimeMillis;
-
-
 - (void)mask:(UIImage *)screenshot
   completion:(void (^)(UIImage *))completion {
     NSString *callId = [LuciqFlutterLogger nextCallId];
+    // The SDK drops the screenshot when the handler takes longer than 2 seconds, so the exit log
+    // reports how long the whole call took, from this entry.
+    CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
                    format:@"[PRIV.mask] #%@ phase=enter screenshotWidth=%.0f screenshotHeight=%.0f",
         callId, screenshot.size.width, screenshot.size.height];
@@ -76,6 +76,7 @@ static long long currentTimeMillis;
                                          error:error
                                     screenshot:capturedScreenshot
                                       callId:callId
+                                     startTime:startTime
                                     completion:completion];
       }];
     });
@@ -128,6 +129,7 @@ static long long currentTimeMillis;
                            error:(FlutterError *)error
                       screenshot:(UIImage *)screenshot
                           callId:(NSString *)callId
+                       startTime:(CFAbsoluteTime)startTime
                       completion:(void (^)(UIImage *))completion {
     if (error) {
         [self logError:error callId:callId];
@@ -137,17 +139,12 @@ static long long currentTimeMillis;
 
     NSArray<NSValue *> *privateViews = [self convertToRectangles:rectangles];
     UIImage *maskedScreenshot = [self drawMaskedImage:screenshot withPrivateViews:privateViews];
-    static long long currentTimeMillis2;
-    currentTimeMillis2 = (long long)([[NSDate date] timeIntervalSince1970] * 1000);
-
-    long long timeDifference = currentTimeMillis2 - currentTimeMillis;
+    long long durationMs = (long long)((CFAbsoluteTimeGetCurrent() - startTime) * 1000);
 
     completion(maskedScreenshot);
     [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
                    format:@"[PRIV.mask] #%@ phase=exit durationMs=%lld rectangleCount=%lu",
-        callId, timeDifference, (unsigned long)privateViews.count];
-
-
+        callId, durationMs, (unsigned long)privateViews.count];
 }
 
 // Convert the raw rectangles array into CGRect values

@@ -3,6 +3,7 @@
 #import "OCMock/OCMock.h"
 #import <objc/runtime.h>
 #import "LuciqApi.h"
+#import <luciq_flutter/LuciqFlutterPlugin.h>
 #import "PrivateViewApi.h"
 #import "LuciqSDK/LuciqSDK.h"
 #import "Util/Luciq+Test.h"
@@ -847,6 +848,39 @@ static NSInteger recordedPlatform = -1;
 
     XCTAssertTrue(PrivateViewApi.masksHostScreenshot);
     PrivateViewApi.masksHostScreenshot = NO;
+}
+
+// Luciq SDK versions before several engines don't declare setCrossPlatformSourceResolver:, so the
+// plugin calls it by selector. The test adds a recording implementation to Luciq.
+static id recordedSourceResolver;
+
+- (void)givenLuciqSupportsSourceResolvers {
+    SEL selector = NSSelectorFromString(@"setCrossPlatformSourceResolver:");
+    Class metaclass = object_getClass([Luciq class]);
+    IMP recorder = imp_implementationWithBlock(^(id _self, id resolver) {
+        recordedSourceResolver = resolver;
+    });
+    if (!class_addMethod(metaclass, selector, recorder, "v@:@?")) {
+        method_setImplementation(class_getClassMethod([Luciq class], selector), recorder);
+    }
+    recordedSourceResolver = nil;
+}
+
+- (void)testRegisteringThePluginWithAnEngine_setsTheResolverOfAFlutterViewControllerToItsEngine {
+    [self.mLuciq stopMocking];
+    [self givenLuciqSupportsSourceResolvers];
+    id registrar = OCMProtocolMock(@protocol(FlutterPluginRegistrar));
+    OCMStub([registrar messenger]).andReturn(OCMProtocolMock(@protocol(FlutterBinaryMessenger)));
+    id engine = OCMClassMock([FlutterEngine class]);
+    id host = OCMClassMock([FlutterViewController class]);
+    OCMStub([host engine]).andReturn(engine);
+
+    [LuciqFlutterPlugin registerWithRegistrar:registrar];
+
+    id _Nullable (^resolver)(UIViewController *) = recordedSourceResolver;
+    XCTAssertNotNil(resolver);
+    XCTAssertEqual(resolver(host), engine);
+    XCTAssertNil(resolver([[UIViewController alloc] init]));
 }
 
 @end

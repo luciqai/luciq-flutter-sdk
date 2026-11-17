@@ -24,9 +24,10 @@
   `flutter.hostAppProjectName`, like the Flutter Gradle plugin.
 - **Hybrid apps with several Flutter engines**: Each engine's routes now name only that engine's
   screens. A route an engine reports while a native screen or another engine's screen is in front
-  is kept for that engine, instead of naming whichever Flutter screen appears next. Needs the
-  native SDK versions that accept the engine with each route; older versions keep the previous
-  behavior.
+  is kept for that engine, instead of naming whichever Flutter screen appears next. This also
+  holds for a Flutter screen shown before Dart calls `attachToNativeApp`, when the native app
+  registers `FlutterViewController` itself. Needs the native SDK versions that accept the engine
+  with each route; older versions keep the previous behavior.
 
 ## [19.13.0](https://github.com/luciqai/luciq-flutter-sdk/compare/v19.13.0...v19.9.4)
 

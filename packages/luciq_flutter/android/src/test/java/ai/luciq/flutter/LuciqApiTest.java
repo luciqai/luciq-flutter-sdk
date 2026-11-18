@@ -37,6 +37,7 @@ import ai.luciq.apm.InternalAPM;
 import ai.luciq.bug.BugReporting;
 import ai.luciq.flutter.generated.LuciqPigeon;
 import ai.luciq.flutter.modules.LuciqApi;
+import ai.luciq.flutter.modules.capturing.FlutterFrameNotifier;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.GlobalMocks;
 import ai.luciq.flutter.util.MockReflected;
@@ -801,6 +802,7 @@ public class LuciqApiTest {
         mInternalCore.verify(InternalCore::_enableHybridMode);
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class));
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class));
+        mInternalCore.verify(() -> InternalCore._setCrossPlatformFrameNotifier(any(FlutterFrameNotifier.class)));
         reflected.verify(() -> MockReflected.setCrossPlatformSourceResolver(any()));
         mInternalCore.close();
         mLuciqBuilder.close();
@@ -821,6 +823,7 @@ public class LuciqApiTest {
         mInternalCore.verify(InternalCore::_enableHybridMode, never());
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(anyInt(), any()), never());
         mInternalCore.verify(() -> InternalCore._registerCrossPlatformHosts(anyInt(), any()), never());
+        mInternalCore.verify(() -> InternalCore._setCrossPlatformFrameNotifier(any()), never());
         mInternalCore.close();
         mLuciqBuilder.close();
     }

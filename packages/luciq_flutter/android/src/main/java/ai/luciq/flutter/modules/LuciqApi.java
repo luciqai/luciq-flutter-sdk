@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import ai.luciq.flutter.generated.LuciqPigeon;
+import ai.luciq.flutter.modules.capturing.FlutterFrameNotifier;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.LuciqFlutterDebugTags;
 import ai.luciq.flutter.util.LuciqFlutterLogger;
@@ -259,6 +260,8 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         // user steps and screenshots then belong to Flutter there.
         InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class);
         InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class);
+        // A FlutterFragment's route is captured once Flutter has drawn it, not after a fixed wait.
+        InternalCore._setCrossPlatformFrameNotifier(new FlutterFrameNotifier());
         // Each engine reports its routes with itself as the source (reportScreenChange), so the SDK
         // must know which engine a host shows. Older SDKs lack it and keep one route for all engines.
         try {

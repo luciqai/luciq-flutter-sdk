@@ -14,7 +14,7 @@ void main() {
 
         await $('Show Manual Survey').scrollTo().tap();
 
-        await wait(second: 2);
+        await wait(second: 5);
 
         final title = await getNativeView($,
             ios: 'SurveyNavigationVC',

@@ -1,9 +1,14 @@
 package ai.luciq.flutter;
 
+
+
+
+
 import static ai.luciq.flutter.util.GlobalMocks.reflected;
 import static ai.luciq.flutter.util.MockResult.makeResult;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -32,6 +37,7 @@ import ai.luciq.apm.InternalAPM;
 import ai.luciq.bug.BugReporting;
 import ai.luciq.flutter.generated.LuciqPigeon;
 import ai.luciq.flutter.modules.LuciqApi;
+import ai.luciq.flutter.modules.capturing.FlutterFrameNotifier;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.GlobalMocks;
 import ai.luciq.flutter.util.MockReflected;
@@ -49,6 +55,8 @@ import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.CoreFeature;
 import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
 import ai.luciq.library.internal.crossplatform.InternalCore;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragment;
 import ai.luciq.library.featuresflags.model.LuciqFeatureFlag;
 import ai.luciq.library.internal.crossplatform.CoreFeature;
 import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
@@ -485,6 +493,38 @@ public class LuciqApiTest {
     }
 
     @Test
+    public void testReportScreenChangeWithAnEngineTheSdkRecordsItUnderSendsTheEngine() {
+        String screenName = "/scenarios";
+        Object engine = new Object();
+        api.setScreenSource(engine);
+        reflected.when(() -> MockReflected.reportScreenChange(null, screenName, null, engine)).thenReturn(true);
+
+        api.reportScreenChange(screenName);
+
+        reflected.verify(() -> MockReflected.reportScreenChange(null, screenName, null, engine));
+        reflected.verify(() -> MockReflected.reportScreenChange(any(), any(), any()), never());
+        reflected.verify(() -> MockReflected.reportCurrentViewChange(screenName));
+    }
+
+    @Test
+    public void testReportScreenChangeWithAnEngineTheSdkHoldsIsNotTheCurrentView() {
+        String screenName = "/statement";
+        Object engine = new Object();
+        api.setScreenSource(engine);
+        reflected.when(() -> MockReflected.reportScreenChange(null, screenName, null, engine)).thenReturn(false);
+
+        api.reportScreenChange(screenName);
+
+        reflected.verify(() -> MockReflected.reportCurrentViewChange(any()), never());
+    }
+
+    @Test
+    public void testEngineOfHostIsNullForAnObjectThatIsNotAFlutterHost() {
+        assertNull(LuciqApi.engineOfHost(new Object()));
+        assertNull(LuciqApi.engineOfHost(null));
+    }
+
+    @Test
     public void testSetCustomBrandingImageGivenLightAndDark() {
         String light = "images/light_logo.png";
         String dark = "images/dark_logo.png";
@@ -745,6 +785,47 @@ public class LuciqApiTest {
 
         LuciqApi.setScreenshotCaptor(any(), internalCore);
         verify(internalCore)._setScreenshotCaptor(any(ScreenshotCaptor.class));
+    }
+
+    @Test
+    public void testAttachToNativeAppDoesNotStartOrReconfigureTheSdk() {
+        mLuciq.when(Luciq::isBuilt).thenReturn(true);
+        MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class);
+
+        MockedStatic<InternalCore> mInternalCore = mockStatic(InternalCore.class);
+
+        api.attachToNativeApp("LogLevel.debug");
+
+        assertEquals(0, mLuciqBuilder.constructed().size());
+        mLuciq.verify(() -> Luciq.setScreenshotProvider(any()), never());
+        reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
+        mInternalCore.verify(InternalCore::_enableHybridMode);
+        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class));
+        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class));
+        mInternalCore.verify(() -> InternalCore._setCrossPlatformFrameNotifier(any(FlutterFrameNotifier.class)));
+        reflected.verify(() -> MockReflected.setCrossPlatformSourceResolver(any()));
+        mInternalCore.close();
+        mLuciqBuilder.close();
+    }
+
+    @Test
+    public void testAttachToNativeAppWhenTheNativeAppDidNotStartLuciq() {
+        mLuciq.when(Luciq::isBuilt).thenReturn(false);
+        MockedConstruction<Luciq.Builder> mLuciqBuilder = mockConstruction(Luciq.Builder.class);
+
+        MockedStatic<InternalCore> mInternalCore = mockStatic(InternalCore.class);
+
+        api.attachToNativeApp("LogLevel.error");
+
+        assertEquals(0, mLuciqBuilder.constructed().size());
+        mLuciq.verify(() -> Luciq.setScreenshotProvider(any()), never());
+        reflected.verify(() -> MockReflected.setCurrentPlatform(anyInt()), never());
+        mInternalCore.verify(InternalCore::_enableHybridMode, never());
+        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHostFragments(anyInt(), any()), never());
+        mInternalCore.verify(() -> InternalCore._registerCrossPlatformHosts(anyInt(), any()), never());
+        mInternalCore.verify(() -> InternalCore._setCrossPlatformFrameNotifier(any()), never());
+        mInternalCore.close();
+        mLuciqBuilder.close();
     }
 
     @Test

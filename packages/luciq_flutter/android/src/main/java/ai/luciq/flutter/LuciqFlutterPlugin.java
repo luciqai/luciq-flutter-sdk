@@ -57,7 +57,8 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
-        register(binding.getApplicationContext(), binding.getBinaryMessenger(), (FlutterRenderer) binding.getTextureRegistry());
+        register(binding.getApplicationContext(), binding.getBinaryMessenger(), (FlutterRenderer) binding.getTextureRegistry(),
+                binding.getFlutterEngine());
         luciqFlutterApi = new LuciqPigeon.LuciqFlutterApi(binding.getBinaryMessenger());
     }
 
@@ -133,7 +134,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
         }
     }
 
-    private static void register(Context context, BinaryMessenger messenger, FlutterRenderer renderer) {
+    private static void register(Context context, BinaryMessenger messenger, FlutterRenderer renderer, Object engine) {
         final Callable<Bitmap> screenshotProvider = new Callable<Bitmap>() {
             @Override
             public Bitmap call() {
@@ -155,7 +156,7 @@ public class LuciqFlutterPlugin implements FlutterPlugin, ActivityAware, Lifecyc
         BugReportingApi.init(messenger);
         CrashReportingApi.init(messenger);
         FeatureRequestsApi.init(messenger);
-        LuciqApi.init(messenger, context, screenshotProvider);
+        LuciqApi.init(messenger, context, screenshotProvider, engine);
         LuciqLogApi.init(messenger);
         RepliesApi.init(messenger);
         SessionReplayApi.init(messenger);

@@ -23,6 +23,16 @@ public class MockReflected {
     public static void reportScreenChange(Bitmap screenshot, String name, Long timestamp) {}
 
     /**
+     * Luciq.reportScreenChange with a source
+     */
+    public static boolean reportScreenChange(Bitmap screenshot, String name, Long timestamp, Object source) { return true; }
+
+    /**
+     * Luciq.setCrossPlatformSourceResolver
+     */
+    public static void setCrossPlatformSourceResolver(kotlin.jvm.functions.Function1<Object, Object> resolver) {}
+
+    /**
      * Luciq.reportCurrentViewChange
      */
     public static void reportCurrentViewChange(String name) {}

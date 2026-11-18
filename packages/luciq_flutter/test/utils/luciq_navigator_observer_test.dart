@@ -152,6 +152,71 @@ void main() {
     });
   });
 
+  test('should fallback to "N/A" when the route has no name', () {
+    fakeAsync((async) {
+      final route = createRoute(null);
+      const fallback = 'N/A';
+
+      observer.didPush(route, previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verify(
+        mScreenLoadingManager.prepareUiTrace(fallback, fallback),
+      ).called(1);
+
+      verify(
+        mHost.reportScreenChange(fallback),
+      ).called(1);
+      verifyNever(mHost.reportScreenChange('null'));
+    });
+  });
+
+  test('should not report an unnamed popup route as a screen when pushed', () {
+    fakeAsync((async) {
+      observer.didPush(createPopupRoute(null), previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verifyNever(mScreenLoadingManager.prepareUiTrace(any, any));
+      verifyNever(mHost.reportScreenChange(any));
+    });
+  });
+
+  test('should not report the screen below again when an unnamed popup is popped',
+      () {
+    fakeAsync((async) {
+      observer.didPop(createPopupRoute(null), previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verifyNever(mScreenLoadingManager.prepareUiTrace(any, any));
+      verifyNever(mHost.reportScreenChange(any));
+    });
+  });
+
+  test('should report a named popup route as a screen', () {
+    fakeAsync((async) {
+      const dialog = '/dialog';
+      observer.didPush(createPopupRoute(dialog), previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verify(mHost.reportScreenChange(dialog)).called(1);
+
+      observer.didPop(createPopupRoute(dialog), previousRoute);
+      WidgetsBinding.instance?.handleBeginFrame(Duration.zero);
+      WidgetsBinding.instance?.handleDrawFrame();
+      async.elapse(const Duration(milliseconds: 1000));
+
+      verify(mHost.reportScreenChange(previousScreen)).called(1);
+    });
+  });
+
   test('should mask screen name when masking callback is set', () {
     const maskedScreen = 'maskedScreen';
 
@@ -257,4 +322,32 @@ Route createRoute(String? name) {
     builder: (_) => Container(),
     settings: RouteSettings(name: name),
   );
+}
+
+Route createPopupRoute(String? name) =>
+    _TestPopupRoute(settings: RouteSettings(name: name));
+
+/// A dialog-like overlay route, without the BuildContext a DialogRoute needs.
+class _TestPopupRoute extends PopupRoute<void> {
+  _TestPopupRoute({RouteSettings? settings}) : super(settings: settings);
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) =>
+      Container();
 }

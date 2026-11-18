@@ -3,16 +3,19 @@ import java.util.zip.ZipEntry
 
 
 project.afterEvaluate {
-    // Works for both `bundleReleaseJsAndAssets` and `createBundleReleaseJsAndAssets` and product flavors
-    def bundleTasks = project(':app').tasks.findAll {
-        task -> task.name
+    // Same lookup as the Flutter Gradle plugin: a host app (add-to-app) may name its app module
+    // something other than `app` and declare it with `flutter.hostAppProjectName`.
+    final hostAppProjectName = rootProject.findProperty('flutter.hostAppProjectName') ?: 'app'
+    final hostAppProject = rootProject.findProject(":$hostAppProjectName")
+    if (hostAppProject == null) {
+        println "Luciq: project ':$hostAppProjectName' not found, skipping automatic debug symbols upload"
+        return
     }
 
-    bundleTasks.forEach { task ->
-
-        if (task.name == 'assembleRelease' || task.name == 'bundleRelease') {
-            task.finalizedBy upload_symbols_task
-        }
+    hostAppProject.tasks.matching { task ->
+        task.name == 'assembleRelease' || task.name == 'bundleRelease'
+    }.configureEach { task ->
+        task.finalizedBy upload_symbols_task
     }
 }
 

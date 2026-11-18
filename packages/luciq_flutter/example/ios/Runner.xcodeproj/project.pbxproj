@@ -11,14 +11,17 @@
 		2001D1442B8F501000885261 /* LuciqExampleMethodCallHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 2001D1432B8F501000885261 /* LuciqExampleMethodCallHandler.m */; };
 		206286ED2ABD0A1F00925509 /* SessionReplayApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 206286EC2ABD0A1F00925509 /* SessionReplayApiTests.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		5D23CFCE5457764D56CA9387 /* PrivateViewHostApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EF1362B65FDF986E12EC6905 /* PrivateViewHostApiTests.m */; };
 		65C88E6E8EAE049E32FF2F52 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 853739F5879F6E4272829F47 /* Pods_Runner.framework */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		805A16B02ED34A0D00860513 /* LuciqConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 805A16AF2ED34A0D00860513 /* LuciqConfig.plist */; };
 		92591B0D1E5E2F01DD98B405 /* Pods_Runner_RunnerUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E60AD566579C980BB4ADC693 /* Pods_Runner_RunnerUITests.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		9D381ECFBB01BD0E978EBDF2 /* Pods_LuciqTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71679BEC094CFF3474195C2E /* Pods_LuciqTests.framework */; };
+		B336F29D189ADF01A1E0D967 /* PrivateViewApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BD0AB124DC0FBD7BE6E39530 /* PrivateViewApiTests.m */; };
 		CC080E112937B7DB0041170A /* LuciqApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC080E102937B7DB0041170A /* LuciqApiTests.m */; };
 		CC198C61293E1A21007077C8 /* SurveysApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC198C60293E1A21007077C8 /* SurveysApiTests.m */; };
 		CC359DB92937720C0067A924 /* ApmApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC359DB82937720C0067A924 /* ApmApiTests.m */; };
@@ -28,7 +31,6 @@
 		CC9925D7293DFB03001FD3EE /* LuciqLogApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC9925D6293DFB03001FD3EE /* LuciqLogApiTests.m */; };
 		CC9925D9293DFD7F001FD3EE /* RepliesApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC9925D8293DFD7F001FD3EE /* RepliesApiTests.m */; };
 		CCADBDD8293CFED300AE5EB8 /* BugReportingApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CCADBDD7293CFED300AE5EB8 /* BugReportingApiTests.m */; };
-		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +76,7 @@
 		71679BEC094CFF3474195C2E /* Pods_LuciqTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LuciqTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		805A16AF2ED34A0D00860513 /* LuciqConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = LuciqConfig.plist; sourceTree = "<group>"; };
 		816B0520F0A0D656CA616D31 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
@@ -89,6 +92,7 @@
 		B03C8370EEFE061BDDDA1DA1 /* Pods-LuciqUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LuciqUITests.debug.xcconfig"; path = "Target Support Files/Pods-LuciqUITests/Pods-LuciqUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		B9D7806D6F888701A44C7014 /* Pods-Runner-RunnerUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.debug.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		BA5633844585BB93FE7BCCE7 /* Pods-LuciqTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LuciqTests.profile.xcconfig"; path = "Target Support Files/Pods-LuciqTests/Pods-LuciqTests.profile.xcconfig"; sourceTree = "<group>"; };
+		BD0AB124DC0FBD7BE6E39530 /* PrivateViewApiTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = PrivateViewApiTests.m; sourceTree = "<group>"; };
 		BE25C4E42E8D4EC600732F21 /* RunnerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE26C80C2BD55575009FECCF /* LCQCrashReporting+CP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LCQCrashReporting+CP.h"; sourceTree = "<group>"; };
 		BF9025BBD0A6FD7B193E903A /* Pods-LuciqTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LuciqTests.debug.xcconfig"; path = "Target Support Files/Pods-LuciqTests/Pods-LuciqTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -109,8 +113,8 @@
 		E4C07D7DB3AE96B64CBADB7B /* Pods-Runner-RunnerUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.release.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.release.xcconfig"; sourceTree = "<group>"; };
 		E5038CACFB49F61ABC8A93E7 /* Pods-Runner-RunnerUITests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.profile.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.profile.xcconfig"; sourceTree = "<group>"; };
 		E60AD566579C980BB4ADC693 /* Pods_Runner_RunnerUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner_RunnerUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EF1362B65FDF986E12EC6905 /* PrivateViewHostApiTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = PrivateViewHostApiTests.m; sourceTree = "<group>"; };
 		F5446C0D3B2623D9BCC7CCE3 /* Pods_LuciqUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LuciqUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -254,6 +258,8 @@
 				CC9925D8293DFD7F001FD3EE /* RepliesApiTests.m */,
 				206286EC2ABD0A1F00925509 /* SessionReplayApiTests.m */,
 				CC3D69E6293F47FC000DCE54 /* ArgsRegistryTests.m */,
+				BD0AB124DC0FBD7BE6E39530 /* PrivateViewApiTests.m */,
+				EF1362B65FDF986E12EC6905 /* PrivateViewHostApiTests.m */,
 			);
 			path = LuciqTests;
 			sourceTree = "<group>";
@@ -272,9 +278,6 @@
 
 /* Begin PBXNativeTarget section */
 		97C146ED1CF9000F007C117D /* Runner */ = {
-			packageProductDependencies = (
-				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,
-			);
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
@@ -292,6 +295,9 @@
 			dependencies = (
 			);
 			name = Runner;
+			packageProductDependencies = (
+				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,
+			);
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
@@ -345,9 +351,6 @@
 
 /* Begin PBXProject section */
 		97C146E61CF9000F007C117D /* Project object */ = {
-			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
-			);
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1510;
@@ -377,6 +380,9 @@
 				Base,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
+			packageReferences = (
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
+			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -636,6 +642,8 @@
 				CC9925D2293DEB0B001FD3EE /* CrashReportingApiTests.m in Sources */,
 				CC9925D7293DFB03001FD3EE /* LuciqLogApiTests.m in Sources */,
 				CC9925D5293DF534001FD3EE /* FeatureRequestsApiTests.m in Sources */,
+				B336F29D189ADF01A1E0D967 /* PrivateViewApiTests.m in Sources */,
+				5D23CFCE5457764D56CA9387 /* PrivateViewHostApiTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1170,12 +1178,14 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};
 /* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */ = {
 			isa = XCSwiftPackageProductDependency;

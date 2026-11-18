@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import ai.luciq.flutter.generated.LuciqPrivateViewPigeon;
+import ai.luciq.flutter.modules.capturing.FlutterContentMaskProvider;
 import ai.luciq.flutter.util.LuciqFlutterDebugTags;
 import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.flutter.util.privateViews.ScreenshotCaptor;
@@ -47,6 +48,9 @@ public class LuciqPrivateView implements LuciqPrivateViewPigeon.LuciqPrivateView
                 }, 300);
             }
         }, InternalCore.INSTANCE);
+        // A Flutter view embedded in a native screen (a FlutterFragment in a native Activity) is
+        // captured natively in hybrid apps; this reports its Dart masks to that native capture.
+        InternalCore._setCrossPlatformMaskProvider(new FlutterContentMaskProvider());
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
                 "[PRIV.init] phase=exit");
     }

@@ -349,4 +349,47 @@
     [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
+- (void)testMask_whenTwoEnginesShowFlutterViews_drawsTheDartMasksOfBoth {
+    PrivateViewApi.masksHostScreenshot = YES;
+    XCTestExpectation *expectation = [self expectationWithDescription:@"completion"];
+    // This engine's view fills the top half of the window; a second engine's view the bottom half.
+    [self flutterViewInWindowWithFrame:CGRectMake(0, 0, 400, 350)];
+    UIView *bottomView = [[UIView alloc] initWithFrame:CGRectMake(0, 350, 400, 350)];
+    [self.testWindow addSubview:bottomView];
+    id bottomController = OCMClassMock([UIViewController class]);
+    OCMStub([bottomController isViewLoaded]).andReturn(YES);
+    OCMStub([bottomController view]).andReturn(bottomView);
+    id bottomEngine = OCMClassMock([FlutterEngine class]);
+    OCMStub([bottomEngine viewController]).andReturn(bottomController);
+    id bottomRegistrar = OCMPartialMock([[MockFlutterPluginRegistrar alloc] init]);
+    OCMStub([bottomRegistrar flutterEngine]).andReturn(bottomEngine);
+    id bottomFlutterApi = OCMClassMock([LuciqPrivateViewFlutterApi class]);
+    OCMStub([bottomFlutterApi getPrivateViewsCallId:OCMOCK_ANY
+                                         completion:([OCMArg invokeBlockWithArgs:@[@10, @10, @30, @30], [NSNull null], nil])]);
+    PrivateViewApi *bottomApi = [[PrivateViewApi alloc] initWithFlutterApi:bottomFlutterApi registrar:bottomRegistrar];
+
+    UIImage *nativelyMasked = [self solidImageOfSize:CGSizeMake(400, 700) color:UIColor.redColor];
+    OCMStub([(PrivateViewApi *)self.api captureNativelyMaskedScreenshot]).andReturn(nativelyMasked);
+    OCMStub([self.mockFlutterApi getPrivateViewsCallId:OCMOCK_ANY
+                                            completion:([OCMArg invokeBlockWithArgs:@[@10, @20, @30, @40], [NSNull null], nil])]);
+
+    __block UIImage *masked;
+    [self.api mask:[[UIImage alloc] init] completion:^(UIImage *result) {
+        masked = result;
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+    UIColor *black = [UIColor colorWithRed:0 green:0 blue:0 alpha:1];
+    // This engine's rect at its own origin, and the bottom engine's rect at the bottom view's origin.
+    XCTAssertEqualObjects([self colorOfImage:masked atPoint:CGPointMake(15, 25)], black);
+    XCTAssertEqualObjects([self colorOfImage:masked atPoint:CGPointMake(15, 365)], black);
+    XCTAssertEqualObjects([self colorOfImage:masked atPoint:CGPointMake(200, 300)], [UIColor colorWithRed:1 green:0 blue:0 alpha:1]);
+    [bottomFlutterApi stopMocking];
+    [bottomEngine stopMocking];
+    [bottomController stopMocking];
+    [bottomRegistrar stopMocking];
+    (void)bottomApi;
+}
+
 @end

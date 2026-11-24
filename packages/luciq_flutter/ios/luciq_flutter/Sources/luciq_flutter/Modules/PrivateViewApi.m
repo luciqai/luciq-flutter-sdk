@@ -16,6 +16,28 @@ extern PrivateViewApi* InitPrivateViewApi(
 
 static BOOL _masksHostScreenshot = NO;
 
+// Every PrivateViewApi, one per engine, held weakly. A screen can show several Flutter views at
+// once (two FlutterViewControllers stacked, each on its own engine), and each engine knows only its
+// own private views, while the SDK holds one masking handler: whichever engine set it masks for all.
+static NSHashTable<PrivateViewApi *> *RegisteredApis(void) {
+    static NSHashTable<PrivateViewApi *> *apis;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        apis = [NSHashTable weakObjectsHashTable];
+    });
+    return apis;
+}
+
+// The APIs whose Flutter view is on screen: this one first, then the other engines'. Main thread.
+- (NSArray<PrivateViewApi *> *)visibleApis {
+    NSMutableArray<PrivateViewApi *> *visible = [NSMutableArray array];
+    if ([self isFlutterViewVisible]) [visible addObject:self];
+    for (PrivateViewApi *api in RegisteredApis().allObjects) {
+        if (api != self && [api isFlutterViewVisible]) [visible addObject:api];
+    }
+    return visible;
+}
+
 + (BOOL)masksHostScreenshot {
     return _masksHostScreenshot;
 }
@@ -30,6 +52,7 @@ static BOOL _masksHostScreenshot = NO;
     if ((self = [super init])) {
         _flutterApi = api;
         _flutterEngineRegistrar = registrar;
+        [RegisteredApis() addObject:self];
     }
     return self;
 }
@@ -46,7 +69,8 @@ static BOOL _masksHostScreenshot = NO;
 
     // A Flutter view that is not on screen (a hidden tab, or under a pushed native screen) still
     // reports the private views of its last route. Masking them would black out native content.
-    if (![self isFlutterViewVisible]) {
+    NSArray<PrivateViewApi *> *visibleApis = [self visibleApis];
+    if (visibleApis.count == 0) {
         [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
                        format:@"[PRIV.mask] #%@ phase=exit skipped=flutterViewNotVisible", callId];
         completion(screenshot);
@@ -56,29 +80,59 @@ static BOOL _masksHostScreenshot = NO;
     __weak typeof(self) weakSelf = self;
     // Wait for the Cupertino animation to complete
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
-                   format:@"[PRIV.capture] #%@ phase=fire", callId];
-    [self.flutterApi getPrivateViewsCallId:callId completion:^(NSArray<NSNumber *> *rectangles, FlutterError *error) {
-        // In a hybrid app the capture must keep the native masks (native private views and
-        // auto-masked native views): the SDK takes it. The screenshot the SDK passed in has them
-        // too, but may predate the Flutter view's first frame.
-        UIImage *capturedScreenshot = PrivateViewApi.masksHostScreenshot
-            ? ([weakSelf captureNativelyMaskedScreenshot] ?: screenshot)
-            : [self captureScreenshot];
-        // The Flutter view may have left the screen during the delay (a tab switch or a push).
-        if (![weakSelf isFlutterViewVisible]) {
+        // Every visible engine is asked; each answer is kept by its position in visibleApis.
+        NSMutableArray *answers = [NSMutableArray arrayWithCapacity:visibleApis.count];
+        dispatch_group_t group = dispatch_group_create();
+        for (NSUInteger i = 0; i < visibleApis.count; i++) {
+            [answers addObject:[NSNull null]];
+            dispatch_group_enter(group);
             [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
-                           format:@"[PRIV.mask] #%@ phase=exit skipped=flutterViewNotVisible", callId];
-            completion(capturedScreenshot);
-            return;
+                           format:@"[PRIV.capture] #%@ phase=fire engine=%lu", callId, (unsigned long)i];
+            [visibleApis[i].flutterApi getPrivateViewsCallId:callId
+                                                  completion:^(NSArray<NSNumber *> *rectangles, FlutterError *error) {
+                if (error) {
+                    [visibleApis[i] logError:error callId:callId];
+                } else if (rectangles) {
+                    answers[i] = rectangles;
+                }
+                dispatch_group_leave(group);
+            }];
         }
-            [weakSelf handlePrivateViewsResult:rectangles
-                                         error:error
-                                    screenshot:capturedScreenshot
-                                      callId:callId
-                                     startTime:startTime
-                                    completion:completion];
-      }];
+        dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+            // In a hybrid app the capture must keep the native masks (native private views and
+            // auto-masked native views): the SDK takes it. The screenshot the SDK passed in has
+            // them too, but may predate the Flutter view's first frame.
+            UIImage *capturedScreenshot = PrivateViewApi.masksHostScreenshot
+                ? ([weakSelf captureNativelyMaskedScreenshot] ?: screenshot)
+                : [weakSelf captureScreenshot];
+            NSMutableArray<NSValue *> *privateViews = [NSMutableArray array];
+            BOOL anyAnswered = NO;
+            BOOL anyVisible = NO;
+            for (NSUInteger i = 0; i < visibleApis.count; i++) {
+                // A Flutter view may have left the screen during the delay (a tab switch or a push).
+                if (![visibleApis[i] isFlutterViewVisible]) continue;
+                anyVisible = YES;
+                if (answers[i] == [NSNull null]) continue;
+                anyAnswered = YES;
+                [privateViews addObjectsFromArray:[visibleApis[i] convertToRectangles:answers[i]]];
+            }
+            if (!anyVisible) {
+                [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                               format:@"[PRIV.mask] #%@ phase=exit skipped=flutterViewNotVisible", callId];
+                completion(capturedScreenshot);
+                return;
+            }
+            if (!anyAnswered) {
+                completion(capturedScreenshot);
+                return;
+            }
+            UIImage *maskedScreenshot = [weakSelf drawMaskedImage:capturedScreenshot withPrivateViews:privateViews];
+            long long durationMs = (long long)((CFAbsoluteTimeGetCurrent() - startTime) * 1000);
+            completion(maskedScreenshot);
+            [LuciqFlutterLogger d:[LuciqFlutterDebugTags privateView]
+                           format:@"[PRIV.mask] #%@ phase=exit durationMs=%lld rectangleCount=%lu engines=%lu",
+                callId, durationMs, (unsigned long)privateViews.count, (unsigned long)visibleApis.count];
+        });
     });
 }
 

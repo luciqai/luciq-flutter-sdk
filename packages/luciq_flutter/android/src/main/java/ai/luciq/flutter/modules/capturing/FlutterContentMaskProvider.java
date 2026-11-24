@@ -5,13 +5,14 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -26,19 +27,17 @@ import ai.luciq.flutter.util.LuciqFlutterDebugTags;
 import ai.luciq.flutter.util.LuciqFlutterLogger;
 import ai.luciq.library.crossplatform.CrossPlatformMaskProvider;
 import ai.luciq.library.crossplatform.CrossPlatformMasks;
-import io.flutter.embedding.android.FlutterActivity;
-import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.engine.FlutterEngine;
 
 /**
- * Reports the Dart private views and auto-masked widgets of a Flutter view embedded in a native
- * screen, such as a {@code FlutterFragment} in a native Activity, so the SDK masks them in that
+ * Reports the Dart private views and auto-masked widgets of the Flutter views embedded in a native
+ * screen, such as {@code FlutterFragment}s in a native Activity, so the SDK masks them in that
  * screen's native screenshot.
  *
- * <p>The rects are asked from the engine attached to the Flutter view on screen, on the main
+ * <p>The rects are asked from the engine attached to each Flutter view on screen, on the main
  * thread, and converted from Flutter logical pixels to window pixels. The fallback is the Flutter
- * view's visible area: the SDK masks it whole when Dart does not answer in time.
+ * views' visible areas: the SDK masks them whole when Dart does not answer in time.
  */
 public class FlutterContentMaskProvider implements CrossPlatformMaskProvider {
 
@@ -56,61 +55,127 @@ public class FlutterContentMaskProvider implements CrossPlatformMaskProvider {
         void post(@NonNull Runnable runnable);
     }
 
+    /** Finds the Flutter views in {@code activity}'s window, in view-tree order. */
+    @VisibleForTesting
+    public interface FlutterViewFinder {
+        @NonNull
+        List<FlutterView> find(@NonNull Activity activity);
+    }
+
     private final PrivateViewsQuery query;
     private final MainThreadPoster mainThread;
+    private final FlutterViewFinder finder;
 
     public FlutterContentMaskProvider() {
         this(FlutterContentMaskProvider::queryAttachedEngine,
-                new Handler(Looper.getMainLooper())::post);
+                new Handler(Looper.getMainLooper())::post,
+                FlutterContentMaskProvider::findFlutterViews);
     }
 
     @VisibleForTesting
-    public FlutterContentMaskProvider(@NonNull PrivateViewsQuery query, @NonNull MainThreadPoster mainThread) {
+    public FlutterContentMaskProvider(@NonNull PrivateViewsQuery query, @NonNull MainThreadPoster mainThread,
+                                      @NonNull FlutterViewFinder finder) {
         this.query = query;
         this.mainThread = mainThread;
+        this.finder = finder;
     }
 
+    /**
+     * Masks every Flutter view the screen shows. A screen can show several at once (two
+     * {@code FlutterFragment}s stacked, each on its own engine), and each engine knows only its own
+     * private views, so each shown view's engine is asked and the answers are combined. If any engine
+     * fails to answer, the whole request fails and the SDK masks every shown Flutter view whole.
+     */
     @Nullable
     @Override
     public CrossPlatformMasks requestMasks(@NonNull Activity activity) {
-        final FlutterView flutterView = findFlutterView(activity);
-        if (flutterView == null) return null;
+        if (activity.getWindow() == null) return null;
+        final List<FlutterView> shownViews = new ArrayList<>();
+        final List<Rect> visibleAreas = new ArrayList<>();
+        final List<int[]> origins = new ArrayList<>();
+        for (FlutterView flutterView : finder.find(activity)) {
+            // isShown() also checks every parent: a hidden FlutterFragment (a bottom-navigation tab
+            // behind a native one) keeps its view attached, and getGlobalVisibleRect alone ignores
+            // hidden parents. Its Dart routes are still current, so asking Dart would mask its
+            // private views over the native tab in front.
+            if (!flutterView.isShown()) continue;
+            final Rect visibleArea = new Rect();
+            if (!flutterView.getGlobalVisibleRect(visibleArea)) continue;
+            final int[] origin = new int[2];
+            flutterView.getLocationInWindow(origin);
+            shownViews.add(flutterView);
+            visibleAreas.add(visibleArea);
+            origins.add(origin);
+        }
+        if (shownViews.isEmpty()) return null;
 
-        // isShown() also checks every parent: a hidden FlutterFragment (a bottom-navigation tab
-        // behind a native one) keeps its view attached, and getGlobalVisibleRect alone ignores
-        // hidden parents. Its Dart routes are still current, so asking Dart would mask its private
-        // views over the native tab in front.
-        if (!flutterView.isShown()) return null;
-        final Rect visibleArea = new Rect();
-        if (!flutterView.getGlobalVisibleRect(visibleArea)) return null;
-
-        final int[] origin = new int[2];
-        flutterView.getLocationInWindow(origin);
         final float density = activity.getResources().getDisplayMetrics().density;
         final PendingRects pending = new PendingRects();
+        final RectsCollector collector = new RectsCollector(shownViews.size(), pending);
         final String callId = LuciqFlutterLogger.nextCallId();
 
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.PRIVATE_VIEW,
-                "[PRIV.embedded] #" + callId + " phase=fire");
+                "[PRIV.embedded] #" + callId + " phase=fire views=" + shownViews.size());
         mainThread.post(() -> {
-            try {
-                query.query(flutterView, callId,
-                        result -> pending.complete(toWindowRects(result, origin, density)));
-            } catch (RuntimeException e) {
-                LuciqFlutterLogger.e(LuciqFlutterDebugTags.PRIVATE_VIEW,
-                        "[PRIV.embedded] #" + callId + " phase=error", e);
-                pending.complete(null);
+            for (int i = 0; i < shownViews.size(); i++) {
+                final int[] origin = origins.get(i);
+                try {
+                    query.query(shownViews.get(i), callId,
+                            result -> collector.add(toWindowRects(result, origin, density)));
+                } catch (RuntimeException e) {
+                    LuciqFlutterLogger.e(LuciqFlutterDebugTags.PRIVATE_VIEW,
+                            "[PRIV.embedded] #" + callId + " phase=error", e);
+                    collector.add(null);
+                }
             }
         });
-        return new CrossPlatformMasks(pending, Collections.singletonList(visibleArea));
+        return new CrossPlatformMasks(pending, visibleAreas);
     }
 
-    @Nullable
-    private static FlutterView findFlutterView(@NonNull Activity activity) {
-        if (activity.getWindow() == null) return null;
-        View view = activity.findViewById(FlutterFragment.FLUTTER_VIEW_ID);
-        if (!(view instanceof FlutterView)) view = activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID);
-        return view instanceof FlutterView ? (FlutterView) view : null;
+    /** Every {@link FlutterView} in the window's view tree, in tree order. */
+    @NonNull
+    private static List<FlutterView> findFlutterViews(@NonNull Activity activity) {
+        final List<FlutterView> found = new ArrayList<>();
+        final Window window = activity.getWindow();
+        collectFlutterViews(window == null ? null : window.peekDecorView(), found);
+        return found;
+    }
+
+    @VisibleForTesting
+    public static void collectFlutterViews(@Nullable View view, @NonNull List<FlutterView> into) {
+        if (view instanceof FlutterView) {
+            into.add((FlutterView) view);
+            return;
+        }
+        if (!(view instanceof ViewGroup)) return;
+        final ViewGroup group = (ViewGroup) view;
+        for (int i = 0; i < group.getChildCount(); i++) collectFlutterViews(group.getChildAt(i), into);
+    }
+
+    /**
+     * Completes {@code pending} once every shown view's engine answered: with all their rects, or
+     * failed as soon as one answer is missing or malformed.
+     */
+    private static final class RectsCollector {
+        private final PendingRects pending;
+        private final List<Rect> rects = new ArrayList<>();
+        private int remaining;
+
+        RectsCollector(int expected, @NonNull PendingRects pending) {
+            this.remaining = expected;
+            this.pending = pending;
+        }
+
+        synchronized void add(@Nullable List<Rect> answer) {
+            if (remaining == 0) return;
+            if (answer == null) {
+                remaining = 0;
+                pending.complete(null);
+                return;
+            }
+            rects.addAll(answer);
+            if (--remaining == 0) pending.complete(new ArrayList<>(rects));
+        }
     }
 
     /**

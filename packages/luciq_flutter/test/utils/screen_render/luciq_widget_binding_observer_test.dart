@@ -102,6 +102,40 @@ void main() {
       );
     });
 
+    group('in a native iOS app that embeds Flutter', () {
+      tearDown(Luciq.$resetStartMode);
+
+      test(
+          'resumed does not restart the UI trace: the native SDK reopens it',
+          () {
+        Luciq.$markAttachedToNativeApp();
+        when(mIBGBuildInfo.isIOS).thenReturn(true);
+        when(mockLoadingManager.currentUiTrace).thenReturn(mockUiTrace);
+        when(mockUiTrace.screenName).thenReturn('HomeScreen');
+        when(mockNameMasker.mask('HomeScreen')).thenReturn('MaskedHome');
+
+        LuciqWidgetsBindingObserver.I
+            .didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+        verifyNever(mockLoadingManager.prepareUiTrace(any, any));
+      });
+
+      test('resumed still restarts the UI trace on Android', () {
+        Luciq.$markAttachedToNativeApp();
+        when(mIBGBuildInfo.isIOS).thenReturn(false);
+        when(mockLoadingManager.currentUiTrace).thenReturn(mockUiTrace);
+        when(mockUiTrace.screenName).thenReturn('HomeScreen');
+        when(mockUiTrace.whenValidated).thenAnswer((_) async => false);
+        when(mockNameMasker.mask('HomeScreen')).thenReturn('MaskedHome');
+
+        LuciqWidgetsBindingObserver.I
+            .didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+        verify(mockLoadingManager.prepareUiTrace('MaskedHome', 'HomeScreen'))
+            .called(1);
+      });
+    });
+
     test('_handleResumedState does nothing if no currentUiTrace', () {
       when(mockLoadingManager.currentUiTrace).thenReturn(null);
 

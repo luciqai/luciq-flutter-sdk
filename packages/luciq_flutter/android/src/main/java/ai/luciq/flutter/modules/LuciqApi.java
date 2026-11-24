@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+
+import kotlin.jvm.functions.Function1;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import ai.luciq.flutter.generated.LuciqPigeon;
+import ai.luciq.flutter.modules.capturing.FlutterFrameNotifier;
 import ai.luciq.flutter.util.ArgsRegistry;
 import ai.luciq.flutter.util.LuciqFlutterDebugTags;
 import ai.luciq.flutter.util.LuciqFlutterLogger;
@@ -47,6 +50,8 @@ import ai.luciq.library.internal.crossplatform.CoreFeature;
 import ai.luciq.library.internal.crossplatform.CoreFeaturesState;
 import ai.luciq.library.internal.crossplatform.FeaturesStateListener;
 import ai.luciq.library.internal.crossplatform.InternalCore;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragment;
 import ai.luciq.library.internal.module.LuciqLocale;
 import ai.luciq.library.invocation.LuciqInvocationEvent;
 import ai.luciq.library.model.NetworkLog;
@@ -65,11 +70,52 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
 
     private final LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi;
 
+    /**
+     * The engine this plugin instance belongs to. Sent with each route, so a hybrid app running several
+     * engines names only the hosts of this engine with it.
+     */
+    @Nullable
+    private Object screenSource;
+
     public static void init(BinaryMessenger messenger, Context context, Callable<Bitmap> screenshotProvider) {
+        init(messenger, context, screenshotProvider, null);
+    }
+
+    public static void init(BinaryMessenger messenger, Context context, Callable<Bitmap> screenshotProvider,
+                            @Nullable Object screenSource) {
         final LuciqPigeon.FeatureFlagsFlutterApi flutterApi = new LuciqPigeon.FeatureFlagsFlutterApi(messenger);
 
         final LuciqApi api = new LuciqApi(context, screenshotProvider, flutterApi);
+        api.screenSource = screenSource;
         LuciqPigeon.LuciqHostApi.setup(messenger, api);
+    }
+
+    @VisibleForTesting
+    public void setScreenSource(@Nullable Object screenSource) {
+        this.screenSource = screenSource;
+    }
+
+    /**
+     * The engine a Flutter host shows: a {@link FlutterFragment}'s or a {@link FlutterActivity}'s; null for
+     * any other object, or a host not attached to an engine yet.
+     */
+    @Nullable
+    @VisibleForTesting
+    public static Object engineOfHost(@Nullable Object host) {
+        if (host instanceof FlutterFragment) {
+            return ((FlutterFragment) host).getFlutterEngine();
+        }
+        if (host instanceof FlutterActivity) {
+            try {
+                // Protected in FlutterActivity.
+                Method getEngine = FlutterActivity.class.getDeclaredMethod("getFlutterEngine");
+                getEngine.setAccessible(true);
+                return getEngine.invoke(host);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public LuciqApi(Context context, Callable<Bitmap> screenshotProvider, LuciqPigeon.FeatureFlagsFlutterApi featureFlagsFlutterApi) {
@@ -178,6 +224,57 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
                     e);
         }
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.init] phase=exit");
+    }
+
+    /**
+     * Connects Flutter to the SDK the native app already started (hybrid apps).
+     * <p>
+     * Unlike {@link #init}, it never builds the SDK, so it leaves the native app's configuration
+     * alone: no second {@code Luciq.Builder}, no process-wide {@code setCurrentPlatform}, no
+     * process-wide screenshot provider, and native user steps stay on for native screens.
+     *
+     * @param debugLogsLevel the Flutter plugin's own log level. It does not change the native SDK's.
+     */
+    @Override
+    public void attachToNativeApp(@NonNull String debugLogsLevel) {
+        int parsedLogLevel = LogLevel.ERROR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            parsedLogLevel = ArgsRegistry.sdkLogLevels.getOrDefault(debugLogsLevel, LogLevel.ERROR);
+        }
+        LuciqFlutterLogger.setLevel(parsedLogLevel);
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE,
+                "[Luciq.attachToNativeApp] phase=enter debugLogsLevel=" + debugLogsLevel);
+        if (!Luciq.isBuilt()) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
+                    "[Luciq.attachToNativeApp] Luciq isn't running in the native app. Start it with "
+                            + "Luciq.Builder in Application.onCreate, before the Flutter engine starts.");
+            return;
+        }
+        // The native app owns its Activities, so Flutter content may sit inside a native Activity
+        // (a FlutterFragment) that it cannot register as a host. Hybrid mode keeps every
+        // unregistered Activity native: captured with native masking plus Flutter's own masks.
+        InternalCore._enableHybridMode();
+        // Flutter's own containers show Flutter content, so they are hosts without the app
+        // declaring them (subclasses included): a FlutterActivity is a Flutter screen, and a
+        // FlutterFragment makes its native Activity show Flutter while it is visible. Dart routes,
+        // user steps and screenshots then belong to Flutter there.
+        InternalCore._registerCrossPlatformHosts(Platform.FLUTTER, FlutterActivity.class);
+        InternalCore._registerCrossPlatformHostFragments(Platform.FLUTTER, FlutterFragment.class);
+        // A FlutterFragment's route is captured once Flutter has drawn it, not after a fixed wait.
+        InternalCore._setCrossPlatformFrameNotifier(new FlutterFrameNotifier());
+        // Each engine reports its routes with itself as the source (reportScreenChange), so the SDK
+        // must know which engine a host shows. Older SDKs lack it and keep one route for all engines.
+        try {
+            Method setResolver = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"),
+                    "setCrossPlatformSourceResolver", Function1.class);
+            if (setResolver != null) {
+                setResolver.invoke(null, (Function1<Object, Object>) LuciqApi::engineOfHost);
+            }
+        } catch (Exception e) {
+            LuciqFlutterLogger.e(LuciqFlutterDebugTags.CORE,
+                    "[Luciq.attachToNativeApp] phase=error errorType=" + e.getClass().getSimpleName(), e);
+        }
+        LuciqFlutterLogger.d(LuciqFlutterDebugTags.CORE, "[Luciq.attachToNativeApp] phase=exit");
     }
 
     @Override
@@ -547,10 +644,22 @@ public class LuciqApi implements LuciqPigeon.LuciqHostApi {
         LuciqFlutterLogger.d(LuciqFlutterDebugTags.SCREEN_TRACKING,
                 "[Luciq.reportScreenChange] phase=enter screenNameLength=" + screenName.length());
         try {
-            Method method = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportScreenChange",
-                    Bitmap.class, String.class, Long.class);
-            if (method != null) {
-                method.invoke(null, null, screenName, null);
+            // With its engine as the source, a route reported while no host of this engine is in front
+            // is held for this engine, and is not the current view.
+            Method sourced = screenSource == null ? null : Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"),
+                    "reportScreenChange", Bitmap.class, String.class, Long.class, Object.class);
+            if (sourced != null) {
+                if (Boolean.FALSE.equals(sourced.invoke(null, null, screenName, null, screenSource))) {
+                    LuciqFlutterLogger.d(LuciqFlutterDebugTags.SCREEN_TRACKING,
+                            "[Luciq.reportScreenChange] phase=exit held=true");
+                    return;
+                }
+            } else {
+                Method method = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportScreenChange",
+                        Bitmap.class, String.class, Long.class);
+                if (method != null) {
+                    method.invoke(null, null, screenName, null);
+                }
             }
             Method reportView = Reflection.getMethod(Class.forName("ai.luciq.library.Luciq"), "reportCurrentViewChange",
                     String.class);

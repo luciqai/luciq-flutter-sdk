@@ -19,7 +19,7 @@
     InitBugReportingApi([registrar messenger]);
     InitCrashReportingApi([registrar messenger]);
     InitFeatureRequestsApi([registrar messenger]);
-    InitLuciqApi([registrar messenger]);
+    InitLuciqApi([registrar messenger], registrar);
     InitLuciqLogApi([registrar messenger]);
     InitRepliesApi([registrar messenger]);
     InitSessionReplayApi([registrar messenger]);
@@ -27,6 +27,11 @@
     PrivateViewApi* privateViewApi = InitPrivateViewApi([registrar messenger],registrar);
     InitPrivateViewApi([registrar messenger], registrar);
     InitPrivateViewHostApi([registrar messenger], privateViewApi);
+    // Set as the engine registers, before any of its FlutterViewControllers appear: the SDK resolves a
+    // host's engine when the host comes on top, and a native app may register FlutterViewController as
+    // a host before Dart calls attachToNativeApp. The SDK consults it only for registered hosts, so an
+    // app that registers none is unaffected.
+    [LuciqApi registerFlutterSourceResolver];
 }
 
 @end

@@ -31,6 +31,8 @@ abstract class LuciqHostApi {
     String? appVariant,
   );
 
+  void attachToNativeApp(String debugLogsLevel);
+
   void enableAutoMasking(List<String> autoMasking);
 
   void show();
